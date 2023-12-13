@@ -23,5 +23,7 @@
 #!docs/README.md
 
 README.md
+Dockerfile
 requirements.txt
+docker-compose.yml
 input_openapi_yaml/**
