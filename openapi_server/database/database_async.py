@@ -4,26 +4,26 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
-class AsyncDatabase:
+class DatabaseAsync:
     _instance = None
 
     @staticmethod
     def get_instance():
-        if AsyncDatabase._instance is None:
+        if DatabaseAsync._instance is None:
             load_dotenv()
             db_url = os.environ.get("DATABASE_URL")
             db_name = os.environ.get("DATABASE_NAME")
             db_user = os.environ.get("DATABASE_USER")
             db_password = os.environ.get("DATABASE_PASSWORD")
-            AsyncDatabase(host=db_url, dbname=db_name, user=db_user, password=db_password)
-            AsyncDatabase._instance.connect()
-        return AsyncDatabase._instance
+            DatabaseAsync(host=db_url, dbname=db_name, user=db_user, password=db_password)
+            DatabaseAsync._instance.connect()
+        return DatabaseAsync._instance
 
     def __init__(self, host, dbname, user, password):
-        if AsyncDatabase._instance is not None:
+        if DatabaseAsync._instance is not None:
             raise Exception("Database already initialized")
         else:
-            AsyncDatabase._instance = self
+            DatabaseAsync._instance = self
 
         self.host = host
         self.dbname = dbname

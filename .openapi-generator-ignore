@@ -23,8 +23,8 @@
 #!docs/README.md
 
 input_openapi_yaml/**
+openapi_server/database/**
 openapi_server/__main__.py
-openapi_server/.env
 docker-compose.yml
 Dockerfile
 README.md

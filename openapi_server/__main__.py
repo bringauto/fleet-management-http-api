@@ -4,10 +4,10 @@ import connexion
 import asyncio
 
 from openapi_server import encoder
-from openapi_server.database.database_async import AsyncDatabase
+from openapi_server.database.database_async import DatabaseAsync
 
 async def init_db():
-    db = AsyncDatabase.get_instance()
+    db = DatabaseAsync.get_instance()
     #result = await db.fetchone("SELECT pg_sleep(3); SELECT 42;")
     #print(result)
 
