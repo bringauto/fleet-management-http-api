@@ -107,6 +107,8 @@ class Car(Model):
         :param platform_id: The platform_id of this Car.
         :type platform_id: int
         """
+        if platform_id is None:
+            raise ValueError("Invalid value for `platform_id`, must not be `None`")  # noqa: E501
 
         self._platform_id = platform_id
 

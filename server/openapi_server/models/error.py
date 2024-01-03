@@ -16,12 +16,12 @@ class Error(Model):
         """Error - a model defined in OpenAPI
 
         :param code: The code of this Error.  # noqa: E501
-        :type code: str
+        :type code: int
         :param message: The message of this Error.  # noqa: E501
         :type message: str
         """
         self.openapi_types = {
-            'code': str,
+            'code': int,
             'message': str
         }
 
@@ -45,22 +45,22 @@ class Error(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def code(self) -> str:
+    def code(self) -> int:
         """Gets the code of this Error.
 
 
         :return: The code of this Error.
-        :rtype: str
+        :rtype: int
         """
         return self._code
 
     @code.setter
-    def code(self, code: str):
+    def code(self, code: int):
         """Sets the code of this Error.
 
 
         :param code: The code of this Error.
-        :type code: str
+        :type code: int
         """
         if code is None:
             raise ValueError("Invalid value for `code`, must not be `None`")  # noqa: E501

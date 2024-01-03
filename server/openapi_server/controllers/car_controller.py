@@ -23,7 +23,7 @@ def create_car(car):  # noqa: E501
     return 'do some magic!'
 
 
-def delete_car(car_id:int):  # noqa: E501
+def delete_car(car_id):  # noqa: E501
     """Delete a car
 
      # noqa: E501
@@ -36,7 +36,7 @@ def delete_car(car_id:int):  # noqa: E501
     return 'do some magic!'
 
 
-def get_car(car_id:int):  # noqa: E501
+def get_car(car_id):  # noqa: E501
     """Finds car by ID
 
      # noqa: E501
@@ -60,7 +60,7 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def startstop_car(car_id:int):  # noqa: E501
+def startstop_car(car_id):  # noqa: E501
     """Start/stop car by ID (intended for phonecalls)
 
      # noqa: E501
@@ -73,7 +73,7 @@ def startstop_car(car_id:int):  # noqa: E501
     return 'do some magic!'
 
 
-def update_car(car:int):  # noqa: E501
+def update_car(car):  # noqa: E501
     """Update an existing car by ID
 
      # noqa: E501

@@ -29,17 +29,52 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                platformId: 1
+                name: BAT-2022-01
+                carAdminPhone:
+                  phone: "+420123456789"
+                defaultRouteId: 1
+                underTest: false
               schema:
                 items:
                   $ref: '#/components/schemas/Car'
                 type: array
           description: Successfuly found all cars
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all cars
       tags:
       - car
@@ -61,13 +96,49 @@ paths:
                 $ref: '#/components/schemas/Car'
           description: Successful car creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new car
       tags:
       - car
@@ -89,15 +160,60 @@ paths:
                 $ref: '#/components/schemas/Car'
           description: Successful car update
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Update an existing car by ID
       tags:
       - car
@@ -120,15 +236,60 @@ paths:
         "200":
           description: Successful car start/stop
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Start/stop car by ID (intended for phonecalls)
       tags:
       - car
@@ -151,17 +312,71 @@ paths:
         "200":
           description: Successful car removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete a car
       tags:
       - car
@@ -187,15 +402,60 @@ paths:
                 $ref: '#/components/schemas/Car'
           description: Successfuly found car
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds car by ID
       tags:
       - car
@@ -218,13 +478,49 @@ paths:
                 $ref: '#/components/schemas/CarState'
           description: Successfuly added car state
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Add a new state for a car by ID
       tags:
       - carState
@@ -236,17 +532,54 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                priority: normal
+                userId: 1
+                status: to_accept
+                carId: 1
+                targetStop: 1
+                stopRoute: 1
+                notificationPhone:
+                  phone: "+420123456789"
               schema:
                 items:
                   $ref: '#/components/schemas/Order'
                 type: array
           description: Successfuly found all orders
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all orders
       tags:
       - order
@@ -268,13 +601,49 @@ paths:
                 $ref: '#/components/schemas/Order'
           description: Successful order creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new order
       tags:
       - order
@@ -296,15 +665,60 @@ paths:
                 $ref: '#/components/schemas/Order'
           description: Successful order update
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Update an existing order by ID
       tags:
       - order
@@ -331,17 +745,71 @@ paths:
                 $ref: '#/components/schemas/Order'
           description: Successfuly received new order
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "408":
-          $ref: '#/components/responses/RequestTimeout'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "408"
+                    message: Request timeout
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Request timeout
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Get order by car ID only if it changed
       tags:
       - order
@@ -364,17 +832,71 @@ paths:
         "200":
           description: Successful order removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete an order
       tags:
       - order
@@ -400,15 +922,60 @@ paths:
                 $ref: '#/components/schemas/Order'
           description: Successfuly found order
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds order by ID
       tags:
       - order
@@ -420,17 +987,47 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                name: ABCD1234EF56
               schema:
                 items:
                   $ref: '#/components/schemas/PlatformHwId'
                 type: array
           description: Successfuly found all platform hardware IDs
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all platform hwIds
       tags:
       - platformHwId
@@ -452,13 +1049,49 @@ paths:
                 $ref: '#/components/schemas/PlatformHwId'
           description: Successful platform hardware ID creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new platform hwId
       tags:
       - platformHwId
@@ -481,17 +1114,71 @@ paths:
         "200":
           description: Successful platform hardware ID removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete a platform hwId
       tags:
       - platformHwId
@@ -517,15 +1204,60 @@ paths:
                 $ref: '#/components/schemas/PlatformHwId'
           description: Successfuly found platform hardware ID
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds platform hwId by ID
       tags:
       - platformHwId
@@ -537,17 +1269,56 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                name: Lužánky
+                points:
+                - latitude: 49.204117
+                  longitude: 16.606525
+                  altitude: 400.25
+                stopIds:
+                - 1
+                - 2
+                - 3
+                - 4
               schema:
                 items:
                   $ref: '#/components/schemas/Route'
                 type: array
           description: Successfuly found all routes
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all routes
       tags:
       - route
@@ -569,13 +1340,49 @@ paths:
                 $ref: '#/components/schemas/Route'
           description: Successful route creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new route
       tags:
       - route
@@ -597,15 +1404,60 @@ paths:
                 $ref: '#/components/schemas/Route'
           description: Successful route update
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Update an existing route by ID
       tags:
       - route
@@ -628,17 +1480,71 @@ paths:
         "200":
           description: Successful route removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete a route
       tags:
       - route
@@ -664,15 +1570,60 @@ paths:
                 $ref: '#/components/schemas/Route'
           description: Successfuly found route
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds route by ID
       tags:
       - route
@@ -684,17 +1635,53 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                name: Lidická
+                position:
+                  latitude: 49.204117
+                  longitude: 16.606525
+                  altitude: 400.25
+                notificationPhone:
+                  phone: "+420123456789"
               schema:
                 items:
                   $ref: '#/components/schemas/Stop'
                 type: array
           description: Successfuly found all stops
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all stops
       tags:
       - stop
@@ -716,13 +1703,49 @@ paths:
                 $ref: '#/components/schemas/Stop'
           description: Successful stop creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new stop
       tags:
       - stop
@@ -744,15 +1767,60 @@ paths:
                 $ref: '#/components/schemas/Stop'
           description: Successful stop update
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Update an existing stop by ID
       tags:
       - stop
@@ -775,17 +1843,71 @@ paths:
         "200":
           description: Successful stop removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete a stop
       tags:
       - stop
@@ -811,15 +1933,60 @@ paths:
                 $ref: '#/components/schemas/Stop'
           description: Successfuly found stop
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds stop by ID
       tags:
       - stop
@@ -831,17 +1998,49 @@ paths:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                email: bringauto@bringauto.com
+                userName: Admin
+                password: abcd
               schema:
                 items:
                   $ref: '#/components/schemas/User'
                 type: array
           description: Successfuly found all users
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds all users
       tags:
       - user
@@ -863,13 +2062,49 @@ paths:
                 $ref: '#/components/schemas/User'
           description: Successful user creation
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Create a new user
       tags:
       - user
@@ -891,15 +2126,60 @@ paths:
                 $ref: '#/components/schemas/User'
           description: Successful user update
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Update an existing user by ID
       tags:
       - user
@@ -922,17 +2202,71 @@ paths:
         "200":
           description: Successful user removal
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         "405":
-          $ref: '#/components/responses/MethodNotAllowed'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Delete a user
       tags:
       - user
@@ -958,15 +2292,60 @@ paths:
                 $ref: '#/components/schemas/User'
           description: Successfuly found user
         "400":
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
         "401":
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
         "403":
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
         "404":
-          $ref: '#/components/responses/NotFound'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
       summary: Finds user by ID
       tags:
       - user
@@ -1055,27 +2434,31 @@ components:
       description: Car object structure
       example:
         underTest: true
-        name: name
+        name: BAT-2022-01
         defaultRouteId: 1
-        id: 0
-        platformId: 6
+        id: 1
+        platformId: 1
         carAdminPhone:
-          phone: phone
+          phone: "+420123456789"
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         platformId:
+          example: 1
           format: int32
           title: platformId
           type: integer
         name:
+          example: BAT-2022-01
           title: name
           type: string
         carAdminPhone:
           $ref: '#/components/schemas/MobilePhone'
         defaultRouteId:
+          example: 1
           format: int32
           title: defaultRouteId
           type: integer
@@ -1085,35 +2468,41 @@ components:
       required:
       - id
       - name
+      - platformId
       title: Car
+      type: object
     CarState:
       description: Car state object structure
       example:
-        fuel: 6
-        id: 0
+        fuel: 80
+        id: 1
         position:
-          altitude: 7.0614014
-          latitude: 5.637377
-          longitude: 2.302136
-        speed: 5.962134
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+        speed: 20.5
         status: null
         carId: 1
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         status:
           $ref: '#/components/schemas/CarStatus'
         fuel:
+          example: 80
           format: int32
           title: fuel
           type: integer
         carId:
+          example: 1
           format: int32
           title: carId
           type: integer
         speed:
+          example: 20.5
           format: float
           title: speed
           type: number
@@ -1124,53 +2513,62 @@ components:
       - id
       - status
       title: CarState
+      type: object
     Error:
       description: Error object structure
       properties:
         code:
+          example: 404
           title: code
-          type: string
+          type: integer
         message:
+          example: Not found
           title: message
           type: string
       required:
       - code
       - message
       title: Error
+      type: object
     Order:
       description: Order object structure
       example:
-        stopRouteId: 5
+        stopRouteId: 1
         notificationPhone:
-          phone: phone
-        targetStopId: 5
-        id: 0
+          phone: "+420123456789"
+        targetStopId: 1
+        id: 1
         priority: null
-        userId: 6
+        userId: 1
         status: null
         carId: 1
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         priority:
           $ref: '#/components/schemas/Priority'
         userId:
+          example: 1
           format: int32
           title: userId
           type: integer
         status:
           $ref: '#/components/schemas/OrderStatus'
         carId:
+          example: 1
           format: int32
           title: carId
           type: integer
         targetStopId:
+          example: 1
           format: int32
           title: targetStopId
           type: integer
         stopRouteId:
+          example: 1
           format: int32
           title: stopRouteId
           type: integer
@@ -1179,54 +2577,70 @@ components:
       required:
       - carId
       - id
+      - stopRoute
+      - targetStop
       - userId
       title: Order
+      type: object
     PlatformHwId:
       description: PlatformHwId object structure
       example:
-        name: name
-        id: 0
+        name: ABCD1234EF56
+        id: 1
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         name:
+          example: ABCD1234EF56
           title: name
           type: string
       required:
       - id
       - name
       title: PlatformHwId
+      type: object
     Route:
       description: Route object structure
       example:
-        name: name
+        name: Lužánky
         stopIds:
-        - 6
-        - 6
-        id: 0
+        - 1
+        - 2
+        - 3
+        - 4
+        id: 1
         points:
-        - altitude: 7.0614014
-          latitude: 5.637377
-          longitude: 2.302136
-        - altitude: 7.0614014
-          latitude: 5.637377
-          longitude: 2.302136
+        - latitude: 49.204117
+          longitude: 16.606525
+          altitude: 400.25
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         name:
+          example: Lužánky
           title: name
           type: string
         points:
+          example:
+          - latitude: 49.204117
+            longitude: 16.606525
+            altitude: 400.25
           items:
             $ref: '#/components/schemas/GNSSPosition'
           title: points
           type: array
         stopIds:
+          example:
+          - 1
+          - 2
+          - 3
+          - 4
           items:
             type: integer
           title: stopIds
@@ -1235,23 +2649,26 @@ components:
       - id
       - name
       title: Route
+      type: object
     Stop:
       description: Stop object structure
       example:
         notificationPhone:
-          phone: phone
-        name: name
-        id: 0
+          phone: "+420123456789"
+        name: Lidická
+        id: 1
         position:
-          altitude: 7.0614014
-          latitude: 5.637377
-          longitude: 2.302136
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         name:
+          example: Lidická
           title: name
           type: string
         position:
@@ -1263,26 +2680,31 @@ components:
       - name
       - position
       title: Stop
+      type: object
     User:
       description: User object structure
       example:
-        password: password
-        id: 0
-        userName: userName
-        email: email
+        password: Admin1
+        id: 1
+        userName: Admin
+        email: bringauto@bringauto.com
       properties:
         id:
+          example: 1
           format: int32
           title: id
           type: integer
         email:
+          example: bringauto@bringauto.com
           format: email
           title: email
           type: string
         userName:
+          example: Admin
           title: userName
           type: string
         password:
+          example: Admin1
           format: password
           title: password
           type: string
@@ -1292,6 +2714,7 @@ components:
       - password
       - userName
       title: User
+      type: object
     CarStatus:
       description: CarStatus enum
       enum:
@@ -1322,29 +2745,35 @@ components:
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
-        altitude: 7.0614014
-        latitude: 5.637377
-        longitude: 2.302136
+        altitude: 400.25
+        latitude: 49.204117
+        longitude: 16.606525
       properties:
         latitude:
+          example: 49.204117
           format: float
           title: latitude
           type: number
         longitude:
+          example: 16.606525
           format: float
           title: longitude
           type: number
         altitude:
+          example: 400.25
           format: float
           title: altitude
           type: number
       title: GNSSPosition
+      type: object
     MobilePhone:
       description: MobilePhone Primitive structure
       example:
-        phone: phone
+        phone: "+420123456789"
       properties:
         phone:
+          example: "+420123456789"
           title: phone
           type: string
       title: MobilePhone
+      type: object

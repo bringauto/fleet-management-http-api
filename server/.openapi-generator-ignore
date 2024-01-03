@@ -22,10 +22,10 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
-input_openapi_yaml/**
-openapi_server/database/**
-openapi_server/__main__.py
-docker-compose.yml
+
+.gitignore
+.openapi-generator-ignore
 Dockerfile
-README.md
-requirements.txt
+travis.yml
+tox.ini
+test-requirements.txt
