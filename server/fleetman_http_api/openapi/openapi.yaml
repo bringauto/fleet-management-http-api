@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 servers:
 - description: Local server
-  url: http://localhost:8011/v1
+  url: /v1
 tags:
 - description: Car related functions
   name: car
