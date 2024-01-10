@@ -1,0 +1,5 @@
+{
+    "request_for_messages": {
+        "timeout_in_seconds": 5
+    }
+}

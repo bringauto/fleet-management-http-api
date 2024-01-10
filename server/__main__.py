@@ -1,3 +1,6 @@
+import sys
+sys.path.append("server")
+
 from openapi_server.__main__ import main as run_server
 
 if __name__ == '__main__':
