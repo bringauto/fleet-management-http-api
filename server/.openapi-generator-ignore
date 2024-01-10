@@ -36,3 +36,4 @@ fleetman_http_api/test/*
 /.dockerignore
 /README.md
 /requirements.txt
+/fleetman_http_api/__main__.py
