@@ -29,3 +29,5 @@ Dockerfile
 travis.yml
 tox.ini
 test-requirements.txt
+
+fleetman_http_api/test/*

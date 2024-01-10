@@ -79,4 +79,4 @@ tox.ini
 requirements.txt
 
 
-fleetv2_http_api/test/*
+fleetman_http_api/test/*
