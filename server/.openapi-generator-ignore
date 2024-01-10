@@ -23,11 +23,16 @@
 #!docs/README.md
 
 
-.gitignore
-.openapi-generator-ignore
+/.gitignore
+/.openapi-generator-ignore
 Dockerfile
-travis.yml
 tox.ini
 test-requirements.txt
 
 fleetman_http_api/test/*
+/.travis.yml
+/git_push.sh
+/setup.py
+/.dockerignore
+/README.md
+/requirements.txt
