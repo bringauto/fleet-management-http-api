@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
-import connexion
-
-from fleet_management_api import encoder
+import fleet_management_api.app as app
 
 
 def main():
-    app = connexion.App(__name__, specification_dir='./openapi/')
-    app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('openapi.yaml', pythonic_params=True)
-    app.run(port=8080)
+    application = app.get_app()
+    application.run(port=8080)
 
 
 if __name__ == '__main__':

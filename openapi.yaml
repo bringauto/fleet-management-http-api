@@ -3,9 +3,11 @@ info:
   title: BringAuto Fleet Management API
   description: Specification for BringAuto fleet backend HTTP API
   version: 1.0.0
+
 servers:
   - url: /v1
     description: Local server
+
 tags:
   - name: car
     description: Car related functions
@@ -25,10 +27,12 @@ paths:
   /car:
     post:
       operationId: createCar
+      x-openapi-router-controller: fleet_management_api.impl.controllers
       tags:
         - car
       summary: Create a new car
       requestBody:
+        x-body-name: car
         description: New car json
         content:
           application/json:
@@ -52,6 +56,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getCars
+      x-openapi-router-controller: fleet_management_api.impl.controllers
       tags:
         - car
       summary: Finds all cars
@@ -68,7 +73,7 @@ paths:
                 [
                   {
                     "id": 1,
-                    "platformId": 1,
+                    "platform_id": 1,
                     "name": 'BAT-2022-01',
                     "carAdminPhone": {"phone":'+420123456789'},
                     "defaultRouteId": 1,
@@ -1064,14 +1069,14 @@ components:
       description: Car object structure
       required:
         - id
-        - platformId
+        - platform_id
         - name
       properties:
         id:
           type: integer
           format: int32
           example: 1
-        platformId:
+        platform_id:
           type: integer
           format: int32
           example: 1

@@ -41,7 +41,7 @@ class Car(Model):
 
         self.attribute_map = {
             'id': 'id',
-            'platform_id': 'platformId',
+            'platform_id': 'platform_id',
             'name': 'name',
             'car_admin_phone': 'carAdminPhone',
             'default_route_id': 'defaultRouteId',

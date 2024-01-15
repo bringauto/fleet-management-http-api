@@ -31,7 +31,7 @@ paths:
             application/json:
               example:
               - id: 1
-                platformId: 1
+                platform_id: 1
                 name: BAT-2022-01
                 carAdminPhone:
                   phone: "+420123456789"
@@ -78,7 +78,7 @@ paths:
       summary: Finds all cars
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.impl.controllers
     post:
       operationId: create_car
       requestBody:
@@ -88,6 +88,7 @@ paths:
               $ref: '#/components/schemas/Car'
         description: New car json
         required: true
+        x-body-name: car
       responses:
         "200":
           content:
@@ -142,7 +143,7 @@ paths:
       summary: Create a new car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.impl.controllers
     put:
       operationId: update_car
       requestBody:
@@ -2434,10 +2435,10 @@ components:
       description: Car object structure
       example:
         underTest: true
+        platform_id: 1
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
-        platformId: 1
         carAdminPhone:
           phone: "+420123456789"
       properties:
@@ -2446,10 +2447,10 @@ components:
           format: int32
           title: id
           type: integer
-        platformId:
+        platform_id:
           example: 1
           format: int32
-          title: platformId
+          title: platform_id
           type: integer
         name:
           example: BAT-2022-01
@@ -2468,7 +2469,7 @@ components:
       required:
       - id
       - name
-      - platformId
+      - platform_id
       title: Car
       type: object
     CarState:

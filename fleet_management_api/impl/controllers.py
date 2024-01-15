@@ -7,7 +7,7 @@ import connexion
 from fleet_management_api.models import Car
 
 
-def create_car(car: Dict|Car) -> Tuple[str, int]:  # noqa: E501
+def create_car(car: Dict) -> Tuple[str, int]:  # noqa: E501
     """Create a new car
 
      # noqa: E501
@@ -19,7 +19,8 @@ def create_car(car: Dict|Car) -> Tuple[str, int]:  # noqa: E501
     """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+        return 'Car was succesfully created.'
+    return
 
 
 def get_cars() -> Tuple[List[Car], int]:  # noqa: E501
