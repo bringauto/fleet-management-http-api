@@ -2,8 +2,9 @@ import sys
 sys.path.append('.')
 import unittest
 
-from server.fleetman_http_api import Car
-from server.fleetman_http_api.impl.controllers import get_cars, create_car
+
+from fleet_management_api.models import Car
+from fleet_management_api.impl.controllers import get_cars, create_car
 
 
 class Test_Cars(unittest.TestCase):
