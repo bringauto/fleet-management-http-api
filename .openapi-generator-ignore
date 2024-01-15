@@ -36,4 +36,4 @@ test-requirements.txt
 /.dockerignore
 /README.md
 /requirements.txt
-/__main__.py
+/fleet_management_api/__main__.py
