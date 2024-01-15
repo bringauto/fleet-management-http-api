@@ -4,7 +4,6 @@ import unittest
 
 from fleet_management_api.models import Car
 from fleet_management_api.app import get_app
-from fleet_management_api.impl.controllers import get_cars, create_car
 
 
 class Test_Cars(unittest.TestCase):
