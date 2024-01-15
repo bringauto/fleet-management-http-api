@@ -13,4 +13,4 @@ COPY . /usr/src/app
 
 ENTRYPOINT ["python3"]
 
-CMD ["-m", "openapi_server"]
+CMD ["-m", "fleet_management_api"]
