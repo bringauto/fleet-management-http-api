@@ -4,40 +4,24 @@ import connexion
 
 from fleet_management_api.models import Car
 from fleet_management_api.database.db_models import CarDBModel
-
-
-_cars: List[Car] = []
+from fleet_management_api.database.db_access import (
+    send_to_database,
+    retrieve_from_database
+)
 
 
 def create_car(car: Dict) -> Tuple[str, int]:  # noqa: E501
-    """Create a new car
-
-     # noqa: E501
-
-    :param car: New car json
-    :type car: dict | bytes
-
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
-    """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
-        _create_car(car)
+        car_db_model = car_to_db_model(car)
+        send_to_database(CarDBModel, car_db_model)
         return 'Car was succesfully created.'
     return
 
 
 def get_cars() -> Tuple[List[Car], int]:  # noqa: E501
-    """Finds all cars
-
-     # noqa: E501
-
-    :rtype: Union[List[Car], Tuple[List[Car], int], Tuple[List[Car], int, Dict[str, str]]
-    """
-    return _cars, 200
-
-
-def _create_car(car: Car) -> None:
-    _cars.append(car)
+    cars = retrieve_from_database(CarDBModel)
+    return cars, 200
 
 
 def car_to_db_model(car: Car) -> CarDBModel:
