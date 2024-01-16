@@ -21,7 +21,5 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         self.assertEqual(car_out, car_in)
 
 
-
-
 if __name__=="__main__":
     unittest.main()

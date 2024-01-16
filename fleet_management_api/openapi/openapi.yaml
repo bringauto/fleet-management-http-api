@@ -2434,7 +2434,7 @@ components:
     Car:
       description: Car object structure
       example:
-        underTest: true
+        underTest: false
         platform_id: 1
         name: BAT-2022-01
         defaultRouteId: 1
@@ -2464,6 +2464,7 @@ components:
           title: defaultRouteId
           type: integer
         underTest:
+          default: false
           title: underTest
           type: boolean
       required:

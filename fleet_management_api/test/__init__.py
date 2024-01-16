@@ -1,7 +1,7 @@
 import logging
 
 import connexion
-from flask.testing import TestCase
+from flask_testing import TestCase
 
 from fleet_management_api.encoder import JSONEncoder
 

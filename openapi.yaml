@@ -1091,6 +1091,7 @@ components:
           example: 1
         underTest:
           type: boolean
+          default: true
     CarState:
       type: object
       description: Car state object structure
