@@ -78,7 +78,7 @@ paths:
       summary: Finds all cars
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
     post:
       operationId: create_car
       requestBody:
@@ -143,7 +143,7 @@ paths:
       summary: Create a new car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
     put:
       operationId: update_car
       requestBody:
