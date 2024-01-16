@@ -37,3 +37,4 @@ test-requirements.txt
 /README.md
 /requirements.txt
 /fleet_management_api/__main__.py
+/fleet_management_api/controllers/security_controller.py
