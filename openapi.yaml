@@ -27,7 +27,7 @@ paths:
   /car:
     post:
       operationId: createCar
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
       tags:
         - car
       summary: Create a new car
@@ -56,7 +56,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getCars
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
       tags:
         - car
       summary: Finds all cars
