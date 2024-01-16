@@ -26,3 +26,17 @@ http://localhost:8080/v1/openapi.json
 ```
 
 
+
+# Testing
+
+You have to have the project installed in your (virtual) environment as a package.
+
+To run all tests for the project, run
+```bash
+python -m tests
+```
+Add optional `-h` to display tests' coverage in html format, for example in your browser:
+```bash
+python -m tests -h
+```
+
