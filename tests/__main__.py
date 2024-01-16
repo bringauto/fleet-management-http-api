@@ -8,7 +8,7 @@ import coverage
 OMITTED_FILES = [
     "__init__.py",
     "*/models/*",
-    "*/controllers/*",
+    "fleet_management_api/controllers/*",
     "util.py",
     "typing_utils.py",
     "encoder.py"
