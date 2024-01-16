@@ -6,7 +6,7 @@ from fleet_management_api.models import Car
 
 class Test_Creating_Car_DB_Model(unittest.TestCase):
 
-    def test_creating_car_db_model_from_car_object(self):
+    def test_creating_car_db_model_from_car_object_preserves_attribute_values(self):
         car = Car(id=1, name='test_car', platform_id=5)
         car_db_model = controllers.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
