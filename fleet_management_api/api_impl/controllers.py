@@ -23,7 +23,7 @@ def create_car(car: Dict) -> str:  # noqa: E501
         return 'Car was succesfully created.'
     else:
         _log_error(f"Invalid request format: {connexion.request.data}. JSON is required")
-        return 'Invalid data.'
+        return 'Invalid request format.'
 
 
 def get_cars() -> Tuple[List[Car], int]:  # noqa: E501
