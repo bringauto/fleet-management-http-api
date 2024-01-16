@@ -1,4 +1,5 @@
 from typing import Tuple, List, Dict
+import logging
 
 import connexion
 
@@ -10,13 +11,19 @@ from fleet_management_api.database.db_access import (
 )
 
 
-def create_car(car: Dict) -> Tuple[str, int]:  # noqa: E501
+API_LOGGER_NAME = "werkzeug"
+
+
+def create_car(car: Dict) -> str:  # noqa: E501
     if connexion.request.is_json:
-        car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+        car: Car = Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = car_to_db_model(car)
         send_to_database(CarDBModel, car_db_model)
+        _log_info(f"Car (name = '{car.name}, id = {car.id}, platform_id = {car.platform_id}) was created.")
         return 'Car was succesfully created.'
-    return
+    else:
+        _log_error(f"Invalid request format: {connexion.request.data}. JSON is required")
+        return 'Invalid data.'
 
 
 def get_cars() -> Tuple[List[Car], int]:  # noqa: E501
@@ -42,3 +49,12 @@ def car_from_db_model(car_db_model: CarDBModel) -> Car:
         car_admin_phone=car_db_model.car_admin_phone,
         default_route_id=car_db_model.default_route_id
     )
+
+
+def _log_info(message: str) -> None:
+    logger = logging.getLogger(API_LOGGER_NAME)
+    logger.info(message)
+
+def _log_error(message: str) -> None:
+    logger = logging.getLogger(API_LOGGER_NAME)
+    logger.error(message)
