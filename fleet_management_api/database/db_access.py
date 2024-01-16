@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional, List, Type
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
 import sqlalchemy.exc as sqaexc
 from connexion.lifecycle import ConnexionResponse
@@ -20,7 +20,6 @@ def send_to_database(base: Type[Base], *data_base: Base) -> ConnexionResponse:
             conn.execute(stmt, data_list)
             return ConnexionResponse(status_code=200, content_type="string", body="Succesfully added to database")
         except sqaexc.IntegrityError as e:
-            msg = "Cannot send to database. {e.orig}"
             return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
 
 
@@ -33,3 +32,16 @@ def retrieve_from_database(base: Type[Base], equal_to: Optional[Dict[str, Any]] 
         stmt = select(base).where(*clauses)
         result = session.execute(stmt)
         return [row[0] for row in result]
+
+
+def update_record(base: Type[Base], id_name: str, id_value: Any, updated_base) -> ConnexionResponse:
+    table = base.__table__
+    base_dict = {col:updated_base.__dict__[col] for col in table.columns.keys()}
+    with current_connection_source().begin() as conn:
+        id_match = getattr(table.columns,id_name) == id_value
+        stmt = update(table).where(id_match).values(base_dict)
+        try:
+            conn.execute(stmt)
+            return ConnexionResponse(status_code=200, content_type="string", body="Succesfully updated record")
+        except sqaexc.IntegrityError as e:
+            return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
