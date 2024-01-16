@@ -5,7 +5,7 @@ from fleet_management_api.database.connection import set_connection_source, curr
 
 
 def main():
-    set_connection_source("./fleet_management.db")
+    set_connection_source("fleet_management.db")
     Base.metadata.create_all(bind=current_connection_source())
     application = app.get_app()
     application.run(port=8080)
