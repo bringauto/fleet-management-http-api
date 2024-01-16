@@ -1,10 +1,9 @@
-import sys
-sys.path.append('./server')
 from typing import Tuple, List, Dict
 
 import connexion
 
 from fleet_management_api.models import Car
+from fleet_management_api.database.db_models import CarDBModel
 
 
 _cars: List[Car] = []
@@ -39,3 +38,23 @@ def get_cars() -> Tuple[List[Car], int]:  # noqa: E501
 
 def _create_car(car: Car) -> None:
     _cars.append(car)
+
+
+def car_to_db_model(car: Car) -> CarDBModel:
+    return CarDBModel(
+        id=car.id,
+        name=car.name,
+        platform_id=car.platform_id,
+        car_admin_phone=car.car_admin_phone,
+        default_route_id=car.default_route_id
+    )
+
+
+def car_from_db_model(car_db_model: CarDBModel) -> Car:
+    return Car(
+        id=car_db_model.id,
+        name=car_db_model.name,
+        platform_id=car_db_model.platform_id,
+        car_admin_phone=car_db_model.car_admin_phone,
+        default_route_id=car_db_model.default_route_id
+    )
