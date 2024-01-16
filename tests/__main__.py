@@ -15,7 +15,7 @@ OMITTED_FILES = [
 ]
 
 
-cov = coverage.Coverage()
+cov = coverage.Coverage(branch=True, omit=OMITTED_FILES)
 cov.start()
 
 suite = unittest.TestLoader().discover('tests', pattern='test_*.py')
@@ -25,7 +25,7 @@ cov.stop()
 cov.save()
 
 if len(sys.argv)>1 and sys.argv[1] == "-h":
-    cov.html_report(omit=OMITTED_FILES)
+    cov.html_report()
     subprocess.run(["open", "htmlcov/index.html"])
 else:
-    cov.report(omit=OMITTED_FILES)
+    cov.report()
