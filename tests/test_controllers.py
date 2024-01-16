@@ -5,7 +5,6 @@ import unittest
 from fleet_management_api.models import Car
 from fleet_management_api.app import get_app
 from fleet_management_api.database.connection import set_test_connection_source
-import fleet_management_api
 
 
 class Test_Cars(unittest.TestCase):
