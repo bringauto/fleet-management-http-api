@@ -62,6 +62,13 @@ class Test_Updating_Existing_Records(unittest.TestCase):
         with self.assertRaises(TypeError):
             db_access.update_record(base=invalid_base_type, id_name="id", id_value=8, updated_obj=updated_obj)
 
+    def test_updating_non_existing_record_yields_404_code(self):
+        test_obj = db_models.TestBase(id=7, test_str='test_string', test_int=5)
+        db_access.send_to_database(db_models.TestBase, test_obj)
+        updated_obj = db_models.TestBase(id=8, test_str='updated_test_string', test_int=6)
+        response = db_access.update_record(base=db_models.TestBase, id_name="id", id_value=8, updated_obj=updated_obj)
+        self.assertEqual(response.status_code, 404)
+
 
 if __name__=="__main__":
     unittest.main() # pragma: no cover
