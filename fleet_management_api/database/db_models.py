@@ -32,7 +32,7 @@ class TestBase(Base):
 @dataclasses.dataclass
 class TestBase_2(Base):
     __tablename__ = 'test_2'
-    id_2: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = Column(Integer, primary_key=True)
     test_str_2: Mapped[str] = Column(String)
     test_int_2: Mapped[int] = Column(Integer)
 
