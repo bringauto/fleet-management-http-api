@@ -73,5 +73,38 @@ class Test_Logging_Car_Creation(unittest.TestCase):
                 self.assertEqual(len(logs.output), 1)
 
 
+class Test_Updating_Car(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+
+    def test_add_and_succesfully_update_car(self) -> None:
+        car = Car(id=1, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            car.name = "Updated Test Car"
+            response = c.put('/v1/car', json = car.to_dict(), content_type='application/json')
+            self.assertEqual(response.status_code, 200)
+
+            response = c.get('/v1/car')
+            self.assertEqual(response.json[0]['name'], "Updated Test Car")
+
+    def test_updating_nonexistent_car_yields_404_error(self) -> None:
+        car = Car(id=1, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            response = c.put('/v1/car', json = car.to_dict(), content_type='application/json')
+            self.assertEqual(response.status_code, 404)
+
+    def test_passing_other_objec_when_updating_car_yields_400_error(self) -> None:
+        car = Car(id=1, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            response = c.put('/v1/car', json = {'id': 1}, content_type='application/json')
+            self.assertEqual(response.status_code, 400)
+
+
 if __name__=="__main__":
     unittest.main()

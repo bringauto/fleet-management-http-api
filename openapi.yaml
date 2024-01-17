@@ -88,11 +88,13 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateCar
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
       tags:
         - car
       summary: Update an existing car by ID
       requestBody:
         description: Car update json
+        x-body-name: car
         content:
           application/json:
             schema:

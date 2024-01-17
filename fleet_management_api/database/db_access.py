@@ -47,8 +47,7 @@ def update_record(id_name: str, id_value: Any, updated_obj: Base) -> ConnexionRe
             n_of_updated_items = result.rowcount
             if n_of_updated_items == 0:
                 code = 404
-                msg = "Error when updating data. " \
-                    f"Object with {id_name}={id_value} not in table {updated_obj.__tablename__} in the database. " \
+                msg = f"Object with {id_name}={id_value} was not found in table {updated_obj.__tablename__} in the database. " \
                     "Nothing to update."
             else:
                 code, msg = 200, "Succesfully updated record"

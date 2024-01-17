@@ -219,7 +219,7 @@ paths:
       summary: Update an existing car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
   /car/startstop/{carId}:
     get:
       operationId: startstop_car
