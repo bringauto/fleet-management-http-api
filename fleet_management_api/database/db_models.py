@@ -21,7 +21,6 @@ class CarDBModel(Base):
     default_route_id: Mapped[int] = Column(Integer)
 
 
-
 @dataclasses.dataclass
 class CarStateDBModel(Base):
     __tablename__ = 'car_states'
