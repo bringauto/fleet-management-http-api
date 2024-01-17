@@ -382,7 +382,7 @@ paths:
       summary: Delete a car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
     get:
       operationId: get_car
       parameters:

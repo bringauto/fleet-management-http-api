@@ -141,13 +141,37 @@ class Test_Updating_Car(unittest.TestCase):
             response = c.put('/v1/car', json = car.to_dict(), content_type='application/json')
             self.assertEqual(response.status_code, 404)
 
-    def test_passing_other_objec_when_updating_car_yields_400_error(self) -> None:
+    def test_passing_other_object_when_updating_car_yields_400_error(self) -> None:
         car = Car(id=1, name="Test Car", platform_id=5)
         app = get_app()
         with app.app.test_client() as c:
             c.post('/v1/car', json = car.to_dict(), content_type='application/json')
             response = c.put('/v1/car', json = {'id': 1}, content_type='application/json')
             self.assertEqual(response.status_code, 400)
+
+
+class Test_Deleting_Car(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+
+    def test_add_and_delete_car(self) -> None:
+        car = Car(id=1, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            response = c.delete('/v1/car/1')
+            self.assertEqual(response.status_code, 200)
+            response = c.get('/v1/car')
+            self.assertEqual(response.json, [])
+
+    def test_deleting_nonexistent_car_yields_404_error(self) -> None:
+        car_id = 17
+        app = get_app()
+        with app.app.test_client() as c:
+            response = c.delete(f'/v1/car/{car_id}')
+            self.assertEqual(response.status_code, 404)
+
 
 
 if __name__=="__main__":

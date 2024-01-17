@@ -152,6 +152,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteCar
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
       tags:
         - car
       summary: Delete a car

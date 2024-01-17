@@ -9,7 +9,7 @@ from fleet_management_api.database.db_models import Base
 from fleet_management_api.database.connection import current_connection_source
 
 
-def send_to_database(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
+def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     if not sent_objs:
         return
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
@@ -25,7 +25,24 @@ def send_to_database(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
             return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
 
 
-def retrieve_from_database(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
+def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> ConnexionResponse:
+    table = base_type.__table__
+    with current_connection_source().begin() as conn:
+        id_match = getattr(table.columns,id_name) == id_value
+        stmt = table.delete().where(id_match)
+        result = conn.execute(stmt)
+        n_of_deleted_items = result.rowcount
+        if n_of_deleted_items == 0:
+            return ConnexionResponse(body=f"Object with {id_name}={id_value} was not found in table " \
+                                     f"{base_type.__tablename__}. Nothing to delete.", status_code=404
+                                    )
+        else:
+            return ConnexionResponse(body=f"Object with {id_name}={id_value} was deleted from table " \
+                                     f"{base_type.__tablename__}.", status_code=200
+                                    )
+
+
+def get_record(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
     if equal_to is None:
         equal_to = {}
     table = base.__table__

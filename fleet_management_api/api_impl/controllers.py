@@ -14,7 +14,7 @@ def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
     if connexion.request.is_json:
         car: Car = Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = obj_to_db.car_to_db_model(car)
-        response = db_access.send_to_database(CarDBModel, car_db_model)
+        response = db_access.add_record(CarDBModel, car_db_model)
         if response.status_code == 200:
             log_info(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) has been created.")
             return 'Car was succesfully created.'
@@ -26,8 +26,12 @@ def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
         return ConnexionResponse(body='Invalid request format.', status_code=400)
 
 
+def delete_car(car_id) -> ConnexionResponse:
+    return ConnexionResponse(body='Not implemented yet', status_code=501)
+
+
 def get_car(car_id) -> ConnexionResponse:
-    cars = db_access.retrieve_from_database(CarDBModel, equal_to={'id': car_id})
+    cars = db_access.get_record(CarDBModel, equal_to={'id': car_id})
     if len(cars) == 0:
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
     else:
@@ -35,7 +39,7 @@ def get_car(car_id) -> ConnexionResponse:
 
 
 def get_cars() -> ConnexionResponse:  # noqa: E501
-    cars = db_access.retrieve_from_database(CarDBModel)
+    cars = db_access.get_record(CarDBModel)
     return ConnexionResponse(body=cars, status_code=200)
 
 
