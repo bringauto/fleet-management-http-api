@@ -48,25 +48,15 @@ class Test_Updating_Existing_Records(unittest.TestCase):
         test_obj = db_models.TestBase(id=7, test_str='test_string', test_int=5)
         db_access.send_to_database(db_models.TestBase, test_obj)
         updated_obj = db_models.TestBase(id=7, test_str='updated_test_string', test_int=6)
-        db_access.update_record(base=db_models.TestBase, id_name="id", id_value=7, updated_obj=updated_obj)
+        db_access.update_record(id_name="id", id_value=7, updated_obj=updated_obj)
         retrieved_obj = db_access.retrieve_from_database(db_models.TestBase, equal_to={'id':7})[0]
         self.assertEqual(updated_obj, retrieved_obj)
-
-    def test_updating_obj_whose_base_does_not_match_specified_base_type_raises_exception(self):
-        base_type = db_models.TestBase
-        db_obj = db_models.TestBase(id=8, test_str='test_string', test_int=5)
-        db_access.send_to_database(base_type, db_obj)
-
-        invalid_base_type = db_models.TestBase_2
-        updated_obj = db_models.TestBase(id=8, test_str='updated_test_string', test_int=6)
-        with self.assertRaises(TypeError):
-            db_access.update_record(base=invalid_base_type, id_name="id", id_value=8, updated_obj=updated_obj)
 
     def test_updating_non_existing_record_yields_404_code(self):
         test_obj = db_models.TestBase(id=7, test_str='test_string', test_int=5)
         db_access.send_to_database(db_models.TestBase, test_obj)
         updated_obj = db_models.TestBase(id=8, test_str='updated_test_string', test_int=6)
-        response = db_access.update_record(base=db_models.TestBase, id_name="id", id_value=8, updated_obj=updated_obj)
+        response = db_access.update_record(id_name="id", id_value=8, updated_obj=updated_obj)
         self.assertEqual(response.status_code, 404)
 
 

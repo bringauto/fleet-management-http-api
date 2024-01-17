@@ -36,26 +36,32 @@ def retrieve_from_database(base: Type[Base], equal_to: Optional[Dict[str, Any]] 
         return [row[0] for row in result]
 
 
-def update_record(base: Type[Base], id_name: str, id_value: Any, updated_obj: Base) -> ConnexionResponse:
-    _check_obj_bases_matches_specifed_base(base, updated_obj)
-    table = base.__table__
-    base_dict = {col:updated_obj.__dict__[col] for col in table.columns.keys()}
+def update_record(id_name: str, id_value: Any, updated_obj: Base) -> ConnexionResponse:
+    table = updated_obj.__table__
+    dict_data = _obj_to_dict(updated_obj)
     with current_connection_source().begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
-        stmt = update(table).where(id_match).values(base_dict)
+        stmt = update(table).where(id_match).values(dict_data)
         try:
             result = conn.execute(stmt)
             n_of_updated_items = result.rowcount
             if n_of_updated_items == 0:
-                msg = f"Error when updating data. Object with {id_name}={id_value} not in table {base.__tablename__} in the database. Nothing to update."
-                return ConnexionResponse(status_code=404, content_type="string", body=msg)
+                code = 404
+                msg = "Error when updating data. " \
+                    f"Object with {id_name}={id_value} not in table {updated_obj.__tablename__} in the database. " \
+                    "Nothing to update."
             else:
-                return ConnexionResponse(status_code=200, content_type="string", body="Succesfully updated record")
+                code, msg = 200, "Succesfully updated record"
         except sqaexc.IntegrityError as e:
-            return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
+            code, msg = 400, e.orig
+    return ConnexionResponse(status_code=code, content_type="string", body=msg)
 
 
 def _check_obj_bases_matches_specifed_base(specified_base: Type[Base], *objs: Base) -> None:
     for obj in objs:
         if not isinstance(obj, specified_base):
             raise TypeError(f"Object {obj} is not of type {specified_base}")
+
+
+def _obj_to_dict(obj: Base) -> Dict[str, Any]:
+    return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
