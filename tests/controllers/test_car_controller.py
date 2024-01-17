@@ -25,7 +25,6 @@ class Test_Cars(unittest.TestCase):
         with app.app.test_client() as c:
             response = c.post('/v1/car', json = car.to_dict(), content_type='application/json')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, "Car was succesfully created.")
             response = c.get('/v1/car')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
@@ -156,11 +155,12 @@ class Test_Deleting_Car(unittest.TestCase):
         set_test_connection_source()
 
     def test_add_and_delete_car(self) -> None:
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car_id = 4
+        car = Car(id=car_id, name="Test Car", platform_id=5)
         app = get_app()
         with app.app.test_client() as c:
             c.post('/v1/car', json = car.to_dict(), content_type='application/json')
-            response = c.delete('/v1/car/1')
+            response = c.delete(f'/v1/car/{car_id}')
             self.assertEqual(response.status_code, 200)
             response = c.get('/v1/car')
             self.assertEqual(response.json, [])

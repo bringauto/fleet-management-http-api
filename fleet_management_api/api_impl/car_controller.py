@@ -17,7 +17,7 @@ def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
         response = db_access.add_record(CarDBModel, car_db_model)
         if response.status_code == 200:
             log_info(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) has been created.")
-            return 'Car was succesfully created.'
+            return ConnexionResponse(body=f"Car with id='{car.id}' was succesfully created.", status_code=200)
         elif response.status_code == 400:
             log_error(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) could not be created. {response.body}")
             return response
@@ -27,7 +27,15 @@ def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
 
 
 def delete_car(car_id) -> ConnexionResponse:
-    return ConnexionResponse(body='Not implemented yet', status_code=501)
+    response = db_access.delete_record(CarDBModel, 'id', car_id)
+    if 200 <= response.status_code < 300:
+        msg = f"Car (id={car_id}) has been deleted."
+        log_info(msg)
+        return ConnexionResponse(body="Car has been succesfully deleted", status_code=200)
+    else:
+        msg = f"Car (id={car_id}) could not be deleted. {response.body}"
+        log_error(msg)
+        return ConnexionResponse(body=msg, status_code=response.status_code)
 
 
 def get_car(car_id) -> ConnexionResponse:
@@ -48,9 +56,9 @@ def update_car(car) -> ConnexionResponse:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = obj_to_db.car_to_db_model(car)
         response = db_access.update_record(id_name="id", id_value=car.id, updated_obj=car_db_model)
-        if response.status_code == 200:
-            log_info(f"Car (id={car.id} has been sucessfully updated.")
-            return ConnexionResponse(body="Car was succesfully updated", status_code=200)
+        if 200 <= response.status_code < 300:
+            log_info(f"Car (id={car.id} has been suchas been succesfully updated")
+            return ConnexionResponse(body=f"Car (id='{car.id}') has been succesfully updated", status_code=200)
         else:
             msg = f"Car (id={car.id}) could not be updated. {response.body}"
             log_error(msg)
