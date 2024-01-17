@@ -46,3 +46,17 @@ To get keycloak authentication working, all parameters in the security section o
 - scope : checking of scopes is not yet implemented (must be `email` for now!)
 - realm : realm in which the client belongs (seen on top of the left side panel in keycloak gui)
 - keycloak_public_key_file : path to public key used to decode jwt tokens (Realm settings -> Keys -> RS256 -> Public key)
+
+# Testing
+
+You have to have the project installed in your (virtual) environment as a package.
+
+To run all tests for the project, run
+```bash
+python -m tests
+```
+Add optional `-h` to display tests' coverage in html format, for example in your browser:
+```bash
+python -m tests -h
+```
+

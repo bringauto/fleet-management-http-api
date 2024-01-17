@@ -14,7 +14,7 @@ class Car(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, platform_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=None):  # noqa: E501
+    def __init__(self, id=None, platform_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=True):  # noqa: E501
         """Car - a model defined in OpenAPI
 
         :param id: The id of this Car.  # noqa: E501

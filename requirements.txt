@@ -14,3 +14,4 @@ psycopg2-binary >= 2.9.9
 python-keycloak == 3.7.0
 pyjwt == 2.3.0
 cryptography == 3.4.8
+coverage>=2.17

@@ -82,7 +82,7 @@ paths:
       summary: Finds all cars
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
     post:
       operationId: create_car
       requestBody:
@@ -147,7 +147,7 @@ paths:
       summary: Create a new car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
     put:
       operationId: update_car
       requestBody:
@@ -157,6 +157,7 @@ paths:
               $ref: '#/components/schemas/Car'
         description: Car update json
         required: true
+        x-body-name: car
       responses:
         "200":
           content:
@@ -222,7 +223,7 @@ paths:
       summary: Update an existing car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
   /car/startstop/{carId}:
     get:
       operationId: startstop_car
@@ -385,7 +386,7 @@ paths:
       summary: Delete a car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
     get:
       operationId: get_car
       parameters:
@@ -464,7 +465,7 @@ paths:
       summary: Finds car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
   /carstate:
     post:
       operationId: add_car_state
@@ -2605,6 +2606,7 @@ components:
           title: defaultRouteId
           type: integer
         underTest:
+          default: true
           title: underTest
           type: boolean
       required:

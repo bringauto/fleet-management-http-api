@@ -83,7 +83,7 @@ paths:
   /car:
     post:
       operationId: createCar
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
       tags:
         - car
       summary: Create a new car
@@ -112,7 +112,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getCars
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
       tags:
         - car
       summary: Finds all cars
@@ -144,11 +144,13 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateCar
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
       tags:
         - car
       summary: Update an existing car by ID
       requestBody:
         description: Car update json
+        x-body-name: car
         content:
           application/json:
             schema:
@@ -174,6 +176,7 @@ paths:
   /car/{carId}:
     get:
       operationId: getCar
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
       tags:
         - car
       summary: Finds car by ID
@@ -205,6 +208,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteCar
+      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
       tags:
         - car
       summary: Delete a car
@@ -1204,6 +1208,7 @@ components:
           example: 1
         underTest:
           type: boolean
+          default: true
     CarState:
       type: object
       description: Car state object structure
