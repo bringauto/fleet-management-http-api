@@ -42,7 +42,7 @@ def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> Connexi
                                     )
 
 
-def get_record(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
+def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
     if equal_to is None:
         equal_to = {}
     table = base.__table__

@@ -183,6 +183,7 @@ paths:
   /car/startstop/{carId}:
     get:
       operationId: startstopCar
+      x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
       tags:
         - car
       summary: Start/stop car by ID (intended for phonecalls)

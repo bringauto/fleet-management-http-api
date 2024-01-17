@@ -39,7 +39,7 @@ def delete_car(car_id) -> ConnexionResponse:
 
 
 def get_car(car_id) -> ConnexionResponse:
-    cars = db_access.get_record(CarDBModel, equal_to={'id': car_id})
+    cars = db_access.get_records(CarDBModel, equal_to={'id': car_id})
     if len(cars) == 0:
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
     else:
@@ -47,7 +47,7 @@ def get_car(car_id) -> ConnexionResponse:
 
 
 def get_cars() -> ConnexionResponse:  # noqa: E501
-    cars = db_access.get_record(CarDBModel)
+    cars = db_access.get_records(CarDBModel)
     return ConnexionResponse(body=cars, status_code=200)
 
 

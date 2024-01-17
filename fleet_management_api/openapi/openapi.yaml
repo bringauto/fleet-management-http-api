@@ -295,7 +295,7 @@ paths:
       summary: Start/stop car by ID (intended for phonecalls)
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
   /car/{carId}:
     delete:
       operationId: delete_car
