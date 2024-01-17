@@ -25,11 +25,6 @@ class SecurityObj:
             state=self._state
         )
         return auth_url
-    
-    # def device_get_authentication(self) -> dict:
-    #     """Get a json for authenticating a device on keycloak."""
-    #     auth_url_device = self._oid.device()
-    #     return auth_url_device
 
     def token_get(self, state: str, session_state: str, iss: str, code: str) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
@@ -45,14 +40,6 @@ class SecurityObj:
             redirect_uri=self._callback
         )
         return token
-    
-    # def device_token_get(self, device_code: str) -> dict:
-    #     """Get token from keycloak using a device code returned by keycloak."""
-    #     token = self._oid.token(
-    #         grant_type="urn:ietf:params:oauth:grant-type:device_code",
-    #         device_code=device_code
-    #     )
-    #     return token
     
     def token_refresh(self, refresh_token: str) -> dict:
         """Get a new token from keycloak using the refresh token."""

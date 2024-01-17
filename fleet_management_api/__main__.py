@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import fleet_management_api.app as app
-from fleet_management_api.impl.controllers import init_security
+from fleet_management_api.api_impl.auth_controller import init_security
 from fleet_management_api.controllers.security_controller import set_public_key
 from fleet_management_api.database.connection import set_connection_source, current_connection_source, Base
 

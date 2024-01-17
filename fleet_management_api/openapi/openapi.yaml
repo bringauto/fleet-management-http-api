@@ -543,7 +543,7 @@ paths:
       security: []
       tags:
       - login
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /order:
     get:
       operationId: get_orders
@@ -2059,7 +2059,7 @@ paths:
       security: []
       tags:
       - login
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /token_refresh:
     get:
       description: Endpoint to receive jwt token from refresh token.
@@ -2082,7 +2082,7 @@ paths:
       security: []
       tags:
       - login
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /user:
     get:
       operationId: get_users

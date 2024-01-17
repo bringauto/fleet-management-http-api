@@ -30,7 +30,7 @@ security:
 paths:
   /login:
     get:
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
       operationId: login
       security: []
       description:
@@ -45,7 +45,7 @@ paths:
 
   /token_get:
     get:
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
       operationId: token_get
       security: []
       description:
@@ -65,7 +65,7 @@ paths:
       
   /token_refresh:
     get:
-      x-openapi-router-controller: fleet_management_api.impl.controllers
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
       operationId: token_refresh
       security: []
       description:
