@@ -21,5 +21,12 @@ class CarDBModel(Base):
     default_route_id: Mapped[int] = Column(Integer)
 
 
-
-
+@dataclasses.dataclass
+class CarStateDBModel(Base):
+    __tablename__ = 'car_states'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    status: Mapped[str] = Column(String)
+    car_id: Mapped[int] = Column(Integer)
+    speed: Mapped[int] = Column(Integer)
+    fuel: Mapped[int] = Column(Integer)
+    position: Mapped[dict] = mapped_column(JSON)

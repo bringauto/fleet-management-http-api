@@ -299,7 +299,7 @@ paths:
       summary: Start/stop car by ID (intended for phonecalls)
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
   /car/{carId}:
     delete:
       operationId: delete_car
@@ -476,6 +476,7 @@ paths:
               $ref: '#/components/schemas/CarState'
         description: Car state json
         required: true
+        x-body-name: carState
       responses:
         "200":
           content:
@@ -2624,9 +2625,9 @@ components:
           altitude: 400.25
           latitude: 49.204117
           longitude: 16.606525
+        car_id: 1
         speed: 20.5
         status: null
-        carId: 1
       properties:
         id:
           example: 1
@@ -2640,10 +2641,10 @@ components:
           format: int32
           title: fuel
           type: integer
-        carId:
+        car_id:
           example: 1
           format: int32
-          title: carId
+          title: car_id
           type: integer
         speed:
           example: 20.5
@@ -2653,7 +2654,7 @@ components:
         position:
           $ref: '#/components/schemas/GNSSPosition'
       required:
-      - carId
+      - car_id
       - id
       - status
       title: CarState

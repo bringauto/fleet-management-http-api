@@ -3,7 +3,7 @@ from typing import Dict
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
-import fleet_management_api.api_impl.obj_to_db as obj_to_db
+import fleet_management_api.api_impl.db_models as db_models
 from fleet_management_api.models import Car
 from fleet_management_api.database.db_models import CarDBModel
 import fleet_management_api.database.db_access as db_access
@@ -13,7 +13,7 @@ from fleet_management_api.api_impl.api_logging import log_info, log_error
 def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
     if connexion.request.is_json:
         car: Car = Car.from_dict(connexion.request.get_json())  # noqa: E501
-        car_db_model = obj_to_db.car_to_db_model(car)
+        car_db_model = db_models.car_to_db_model(car)
         response = db_access.add_record(CarDBModel, car_db_model)
         if response.status_code == 200:
             log_info(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) has been created.")
@@ -39,7 +39,7 @@ def delete_car(car_id) -> ConnexionResponse:
 
 
 def get_car(car_id) -> ConnexionResponse:
-    cars = db_access.get_record(CarDBModel, equal_to={'id': car_id})
+    cars = db_access.get_records(CarDBModel, equal_to={'id': car_id})
     if len(cars) == 0:
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
     else:
@@ -47,14 +47,14 @@ def get_car(car_id) -> ConnexionResponse:
 
 
 def get_cars() -> ConnexionResponse:  # noqa: E501
-    cars = db_access.get_record(CarDBModel)
+    cars = db_access.get_records(CarDBModel)
     return ConnexionResponse(body=cars, status_code=200)
 
 
 def update_car(car) -> ConnexionResponse:
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
-        car_db_model = obj_to_db.car_to_db_model(car)
+        car_db_model = db_models.car_to_db_model(car)
         response = db_access.update_record(id_name="id", id_value=car.id, updated_obj=car_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Car (id={car.id} has been suchas been succesfully updated")
