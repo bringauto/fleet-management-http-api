@@ -5,6 +5,7 @@ from typing import Optional
 from connexion.lifecycle import ConnexionResponse
 from fleet_management_api.api_impl.security import SecurityObj
 from flask import redirect
+from fleet_management_api.api_impl.api_logging import log_info, log_error
 
 
 _security = SecurityObj()
@@ -22,9 +23,9 @@ def login() -> ConnexionResponse:
     try:
         return redirect(_security.get_authentication_url())
     except:
-        #msg = "Problem reaching oAuth service."
-        #return _log_and_respond(msg, 500, msg)
-        return ConnexionResponse(body="Problem reaching oAuth service.", status_code=500)
+        msg = "Problem reaching oAuth service."
+        log_error(msg)
+        return ConnexionResponse(body=msg, status_code=500)
 
 
 
@@ -52,10 +53,10 @@ def token_get(
     try:
         token = _security.token_get(state, session_state, iss, code)
     except:
-        #msg = "Problem getting token from oAuth service."
-        #return _log_and_respond(msg, 500, msg)
-        return ConnexionResponse(body="Problem getting token from oAuth service.", status_code=500)
-    #return _log_and_respond(token, 200, "Jwt token generated.")
+        msg = "Problem getting token from oAuth service."
+        log_error(msg)
+        return ConnexionResponse(body=msg, status_code=500)
+    log_info("Jwt token generated.")
     return ConnexionResponse(body=token, status_code=200)
 
 
@@ -74,8 +75,8 @@ def token_refresh(
     try:
         token = _security.token_refresh(refresh_token)
     except:
-        #msg = "Problem getting token from oAuth service."
-        #return _log_and_respond(msg, 500, msg)
-        return ConnexionResponse(body="Problem getting token from oAuth service.", status_code=500)
-    #return _log_and_respond(token, 200, "Jwt token refreshed.")
+        msg = "Problem getting token from oAuth service."
+        log_error(msg)
+        return ConnexionResponse(body=msg, status_code=500)
+    log_info("Jwt token refreshed.")
     return ConnexionResponse(body=token, status_code=200)
