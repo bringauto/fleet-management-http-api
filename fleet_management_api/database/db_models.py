@@ -30,3 +30,16 @@ class CarStateDBModel(Base):
     speed: Mapped[int] = Column(Integer)
     fuel: Mapped[int] = Column(Integer)
     position: Mapped[dict] = mapped_column(JSON)
+
+
+@dataclasses.dataclass
+class OrderDBModel(Base):
+    __tablename__ = 'orders'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    priority: Mapped[str] = Column(String)
+    user_id: Mapped[int] = Column(Integer)
+    status: Mapped[str] = Column(String)
+    car_id: Mapped[int] = Column(Integer)
+    target_stop_id: Mapped[int] = Column(Integer)
+    stop_route_id: Mapped[int] = Column(Integer)
+    notification_phone: Mapped[dict] = mapped_column(JSON)

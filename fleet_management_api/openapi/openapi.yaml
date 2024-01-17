@@ -2581,8 +2581,8 @@ components:
       required:
       - carId
       - id
-      - stopRoute
-      - targetStop
+      - stopRouteId
+      - targetStopId
       - userId
       title: Order
       type: object

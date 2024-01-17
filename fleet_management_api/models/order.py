@@ -209,6 +209,8 @@ class Order(Model):
         :param target_stop_id: The target_stop_id of this Order.
         :type target_stop_id: int
         """
+        if target_stop_id is None:
+            raise ValueError("Invalid value for `target_stop_id`, must not be `None`")  # noqa: E501
 
         self._target_stop_id = target_stop_id
 
@@ -230,6 +232,8 @@ class Order(Model):
         :param stop_route_id: The stop_route_id of this Order.
         :type stop_route_id: int
         """
+        if stop_route_id is None:
+            raise ValueError("Invalid value for `stop_route_id`, must not be `None`")  # noqa: E501
 
         self._stop_route_id = stop_route_id
 

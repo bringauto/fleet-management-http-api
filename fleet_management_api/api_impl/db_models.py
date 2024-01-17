@@ -2,9 +2,12 @@ from fleet_management_api.models import (
     Car,
     MobilePhone,
     CarState,
-    GNSSPosition
+    GNSSPosition,
+    Order,
+    Priority,
+    OrderStatus
 )
-from fleet_management_api.database.db_models import CarDBModel, CarStateDBModel
+from fleet_management_api.database.db_models import CarDBModel, CarStateDBModel, OrderDBModel
 
 
 def car_to_db_model(car: Car) -> CarDBModel:
@@ -62,4 +65,39 @@ def car_state_from_db_model(car_state_db_model: CarStateDBModel) -> CarState:
         speed=car_state_db_model.speed,
         fuel=car_state_db_model.fuel,
         position=car_position
+    )
+
+
+def order_to_db_model(order: Order) -> OrderDBModel:
+    if order.notification_phone is None:
+        notification_phone = None
+    else:
+        notification_phone = order.notification_phone.to_dict()
+    return OrderDBModel(
+        id=order.id,
+        priority=order.priority,
+        user_id=order.user_id,
+        status=order.status,
+        car_id=order.car_id,
+        target_stop_id=order.target_stop_id,
+        stop_route_id=order.stop_route_id,
+        notification_phone=notification_phone
+    )
+
+
+
+def order_from_db_model(order_db_model: OrderDBModel) -> Order:
+    if order_db_model.notification_phone is None:
+        notification_phone = None
+    else:
+        notification_phone = MobilePhone.from_dict(order_db_model.notification_phone)
+    return Order(
+        id=order_db_model.id,
+        priority=order_db_model.priority,
+        user_id=order_db_model.user_id,
+        status=order_db_model.status,
+        car_id=order_db_model.car_id,
+        target_stop_id=order_db_model.target_stop_id,
+        stop_route_id=order_db_model.stop_route_id,
+        notification_phone=notification_phone
     )

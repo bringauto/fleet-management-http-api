@@ -1147,8 +1147,8 @@ components:
         - id
         - userId
         - carId
-        - targetStop
-        - stopRoute
+        - targetStopId
+        - stopRouteId
       properties:
         id:
           type: integer
