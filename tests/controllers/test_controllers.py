@@ -48,6 +48,50 @@ class Test_Cars(unittest.TestCase):
             response = c.post('/v1/car', json = car_dict_missing_an_id, content_type='application/json')
             self.assertEqual(response.status_code, 400)
 
+    def test_creating_car_with_already_existing_id_returns_400_error_code(self):
+        car_1 = Car(id=1, name="Test Car 1", platform_id=5)
+        car_2 = Car(id=1, name="Test Car 2", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car_1.to_dict(), content_type='application/json')
+            response = c.post('/v1/car', json = car_2.to_dict(), content_type='application/json')
+            self.assertEqual(response.status_code, 400)
+
+    def test_creating_car_with_already_existing_name_returns_400_error_code(self):
+        car_1 = Car(id=1, name="Test Car", platform_id=5)
+        car_2 = Car(id=2, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car_1.to_dict(), content_type='application/json')
+            response = c.post('/v1/car', json = car_2.to_dict(), content_type='application/json')
+            self.assertEqual(response.status_code, 400)
+
+
+class Test_Retrieving_Single_Car(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+
+    def test_retrieving_single_existing_car(self):
+        car_id = 17
+        car = Car(id=car_id, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            response = c.get(f"/v1/car/{car_id}")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json['name'], car.name)
+
+    def test_retrieving_nonexistent_car_returns_code_404(self):
+        car_id = 17
+        nonexistent_car_id = 25
+        car = Car(id=car_id, name="Test Car", platform_id=5)
+        app = get_app()
+        with app.app.test_client() as c:
+            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            response = c.get(f"/v1/car/{nonexistent_car_id }")
+            self.assertEqual(response.status_code, 404)
+
 
 class Test_Logging_Car_Creation(unittest.TestCase):
 

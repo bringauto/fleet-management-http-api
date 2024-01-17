@@ -7,7 +7,7 @@ import fleet_management_api.database.db_access as db_access
 import tests.database.models as models
 
 
-class Test_Sending_Data_To_Database(unittest.TestCase):
+class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
 
     def setUp(self) -> None:
         connection.set_test_connection_source()

@@ -120,6 +120,7 @@ paths:
   /car/{carId}:
     get:
       operationId: getCar
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
       tags:
         - car
       summary: Finds car by ID

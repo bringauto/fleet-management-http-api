@@ -26,6 +26,14 @@ def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
         return ConnexionResponse(body='Invalid request format.', status_code=400)
 
 
+def get_car(car_id) -> ConnexionResponse:
+    cars = db_access.retrieve_from_database(CarDBModel, equal_to={'id': car_id})
+    if len(cars) == 0:
+        return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
+    else:
+        return ConnexionResponse(body=cars[0], status_code=200)
+
+
 def get_cars() -> ConnexionResponse:  # noqa: E501
     cars = db_access.retrieve_from_database(CarDBModel)
     return ConnexionResponse(body=cars, status_code=200)
@@ -46,3 +54,5 @@ def update_car(car) -> ConnexionResponse:
     else:
         log_error(f"Invalid request format: {connexion.request.data}. JSON is required")
         return ConnexionResponse(body='Invalid request format.', status_code=400)
+
+

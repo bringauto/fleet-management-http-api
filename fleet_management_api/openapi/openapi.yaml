@@ -461,7 +461,7 @@ paths:
       summary: Finds car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.controllers.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers
   /carstate:
     post:
       operationId: add_car_state
