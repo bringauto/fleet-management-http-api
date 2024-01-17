@@ -212,11 +212,13 @@ paths:
   /carstate:
     post:
       operationId: addCarState
+      x-openapi-router-controller: fleet_management_api.api_impl.car_state_controller
       tags:
         - carState
       summary: Add a new state for a car by ID
       requestBody:
         description: Car state json
+        x-body-name: carState
         content:
           application/json:
             schema:
@@ -1103,7 +1105,7 @@ components:
       required:
         - id
         - status
-        - carId
+        - car_id
       properties:
         id:
           type: integer
@@ -1115,7 +1117,7 @@ components:
           type: integer
           format: int32
           example: 80
-        carId:
+        car_id:
           type: integer
           format: int32
           example: 1
