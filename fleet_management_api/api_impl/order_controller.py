@@ -39,7 +39,20 @@ def get_orders() -> List[Order]:
 
 
 def update_order(order) -> Order:
-    return ConnexionResponse(status_code=501, content_type="text/plain", body="Not implemented yet")
+    if connexion.request.is_json:
+        order = Order.from_dict(connexion.request.get_json())
+        order_db_model = order_to_db_model(order)
+        response = db_access.update_record(id_name="id", id_value=order.id, updated_obj=order_db_model)
+        if 200 <= response.status_code < 300:
+            log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
+            return ConnexionResponse(body=f"Order(id='{order.id}') has been succesfully updated.", status_code=200)
+        else:
+            msg = f"Order (id={order.id}) could not be updated. {response.body}"
+            log_error(msg)
+            return ConnexionResponse(body=msg, status_code=response.status_code)
+    else:
+        log_error(f"Invalid request format: {connexion.request.data}. JSON is required.")
+        return ConnexionResponse(body='Invalid request format.', status_code=400)
 
 
 def _car_exist(car_id: int) -> bool:
