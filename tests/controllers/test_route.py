@@ -49,11 +49,22 @@ class Test_Retrieving_Route(unittest.TestCase):
         set_test_connection_source()
         self.app = get_app().app
 
-    def test_retrieving_existing_Routes(self):
-        pass
+    def test_retrieving_existing_routes(self):
+        route_1 = Route(id=1, name="test_route_1")
+        route_2 = Route(id=2, name="test_route_2")
+        with self.app.test_client() as c:
+            response = c.post('/v1/route', json=route_1.to_dict())
+            response = c.post('/v1/route', json=route_2.to_dict())
 
-    def test_retrieving_Routes_when_no_hw_id_exists_yields_empty_list(self):
-        pass
+            response = c.get('/v1/route')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+
+    def test_retrieving_routes_when_route_exists_yields_empty_list(self):
+        with self.app.test_client() as c:
+            response = c.get('/v1/route')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json, [])
 
 
 class Test_Getting_Single_Route(unittest.TestCase):
