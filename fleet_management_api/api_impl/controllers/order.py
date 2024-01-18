@@ -1,3 +1,5 @@
+from typing import List
+
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
@@ -45,8 +47,15 @@ def get_order(order_id: int) -> ConnexionResponse:
 
 
 def get_updated_orders(car_id: int) -> ConnexionResponse:
-    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True})
-    # db_access.update_records(db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True}, updated_obj={'updated': False})
+    if not _car_exist(car_id):
+        return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
+
+    order_db_models: List[db_models.OrderDBModel] = db_access.get_records(
+        db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True}
+    )
+    for m in order_db_models:
+        m.updated = False
+        db_access.update_record(m)
     orders = [obj_to_db.order_from_db_model(order_db_model) for order_db_model in order_db_models]
     return ConnexionResponse(body=orders, status_code=200)
 

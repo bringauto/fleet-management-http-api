@@ -217,7 +217,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
             c.post('/v1/car', json=self.car.to_dict())
-        order_1 = Order(
+        self.order_1 = Order(
             id=78,
             user_id=789,
             car_id=12,
@@ -225,7 +225,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
-        order_2 = Order(
+        self.order_2 = Order(
             id=79,
             user_id=789,
             car_id=12,
@@ -234,14 +234,48 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             notification_phone=MobilePhone(phone='4444444444')
         )
         with self.app.test_client() as c:
-            c.post('/v1/order', json=order_1.to_dict())
-            c.post('/v1/order', json=order_2.to_dict())
+            c.post('/v1/order', json=self.order_1.to_dict())
+            c.post('/v1/order', json=self.order_2.to_dict())
 
-    def _test_listing_changed_orders_for_existing_car_when_no_orders_changed_yields_code_200_and_empty_list(self):
+    def test_all_orders_not_yet_retrieved_are_listed_as_updated(self):
         with self.app.test_client() as c:
             response = c.get(f'/v1/order/wait/{self.car.id}')
+            returned_orders = response.json
             self.assertEqual(response.status_code, 200)
-            self.assertListEqual(response.json, [])
+            self.assertEqual(len(returned_orders), 2)
+
+    def test_not_updated_orders_cannot_be_listed_repeatedly_without_updating_them(self):
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+            returned_orders = response.json
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(returned_orders), 0)
+
+    def test_order_that_was_updated_before_repeated_request_is_listed_again(self):
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+
+            # second order is updated
+            c.put('/v1/order', json=self.order_2.to_dict())
+
+            # second order is listed again, first one is ignored
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+            returned_orders = response.json
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(returned_orders), 1)
+
+            # after another request, second order is ignored
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+            returned_orders = response.json
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(returned_orders), 0)
+
+    def test_listing_updated_orders_for_nonexistent_car_yields_code_404(self):
+        nonexistent_car_id = 651651651
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order/wait/{nonexistent_car_id}')
+            self.assertEqual(response.status_code, 404)
 
 
 if __name__ == '__main__':
