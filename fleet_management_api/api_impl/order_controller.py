@@ -22,7 +22,7 @@ def create_order(order) -> ConnexionResponse:
         if response.status_code == 200:
             return log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:
-            return log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
+            return log_and_respond(response.status_code, f"Error when sending order (id={order.id}). {response.body}.")
 
 
 def delete_order(order_id: int) -> ConnexionResponse:
@@ -30,7 +30,7 @@ def delete_order(order_id: int) -> ConnexionResponse:
     if 200 <= response.status_code < 300:
         msg = f"Order (id={order_id}) has been deleted."
         log_info(msg)
-        return ConnexionResponse(body="Order has been succesfully deleted", status_code=200)
+        return ConnexionResponse(body=f"Order (id={order_id})has been succesfully deleted", status_code=200)
     else:
         msg = f"Order (id={order_id}) could not be deleted. {response.body}"
         log_error(msg)
