@@ -9,18 +9,18 @@ from fleet_management_api.api_impl.api_logging import log_error, log_info
 
 def create_order(order):
     if not connexion.request.is_json:
-        _log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+        return _log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
     order = Order.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
-        _log_and_respond(404, f"Car with id={order.car_id} does not exist.")
+        return _log_and_respond(404, f"Car with id={order.car_id} does not exist.")
     else:
         db_model = order_to_db_model(order)
         response = db_access.add_record(OrderDBModel, db_model)
         if response.status_code == 200:
-            _log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
+            return _log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:
-            _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
+            return _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
 def _car_exist(car_id: int) -> bool:
