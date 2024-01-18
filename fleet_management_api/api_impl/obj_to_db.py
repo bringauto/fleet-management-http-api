@@ -4,7 +4,8 @@ from fleet_management_api.models import (
     CarState,
     GNSSPosition,
     PlatformHwId,
-    Order
+    Order,
+    Route
 )
 import fleet_management_api.database.db_models as db_models
 
@@ -113,4 +114,18 @@ def platform_hw_id_from_db_model(platform_hw_id_db_model: db_models.PlatformHwId
     return PlatformHwId(
         id = platform_hw_id_db_model.id,
         name = platform_hw_id_db_model.name
+    )
+
+
+def route_to_db_model(route: Route) -> db_models.RouteDBModel:
+    return db_models.RouteDBModel(
+        id=route.id,
+        name=route.name
+    )
+
+
+def route_from_db_model(route_db_model: db_models.RouteDBModel) -> Route:
+    return Route(
+        id=route_db_model.id,
+        name=route_db_model.name
     )

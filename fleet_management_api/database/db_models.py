@@ -51,3 +51,10 @@ class PlatformHwIdDBModel(Base):
     __tablename__ = 'platform_hw_ids'
     id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     name: Mapped[str] = Column(String, unique=True)
+
+
+@dataclasses.dataclass
+class RouteDBModel(Base):
+    __tablename__ = 'routes'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    name: Mapped[str] = Column(String, unique=True)

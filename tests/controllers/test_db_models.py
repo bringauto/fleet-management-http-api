@@ -7,7 +7,8 @@ from fleet_management_api.models import (
     CarState,
     GNSSPosition,
     Order,
-    PlatformHwId
+    PlatformHwId,
+    Route
 )
 
 
@@ -151,6 +152,20 @@ class Test_Creating_Platform_HW_Id_DB_Model(unittest.TestCase):
             obj_to_db.platform_hw_id_to_db_model(platform_hwid_in)
         )
         self.assertEqual(platform_hwid_out, platform_hwid_in)
+
+
+class Test_Creating_RouteDBModel(unittest.TestCase):
+
+    def test_creating_db_model_from_route_preserves_attribute_values(self):
+        route = Route(id=1, name="test_route")
+        route_db_model = obj_to_db.route_to_db_model(route)
+        self.assertEqual(route_db_model.id, route.id)
+        self.assertEqual(route_db_model.name, route.name)
+
+    def test_route_converted_to_db_model_and_back_preserves_its_attributes(self):
+        route_in = Route(id=1, name="test_route")
+        route_out = obj_to_db.route_from_db_model(obj_to_db.route_to_db_model(route_in))
+        self.assertEqual(route_out, route_in)
 
 
 if __name__=="__main__":
