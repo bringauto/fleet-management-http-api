@@ -556,11 +556,13 @@ paths:
   /route:
     post:
       operationId: createRoute
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
       summary: Create a new route
       requestBody:
         description: New route json
+        x-body-name: route
         content:
           application/json:
             schema:
@@ -583,6 +585,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getRoutes
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
       summary: Finds all routes
@@ -618,11 +621,13 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateRoute
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
       summary: Update an existing route by ID
       requestBody:
         description: Route update json
+        x-body-name: route
         content:
           application/json:
             schema:
@@ -648,6 +653,7 @@ paths:
   /route/{routeId}:
     get:
       operationId: getRoute
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
       summary: Finds route by ID
@@ -679,6 +685,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteRoute
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
       summary: Delete a route
@@ -1219,6 +1226,7 @@ components:
           example: 'Lužánky'
         points:
           type: array
+          default: []
           items:
             $ref: '#/components/schemas/GNSSPosition'
           example:

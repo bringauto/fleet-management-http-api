@@ -1,0 +1,41 @@
+from typing import List
+
+import connexion
+from connexion.lifecycle import ConnexionResponse
+
+from fleet_management_api.api_impl.api_logging import log_and_respond, log_info
+from fleet_management_api.models import Route
+import fleet_management_api.api_impl.obj_to_db as obj_to_db
+import fleet_management_api.database.db_access as db_access
+from fleet_management_api.database.db_models import RouteDBModel
+
+
+def create_route(route: Route) -> ConnexionResponse:
+    if not connexion.request.is_json:
+        return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+    else:
+        route = Route.from_dict(connexion.request.get_json())
+        route_db_model = obj_to_db.route_to_db_model(route)
+        response = db_access.add_record(RouteDBModel, route_db_model)
+        if response.status_code == 200:
+            return log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
+        elif response.status_code == 400:
+            return log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
+        else:
+            return log_and_respond(response.status_code, response.body)
+
+
+def delete_route(route_id: int) -> ConnexionResponse:
+    return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')
+
+
+def get_route(route_id: int) -> Route:
+    return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')
+
+
+def get_routes() -> List[Route]:
+    return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')
+
+
+def update_route(route_id: int, route: Route) -> ConnexionResponse:
+    return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')

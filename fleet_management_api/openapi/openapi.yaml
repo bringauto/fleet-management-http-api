@@ -1328,7 +1328,7 @@ paths:
       summary: Finds all routes
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     post:
       operationId: create_route
       requestBody:
@@ -1338,6 +1338,7 @@ paths:
               $ref: '#/components/schemas/Route'
         description: New route json
         required: true
+        x-body-name: route
       responses:
         "200":
           content:
@@ -1392,7 +1393,7 @@ paths:
       summary: Create a new route
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     put:
       operationId: update_route
       requestBody:
@@ -1402,6 +1403,7 @@ paths:
               $ref: '#/components/schemas/Route'
         description: Route update json
         required: true
+        x-body-name: route
       responses:
         "200":
           content:
@@ -1467,7 +1469,7 @@ paths:
       summary: Update an existing route by ID
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
   /route/{routeId}:
     delete:
       operationId: delete_route
@@ -1554,7 +1556,7 @@ paths:
       summary: Delete a route
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     get:
       operationId: get_route
       parameters:
@@ -1633,7 +1635,7 @@ paths:
       summary: Finds route by ID
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
   /stop:
     get:
       operationId: get_stops
@@ -2642,6 +2644,7 @@ components:
           title: name
           type: string
         points:
+          default: []
           example:
           - latitude: 49.204117
             longitude: 16.606525
