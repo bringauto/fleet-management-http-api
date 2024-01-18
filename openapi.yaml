@@ -27,7 +27,7 @@ paths:
   /car:
     post:
       operationId: createCar
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
       summary: Create a new car
@@ -56,7 +56,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getCars
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
       summary: Finds all cars
@@ -88,7 +88,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateCar
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
       summary: Update an existing car by ID
@@ -120,7 +120,7 @@ paths:
   /car/{car_id}:
     get:
       operationId: getCar
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
       summary: Finds car by ID
@@ -152,7 +152,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteCar
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
       summary: Delete a car
@@ -183,7 +183,7 @@ paths:
   /car/startstop/{car_id}:
     get:
       operationId: startstopCar
-      x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
       tags:
         - car
       summary: Start/stop car by ID (intended for phonecalls)
@@ -212,7 +212,7 @@ paths:
   /carstate:
     post:
       operationId: addCarState
-      x-openapi-router-controller: fleet_management_api.api_impl.car_state_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
       summary: Add a new state for a car by ID
@@ -242,7 +242,7 @@ paths:
   /order:
     post:
       operationId: createOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Create a new order
@@ -271,7 +271,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getOrders
-      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Finds all orders
@@ -305,7 +305,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Update an existing order by ID
@@ -337,7 +337,7 @@ paths:
   /order/{order_id}:
     get:
       operationId: getOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Finds order by ID
@@ -369,7 +369,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Delete an order
@@ -434,7 +434,7 @@ paths:
   /platformhwid:
     post:
       operationId: createHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
       tags:
         - platformHwId
       summary: Create a new platform hwId
@@ -463,7 +463,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getHwIds
-      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
       tags:
         - platformHwId
       summary: Finds all platform hwIds
@@ -492,7 +492,7 @@ paths:
   /platformhwid/{platformhwid_id}:
     get:
       operationId: getHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
       tags:
         - platformHwId
       summary: Finds platform hwId by ID
@@ -524,7 +524,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
       tags:
         - platformHwId
       summary: Delete a platform hwId

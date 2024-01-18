@@ -5,7 +5,7 @@ from connexion.lifecycle import ConnexionResponse
 
 from fleet_management_api.api_impl.api_logging import log_and_respond, log_info
 from fleet_management_api.models import PlatformHwId
-import fleet_management_api.api_impl.db_models as db_models
+import fleet_management_api.api_impl.obj_to_db as obj_to_db
 import fleet_management_api.database.db_access as db_access
 from fleet_management_api.database.db_models import PlatformHwIdDBModel
 
@@ -13,7 +13,7 @@ from fleet_management_api.database.db_models import PlatformHwIdDBModel
 def create_hw_id(platform_hw_id) -> ConnexionResponse:
     if connexion.request.is_json:
         platform_hw_id = PlatformHwId.from_dict(connexion.request.get_json())
-        platform_hwid_db_model = db_models.platform_hw_id_to_db_model(platform_hw_id)
+        platform_hwid_db_model = obj_to_db.platform_hw_id_to_db_model(platform_hw_id)
         response = db_access.add_record(PlatformHwIdDBModel, platform_hwid_db_model)
         if response.status_code == 200:
             return log_and_respond(200, f"Platform HW Id (id={platform_hw_id.id}, name='{platform_hw_id.name}) has been created.")
@@ -28,13 +28,13 @@ def create_hw_id(platform_hw_id) -> ConnexionResponse:
 
 def get_hw_ids() -> ConnexionResponse:
     hw_id_moodels = db_access.get_records(PlatformHwIdDBModel)
-    platform_hw_ids: List[PlatformHwId] = [db_models.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
+    platform_hw_ids: List[PlatformHwId] = [obj_to_db.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     return ConnexionResponse(body=platform_hw_ids, status_code=200, content_type="application/json")
 
 
 def get_hw_id(platformhwid_id: int) -> ConnexionResponse:
     hw_id_moodels = db_access.get_records(PlatformHwIdDBModel, equal_to={"id": platformhwid_id})
-    platform_hw_ids = [db_models.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
+    platform_hw_ids = [obj_to_db.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     if len(platform_hw_ids) == 0:
         return log_and_respond(404, f"Order with id={platformhwid_id} was not found.")
     else:

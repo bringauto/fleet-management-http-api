@@ -2,7 +2,8 @@ import connexion
 from connexion.lifecycle import ConnexionResponse
 
 from fleet_management_api.models.car_state import CarState
-import fleet_management_api.api_impl.db_models as db_models
+import fleet_management_api.api_impl.obj_to_db as obj_to_db
+import fleet_management_api.database.db_models as db_models
 import fleet_management_api.database.db_access as db_access
 from fleet_management_api.api_impl.api_logging import log_info, log_error
 
@@ -13,7 +14,7 @@ def add_car_state(car_state):  # noqa: E501
         log_error(msg)
     else:
         car_state = CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        state_db_model = db_models.car_state_to_db_model(car_state)
+        state_db_model = obj_to_db.car_state_to_db_model(car_state)
         car_db_model = db_access.get_records(db_models.CarDBModel, equal_to={'id': car_state.car_id})
         if len(car_db_model) == 0:
             code, msg = 404, f"Car with id='{car_state.car_id}' was not found."
