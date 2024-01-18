@@ -77,8 +77,8 @@ class Test_Getting_Single_Platform_HW_Id(unittest.TestCase):
         platform_hw_id_1 = PlatformHwId(id=15, name="test_platform_y")
         platform_hw_id_2 = PlatformHwId(id=24, name="test_platform_z")
         with self.app.test_client() as c:
-            response = c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
-            response = c.post('/v1/platformhwid', json=platform_hw_id_2.to_dict())
+            c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
+            c.post('/v1/platformhwid', json=platform_hw_id_2.to_dict())
 
             response = c.get('/v1/platformhwid/15')
             self.assertEqual(response.status_code, 200)
@@ -92,6 +92,29 @@ class Test_Getting_Single_Platform_HW_Id(unittest.TestCase):
         nonexistent_platform_id = 156155
         with self.app.test_client() as c:
             response = c.get(f'/v1/platformhwid/{nonexistent_platform_id}')
+            self.assertEqual(response.status_code, 404)
+
+
+class Test_Deleting_Platform_HW_Id(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+        self.app = get_app().app
+
+    def test_deleting_an_existing_platform_hw_id(self):
+        platform_hw_id = PlatformHwId(id=123, name="test_platform")
+        with self.app.test_client() as c:
+            c.post('/v1/platformhwid', json=platform_hw_id.to_dict())
+            response = c.delete('/v1/platformhwid/123')
+            self.assertEqual(response.status_code, 200)
+
+            response = c.get('/v1/platformhwid')
+            self.assertEqual(response.json, [])
+
+    def test_deleting_a_nonexistent_platform_hw_id_yields_code_404(self):
+        nonexistent_platform_id = 156155
+        with self.app.test_client() as c:
+            response = c.delete(f'/v1/platformhwid/{nonexistent_platform_id}')
             self.assertEqual(response.status_code, 404)
 
 

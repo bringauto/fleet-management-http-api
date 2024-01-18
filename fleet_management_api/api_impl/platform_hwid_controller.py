@@ -32,7 +32,7 @@ def get_hw_ids() -> ConnexionResponse:
     return ConnexionResponse(body=platform_hw_ids, status_code=200, content_type="application/json")
 
 
-def get_hw_id(platformhwid_id) -> ConnexionResponse:
+def get_hw_id(platformhwid_id: int) -> ConnexionResponse:
     hw_id_moodels = db_access.get_records(PlatformHwIdDBModel, equal_to={"id": platformhwid_id})
     platform_hw_ids = [db_models.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     if len(platform_hw_ids) == 0:
@@ -42,5 +42,12 @@ def get_hw_id(platformhwid_id) -> ConnexionResponse:
         return ConnexionResponse(body=platform_hw_ids[0], status_code=200, content_type="application/json")
 
 
-def delete_hw_id(hw_id: int) -> ConnexionResponse:
-    return ConnexionResponse(body="Not implemented", status_code=501, content_type="text/plain")
+def delete_hw_id(platformhwid_id: int) -> ConnexionResponse:
+    response = db_access.delete_record(PlatformHwIdDBModel, id_name="id", id_value=platformhwid_id)
+    if response.status_code == 200:
+        return log_and_respond(200, f"Platform HW Id with id={platformhwid_id} has been deleted.")
+    elif response.status_code == 404:
+        return log_and_respond(404, f"Platform HW Id with id={platformhwid_id} was not found.")
+    else:
+        return log_and_respond(response.status_code, f"Could not delete platform HW id (id={platformhwid_id}). {response.json()}")
+
