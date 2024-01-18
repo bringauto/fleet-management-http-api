@@ -1,6 +1,6 @@
 import dataclasses
 
-from sqlalchemy import Column, Integer, String, JSON
+from sqlalchemy import Column, Integer, String, JSON, Boolean
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
 
 
@@ -43,6 +43,7 @@ class OrderDBModel(Base):
     target_stop_id: Mapped[int] = Column(Integer)
     stop_route_id: Mapped[int] = Column(Integer)
     notification_phone: Mapped[dict] = mapped_column(JSON)
+    updated: Mapped[bool] = Column(Boolean)
 
 
 @dataclasses.dataclass

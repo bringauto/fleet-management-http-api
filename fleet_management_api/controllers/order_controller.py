@@ -49,7 +49,18 @@ def get_order(order_id):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order_wait(car_id):  # noqa: E501
+def get_orders():  # noqa: E501
+    """Finds all orders
+
+     # noqa: E501
+
+
+    :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
+    """
+    return 'do some magic!'
+
+
+def get_updated_orders(car_id):  # noqa: E501
     """Get order by car ID only if it changed
 
      # noqa: E501
@@ -58,17 +69,6 @@ def get_order_wait(car_id):  # noqa: E501
     :type car_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
-    """
-    return 'do some magic!'
-
-
-def get_orders():  # noqa: E501
-    """Finds all orders
-
-     # noqa: E501
-
-
-    :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
     """
     return 'do some magic!'
 

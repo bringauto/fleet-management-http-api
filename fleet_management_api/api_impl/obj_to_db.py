@@ -80,7 +80,8 @@ def order_to_db_model(order: Order) -> db_models.OrderDBModel:
         car_id=order.car_id,
         target_stop_id=order.target_stop_id,
         stop_route_id=order.stop_route_id,
-        notification_phone=notification_phone
+        notification_phone=notification_phone,
+        updated=True
     )
 
 
@@ -97,7 +98,7 @@ def order_from_db_model(order_db_model: db_models.OrderDBModel) -> Order:
         car_id=order_db_model.car_id,
         target_stop_id=order_db_model.target_stop_id,
         stop_route_id=order_db_model.stop_route_id,
-        notification_phone=notification_phone
+        notification_phone=notification_phone,
     )
 
 

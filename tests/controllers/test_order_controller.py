@@ -209,5 +209,40 @@ class Test_Deleting_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
 
+class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_connection_source()
+        self.app = get_app().app
+        self.car = Car(id=12, name='test_car', platform_id=5)
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=self.car.to_dict())
+        order_1 = Order(
+            id=78,
+            user_id=789,
+            car_id=12,
+            target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        order_2 = Order(
+            id=79,
+            user_id=789,
+            car_id=12,
+            target_stop_id=14,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='4444444444')
+        )
+        with self.app.test_client() as c:
+            c.post('/v1/order', json=order_1.to_dict())
+            c.post('/v1/order', json=order_2.to_dict())
+
+    def _test_listing_changed_orders_for_existing_car_when_no_orders_changed_yields_code_200_and_empty_list(self):
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order/wait/{self.car.id}')
+            self.assertEqual(response.status_code, 200)
+            self.assertListEqual(response.json, [])
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

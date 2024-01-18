@@ -730,7 +730,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/wait/{car_id}:
     get:
-      operationId: get_order_wait
+      operationId: get_updated_orders
       parameters:
       - description: ID of car with order to return
         example: 1
@@ -818,7 +818,7 @@ paths:
       summary: Get order by car ID only if it changed
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/{order_id}:
     delete:
       operationId: delete_order

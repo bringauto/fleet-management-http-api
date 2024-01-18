@@ -37,11 +37,18 @@ def delete_order(order_id: int) -> ConnexionResponse:
 
 
 def get_order(order_id: int) -> ConnexionResponse:
-    orders = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
-    if len(orders) == 0:
+    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
+    if len(order_db_models) == 0:
         return ConnexionResponse(body=f"Order with id={order_id} was not found.", status_code=404)
     else:
-        return ConnexionResponse(body=orders[0], status_code=200)
+        return ConnexionResponse(body=obj_to_db.order_from_db_model(order_db_models[0]), status_code=200)
+
+
+def get_updated_orders(car_id: int) -> ConnexionResponse:
+    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True})
+    # db_access.update_records(db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True}, updated_obj={'updated': False})
+    orders = [obj_to_db.order_from_db_model(order_db_model) for order_db_model in order_db_models]
+    return ConnexionResponse(body=orders, status_code=200)
 
 
 def get_orders() -> ConnexionResponse:

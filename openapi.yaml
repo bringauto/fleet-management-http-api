@@ -399,7 +399,8 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
   /order/wait/{car_id}:
     get:
-      operationId: getOrderWait
+      operationId: getUpdatedOrders
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Get order by car ID only if it changed
