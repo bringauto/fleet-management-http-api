@@ -9,26 +9,27 @@ from fleet_management_api.api_impl.api_logging import log_error, log_info
 
 def create_order(order):
     if not connexion.request.is_json:
-        code, msg = 400, f"Invalid request format: {connexion.request.data}. JSON is required"
-        log_error(msg)
-        return ConnexionResponse(status_code=code, content_type="text/plain", body=msg)
+        _log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
     order = Order.from_dict(connexion.request.get_json())
-    if _car_exist(order.car_id):
+    if not _car_exist(order.car_id):
+        _log_and_respond(404, f"Car with id={order.car_id} does not exist.")
+    else:
         db_model = order_to_db_model(order)
         response = db_access.add_record(OrderDBModel, db_model)
         if response.status_code == 200:
-            code, msg = 200, f"Order (id={order.id}) has been created and sent."
-            log_info(msg)
+            _log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:
-            code, msg = response.status_code, f"Error when sending order. {response.body}."
-            log_error(msg)
-    else:
-        code, msg = 404, f"Car with id={order.car_id} does not exist."
-        log_error(msg)
-
-    return ConnexionResponse(status_code=code, content_type="text/plain", body=msg)
+            _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
 def _car_exist(car_id: int) -> bool:
     return bool(db_access.get_records(CarDBModel, equal_to={'id': car_id}))
+
+
+def _log_and_respond(code: int, msg: str) -> ConnexionResponse:
+    if 200 <= code < 300:
+        log_info(msg)
+    else:
+        log_error(msg)
+    return ConnexionResponse(status_code=code, content_type="text/plain", body=msg)
