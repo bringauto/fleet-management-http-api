@@ -24,7 +24,7 @@ def create_order(order):
             code, msg = response.status_code, f"Error when sending order. {response.body}."
             log_error(msg)
     else:
-        code, msg = 404, f"Car with id={order.car_id} does not exist"
+        code, msg = 404, f"Car with id={order.car_id} does not exist."
         log_error(msg)
 
     return ConnexionResponse(status_code=code, content_type="text/plain", body=msg)
