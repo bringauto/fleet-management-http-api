@@ -66,5 +66,38 @@ class Test_Sending_And_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_All_Retrieving_Orders(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_connection_source()
+        self.app = get_app().app
+        self.car = Car(id=12, name='test_car', platform_id=5)
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=self.car.to_dict())
+
+    def test_retrieving_all_orders_when_no_orders_exist_yields_code_200(self):
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order')
+            self.assertEqual(response.status_code, 200)
+            self.assertListEqual(response.json, [])
+
+    def test_retrieving_all_orders_when_some_orders_exist_yields_code_200(self):
+        order_id = 78
+        order = Order(
+            id=order_id,
+            user_id=789,
+            car_id=12,
+            target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        with self.app.test_client() as c:
+            c.post('/v1/order', json=order.to_dict())
+            response = c.get(f'/v1/order')
+            self.assertEqual(response.status_code, 200)
+            self.assertListEqual(response.json, [order.to_dict()])
+
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

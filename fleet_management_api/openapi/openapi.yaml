@@ -586,7 +586,7 @@ paths:
       summary: Finds all orders
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
     post:
       operationId: create_order
       requestBody:

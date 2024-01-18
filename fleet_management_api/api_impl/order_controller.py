@@ -1,13 +1,15 @@
+from typing import List
+
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
 from fleet_management_api.models.order import Order
-from fleet_management_api.api_impl.db_models import OrderDBModel, CarDBModel, order_to_db_model
+from fleet_management_api.api_impl.db_models import OrderDBModel, CarDBModel, order_to_db_model, order_from_db_model
 import fleet_management_api.database.db_access as db_access
 from fleet_management_api.api_impl.api_logging import log_error, log_info
 
 
-def create_order(order):
+def create_order(order) -> ConnexionResponse:
     if not connexion.request.is_json:
         return _log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
@@ -21,6 +23,11 @@ def create_order(order):
             return _log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:
             return _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
+
+
+def get_orders() -> List[Order]:
+    log_info("Listing all existing orders")
+    return [order_from_db_model(order_db_model) for order_db_model in db_access.get_records(OrderDBModel)]
 
 
 def _car_exist(car_id: int) -> bool:

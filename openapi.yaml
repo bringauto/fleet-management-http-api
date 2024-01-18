@@ -271,6 +271,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getOrders
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
       tags:
         - order
       summary: Finds all orders
