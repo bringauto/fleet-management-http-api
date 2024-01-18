@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
