@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import connexion
 from connexion.lifecycle import ConnexionResponse
@@ -25,9 +25,21 @@ def create_order(order) -> ConnexionResponse:
             return _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
+def get_order(order_id) -> ConnexionResponse:
+    orders = db_access.get_records(OrderDBModel, equal_to={'id': order_id})
+    if len(orders) == 0:
+        return ConnexionResponse(body=f"Order with id={order_id} was not found.", status_code=404)
+    else:
+        return ConnexionResponse(body=orders[0], status_code=200)
+
+
 def get_orders() -> List[Order]:
     log_info("Listing all existing orders")
     return [order_from_db_model(order_db_model) for order_db_model in db_access.get_records(OrderDBModel)]
+
+
+def update_order(order) -> Order:
+    return ConnexionResponse(status_code=501, content_type="text/plain", body="Not implemented yet")
 
 
 def _car_exist(car_id: int) -> bool:

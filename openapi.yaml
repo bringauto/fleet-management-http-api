@@ -305,11 +305,13 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateOrder
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
       tags:
         - order
       summary: Update an existing order by ID
       requestBody:
         description: Order update json
+        x-body-name: order
         content:
           application/json:
             schema:
@@ -335,6 +337,7 @@ paths:
   /order/{order_id}:
     get:
       operationId: getOrder
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
       tags:
         - order
       summary: Finds order by ID

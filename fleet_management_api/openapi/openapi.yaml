@@ -661,6 +661,7 @@ paths:
               $ref: '#/components/schemas/Order'
         description: Order update json
         required: true
+        x-body-name: order
       responses:
         "200":
           content:
@@ -726,7 +727,7 @@ paths:
       summary: Update an existing order by ID
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
   /order/wait/{car_id}:
     get:
       operationId: get_order_wait
@@ -983,7 +984,7 @@ paths:
       summary: Finds order by ID
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
   /platformhwid:
     get:
       operationId: get_hw_ids

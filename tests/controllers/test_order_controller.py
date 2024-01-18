@@ -98,6 +98,64 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             self.assertListEqual(response.json, [order.to_dict()])
 
 
+class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
+
+    def setUp(self):
+        connection.set_connection_source()
+        self.app = get_app().app
+        self.car = Car(id=12, name='test_car', platform_id=5)
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=self.car.to_dict())
+
+    def test_retrieving_existing_order(self):
+        order_id = 78
+        order = Order(
+            id=order_id,
+            user_id=789,
+            car_id=12,
+            target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        with self.app.test_client() as c:
+            c.post('/v1/order', json=order.to_dict())
+            response = c.get(f'/v1/order/{order_id}')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json, order.to_dict())
+
+    def test_retrieving_non_existing_order_yields_code_404(self):
+        nonexistent_order_id = 65169861848
+        with self.app.test_client() as c:
+            response = c.get(f'/v1/order/{nonexistent_order_id}')
+            self.assertEqual(response.status_code, 404)
+
+
+# class Test_Updating_Order(unittest.TestCase):
+
+#     def setUp(self):
+#         connection.set_connection_source()
+#         self.app = get_app().app
+#         self.car = Car(id=12, name='test_car', platform_id=5)
+#         with self.app.test_client() as c:
+#             c.post('/v1/car', json=self.car.to_dict())
+
+#     def test_updating_existing_order(self):
+#         order = Order(
+#             id=78,
+#             user_id=789,
+#             car_id=12,
+#             target_stop_id=7,
+#             stop_route_id=8
+#         )
+#         with self.app.test_client() as c:
+#             c.post('/v1/order', json=order.to_dict())
+
+#             # update order attribute
+#             order.target_stop_id = 9
+
+#             response = c.put('/v1/order', json=order.to_dict())
+#             self.assertEqual(response.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage
