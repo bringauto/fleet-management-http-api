@@ -3,9 +3,7 @@ from fleet_management_api.models import (
     MobilePhone,
     CarState,
     GNSSPosition,
-    Order,
-    Priority,
-    OrderStatus
+    Order
 )
 from fleet_management_api.database.db_models import CarDBModel, CarStateDBModel, OrderDBModel
 
@@ -83,7 +81,6 @@ def order_to_db_model(order: Order) -> OrderDBModel:
         stop_route_id=order.stop_route_id,
         notification_phone=notification_phone
     )
-
 
 
 def order_from_db_model(order_db_model: OrderDBModel) -> Order:

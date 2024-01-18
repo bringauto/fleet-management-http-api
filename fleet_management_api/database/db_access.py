@@ -11,16 +11,15 @@ from fleet_management_api.database.connection import current_connection_source
 
 def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     if not sent_objs:
-        return
+        return ConnexionResponse(status_code=200, content_type="string", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
-
     table = base.__table__
     with current_connection_source().begin() as conn:
         stmt = insert(table) # type: ignore
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
             conn.execute(stmt, data_list)
-            return ConnexionResponse(status_code=200, content_type="string", body="Succesfully added to database")
+            return ConnexionResponse(status_code=200, content_type="string", body="Succesfully added record to database")
         except sqaexc.IntegrityError as e:
             return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
 

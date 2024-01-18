@@ -6,9 +6,7 @@ from fleet_management_api.models import (
     MobilePhone,
     CarState,
     GNSSPosition,
-    Order,
-    Priority,
-    OrderStatus
+    Order
 )
 
 
@@ -100,10 +98,10 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
     def test_creating_db_model_from_order_with_only_required_attributes_specified_preserves_attribute_values(self):
         order = Order(
             id=1,
-            priority=Priority.NORMAL,
+            priority="normal",
             user_id=789,
             car_id=12,
-            status=OrderStatus.IN_PROGRESS,
+            status="in_progress",
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
@@ -126,10 +124,10 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
     def test_order_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(self):
         order_in = Order(
             id=1,
-            priority=Priority.HIGH,
+            priority="high",
             user_id=789,
             car_id=12,
-            status=OrderStatus.IN_PROGRESS,
+            status="in_progress",
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')

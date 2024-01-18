@@ -39,7 +39,7 @@ class Stop(Model):
             'id': 'id',
             'name': 'name',
             'position': 'position',
-            'notification_phone': 'notificationPhone'
+            'notification_phone': 'notification_phone'
         }
 
         self._id = id

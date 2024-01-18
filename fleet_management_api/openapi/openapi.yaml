@@ -220,7 +220,7 @@ paths:
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.car_controller
-  /car/startstop/{carId}:
+  /car/startstop/{car_id}:
     get:
       operationId: startstop_car
       parameters:
@@ -228,7 +228,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: carId
+        name: car_id
         required: true
         schema:
           format: int32
@@ -296,7 +296,7 @@ paths:
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
-  /car/{carId}:
+  /car/{car_id}:
     delete:
       operationId: delete_car
       parameters:
@@ -304,7 +304,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: carId
+        name: car_id
         required: true
         schema:
           format: int32
@@ -390,7 +390,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: carId
+        name: car_id
         required: true
         schema:
           format: int32
@@ -538,12 +538,12 @@ paths:
               example:
               - id: 1
                 priority: normal
-                userId: 1
+                user_id: 1
                 status: to_accept
-                carId: 1
-                targetStop: 1
-                stopRoute: 1
-                notificationPhone:
+                car_id: 1
+                target_stop_id: 1
+                stop_route_id: 1
+                notification_phone:
                   phone: "+420123456789"
               schema:
                 items:
@@ -596,6 +596,7 @@ paths:
               $ref: '#/components/schemas/Order'
         description: New order json
         required: true
+        x-body-name: order
       responses:
         "200":
           content:
@@ -650,7 +651,7 @@ paths:
       summary: Create a new order
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.order_controller
     put:
       operationId: update_order
       requestBody:
@@ -726,7 +727,7 @@ paths:
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.controllers.order_controller
-  /order/wait/{carId}:
+  /order/wait/{car_id}:
     get:
       operationId: get_order_wait
       parameters:
@@ -734,7 +735,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: carId
+        name: car_id
         required: true
         schema:
           format: int32
@@ -817,7 +818,7 @@ paths:
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.controllers.order_controller
-  /order/{orderId}:
+  /order/{order_id}:
     delete:
       operationId: delete_order
       parameters:
@@ -825,7 +826,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: orderId
+        name: order_id
         required: true
         schema:
           format: int32
@@ -911,7 +912,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: orderId
+        name: order_id
         required: true
         schema:
           format: int32
@@ -1645,7 +1646,7 @@ paths:
                   latitude: 49.204117
                   longitude: 16.606525
                   altitude: 400.25
-                notificationPhone:
+                notification_phone:
                   phone: "+420123456789"
               schema:
                 items:
@@ -2187,7 +2188,7 @@ paths:
       tags:
       - user
       x-openapi-router-controller: fleet_management_api.controllers.user_controller
-  /user/{userId}:
+  /user/{user_id}:
     delete:
       operationId: delete_user
       parameters:
@@ -2195,7 +2196,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: userId
+        name: user_id
         required: true
         schema:
           format: int32
@@ -2281,7 +2282,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: userId
+        name: user_id
         required: true
         schema:
           format: int32
@@ -2537,15 +2538,15 @@ components:
     Order:
       description: Order object structure
       example:
-        stopRouteId: 1
-        notificationPhone:
-          phone: "+420123456789"
-        targetStopId: 1
+        stop_route_id: 1
+        user_id: 1
+        target_stop_id: 1
         id: 1
-        priority: null
-        userId: 1
-        status: null
-        carId: 1
+        priority: normal
+        car_id: 1
+        notification_phone:
+          phone: "+420123456789"
+        status: to_accept
       properties:
         id:
           example: 1
@@ -2553,37 +2554,45 @@ components:
           title: id
           type: integer
         priority:
-          $ref: '#/components/schemas/Priority'
-        userId:
+          default: normal
+          description: "Priority (low, normal, high)"
+          pattern: ^(low|normal|high)$
+          title: priority
+          type: string
+        user_id:
           example: 1
           format: int32
-          title: userId
+          title: user_id
           type: integer
         status:
-          $ref: '#/components/schemas/OrderStatus'
-        carId:
+          default: to_accept
+          description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+          pattern: ^(to_accept|accepted|in_progress|done|canceled)$
+          title: status
+          type: string
+        car_id:
           example: 1
           format: int32
-          title: carId
+          title: car_id
           type: integer
-        targetStopId:
+        target_stop_id:
           example: 1
           format: int32
-          title: targetStopId
+          title: target_stop_id
           type: integer
-        stopRouteId:
+        stop_route_id:
           example: 1
           format: int32
-          title: stopRouteId
+          title: stop_route_id
           type: integer
-        notificationPhone:
+        notification_phone:
           $ref: '#/components/schemas/MobilePhone'
       required:
-      - carId
+      - car_id
       - id
-      - stopRouteId
-      - targetStopId
-      - userId
+      - stop_route_id
+      - target_stop_id
+      - user_id
       title: Order
       type: object
     PlatformHwId:
@@ -2657,14 +2666,14 @@ components:
     Stop:
       description: Stop object structure
       example:
-        notificationPhone:
-          phone: "+420123456789"
         name: Lidická
         id: 1
         position:
           altitude: 400.25
           latitude: 49.204117
           longitude: 16.606525
+        notification_phone:
+          phone: "+420123456789"
       properties:
         id:
           example: 1
@@ -2677,7 +2686,7 @@ components:
           type: string
         position:
           $ref: '#/components/schemas/GNSSPosition'
-        notificationPhone:
+        notification_phone:
           $ref: '#/components/schemas/MobilePhone'
       required:
       - id
@@ -2728,24 +2737,6 @@ components:
       - stopped_by_phone
       title: CarStatus
       type: string
-    OrderStatus:
-      description: OrderStatus enum
-      enum:
-      - to_accept
-      - accepted
-      - in_progress
-      - done
-      - canceled
-      title: OrderStatus
-      type: string
-    Priority:
-      description: Priority enum
-      enum:
-      - low
-      - normal
-      - high
-      title: Priority
-      type: string
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
@@ -2781,3 +2772,15 @@ components:
           type: string
       title: MobilePhone
       type: object
+    Priority:
+      default: normal
+      description: "Priority (low, normal, high)"
+      pattern: ^(low|normal|high)$
+      title: priority
+      type: string
+    OrderStatus:
+      default: to_accept
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+      pattern: ^(to_accept|accepted|in_progress|done|canceled)$
+      title: status
+      type: string
