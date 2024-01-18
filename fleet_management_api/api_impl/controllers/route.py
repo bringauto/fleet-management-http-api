@@ -26,6 +26,13 @@ def create_route(route: Route) -> ConnexionResponse:
 
 
 def delete_route(route_id: int) -> ConnexionResponse:
+    response = db_access.delete_record(RouteDBModel, id_name="id", id_value=route_id)
+    if response.status_code == 200:
+        return log_and_respond(200, f"Route with id={route_id} has been deleted.")
+    elif response.status_code == 404:
+        return log_and_respond(404, f"Route with id={route_id} was not found.")
+    else:
+        return log_and_respond(response.status_code, f"Could not delete route (id={route_id}). {response.json()}")
     return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')
 
 
