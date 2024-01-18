@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Tuple
 
 import connexion
 from connexion.lifecycle import ConnexionResponse
@@ -38,21 +38,20 @@ def get_orders() -> List[Order]:
     return [order_from_db_model(order_db_model) for order_db_model in db_access.get_records(OrderDBModel)]
 
 
-def update_order(order) -> Order:
+def update_order(order) -> Tuple[Order|None, int]:
     if connexion.request.is_json:
         order = Order.from_dict(connexion.request.get_json())
         order_db_model = order_to_db_model(order)
         response = db_access.update_record(id_name="id", id_value=order.id, updated_obj=order_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
-            return ConnexionResponse(body=f"Order(id='{order.id}') has been succesfully updated.", status_code=200)
+            return order, response.status_code
         else:
-            msg = f"Order (id={order.id}) could not be updated. {response.body}"
-            log_error(msg)
-            return ConnexionResponse(body=msg, status_code=response.status_code)
+            log_error(f"Order (id={order.id}) could not be updated. {response.body}")
+            return order, response.status_code
     else:
         log_error(f"Invalid request format: {connexion.request.data}. JSON is required.")
-        return ConnexionResponse(body='Invalid request format.', status_code=400)
+        return None, 400
 
 
 def _car_exist(car_id: int) -> bool:
