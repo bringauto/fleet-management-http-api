@@ -173,5 +173,41 @@ class Test_Updating_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Deleting_Order(unittest.TestCase):
+
+    def setUp(self):
+        connection.set_connection_source()
+        self.app = get_app().app
+        self.car = Car(id=12, name='test_car', platform_id=5)
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=self.car.to_dict())
+        self.order = Order(
+            id=78,
+            user_id=789,
+            car_id=12,
+            target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        c.post('/v1/order', json=self.order.to_dict())
+
+    def test_deleting_existing_order(self):
+        with self.app.test_client() as c:
+            # verify that order is in the database
+            response = c.get(f'/v1/order')
+            self.assertListEqual(response.json, [self.order.to_dict()])
+
+            response = c.delete(f'/v1/order/{self.order.id}')
+            self.assertEqual(response.status_code, 200)
+            response = c.get(f'/v1/order')
+            self.assertEqual(response.json, [])
+
+    def test_deleting_nonexistent_order_yields_code_404(self):
+        nonexistent_order_id = 651651651
+        with self.app.test_client() as c:
+            response = c.delete(f'/v1/order/{nonexistent_order_id}')
+            self.assertEqual(response.status_code, 404)
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

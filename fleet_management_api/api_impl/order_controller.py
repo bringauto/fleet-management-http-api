@@ -25,7 +25,19 @@ def create_order(order) -> ConnexionResponse:
             return log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
-def get_order(order_id) -> ConnexionResponse:
+def delete_order(order_id: int) -> ConnexionResponse:
+    response = db_access.delete_record(OrderDBModel, 'id', order_id)
+    if 200 <= response.status_code < 300:
+        msg = f"Order (id={order_id}) has been deleted."
+        log_info(msg)
+        return ConnexionResponse(body="Order has been succesfully deleted", status_code=200)
+    else:
+        msg = f"Order (id={order_id}) could not be deleted. {response.body}"
+        log_error(msg)
+        return ConnexionResponse(body=msg, status_code=response.status_code)
+
+
+def get_order(order_id: int) -> ConnexionResponse:
     orders = db_access.get_records(OrderDBModel, equal_to={'id': order_id})
     if len(orders) == 0:
         return ConnexionResponse(body=f"Order with id={order_id} was not found.", status_code=404)
