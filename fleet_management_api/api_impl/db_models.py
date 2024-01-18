@@ -3,17 +3,18 @@ from fleet_management_api.models import (
     MobilePhone,
     CarState,
     GNSSPosition,
+    PlatformHwId,
     Order
 )
-from fleet_management_api.database.db_models import CarDBModel, CarStateDBModel, OrderDBModel
+import fleet_management_api.database.db_models as db_models
 
 
-def car_to_db_model(car: Car) -> CarDBModel:
+def car_to_db_model(car: Car) -> db_models.CarDBModel:
     if car.car_admin_phone is None:
         car_mobile_phone = None
     else:
         car_mobile_phone = car.car_admin_phone.to_dict()
-    return CarDBModel(
+    return db_models.CarDBModel(
         id=car.id,
         name=car.name,
         platform_id=car.platform_id,
@@ -22,7 +23,7 @@ def car_to_db_model(car: Car) -> CarDBModel:
     )
 
 
-def car_from_db_model(car_db_model: CarDBModel) -> Car:
+def car_from_db_model(car_db_model: db_models.CarDBModel) -> Car:
     if car_db_model.car_admin_phone is None:
         car_mobile_phone = None
     else:
@@ -36,12 +37,12 @@ def car_from_db_model(car_db_model: CarDBModel) -> Car:
     )
 
 
-def car_state_to_db_model(car_state: CarState) -> CarStateDBModel:
+def car_state_to_db_model(car_state: CarState) -> db_models.CarStateDBModel:
     if car_state.position is None:
         car_position = None
     else:
         car_position = car_state.position.to_dict()
-    return CarStateDBModel(
+    return db_models.CarStateDBModel(
         id=car_state.id,
         status=car_state.status,
         car_id=car_state.car_id,
@@ -51,7 +52,7 @@ def car_state_to_db_model(car_state: CarState) -> CarStateDBModel:
     )
 
 
-def car_state_from_db_model(car_state_db_model: CarStateDBModel) -> CarState:
+def car_state_from_db_model(car_state_db_model: db_models.CarStateDBModel) -> CarState:
     if car_state_db_model.position is None:
         car_position = None
     else:
@@ -66,12 +67,12 @@ def car_state_from_db_model(car_state_db_model: CarStateDBModel) -> CarState:
     )
 
 
-def order_to_db_model(order: Order) -> OrderDBModel:
+def order_to_db_model(order: Order) -> db_models.OrderDBModel:
     if order.notification_phone is None:
         notification_phone = None
     else:
         notification_phone = order.notification_phone.to_dict()
-    return OrderDBModel(
+    return db_models.OrderDBModel(
         id=order.id,
         priority=order.priority,
         user_id=order.user_id,
@@ -83,7 +84,7 @@ def order_to_db_model(order: Order) -> OrderDBModel:
     )
 
 
-def order_from_db_model(order_db_model: OrderDBModel) -> Order:
+def order_from_db_model(order_db_model: db_models.OrderDBModel) -> Order:
     if order_db_model.notification_phone is None:
         notification_phone = None
     else:
@@ -97,4 +98,18 @@ def order_from_db_model(order_db_model: OrderDBModel) -> Order:
         target_stop_id=order_db_model.target_stop_id,
         stop_route_id=order_db_model.stop_route_id,
         notification_phone=notification_phone
+    )
+
+
+def platform_hw_id_to_db_model(platform_hw_id: PlatformHwId) -> db_models.PlatformHwIdDBModel:
+    return db_models.PlatformHwIdDBModel(
+        id=platform_hw_id.id,
+        name=platform_hw_id.name
+    )
+
+
+def platform_hw_id_from_db_model(platform_hw_id_db_model: db_models.PlatformHwIdDBModel) -> PlatformHwId:
+    return PlatformHwId(
+        id = platform_hw_id_db_model.id,
+        name = platform_hw_id_db_model.name
     )

@@ -6,7 +6,8 @@ from fleet_management_api.models import (
     MobilePhone,
     CarState,
     GNSSPosition,
-    Order
+    Order,
+    PlatformHwId
 )
 
 
@@ -135,6 +136,21 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         order_out = db_models.order_from_db_model(db_models.order_to_db_model(order_in))
         self.assertEqual(order_out, order_in)
 
+
+class Test_Creating_Platform_HW_Id(unittest.TestCase):
+
+    def test_creating_db_model_from_paltform_hw_id_preserves_attribute_values(self):
+        platform_hwid = PlatformHwId(id=1, name="test_platform")
+        platform_db_model = db_models.platform_hw_id_to_db_model(platform_hwid)
+        self.assertEqual(platform_db_model.id, platform_hwid.id)
+        self.assertEqual(platform_db_model.name, platform_hwid.name)
+
+    def test_platform_hwid_converted_to_db_model_and_back_preserves_its_attributes(self):
+        platform_hwid_in = PlatformHwId(id=1, name="test_platform")
+        platform_hwid_out = db_models.platform_hw_id_from_db_model(
+            db_models.platform_hw_id_to_db_model(platform_hwid_in)
+        )
+        self.assertEqual(platform_hwid_out, platform_hwid_in)
 
 
 if __name__=="__main__":

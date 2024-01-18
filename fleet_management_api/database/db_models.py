@@ -43,3 +43,10 @@ class OrderDBModel(Base):
     target_stop_id: Mapped[int] = Column(Integer)
     stop_route_id: Mapped[int] = Column(Integer)
     notification_phone: Mapped[dict] = mapped_column(JSON)
+
+
+@dataclasses.dataclass
+class PlatformHwIdDBModel(Base):
+    __tablename__ = 'platform_hw_ids'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    name: Mapped[str] = Column(String, unique=True)

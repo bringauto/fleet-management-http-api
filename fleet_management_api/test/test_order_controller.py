@@ -3,7 +3,7 @@ import unittest
 from flask import json
 
 from fleet_management_api.models.error import Error  # noqa: E501
-from fleet_management_api.models.order import Order  # noqa: E501
+from fleet_management_api.models.order import PlatformHwId  # noqa: E501
 from fleet_management_api.test import BaseTestCase
 
 
@@ -16,7 +16,7 @@ class TestOrderController(BaseTestCase):
         Create a new order
         """
         order = {"stopRouteId":1,"notificationPhone":{"phone":"+420123456789"},"targetStopId":1,"id":1,"userId":1,"carId":1}
-        headers = { 
+        headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
@@ -34,7 +34,7 @@ class TestOrderController(BaseTestCase):
 
         Delete an order
         """
-        headers = { 
+        headers = {
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -49,7 +49,7 @@ class TestOrderController(BaseTestCase):
 
         Finds order by ID
         """
-        headers = { 
+        headers = {
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -64,7 +64,7 @@ class TestOrderController(BaseTestCase):
 
         Get order by car ID only if it changed
         """
-        headers = { 
+        headers = {
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -79,7 +79,7 @@ class TestOrderController(BaseTestCase):
 
         Finds all orders
         """
-        headers = { 
+        headers = {
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -95,7 +95,7 @@ class TestOrderController(BaseTestCase):
         Update an existing order by ID
         """
         order = {"stopRouteId":1,"notificationPhone":{"phone":"+420123456789"},"targetStopId":1,"id":1,"userId":1,"carId":1}
-        headers = { 
+        headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }

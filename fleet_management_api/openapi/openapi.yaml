@@ -1036,7 +1036,7 @@ paths:
       summary: Finds all platform hwIds
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
     post:
       operationId: create_hw_id
       requestBody:
@@ -1046,6 +1046,7 @@ paths:
               $ref: '#/components/schemas/PlatformHwId'
         description: Platform hardware ID json
         required: true
+        x-body-name: platformHwId
       responses:
         "200":
           content:
@@ -1100,7 +1101,7 @@ paths:
       summary: Create a new platform hwId
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
   /platformhwid/{platformhwidId}:
     delete:
       operationId: delete_hw_id

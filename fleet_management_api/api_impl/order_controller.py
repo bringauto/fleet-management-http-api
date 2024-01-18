@@ -1,7 +1,7 @@
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
-from fleet_management_api.models.order import Order
+from fleet_management_api.models.order import PlatformHwId
 import fleet_management_api.api_impl.db_models as db_models
 import fleet_management_api.database.db_access as db_access
 from fleet_management_api.api_impl.api_logging import log_error, log_info, log_and_respond
@@ -11,11 +11,11 @@ def create_order(order) -> ConnexionResponse:
     if not connexion.request.is_json:
         return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
-    order = Order.from_dict(connexion.request.get_json())
+    order = PlatformHwId.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
         return log_and_respond(404, f"Car with id={order.car_id} does not exist.")
     else:
-        db_model = db_models.order_to_db_model(order)
+        db_model = db_models.platform_to_db_model(order)
         response = db_access.add_record(db_models .OrderDBModel, db_model)
         if response.status_code == 200:
             return log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
@@ -54,8 +54,8 @@ def get_orders() -> ConnexionResponse:
 
 def update_order(order) -> ConnexionResponse:
     if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())
-        order_db_model = db_models.order_to_db_model(order)
+        order = PlatformHwId.from_dict(connexion.request.get_json())
+        order_db_model = db_models.platform_to_db_model(order)
         response = db_access.update_record(id_name="id", id_value=order.id, updated_obj=order_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
