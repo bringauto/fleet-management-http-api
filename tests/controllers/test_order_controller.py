@@ -5,7 +5,7 @@ from fleet_management_api.models import Order, Car, MobilePhone
 from fleet_management_api.app import get_app
 
 
-class Test_Sending_And_Retrieving_Order(unittest.TestCase):
+class Test_Sending_And_Order(unittest.TestCase):
 
     def setUp(self) -> None:
         connection.set_connection_source()
