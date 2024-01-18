@@ -116,5 +116,36 @@ class Test_Deleting_Route(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
 
+class Test_Updating_Route(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+        self.app = get_app().app
+        self.route = Route(id=78, name="test_route_1")
+        with self.app.test_client() as c:
+            c.post('/v1/route', json=self.route.to_dict())
+
+    def test_updating_existing_route(self):
+        updated_route = Route(id=78, name="better_name")
+        with self.app.test_client() as c:
+            response = c.put('/v1/route', json=updated_route.to_dict())
+            self.assertEqual(response.status_code, 200)
+
+            response = c.get('/v1/route/78')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["name"], "better_name")
+
+    def test_updating_nonexistent_route_yields_code_404(self):
+        updated_route = Route(id=999, name="better_name")
+        with self.app.test_client() as c:
+            response = c.put('/v1/route', json=updated_route.to_dict())
+            self.assertEqual(response.status_code, 404)
+
+    def test_updating_existing_route_with_incomplete_data_yields_code_400(self):
+        with self.app.test_client() as c:
+            response = c.put('/v1/route', json={"id": 78})
+            self.assertEqual(response.status_code, 400)
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverages

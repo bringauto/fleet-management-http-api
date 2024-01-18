@@ -42,7 +42,7 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
             db_access.add_record(base_type, db_obj)
 
 
-class Test_Updating_Existing_Records(unittest.TestCase):
+class Test_Updating_Records(unittest.TestCase):
 
     def setUp(self) -> None:
         connection.set_test_connection_source()
