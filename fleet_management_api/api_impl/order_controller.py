@@ -45,25 +45,33 @@ def get_order(order_id: int) -> ConnexionResponse:
         return ConnexionResponse(body=orders[0], status_code=200)
 
 
-def get_orders() -> List[Order]:
+def get_orders() -> ConnexionResponse:
     log_info("Listing all existing orders")
-    return [order_from_db_model(order_db_model) for order_db_model in db_access.get_records(OrderDBModel)]
+    return ConnexionResponse(
+        content_type="application/json",
+        body=[order_from_db_model(order_db_model) for order_db_model in db_access.get_records(OrderDBModel)],
+        status_code=200
+    )
 
 
-def update_order(order) -> Tuple[Order|None, int]:
+def update_order(order) -> ConnexionResponse:
     if connexion.request.is_json:
         order = Order.from_dict(connexion.request.get_json())
         order_db_model = order_to_db_model(order)
         response = db_access.update_record(id_name="id", id_value=order.id, updated_obj=order_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
-            return order, response.status_code
+            return ConnexionResponse(status_code=200, content_type="application/json", body=order)
+        elif response.status_code == 404:
+            log_error(f"Order (id={order.id}) was not found and could not be updated. {response.body}")
+            return ConnexionResponse(status_code=404, content_type="application/json", body=order)
         else:
             log_error(f"Order (id={order.id}) could not be updated. {response.body}")
-            return order, response.status_code
+            return ConnexionResponse(status_code=400, content_type="application/json", body=order)
     else:
-        log_error(f"Invalid request format: {connexion.request.data}. JSON is required.")
-        return None, 400
+        msg = f"Invalid request format: {connexion.request.data}. JSON is required."
+        log_error(msg)
+        return ConnexionResponse(status_code=400, content_type="text/plain", body=msg)
 
 
 def _car_exist(car_id: int) -> bool:
