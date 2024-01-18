@@ -49,6 +49,22 @@ class Test_Sending_And_Retrieving_Order(unittest.TestCase):
             response = c.post('/v1/order', json=incomplete_order_dict)
             self.assertEqual(response.status_code, 400)
 
+    def test_repeated_sending_of_order_with_identical_id_yields_code_400(self):
+        order_id = 78
+        order = Order(
+            id=order_id,
+            user_id=789,
+            car_id=12,
+            target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        with self.app.test_client() as c:
+            response = c.post('/v1/order', json=order.to_dict())
+            self.assertEqual(response.status_code, 200)
+            response = c.post('/v1/order', json=order.to_dict())
+            self.assertEqual(response.status_code, 400)
+
 
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

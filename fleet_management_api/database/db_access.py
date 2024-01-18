@@ -21,7 +21,7 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
             conn.execute(stmt, data_list)
             return ConnexionResponse(status_code=200, content_type="string", body="Succesfully added record to database")
         except sqaexc.IntegrityError as e:
-            return ConnexionResponse(status_code=400, content_type="string", body=str(e.orig))
+            return ConnexionResponse(status_code=400, content_type="string", body=f"Nothing added to the database. {e.orig}")
 
 
 def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> ConnexionResponse:

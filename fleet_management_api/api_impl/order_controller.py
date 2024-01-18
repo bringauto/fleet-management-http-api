@@ -21,7 +21,7 @@ def create_order(order):
             code, msg = 200, f"Order (id={order.id}) has been created and sent."
             log_info(msg)
         else:
-            code, msg = response.status_code, "Error when sending order: {response.body}."
+            code, msg = response.status_code, f"Error when sending order. {response.body}."
             log_error(msg)
     else:
         code, msg = 404, f"Car with id={order.car_id} does not exist"
