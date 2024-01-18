@@ -86,6 +86,7 @@ fleetman_http_api/test/*
 *.pyc
 __pycache__
 .coverage
+/htmlcov
 
 /restart.sh
 /*.db
