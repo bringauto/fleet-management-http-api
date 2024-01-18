@@ -1102,7 +1102,7 @@ paths:
       tags:
       - platformHwId
       x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
-  /platformhwid/{platformhwidId}:
+  /platformhwid/{platformhwid_id}:
     delete:
       operationId: delete_hw_id
       parameters:
@@ -1110,7 +1110,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: platformhwidId
+        name: platformhwid_id
         required: true
         schema:
           format: int32
@@ -1188,7 +1188,7 @@ paths:
       summary: Delete a platform hwId
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
     get:
       operationId: get_hw_id
       parameters:
@@ -1196,7 +1196,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: platformhwidId
+        name: platformhwid_id
         required: true
         schema:
           format: int32
@@ -1267,7 +1267,7 @@ paths:
       summary: Finds platform hwId by ID
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.platform_hwid_controller
   /route:
     get:
       operationId: get_routes
