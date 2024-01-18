@@ -6,23 +6,23 @@ from connexion.lifecycle import ConnexionResponse
 from fleet_management_api.models.order import Order
 from fleet_management_api.api_impl.db_models import OrderDBModel, CarDBModel, order_to_db_model, order_from_db_model
 import fleet_management_api.database.db_access as db_access
-from fleet_management_api.api_impl.api_logging import log_error, log_info
+from fleet_management_api.api_impl.api_logging import log_error, log_info, log_and_respond
 
 
 def create_order(order) -> ConnexionResponse:
     if not connexion.request.is_json:
-        return _log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+        return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
     order = Order.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
-        return _log_and_respond(404, f"Car with id={order.car_id} does not exist.")
+        return log_and_respond(404, f"Car with id={order.car_id} does not exist.")
     else:
         db_model = order_to_db_model(order)
         response = db_access.add_record(OrderDBModel, db_model)
         if response.status_code == 200:
-            return _log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
+            return log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:
-            return _log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
+            return log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
 def get_order(order_id) -> ConnexionResponse:
@@ -57,10 +57,3 @@ def update_order(order) -> Tuple[Order|None, int]:
 def _car_exist(car_id: int) -> bool:
     return bool(db_access.get_records(CarDBModel, equal_to={'id': car_id}))
 
-
-def _log_and_respond(code: int, msg: str) -> ConnexionResponse:
-    if 200 <= code < 300:
-        log_info(msg)
-    else:
-        log_error(msg)
-    return ConnexionResponse(status_code=code, content_type="text/plain", body=msg)
