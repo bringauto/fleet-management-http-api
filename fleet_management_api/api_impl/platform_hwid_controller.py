@@ -1,3 +1,5 @@
+from typing import List
+
 import connexion
 from connexion.lifecycle import ConnexionResponse
 
@@ -6,10 +8,6 @@ from fleet_management_api.models import PlatformHwId
 import fleet_management_api.api_impl.db_models as db_models
 import fleet_management_api.database.db_access as db_access
 from fleet_management_api.database.db_models import PlatformHwIdDBModel
-
-
-def get_hw_ids() -> ConnexionResponse:
-    return ConnexionResponse(body="not implemented", status_code=501, content_type="text/plain")
 
 
 def create_hw_id(platform_hw_id) -> ConnexionResponse:
@@ -26,3 +24,9 @@ def create_hw_id(platform_hw_id) -> ConnexionResponse:
             return log_and_respond(response.status_code, response.body)
     else:
         return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+
+
+def get_hw_ids() -> ConnexionResponse:
+    hw_id_moodels = db_access.get_records(PlatformHwIdDBModel)
+    platform_hw_ids: List[PlatformHwId] = [db_models.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
+    return ConnexionResponse(body=platform_hw_ids, status_code=200, content_type="application/json")

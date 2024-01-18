@@ -43,5 +43,31 @@ class Test_Creating_Platform_HW_Id(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Retrieving_Platform_HW_Id(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+        self.app = get_app().app
+
+    def test_retrieving_existing_platform_hw_ids(self):
+        platform_hw_id_1 = PlatformHwId(id=1, name="test_platform_1")
+        platform_hw_id_2 = PlatformHwId(id=2, name="test_platform_2")
+        with self.app.test_client() as c:
+            response = c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_2.to_dict())
+
+            response = c.get('/v1/platformhwid')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+
+    def test_retrieving_platform_hw_ids_when_no_hw_id_exists_yields_empty_list(self):
+        # no platform hw id has been sent to the database
+        with self.app.test_client() as c:
+            response = c.get('/v1/platformhwid')
+            self.assertEqual(response.status_code, 200)
+            self.assertListEqual(response.json, [])
+
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverages
