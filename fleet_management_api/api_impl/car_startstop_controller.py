@@ -1,9 +1,9 @@
 from connexion.lifecycle import ConnexionResponse
 
 from fleet_management_api.models import Car
-from fleet_management_api.api_impl.db_models import CarDBModel
 import fleet_management_api.database.db_access as db_access
 import fleet_management_api.api_impl.db_models as db_models
+from fleet_management_api.database.db_models import CarDBModel
 
 
 def startstop_car(car_id):  # noqa: E501

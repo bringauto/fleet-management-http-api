@@ -137,7 +137,7 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         self.assertEqual(order_out, order_in)
 
 
-class Test_Creating_Platform_HW_Id(unittest.TestCase):
+class Test_Creating_Platform_HW_Id_DB_Model(unittest.TestCase):
 
     def test_creating_db_model_from_paltform_hw_id_preserves_attribute_values(self):
         platform_hwid = PlatformHwId(id=1, name="test_platform")
@@ -151,6 +151,8 @@ class Test_Creating_Platform_HW_Id(unittest.TestCase):
             db_models.platform_hw_id_to_db_model(platform_hwid_in)
         )
         self.assertEqual(platform_hwid_out, platform_hwid_in)
+
+
 
 
 if __name__=="__main__":
