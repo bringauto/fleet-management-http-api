@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Type
+from typing import Any, Dict, Optional, List, Type, Set
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
@@ -7,6 +7,9 @@ from connexion.lifecycle import ConnexionResponse
 
 from fleet_management_api.database.db_models import Base
 from fleet_management_api.database.connection import current_connection_source
+
+
+DATABASE_RECORD_ID_NAME = "id"
 
 
 def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
@@ -52,18 +55,25 @@ def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> 
         return [row[0] for row in result]
 
 
-def update_record(id_name: str, id_value: Any, updated_obj: Base) -> ConnexionResponse:
+def update_record(updated_obj: Base) -> ConnexionResponse:
+    """Updates record in the database.
+
+    All the passed updated objects should be instances of the same Base.
+
+    If record with given id does not exist, returns 404.
+    """
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     with current_connection_source().begin() as conn:
-        id_match = getattr(table.columns,id_name) == id_value
+        id = updated_obj.__dict__[DATABASE_RECORD_ID_NAME]
+        id_match = getattr(table.columns, DATABASE_RECORD_ID_NAME) == id
         stmt = update(table).where(id_match).values(dict_data)
         try:
             result = conn.execute(stmt)
             n_of_updated_items = result.rowcount
             if n_of_updated_items == 0:
                 code = 404
-                msg = f"Object with {id_name}={id_value} was not found in table {updated_obj.__tablename__} in the database. " \
+                msg = f"Object with {DATABASE_RECORD_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. " \
                     "Nothing to update."
             else:
                 code, msg = 200, "Succesfully updated record"

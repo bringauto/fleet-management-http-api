@@ -64,7 +64,7 @@ def update_order(order) -> ConnexionResponse:
     if connexion.request.is_json:
         order = Order.from_dict(connexion.request.get_json())
         order_db_model = obj_to_db.order_to_db_model(order)
-        response = db_access.update_record(id_name="id", id_value=order.id, updated_obj=order_db_model)
+        response = db_access.update_record(updated_obj=order_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
             return ConnexionResponse(status_code=200, content_type="application/json", body=order)

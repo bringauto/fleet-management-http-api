@@ -52,7 +52,7 @@ class Test_Updating_Existing_Records(unittest.TestCase):
         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
         db_access.add_record(models.TestBase, test_obj)
         updated_obj = models.TestBase(id=7, test_str='updated_test_string', test_int=6)
-        db_access.update_record(id_name="id", id_value=7, updated_obj=updated_obj)
+        db_access.update_record(updated_obj=updated_obj)
         retrieved_obj = db_access.get_records(models.TestBase, equal_to={'id':7})[0]
         self.assertEqual(updated_obj, retrieved_obj)
 
@@ -60,7 +60,7 @@ class Test_Updating_Existing_Records(unittest.TestCase):
         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
         db_access.add_record(models.TestBase, test_obj)
         updated_obj = models.TestBase(id=8, test_str='updated_test_string', test_int=6)
-        response = db_access.update_record(id_name="id", id_value=8, updated_obj=updated_obj)
+        response = db_access.update_record(updated_obj=updated_obj)
         self.assertEqual(response.status_code, 404)
 
 

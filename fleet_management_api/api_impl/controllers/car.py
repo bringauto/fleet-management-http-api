@@ -55,7 +55,7 @@ def update_car(car) -> ConnexionResponse:
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = obj_to_db.car_to_db_model(car)
-        response = db_access.update_record(id_name="id", id_value=car.id, updated_obj=car_db_model)
+        response = db_access.update_record(updated_obj=car_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Car (id={car.id} has been suchas been succesfully updated")
             return ConnexionResponse(body=f"Car (id='{car.id}') has been succesfully updated", status_code=200)
