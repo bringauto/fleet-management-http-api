@@ -47,6 +47,10 @@ def get_order(order_id: int) -> ConnexionResponse:
 
 
 def get_updated_orders(car_id: int) -> ConnexionResponse:
+    """ Returns all orders for a given car that have been updated since their were last requested.
+
+    After the order have been returned from the API, they are not longer considered updated.
+    """
     if not _car_exist(car_id):
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
 
