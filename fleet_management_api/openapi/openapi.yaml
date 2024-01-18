@@ -1282,7 +1282,7 @@ paths:
                 - latitude: 49.204117
                   longitude: 16.606525
                   altitude: 400.25
-                stopIds:
+                stop_ids:
                 - 1
                 - 2
                 - 3
@@ -2622,12 +2622,12 @@ components:
     Route:
       description: Route object structure
       example:
-        name: Lužánky
-        stopIds:
+        stop_ids:
         - 1
         - 2
         - 3
         - 4
+        name: Lužánky
         id: 1
         points:
         - latitude: 49.204117
@@ -2653,7 +2653,8 @@ components:
             $ref: '#/components/schemas/GNSSPosition'
           title: points
           type: array
-        stopIds:
+        stop_ids:
+          default: []
           example:
           - 1
           - 2
@@ -2661,7 +2662,7 @@ components:
           - 4
           items:
             type: integer
-          title: stopIds
+          title: stop_ids
           type: array
       required:
       - id

@@ -14,7 +14,7 @@ class Route(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, points=[], stop_ids=None):  # noqa: E501
+    def __init__(self, id=None, name=None, points=[], stop_ids=[]):  # noqa: E501
         """Route - a model defined in OpenAPI
 
         :param id: The id of this Route.  # noqa: E501
@@ -37,7 +37,7 @@ class Route(Model):
             'id': 'id',
             'name': 'name',
             'points': 'points',
-            'stop_ids': 'stopIds'
+            'stop_ids': 'stop_ids'
         }
 
         self._id = id

@@ -72,12 +72,26 @@ class Test_Getting_Single_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_test_connection_source()
         self.app = get_app().app
+        self.route_1 = Route(id=78, name="test_route_1")
+        self.route_2 = Route(id=142, name="test_route_2")
+        with self.app.test_client() as c:
+            response = c.post('/v1/route', json=self.route_1.to_dict())
+            response = c.post('/v1/route', json=self.route_2.to_dict())
 
-    def test_getting_single_existing_Route(self):
-        pass
+    def test_retrieving_existing_route(self):
+        with self.app.test_client() as c:
+            response = c.get('/v1/route/78')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json, self.route_1.to_dict())
 
-    def test_retrieving_nonexistent_Route_yields_code_404(self):
-        pass
+            response = c.get('/v1/route/142')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json, self.route_2.to_dict())
+
+    def test_retrieving_nonexistent_route_yields_code_404(self):
+        with self.app.test_client() as c:
+            response = c.get('/v1/route/999')
+            self.assertEqual(response.status_code, 404)
 
 
 class Test_Deleting_Route(unittest.TestCase):

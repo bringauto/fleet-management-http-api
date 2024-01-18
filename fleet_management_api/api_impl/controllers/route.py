@@ -30,7 +30,13 @@ def delete_route(route_id: int) -> ConnexionResponse:
 
 
 def get_route(route_id: int) -> Route:
-    return ConnexionResponse(body="Not implemented", status_code=501, mimetype='text/plain')
+    route_db_models = db_access.get_records(RouteDBModel, equal_to={"id": route_id})
+    routes = [obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
+    if len(routes) == 0:
+        return log_and_respond(404, f"Route with id={route_id} was not found.")
+    else:
+        log_info(f"Found {len(routes)} route with id={route_id}")
+        return ConnexionResponse(body=routes[0], status_code=200, content_type="application/json")
 
 
 def get_routes() -> List[Route]:

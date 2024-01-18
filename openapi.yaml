@@ -610,7 +610,7 @@ paths:
                         "altitude": 400.25
                       }
                     ],
-                    "stopIds": [1, 2, 3, 4]
+                    "stop_ids": [1, 2, 3, 4]
                   }
                 ]
         '401':
@@ -1237,8 +1237,9 @@ components:
                 "altitude": 400.25
               }
             ]
-        stopIds:
+        stop_ids:
           type: array
+          default: []
           items:
             type: integer
           example: [1, 2, 3, 4]

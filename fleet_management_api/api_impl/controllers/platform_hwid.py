@@ -36,7 +36,7 @@ def get_hw_id(platformhwid_id: int) -> ConnexionResponse:
     hw_id_moodels = db_access.get_records(PlatformHwIdDBModel, equal_to={"id": platformhwid_id})
     platform_hw_ids = [obj_to_db.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     if len(platform_hw_ids) == 0:
-        return log_and_respond(404, f"Order with id={platformhwid_id} was not found.")
+        return log_and_respond(404, f"Platform HW Id  with id={platformhwid_id} was not found.")
     else:
         log_info(f"Found {len(platform_hw_ids)} platform HW Ids with id={platformhwid_id}")
         return ConnexionResponse(body=platform_hw_ids[0], status_code=200, content_type="application/json")
