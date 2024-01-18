@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Type, Set
+from typing import Any, Dict, Optional, List, Type
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
@@ -56,12 +56,6 @@ def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> 
 
 
 def update_record(updated_obj: Base) -> ConnexionResponse:
-    """Updates record in the database.
-
-    All the passed updated objects should be instances of the same Base.
-
-    If record with given id does not exist, returns 404.
-    """
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     with current_connection_source().begin() as conn:
