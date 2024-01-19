@@ -65,6 +65,12 @@ class Test_Cars(unittest.TestCase):
             response = c.post('/v1/car', json = car_2.to_dict(), content_type='application/json')
             self.assertEqual(response.status_code, 400)
 
+    def test_creating_car_using_invalid_json_returns_400_error_code(self):
+        app = get_app()
+        with app.app.test_client() as c:
+            response = c.post('/v1/car', json=7)
+            self.assertEqual(response.status_code, 400)
+
 
 class Test_Retrieving_Single_Car(unittest.TestCase):
 

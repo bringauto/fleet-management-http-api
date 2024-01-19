@@ -7,23 +7,22 @@ import fleet_management_api.api_impl.obj_to_db as obj_to_db
 from fleet_management_api.models import Car
 from fleet_management_api.database.db_models import CarDBModel
 import fleet_management_api.database.db_access as db_access
-from fleet_management_api.api_impl.api_logging import log_info, log_error
+from fleet_management_api.api_impl.api_logging import log_info, log_error, log_and_respond
 
 
 def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
-    if connexion.request.is_json:
-        car: Car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+    if not connexion.request.is_json:
+        return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+    else:
+        car = Car.from_dict(connexion.request.get_json())
         car_db_model = obj_to_db.car_to_db_model(car)
         response = db_access.add_record(CarDBModel, car_db_model)
         if response.status_code == 200:
-            log_info(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) has been created.")
-            return ConnexionResponse(body=f"Car with id='{car.id}' was succesfully created.", status_code=200)
+            return log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been sent.")
         elif response.status_code == 400:
-            log_error(f"Car (id={car.id}, name='{car.name}, platform_id={car.platform_id}) could not be created. {response.body}")
-            return response
-    else:
-        log_error(f"Invalid request format: {connexion.request.data}. JSON is required")
-        return ConnexionResponse(body='Invalid request format.', status_code=400)
+            return log_and_respond(response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}")
+        else:
+            return log_and_respond(response.status_code, response.body)
 
 
 def delete_car(car_id) -> ConnexionResponse:
