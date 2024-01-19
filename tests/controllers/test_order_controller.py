@@ -8,7 +8,7 @@ from fleet_management_api.app import get_app
 class Test_Sending_And_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -69,7 +69,7 @@ class Test_Sending_And_Order(unittest.TestCase):
 class Test_All_Retrieving_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -101,7 +101,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
     def setUp(self):
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -133,7 +133,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 class Test_Updating_Order(unittest.TestCase):
 
     def setUp(self):
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -176,7 +176,7 @@ class Test_Updating_Order(unittest.TestCase):
 class Test_Deleting_Order(unittest.TestCase):
 
     def setUp(self):
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -212,7 +212,7 @@ class Test_Deleting_Order(unittest.TestCase):
 class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_connection_source()
+        connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
