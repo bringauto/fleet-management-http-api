@@ -17,6 +17,8 @@ fleet_management_api/models/error.py
 fleet_management_api/models/gnss_position.py
 fleet_management_api/models/mobile_phone.py
 fleet_management_api/models/order.py
+fleet_management_api/models/order_state.py
+fleet_management_api/models/order_status.py
 fleet_management_api/models/platform_hw_id.py
 fleet_management_api/models/route.py
 fleet_management_api/models/stop.py

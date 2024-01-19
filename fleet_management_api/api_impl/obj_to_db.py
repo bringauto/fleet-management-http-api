@@ -5,6 +5,7 @@ from fleet_management_api.models import (
     GNSSPosition,
     PlatformHwId,
     Order,
+    OrderState,
     Route,
     Stop
 )
@@ -78,7 +79,6 @@ def order_to_db_model(order: Order) -> db_models.OrderDBModel:
         id=order.id,
         priority=order.priority,
         user_id=order.user_id,
-        status=order.status,
         car_id=order.car_id,
         target_stop_id=order.target_stop_id,
         stop_route_id=order.stop_route_id,
@@ -96,11 +96,26 @@ def order_from_db_model(order_db_model: db_models.OrderDBModel) -> Order:
         id=order_db_model.id,
         priority=order_db_model.priority,
         user_id=order_db_model.user_id,
-        status=order_db_model.status,
         car_id=order_db_model.car_id,
         target_stop_id=order_db_model.target_stop_id,
         stop_route_id=order_db_model.stop_route_id,
         notification_phone=notification_phone,
+    )
+
+
+def order_state_to_db_model(order_state: OrderState) -> db_models.OrderStateDBModel:
+    return db_models.OrderStateDBModel(
+        id=order_state.id,
+        status=order_state.status,
+        order_id=order_state.order_id
+    )
+
+
+def order_state_from_db_model(order_state_db_model: db_models.OrderStateDBModel) -> Order:
+    return OrderState(
+        id=order_state_db_model.id,
+        status=order_state_db_model.status,
+        order_id=order_state_db_model.order_id
     )
 
 
@@ -148,3 +163,4 @@ def stop_from_db_model(stop_db_model: db_models.StopDBModel) -> Stop:
         position=GNSSPosition.from_dict(stop_db_model.position),
         notification_phone=MobilePhone.from_dict(stop_db_model.notification_phone)
     )
+

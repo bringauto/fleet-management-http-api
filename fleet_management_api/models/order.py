@@ -16,7 +16,7 @@ class Order(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, priority='normal', user_id=None, status='to_accept', car_id=None, target_stop_id=None, stop_route_id=None, notification_phone=None):  # noqa: E501
+    def __init__(self, id=None, priority='normal', user_id=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None):  # noqa: E501
         """Order - a model defined in OpenAPI
 
         :param id: The id of this Order.  # noqa: E501
@@ -25,10 +25,10 @@ class Order(Model):
         :type priority: str
         :param user_id: The user_id of this Order.  # noqa: E501
         :type user_id: int
-        :param status: The status of this Order.  # noqa: E501
-        :type status: str
         :param car_id: The car_id of this Order.  # noqa: E501
         :type car_id: int
+        :param notification: The notification of this Order.  # noqa: E501
+        :type notification: str
         :param target_stop_id: The target_stop_id of this Order.  # noqa: E501
         :type target_stop_id: int
         :param stop_route_id: The stop_route_id of this Order.  # noqa: E501
@@ -40,8 +40,8 @@ class Order(Model):
             'id': int,
             'priority': str,
             'user_id': int,
-            'status': str,
             'car_id': int,
+            'notification': str,
             'target_stop_id': int,
             'stop_route_id': int,
             'notification_phone': MobilePhone
@@ -51,8 +51,8 @@ class Order(Model):
             'id': 'id',
             'priority': 'priority',
             'user_id': 'userId',
-            'status': 'status',
             'car_id': 'carId',
+            'notification': 'notification',
             'target_stop_id': 'targetStopId',
             'stop_route_id': 'stopRouteId',
             'notification_phone': 'notificationPhone'
@@ -61,8 +61,8 @@ class Order(Model):
         self._id = id
         self._priority = priority
         self._user_id = user_id
-        self._status = status
         self._car_id = car_id
+        self._notification = notification
         self._target_stop_id = target_stop_id
         self._stop_route_id = stop_route_id
         self._notification_phone = notification_phone
@@ -150,31 +150,6 @@ class Order(Model):
         self._user_id = user_id
 
     @property
-    def status(self) -> str:
-        """Gets the status of this Order.
-
-        OrderStatus (to_accept, accepted, in_progress, done, canceled)  # noqa: E501
-
-        :return: The status of this Order.
-        :rtype: str
-        """
-        return self._status
-
-    @status.setter
-    def status(self, status: str):
-        """Sets the status of this Order.
-
-        OrderStatus (to_accept, accepted, in_progress, done, canceled)  # noqa: E501
-
-        :param status: The status of this Order.
-        :type status: str
-        """
-        if status is not None and not re.search(r'^(to_accept|accepted|in_progress|done|canceled)$', status):  # noqa: E501
-            raise ValueError("Invalid value for `status`, must be a follow pattern or equal to `/^(to_accept|accepted|in_progress|done|canceled)$/`")  # noqa: E501
-
-        self._status = status
-
-    @property
     def car_id(self) -> int:
         """Gets the car_id of this Order.
 
@@ -196,6 +171,27 @@ class Order(Model):
             raise ValueError("Invalid value for `car_id`, must not be `None`")  # noqa: E501
 
         self._car_id = car_id
+
+    @property
+    def notification(self) -> str:
+        """Gets the notification of this Order.
+
+
+        :return: The notification of this Order.
+        :rtype: str
+        """
+        return self._notification
+
+    @notification.setter
+    def notification(self, notification: str):
+        """Sets the notification of this Order.
+
+
+        :param notification: The notification of this Order.
+        :type notification: str
+        """
+
+        self._notification = notification
 
     @property
     def target_stop_id(self) -> int:

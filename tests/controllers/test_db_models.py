@@ -7,6 +7,7 @@ from fleet_management_api.models import (
     CarState,
     GNSSPosition,
     Order,
+    OrderState,
     PlatformHwId,
     Route,
     Stop
@@ -92,7 +93,6 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         self.assertEqual(order_db_model.id, order.id)
         self.assertEqual(order_db_model.priority, order.priority)
         self.assertEqual(order_db_model.user_id, order.user_id)
-        self.assertEqual(order_db_model.status, order.status)
         self.assertEqual(order_db_model.car_id, order.car_id)
         self.assertEqual(order_db_model.target_stop_id, order.target_stop_id)
         self.assertEqual(order_db_model.stop_route_id, order.stop_route_id)
@@ -104,7 +104,6 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
             priority="normal",
             user_id=789,
             car_id=12,
-            status="in_progress",
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
@@ -113,7 +112,6 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         self.assertEqual(order_db_model.id, order.id)
         self.assertEqual(order_db_model.priority, order.priority)
         self.assertEqual(order_db_model.user_id, order.user_id)
-        self.assertEqual(order_db_model.status, order.status)
         self.assertEqual(order_db_model.car_id, order.car_id)
         self.assertEqual(order_db_model.target_stop_id, order.target_stop_id)
         self.assertEqual(order_db_model.stop_route_id, order.stop_route_id)
@@ -130,7 +128,6 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
             priority="high",
             user_id=789,
             car_id=12,
-            status="in_progress",
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
@@ -193,6 +190,21 @@ class Test_Creating_StopDBModel(unittest.TestCase):
         )
         stop_out = obj_to_db.stop_from_db_model(obj_to_db.stop_to_db_model(stop_in))
         self.assertEqual(stop_out, stop_in)
+
+
+class Test_Creating_OrderStateDBModel(unittest.TestCase):
+
+    def test_creating_db_model_from_order_state_preserves_attribute_values(self):
+        order_state = OrderState(id=1, status="to_accept", order_id=1)
+        order_state_db_model = obj_to_db.order_state_to_db_model(order_state)
+        self.assertEqual(order_state_db_model.id, order_state.id)
+        self.assertEqual(order_state_db_model.status, order_state.status)
+        self.assertEqual(order_state_db_model.order_id, order_state.order_id)
+
+    def test_order_state_converted_to_db_model_and_back_preserves_its_attributes(self):
+        order_state_in = OrderState(id=1, status="to_accept", order_id=1)
+        order_state_out = obj_to_db.order_state_from_db_model(obj_to_db.order_state_to_db_model(order_state_in))
+        self.assertEqual(order_state_out, order_state_in)
 
 
 if __name__=="__main__":

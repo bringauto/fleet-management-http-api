@@ -985,6 +985,214 @@ paths:
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+  /orderstate:
+    get:
+      operationId: get_all_order_states
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                orderId: 1
+                status: to_accept
+                carId: 1
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
+          description: Successfuly found all order states
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds all order states
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+    post:
+      operationId: create_order_state
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderState'
+        description: New order state json
+        required: true
+        x-body-name: orderState
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+          description: Succesfully added new order state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new order state
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+  /orderstate/{orderId}:
+    get:
+      operationId: get_order_states
+      parameters:
+      - description: ID of order for which states shall be returned
+        example: 1
+        explode: false
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Whether to return all available states or only the latest one
+        example: true
+        explode: true
+        in: query
+        name: allAvailable
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+          description: Successfuly found order state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds order state by ID
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
   /platformhwid:
     get:
       operationId: get_hw_ids
@@ -2188,6 +2396,7 @@ components:
     Order:
       description: Order object structure
       example:
+        notification: Order notification
         stopRouteId: 1
         notificationPhone:
           phone: "+420123456789"
@@ -2195,7 +2404,6 @@ components:
         id: 1
         priority: normal
         userId: 1
-        status: to_accept
         carId: 1
       properties:
         id:
@@ -2214,17 +2422,15 @@ components:
           format: int32
           title: userId
           type: integer
-        status:
-          default: to_accept
-          description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
-          pattern: ^(to_accept|accepted|in_progress|done|canceled)$
-          title: status
-          type: string
         carId:
           example: 1
           format: int32
           title: carId
           type: integer
+        notification:
+          example: Order notification
+          title: notification
+          type: string
         targetStopId:
           example: 1
           format: int32
@@ -2244,6 +2450,31 @@ components:
       - targetStopId
       - userId
       title: Order
+      type: object
+    OrderState:
+      description: Order state object structure
+      example:
+        orderId: 1
+        id: 1
+        status: to_accept
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        orderId:
+          example: 1
+          format: int32
+          title: orderId
+          type: integer
+      required:
+      - id
+      - orderId
+      - status
+      title: OrderState
       type: object
     PlatformHwId:
       description: PlatformHwId object structure
@@ -2394,15 +2625,20 @@ components:
           type: string
       title: MobilePhone
       type: object
+    OrderStatus:
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+      enum:
+      - to_accept
+      - accepted
+      - in_progress
+      - done
+      - canceled
+      example: to_accept
+      title: OrderStatus
+      type: string
     Priority:
       default: normal
       description: "Priority (low, normal, high)"
       pattern: ^(low|normal|high)$
       title: priority
-      type: string
-    OrderStatus:
-      default: to_accept
-      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
-      pattern: ^(to_accept|accepted|in_progress|done|canceled)$
-      title: status
       type: string

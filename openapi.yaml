@@ -433,6 +433,106 @@ paths:
           $ref: '#/components/responses/RequestTimeout'
         default:
           $ref: '#/components/responses/UnexpectedError'
+  /orderstate:
+    post:
+      operationId: createOrderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+      tags:
+        - order
+      summary: Create a new order state
+      requestBody:
+        description: New order state json
+        x-body-name: orderState
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderState'
+        required: true
+      responses:
+        '200':
+          description: Succesfully added new order state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+    get:
+      operationId: getAllOrderStates
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+      tags:
+        - order
+      summary: Finds all order states
+      responses:
+        '200':
+          description: Successfuly found all order states
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderState'
+              example:
+                [
+                  {
+                    "id": 1,
+                    "orderId": 1,
+                    "status": "to_accept",
+                    "carId": 1
+                  }
+                ]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+  /orderstate/{orderId}:
+    get:
+      operationId: getOrderStates
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+      tags:
+        - order
+      summary: Finds order state by ID
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of order for which states shall be returned
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+        - name: allAvailable
+          in: query
+          description: Whether to return all available states or only the latest one
+          required: false
+          example: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successfuly found order state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
   /platformhwid:
     post:
       operationId: createHwId
@@ -1044,12 +1144,13 @@ components:
           type: integer
           format: int32
           example: 1
-        status:
-          $ref: "#/components/schemas/OrderStatus"
         carId:
           type: integer
           format: int32
           example: 1
+        notification:
+          type: string
+          example: 'Order notification'
         targetStopId:
           type: integer
           format: int32
@@ -1060,6 +1161,24 @@ components:
           example: 1
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
+    OrderState:
+      type: object
+      description: Order state object structure
+      required:
+        - id
+        - status
+        - orderId
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        orderId:
+          type: integer
+          format: int32
+          example: 1
     PlatformHwId:
       type: object
       description: PlatformHwId object structure
@@ -1161,6 +1280,16 @@ components:
         phone:
           type: string
           example: '+420123456789'
+    OrderStatus:
+      type: string
+      description: OrderStatus (to_accept, accepted, in_progress, done, canceled)
+      enum:
+        - to_accept
+        - accepted
+        - in_progress
+        - done
+        - canceled
+      example: to_accept
 
     # OpenAPI Generator IGNORES default value when using enum. Using pattern matching instead.
     # The pattern is checked ONLY when the value is passed to the API, not when any of the objects below is created.
@@ -1169,9 +1298,3 @@ components:
       description: Priority (low, normal, high)
       pattern: ^(low|normal|high)$
       default: "normal"
-    OrderStatus:
-      type: string
-      description: OrderStatus (to_accept, accepted, in_progress, done, canceled)
-      pattern: ^(to_accept|accepted|in_progress|done|canceled)$
-      default: "to_accept"
-

@@ -38,7 +38,6 @@ class OrderDBModel(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     priority: Mapped[str] = Column(String)
     user_id: Mapped[int] = Column(Integer)
-    status: Mapped[str] = Column(String)
     car_id: Mapped[int] = Column(Integer)
     target_stop_id: Mapped[int] = Column(Integer)
     stop_route_id: Mapped[int] = Column(Integer)
@@ -67,3 +66,11 @@ class StopDBModel(Base):
     name: Mapped[str] = Column(String, unique=True)
     position: Mapped[dict] = mapped_column(JSON)
     notification_phone: Mapped[dict] = mapped_column(JSON)
+
+
+@dataclasses.dataclass
+class OrderStateDBModel(Base):
+    __tablename__ = 'order_states'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    status: Mapped[str] = Column(String)
+    order_id: Mapped[int] = Column(Integer)
