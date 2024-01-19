@@ -240,6 +240,66 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/UnexpectedError'
+    get:
+      operationId: getAllCarStates
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+      tags:
+        - carState
+      summary: Finds all car states
+      responses:
+        '200':
+          description: Successfuly found all car states
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+
+  /carstate/{carId}:
+    get:
+      operationId: getCarStates
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+      tags:
+        - carState
+      summary: Finds car states by ID
+      parameters:
+        - name: carId
+          in: path
+          description: ID of car for which states shall be returned
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+        - name: allAvailable
+          in: query
+          description: Whether to return all available car states or only the latest one
+          required: false
+          example: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successfuly found car state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
   /order:
     post:
       operationId: createOrder
@@ -513,7 +573,7 @@ paths:
             format: int32
         - name: allAvailable
           in: query
-          description: Whether to return all available states or only the latest one
+          description: Whether to return all available order states or only the latest one
           required: false
           example: true
           schema:

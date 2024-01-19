@@ -463,6 +463,54 @@ paths:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
   /carstate:
+    get:
+      operationId: get_all_car_states
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
+          description: Successfuly found all car states
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds all car states
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
       operationId: add_car_state
       requestBody:
@@ -525,6 +573,85 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
       summary: Add a new state for a car by ID
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+  /carstate/{carId}:
+    get:
+      operationId: get_car_states
+      parameters:
+      - description: ID of car for which states shall be returned
+        example: 1
+        explode: false
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - description: Whether to return all available car states or only the latest
+          one
+        example: true
+        explode: true
+        in: query
+        name: allAvailable
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarState'
+          description: Successfuly found car state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds car states by ID
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -1129,7 +1256,8 @@ paths:
           format: int32
           type: integer
         style: simple
-      - description: Whether to return all available states or only the latest one
+      - description: Whether to return all available order states or only the latest
+          one
         example: true
         explode: true
         in: query

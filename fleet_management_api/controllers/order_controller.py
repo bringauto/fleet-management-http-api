@@ -83,7 +83,7 @@ def get_order_states(order_id, all_available=None):  # noqa: E501
 
     :param order_id: ID of order for which states shall be returned
     :type order_id: int
-    :param all_available: Whether to return all available states or only the latest one
+    :param all_available: Whether to return all available order states or only the latest one
     :type all_available: bool
 
     :rtype: Union[OrderState, Tuple[OrderState, int], Tuple[OrderState, int, Dict[str, str]]
