@@ -47,7 +47,7 @@ def get_route(route_id: int) -> Route:
 
 def get_routes() -> List[Route]:
     route_db_models = db_access.get_records(RouteDBModel)
-    route: List[Route] = [obj_to_db.platform_hw_id_from_db_model(route_db_model) for route_db_model in route_db_models]
+    route: List[Route] = [obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     return ConnexionResponse(body=route, status_code=200, content_type="application/json")
 
 

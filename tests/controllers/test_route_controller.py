@@ -43,7 +43,7 @@ class Test_Creating_Route(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
-class Test_Retrieving_Route(unittest.TestCase):
+class Test_Getting_All_Routes(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
