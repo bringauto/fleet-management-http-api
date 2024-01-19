@@ -3,7 +3,7 @@ import unittest
 from flask import json
 
 from fleet_management_api.models.error import Error  # noqa: E501
-from fleet_management_api.models.order import PlatformHwId  # noqa: E501
+from fleet_management_api.models.order import Order  # noqa: E501
 from fleet_management_api.test import BaseTestCase
 
 
@@ -15,8 +15,8 @@ class TestOrderController(BaseTestCase):
 
         Create a new order
         """
-        order = {"stopRouteId":1,"notificationPhone":{"phone":"+420123456789"},"targetStopId":1,"id":1,"userId":1,"carId":1}
-        headers = {
+        order = {"stop_route_id":1,"user_id":1,"target_stop_id":1,"id":1,"priority":"normal","car_id":1,"notification_phone":{"phone":"+420123456789"},"status":"to_accept"}
+        headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
@@ -34,7 +34,7 @@ class TestOrderController(BaseTestCase):
 
         Delete an order
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -49,26 +49,11 @@ class TestOrderController(BaseTestCase):
 
         Finds order by ID
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/v1/order/{order_id}'.format(order_id=1),
-            method='GET',
-            headers=headers)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    def test_get_order_wait(self):
-        """Test case for get_order_wait
-
-        Get order by car ID only if it changed
-        """
-        headers = {
-            'Accept': 'application/json',
-        }
-        response = self.client.open(
-            '/v1/order/wait/{car_id}'.format(car_id=1),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -79,11 +64,26 @@ class TestOrderController(BaseTestCase):
 
         Finds all orders
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
             '/v1/order',
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_get_updated_orders(self):
+        """Test case for get_updated_orders
+
+        Get order by car ID only if it changed
+        """
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/order/wait/{car_id}'.format(car_id=1),
             method='GET',
             headers=headers)
         self.assert200(response,
@@ -94,8 +94,8 @@ class TestOrderController(BaseTestCase):
 
         Update an existing order by ID
         """
-        order = {"stopRouteId":1,"notificationPhone":{"phone":"+420123456789"},"targetStopId":1,"id":1,"userId":1,"carId":1}
-        headers = {
+        order = {"stop_route_id":1,"user_id":1,"target_stop_id":1,"id":1,"priority":"normal","car_id":1,"notification_phone":{"phone":"+420123456789"},"status":"to_accept"}
+        headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }

@@ -3,7 +3,7 @@ import unittest
 from flask import json
 
 from fleet_management_api.models.error import Error  # noqa: E501
-from fleet_management_api.models.platform_hw_id import Order  # noqa: E501
+from fleet_management_api.models.platform_hw_id import PlatformHwId  # noqa: E501
 from fleet_management_api.test import BaseTestCase
 
 
@@ -16,7 +16,7 @@ class TestPlatformHwIdController(BaseTestCase):
         Create a new platform hwId
         """
         platform_hw_id = {"name":"ABCD1234EF56","id":1}
-        headers = {
+        headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         }
@@ -34,7 +34,7 @@ class TestPlatformHwIdController(BaseTestCase):
 
         Delete a platform hwId
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -49,7 +49,7 @@ class TestPlatformHwIdController(BaseTestCase):
 
         Finds platform hwId by ID
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(
@@ -64,7 +64,7 @@ class TestPlatformHwIdController(BaseTestCase):
 
         Finds all platform hwIds
         """
-        headers = {
+        headers = { 
             'Accept': 'application/json',
         }
         response = self.client.open(

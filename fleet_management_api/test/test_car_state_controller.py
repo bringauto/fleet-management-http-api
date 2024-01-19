@@ -15,7 +15,7 @@ class TestCarStateController(BaseTestCase):
 
         Add a new state for a car by ID
         """
-        car_state = {"fuel":80,"id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"speed":20.5,"carId":1}
+        car_state = {"fuel":80,"id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"car_id":1,"speed":20.5}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
