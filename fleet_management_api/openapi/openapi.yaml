@@ -1693,7 +1693,7 @@ paths:
       summary: Finds all stops
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     post:
       operationId: create_stop
       requestBody:
@@ -1703,6 +1703,7 @@ paths:
               $ref: '#/components/schemas/Stop'
         description: New stop json
         required: true
+        x-body-name: stop
       responses:
         "200":
           content:
@@ -1757,7 +1758,7 @@ paths:
       summary: Create a new stop
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     put:
       operationId: update_stop
       requestBody:
@@ -1767,6 +1768,7 @@ paths:
               $ref: '#/components/schemas/Stop'
         description: Stop update json
         required: true
+        x-body-name: stop
       responses:
         "200":
           content:
@@ -1832,8 +1834,8 @@ paths:
       summary: Update an existing stop by ID
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
-  /stop/{stopId}:
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+  /stop/{stop_id}:
     delete:
       operationId: delete_stop
       parameters:
@@ -1841,7 +1843,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: stopId
+        name: stop_id
         required: true
         schema:
           format: int32
@@ -1919,7 +1921,7 @@ paths:
       summary: Delete a stop
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     get:
       operationId: get_stop
       parameters:
@@ -1927,7 +1929,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: stopId
+        name: stop_id
         required: true
         schema:
           format: int32
@@ -1998,7 +2000,7 @@ paths:
       summary: Finds stop by ID
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
   /user:
     get:
       operationId: get_users

@@ -716,11 +716,13 @@ paths:
   /stop:
     post:
       operationId: createStop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
       summary: Create a new stop
       requestBody:
         description: New stop json
+        x-body-name: stop
         content:
           application/json:
             schema:
@@ -743,6 +745,7 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     get:
       operationId: getStops
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
       summary: Finds all stops
@@ -776,11 +779,13 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     put:
       operationId: updateStop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
       summary: Update an existing stop by ID
       requestBody:
         description: Stop update json
+        x-body-name: stop
         content:
           application/json:
             schema:
@@ -803,14 +808,15 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /stop/{stopId}:
+  /stop/{stop_id}:
     get:
       operationId: getStop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
       summary: Finds stop by ID
       parameters:
-        - name: stopId
+        - name: stop_id
           in: path
           description: ID of stop to return
           required: true
@@ -837,11 +843,12 @@ paths:
           $ref: '#/components/responses/UnexpectedError'
     delete:
       operationId: deleteStop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
       summary: Delete a stop
       parameters:
-        - name: stopId
+        - name: stop_id
           in: path
           description: ID of stop to delete
           required: true
