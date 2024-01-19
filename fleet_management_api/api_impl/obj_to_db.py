@@ -5,7 +5,8 @@ from fleet_management_api.models import (
     GNSSPosition,
     PlatformHwId,
     Order,
-    Route
+    Route,
+    Stop
 )
 import fleet_management_api.database.db_models as db_models
 
@@ -128,4 +129,22 @@ def route_from_db_model(route_db_model: db_models.RouteDBModel) -> Route:
     return Route(
         id=route_db_model.id,
         name=route_db_model.name
+    )
+
+
+def stop_to_db_model(stop: Stop) -> db_models.StopDBModel:
+    return db_models.StopDBModel(
+        id=stop.id,
+        name=stop.name,
+        position=stop.position.to_dict(),
+        notification_phone=stop.notification_phone.to_dict()
+    )
+
+
+def stop_from_db_model(stop_db_model: db_models.StopDBModel) -> Stop:
+    return Stop(
+        id=stop_db_model.id,
+        name=stop_db_model.name,
+        position=GNSSPosition.from_dict(stop_db_model.position),
+        notification_phone=MobilePhone.from_dict(stop_db_model.notification_phone)
     )

@@ -8,7 +8,8 @@ from fleet_management_api.models import (
     GNSSPosition,
     Order,
     PlatformHwId,
-    Route
+    Route,
+    Stop
 )
 
 
@@ -166,6 +167,32 @@ class Test_Creating_RouteDBModel(unittest.TestCase):
         route_in = Route(id=1, name="test_route")
         route_out = obj_to_db.route_from_db_model(obj_to_db.route_to_db_model(route_in))
         self.assertEqual(route_out, route_in)
+
+
+class Test_Creating_StopDBModel(unittest.TestCase):
+
+    def test_creating_db_model_from_stop_preserves_attribute_values(self):
+        stop = Stop(
+            id=1,
+            name="test_stop",
+            position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        stop_db_model = obj_to_db.stop_to_db_model(stop)
+        self.assertEqual(stop_db_model.id, stop.id)
+        self.assertEqual(stop_db_model.name, stop.name)
+        self.assertEqual(stop_db_model.position, stop.position.to_dict())
+        self.assertEqual(stop_db_model.notification_phone, stop.notification_phone.to_dict())
+
+    def test_stop_converted_to_db_model_and_back_preserves_its_attributes(self):
+        stop_in = Stop(
+            id=1,
+            name="test_stop",
+            position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        stop_out = obj_to_db.stop_from_db_model(obj_to_db.stop_to_db_model(stop_in))
+        self.assertEqual(stop_out, stop_in)
 
 
 if __name__=="__main__":

@@ -58,3 +58,12 @@ class RouteDBModel(Base):
     __tablename__ = 'routes'
     id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     name: Mapped[str] = Column(String, unique=True)
+
+
+@dataclasses.dataclass
+class StopDBModel(Base):
+    __tablename__ = 'stops'
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
+    name: Mapped[str] = Column(String, unique=True)
+    position: Mapped[dict] = mapped_column(JSON)
+    notification_phone: Mapped[dict] = mapped_column(JSON)
