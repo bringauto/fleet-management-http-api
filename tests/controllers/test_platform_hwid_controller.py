@@ -14,25 +14,25 @@ class Test_Creating_Platform_HW_Id(unittest.TestCase):
     def test_creating_platform_hw_id(self):
         platform_hw_id = PlatformHwId(id=5, name="test_platform")
         with self.app.test_client() as c:
-            response = c.post('/v1/platformhwid', json=platform_hw_id.to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id)
             self.assertEqual(response.status_code, 200)
 
     def test_creating_platform_hw_id_with_already_taken_id_returns_code_400(self):
         platform_hw_id_1 = PlatformHwId(id=1, name="test_platform_1")
         platform_hw_id_2 = PlatformHwId(id=1, name="test_platform_2")
         with self.app.test_client() as c:
-            response = c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_1)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/platformhwid', json=platform_hw_id_2 .to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_2)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_platform_hw_id_with_already_taken_name_returns_code_400(self):
         platform_hw_id_1 = PlatformHwId(id=1, name="test_platform")
         platform_hw_id_2 = PlatformHwId(id=516515, name="test_platform")
         with self.app.test_client() as c:
-            response = c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_1)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/platformhwid', json=platform_hw_id_2 .to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_2)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_platform_hw_id_with_missing_id_or_name_returns_code_400(self):
@@ -53,8 +53,8 @@ class Test_Retrieving_Platform_HW_Id(unittest.TestCase):
         platform_hw_id_1 = PlatformHwId(id=1, name="test_platform_1")
         platform_hw_id_2 = PlatformHwId(id=2, name="test_platform_2")
         with self.app.test_client() as c:
-            response = c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
-            response = c.post('/v1/platformhwid', json=platform_hw_id_2.to_dict())
+            response = c.post('/v1/platformhwid', json=platform_hw_id_1)
+            response = c.post('/v1/platformhwid', json=platform_hw_id_2)
             response = c.get('/v1/platformhwid')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -77,8 +77,8 @@ class Test_Getting_Single_Platform_HW_Id(unittest.TestCase):
         platform_hw_id_1 = PlatformHwId(id=15, name="test_platform_y")
         platform_hw_id_2 = PlatformHwId(id=24, name="test_platform_z")
         with self.app.test_client() as c:
-            c.post('/v1/platformhwid', json=platform_hw_id_1.to_dict())
-            c.post('/v1/platformhwid', json=platform_hw_id_2.to_dict())
+            c.post('/v1/platformhwid', json=platform_hw_id_1)
+            c.post('/v1/platformhwid', json=platform_hw_id_2)
 
             response = c.get('/v1/platformhwid/15')
             self.assertEqual(response.status_code, 200)
@@ -104,7 +104,7 @@ class Test_Deleting_Platform_HW_Id(unittest.TestCase):
     def test_deleting_an_existing_platform_hw_id(self):
         platform_hw_id = PlatformHwId(id=123, name="test_platform")
         with self.app.test_client() as c:
-            c.post('/v1/platformhwid', json=platform_hw_id.to_dict())
+            c.post('/v1/platformhwid', json=platform_hw_id)
             response = c.delete('/v1/platformhwid/123')
             self.assertEqual(response.status_code, 200)
 

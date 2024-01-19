@@ -31,7 +31,7 @@ paths:
             application/json:
               example:
               - id: 1
-                platform_id: 1
+                platformId: 1
                 name: BAT-2022-01
                 carAdminPhone:
                   phone: "+420123456789"
@@ -220,7 +220,7 @@ paths:
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
-  /car/startstop/{car_id}:
+  /car/startstop/{carId}:
     get:
       operationId: startstop_car
       parameters:
@@ -228,7 +228,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: car_id
+        name: carId
         required: true
         schema:
           format: int32
@@ -296,7 +296,7 @@ paths:
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
-  /car/{car_id}:
+  /car/{carId}:
     delete:
       operationId: delete_car
       parameters:
@@ -304,7 +304,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: car_id
+        name: carId
         required: true
         schema:
           format: int32
@@ -390,7 +390,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: car_id
+        name: carId
         required: true
         schema:
           format: int32
@@ -538,12 +538,12 @@ paths:
               example:
               - id: 1
                 priority: normal
-                user_id: 1
+                userId: 1
                 status: to_accept
-                car_id: 1
-                target_stop_id: 1
-                stop_route_id: 1
-                notification_phone:
+                carId: 1
+                targetStopId: 1
+                stopRouteId: 1
+                notificationPhone:
                   phone: "+420123456789"
               schema:
                 items:
@@ -728,7 +728,7 @@ paths:
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-  /order/wait/{car_id}:
+  /order/wait/{carId}:
     get:
       operationId: get_updated_orders
       parameters:
@@ -736,7 +736,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: car_id
+        name: carId
         required: true
         schema:
           format: int32
@@ -819,7 +819,7 @@ paths:
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-  /order/{order_id}:
+  /order/{orderId}:
     delete:
       operationId: delete_order
       parameters:
@@ -827,7 +827,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: order_id
+        name: orderId
         required: true
         schema:
           format: int32
@@ -913,7 +913,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: order_id
+        name: orderId
         required: true
         schema:
           format: int32
@@ -1102,7 +1102,7 @@ paths:
       tags:
       - platformHwId
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
-  /platformhwid/{platformhwid_id}:
+  /platformhwid/{platformhwidId}:
     delete:
       operationId: delete_hw_id
       parameters:
@@ -1110,7 +1110,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: platformhwid_id
+        name: platformhwidId
         required: true
         schema:
           format: int32
@@ -1196,7 +1196,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: platformhwid_id
+        name: platformhwidId
         required: true
         schema:
           format: int32
@@ -1282,7 +1282,7 @@ paths:
                 - latitude: 49.204117
                   longitude: 16.606525
                   altitude: 400.25
-                stop_ids:
+                stopIds:
                 - 1
                 - 2
                 - 3
@@ -1650,7 +1650,7 @@ paths:
                   latitude: 49.204117
                   longitude: 16.606525
                   altitude: 400.25
-                notification_phone:
+                notificationPhone:
                   phone: "+420123456789"
               schema:
                 items:
@@ -1835,7 +1835,7 @@ paths:
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
-  /stop/{stop_id}:
+  /stop/{stopId}:
     delete:
       operationId: delete_stop
       parameters:
@@ -1843,7 +1843,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: stop_id
+        name: stopId
         required: true
         schema:
           format: int32
@@ -1929,7 +1929,7 @@ paths:
         example: 1
         explode: false
         in: path
-        name: stop_id
+        name: stopId
         required: true
         schema:
           format: int32
@@ -2085,10 +2085,10 @@ components:
       description: Car object structure
       example:
         underTest: true
-        platform_id: 1
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
+        platformId: 1
         carAdminPhone:
           phone: "+420123456789"
       properties:
@@ -2097,10 +2097,10 @@ components:
           format: int32
           title: id
           type: integer
-        platform_id:
+        platformId:
           example: 1
           format: int32
-          title: platform_id
+          title: platformId
           type: integer
         name:
           example: BAT-2022-01
@@ -2120,7 +2120,7 @@ components:
       required:
       - id
       - name
-      - platform_id
+      - platformId
       title: Car
       type: object
     CarState:
@@ -2132,9 +2132,9 @@ components:
           altitude: 400.25
           latitude: 49.204117
           longitude: 16.606525
-        car_id: 1
         speed: 20.5
         status: null
+        carId: 1
       properties:
         id:
           example: 1
@@ -2148,10 +2148,10 @@ components:
           format: int32
           title: fuel
           type: integer
-        car_id:
+        carId:
           example: 1
           format: int32
-          title: car_id
+          title: carId
           type: integer
         speed:
           example: 20.5
@@ -2161,7 +2161,7 @@ components:
         position:
           $ref: '#/components/schemas/GNSSPosition'
       required:
-      - car_id
+      - carId
       - id
       - status
       title: CarState
@@ -2185,15 +2185,15 @@ components:
     Order:
       description: Order object structure
       example:
-        stop_route_id: 1
-        user_id: 1
-        target_stop_id: 1
+        stopRouteId: 1
+        notificationPhone:
+          phone: "+420123456789"
+        targetStopId: 1
         id: 1
         priority: normal
-        car_id: 1
-        notification_phone:
-          phone: "+420123456789"
+        userId: 1
         status: to_accept
+        carId: 1
       properties:
         id:
           example: 1
@@ -2206,10 +2206,10 @@ components:
           pattern: ^(low|normal|high)$
           title: priority
           type: string
-        user_id:
+        userId:
           example: 1
           format: int32
-          title: user_id
+          title: userId
           type: integer
         status:
           default: to_accept
@@ -2217,29 +2217,29 @@ components:
           pattern: ^(to_accept|accepted|in_progress|done|canceled)$
           title: status
           type: string
-        car_id:
+        carId:
           example: 1
           format: int32
-          title: car_id
+          title: carId
           type: integer
-        target_stop_id:
+        targetStopId:
           example: 1
           format: int32
-          title: target_stop_id
+          title: targetStopId
           type: integer
-        stop_route_id:
+        stopRouteId:
           example: 1
           format: int32
-          title: stop_route_id
+          title: stopRouteId
           type: integer
-        notification_phone:
+        notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
       required:
-      - car_id
+      - carId
       - id
-      - stop_route_id
-      - target_stop_id
-      - user_id
+      - stopRouteId
+      - targetStopId
+      - userId
       title: Order
       type: object
     PlatformHwId:
@@ -2265,12 +2265,12 @@ components:
     Route:
       description: Route object structure
       example:
-        stop_ids:
+        name: Lužánky
+        stopIds:
         - 1
         - 2
         - 3
         - 4
-        name: Lužánky
         id: 1
         points:
         - latitude: 49.204117
@@ -2296,7 +2296,7 @@ components:
             $ref: '#/components/schemas/GNSSPosition'
           title: points
           type: array
-        stop_ids:
+        stopIds:
           default: []
           example:
           - 1
@@ -2305,7 +2305,7 @@ components:
           - 4
           items:
             type: integer
-          title: stop_ids
+          title: stopIds
           type: array
       required:
       - id
@@ -2315,14 +2315,14 @@ components:
     Stop:
       description: Stop object structure
       example:
+        notificationPhone:
+          phone: "+420123456789"
         name: Lidická
         id: 1
         position:
           altitude: 400.25
           latitude: 49.204117
           longitude: 16.606525
-        notification_phone:
-          phone: "+420123456789"
       properties:
         id:
           example: 1
@@ -2335,7 +2335,7 @@ components:
           type: string
         position:
           $ref: '#/components/schemas/GNSSPosition'
-        notification_phone:
+        notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
       required:
       - id

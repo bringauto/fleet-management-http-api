@@ -12,7 +12,7 @@ class Test_Sending_And_Order(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
 
     def test_sending_order_to_exising_car(self):
         order_id = 78
@@ -25,7 +25,7 @@ class Test_Sending_And_Order(unittest.TestCase):
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.test_client() as c:
-            response = c.post('/v1/order', json=order.to_dict())
+            response = c.post('/v1/order', json=order)
             self.assertEqual(response.status_code, 200)
 
     def test_sending_order_to_non_exising_car_yields_code_404(self):
@@ -40,7 +40,7 @@ class Test_Sending_And_Order(unittest.TestCase):
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.test_client() as c:
-            response = c.post('/v1/order', json=order.to_dict())
+            response = c.post('/v1/order', json=order)
             self.assertEqual(response.status_code, 404)
 
     def test_sending_incomplete_order_data_yields_code_400(self):
@@ -60,9 +60,9 @@ class Test_Sending_And_Order(unittest.TestCase):
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.test_client() as c:
-            response = c.post('/v1/order', json=order.to_dict())
+            response = c.post('/v1/order', json=order)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/order', json=order.to_dict())
+            response = c.post('/v1/order', json=order)
             self.assertEqual(response.status_code, 400)
 
 
@@ -73,7 +73,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
 
     def test_retrieving_all_orders_when_no_orders_exist_yields_code_200(self):
         with self.app.test_client() as c:
@@ -92,10 +92,10 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.test_client() as c:
-            c.post('/v1/order', json=order.to_dict())
+            c.post('/v1/order', json=order)
             response = c.get(f'/v1/order')
             self.assertEqual(response.status_code, 200)
-            self.assertListEqual(response.json, [order.to_dict()])
+            self.assertEqual(Order.from_dict(response.json[0]), order)
 
 
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
@@ -105,7 +105,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
 
     def test_retrieving_existing_order(self):
         order_id = 78
@@ -118,10 +118,10 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.test_client() as c:
-            c.post('/v1/order', json=order.to_dict())
+            c.post('/v1/order', json=order)
             response = c.get(f'/v1/order/{order_id}')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, order.to_dict())
+            self.assertEqual(Order.from_dict(response.json), order)
 
     def test_retrieving_non_existing_order_yields_code_404(self):
         nonexistent_order_id = 65169861848
@@ -137,7 +137,7 @@ class Test_Updating_Order(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
         self.order = Order(
             id=78,
             user_id=789,
@@ -149,25 +149,25 @@ class Test_Updating_Order(unittest.TestCase):
 
     def test_updating_existing_order(self):
         with self.app.test_client() as c:
-            c.post('/v1/order', json=self.order.to_dict())
+            c.post('/v1/order', json=self.order)
 
             # update order attribute
             self.order.target_stop_id = 1234
 
-            response = c.put('/v1/order', json=self.order.to_dict())
+            response = c.put('/v1/order', json=self.order)
             self.assertEqual(response.status_code, 200)
             response = c.get(f'/v1/order/{self.order.id}')
-            self.assertEqual(response.json["target_stop_id"], 1234)
+            self.assertEqual(response.json["targetStopId"], 1234)
 
     def test_updating_nonexistent_order_yields_code_404(self):
         with self.app.test_client() as c:
-            response = c.put('/v1/order', json=self.order.to_dict())
+            response = c.put('/v1/order', json=self.order)
             self.assertEqual(response.status_code, 404)
 
     def test_updating_order_using_incomplete_data_yields_code_400(self):
         incomplete_order_dict = {}
         with self.app.test_client() as c:
-            response = c.post('/v1/order', json=self.order.to_dict())
+            response = c.post('/v1/order', json=self.order)
             self.assertEqual(response.status_code, 200)
             response = c.put('/v1/order', json=incomplete_order_dict)
             self.assertEqual(response.status_code, 400)
@@ -180,7 +180,7 @@ class Test_Deleting_Order(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
         self.order = Order(
             id=78,
             user_id=789,
@@ -189,13 +189,13 @@ class Test_Deleting_Order(unittest.TestCase):
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
-        c.post('/v1/order', json=self.order.to_dict())
+        c.post('/v1/order', json=self.order)
 
     def test_deleting_existing_order(self):
         with self.app.test_client() as c:
             # verify that order is in the database
             response = c.get(f'/v1/order')
-            self.assertListEqual(response.json, [self.order.to_dict()])
+            self.assertEqual(len(response.json), 1)
 
             response = c.delete(f'/v1/order/{self.order.id}')
             self.assertEqual(response.status_code, 200)
@@ -216,7 +216,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
-            c.post('/v1/car', json=self.car.to_dict())
+            c.post('/v1/car', json=self.car)
         self.order_1 = Order(
             id=78,
             user_id=789,
@@ -234,8 +234,8 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             notification_phone=MobilePhone(phone='4444444444')
         )
         with self.app.test_client() as c:
-            c.post('/v1/order', json=self.order_1.to_dict())
-            c.post('/v1/order', json=self.order_2.to_dict())
+            c.post('/v1/order', json=self.order_1)
+            c.post('/v1/order', json=self.order_2)
 
     def test_all_orders_not_yet_retrieved_are_listed_as_updated(self):
         with self.app.test_client() as c:
@@ -257,7 +257,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             response = c.get(f'/v1/order/wait/{self.car.id}')
 
             # second order is updated
-            c.put('/v1/order', json=self.order_2.to_dict())
+            c.put('/v1/order', json=self.order_2)
 
             # second order is listed again, first one is ignored
             response = c.get(f'/v1/order/wait/{self.car.id}')

@@ -45,7 +45,7 @@ class CarState(Model):
             'id': 'id',
             'status': 'status',
             'fuel': 'fuel',
-            'car_id': 'car_id',
+            'car_id': 'carId',
             'speed': 'speed',
             'position': 'position'
         }

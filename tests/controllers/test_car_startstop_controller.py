@@ -15,7 +15,7 @@ class Test_Car_StartStop_Controller(unittest.TestCase):
         car = Car(id=car_id, name="Test Car", platform_id=5)
         app = get_app()
         with app.app.test_client() as c:
-            c.post('/v1/car', json = car.to_dict(), content_type='application/json')
+            c.post('/v1/car', json=car, content_type='application/json')
             response = c.get(f'/v1/car/startstop/{car_id}')
             self.assertEqual(response.status_code, 200)
 

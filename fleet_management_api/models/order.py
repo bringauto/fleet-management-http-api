@@ -50,12 +50,12 @@ class Order(Model):
         self.attribute_map = {
             'id': 'id',
             'priority': 'priority',
-            'user_id': 'user_id',
+            'user_id': 'userId',
             'status': 'status',
-            'car_id': 'car_id',
-            'target_stop_id': 'target_stop_id',
-            'stop_route_id': 'stop_route_id',
-            'notification_phone': 'notification_phone'
+            'car_id': 'carId',
+            'target_stop_id': 'targetStopId',
+            'stop_route_id': 'stopRouteId',
+            'notification_phone': 'notificationPhone'
         }
 
         self._id = id

@@ -73,7 +73,7 @@ paths:
                 [
                   {
                     "id": 1,
-                    "platform_id": 1,
+                    "platformId": 1,
                     "name": 'BAT-2022-01',
                     "carAdminPhone": {"phone":'+420123456789'},
                     "defaultRouteId": 1,
@@ -117,7 +117,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /car/{car_id}:
+  /car/{carId}:
     get:
       operationId: getCar
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -125,7 +125,7 @@ paths:
         - car
       summary: Finds car by ID
       parameters:
-        - name: car_id
+        - name: carId
           in: path
           description: ID of car to return
           required: true
@@ -157,7 +157,7 @@ paths:
         - car
       summary: Delete a car
       parameters:
-        - name: car_id
+        - name: carId
           in: path
           description: ID of car to delete
           required: true
@@ -180,7 +180,7 @@ paths:
           $ref: '#/components/responses/MethodNotAllowed'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /car/startstop/{car_id}:
+  /car/startstop/{carId}:
     get:
       operationId: startstopCar
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
@@ -188,7 +188,7 @@ paths:
         - car
       summary: Start/stop car by ID (intended for phonecalls)
       parameters:
-        - name: car_id
+        - name: carId
           in: path
           description: ID of car to start/stop
           required: true
@@ -289,12 +289,12 @@ paths:
                   {
                     "id": 1,
                     "priority": "normal",
-                    "user_id": 1,
+                    "userId": 1,
                     "status": "to_accept",
-                    "car_id": 1,
-                    "target_stop_id": 1,
-                    "stop_route_id": 1,
-                    "notification_phone": {"phone":'+420123456789'}
+                    "carId": 1,
+                    "targetStopId": 1,
+                    "stopRouteId": 1,
+                    "notificationPhone": {"phone":'+420123456789'}
                   }
                 ]
         '401':
@@ -334,7 +334,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /order/{order_id}:
+  /order/{orderId}:
     get:
       operationId: getOrder
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -342,7 +342,7 @@ paths:
         - order
       summary: Finds order by ID
       parameters:
-        - name: order_id
+        - name: orderId
           in: path
           description: ID of order to return
           required: true
@@ -374,7 +374,7 @@ paths:
         - order
       summary: Delete an order
       parameters:
-        - name: order_id
+        - name: orderId
           in: path
           description: ID of order to delete
           required: true
@@ -397,7 +397,7 @@ paths:
           $ref: '#/components/responses/MethodNotAllowed'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /order/wait/{car_id}:
+  /order/wait/{carId}:
     get:
       operationId: getUpdatedOrders
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -405,7 +405,7 @@ paths:
         - order
       summary: Get order by car ID only if it changed
       parameters:
-        - name: car_id
+        - name: carId
           in: path
           description: ID of car with order to return
           required: true
@@ -490,7 +490,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /platformhwid/{platformhwid_id}:
+  /platformhwid/{platformhwidId}:
     get:
       operationId: getHwId
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
@@ -498,7 +498,7 @@ paths:
         - platformHwId
       summary: Finds platform hwId by ID
       parameters:
-        - name: platformhwid_id
+        - name: platformhwidId
           in: path
           description: ID of platform hwId to return
           required: true
@@ -530,7 +530,7 @@ paths:
         - platformHwId
       summary: Delete a platform hwId
       parameters:
-        - name: platformhwid_id
+        - name: platformhwidId
           in: path
           description: ID of platform hwId to delete
           required: true
@@ -610,7 +610,7 @@ paths:
                         "altitude": 400.25
                       }
                     ],
-                    "stop_ids": [1, 2, 3, 4]
+                    "stopIds": [1, 2, 3, 4]
                   }
                 ]
         '401':
@@ -768,7 +768,7 @@ paths:
                       "longitude": 16.606525,
                       "altitude": 400.25
                     },
-                    "notification_phone": {"phone":'+420123456789'}
+                    "notificationPhone": {"phone":'+420123456789'}
                   }
                 ]
         '401':
@@ -808,7 +808,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/UnexpectedError'
-  /stop/{stop_id}:
+  /stop/{stopId}:
     get:
       operationId: getStop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -816,7 +816,7 @@ paths:
         - stop
       summary: Finds stop by ID
       parameters:
-        - name: stop_id
+        - name: stopId
           in: path
           description: ID of stop to return
           required: true
@@ -848,7 +848,7 @@ paths:
         - stop
       summary: Delete a stop
       parameters:
-        - name: stop_id
+        - name: stopId
           in: path
           description: ID of stop to delete
           required: true
@@ -956,14 +956,14 @@ components:
       description: Car object structure
       required:
         - id
-        - platform_id
+        - platformId
         - name
       properties:
         id:
           type: integer
           format: int32
           example: 1
-        platform_id:
+        platformId:
           type: integer
           format: int32
           example: 1
@@ -985,7 +985,7 @@ components:
       required:
         - id
         - status
-        - car_id
+        - carId
       properties:
         id:
           type: integer
@@ -997,7 +997,7 @@ components:
           type: integer
           format: int32
           example: 80
-        car_id:
+        carId:
           type: integer
           format: int32
           example: 1
@@ -1025,10 +1025,10 @@ components:
       description: Order object structure
       required:
         - id
-        - user_id
-        - car_id
-        - target_stop_id
-        - stop_route_id
+        - userId
+        - carId
+        - targetStopId
+        - stopRouteId
       properties:
         id:
           type: integer
@@ -1036,25 +1036,25 @@ components:
           example: 1
         priority:
           $ref: "#/components/schemas/Priority"
-        user_id:
+        userId:
           type: integer
           format: int32
           example: 1
         status:
           $ref: "#/components/schemas/OrderStatus"
-        car_id:
+        carId:
           type: integer
           format: int32
           example: 1
-        target_stop_id:
+        targetStopId:
           type: integer
           format: int32
           example: 1
-        stop_route_id:
+        stopRouteId:
           type: integer
           format: int32
           example: 1
-        notification_phone:
+        notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
     PlatformHwId:
       type: object
@@ -1097,7 +1097,7 @@ components:
                 "altitude": 400.25
               }
             ]
-        stop_ids:
+        stopIds:
           type: array
           default: []
           items:
@@ -1120,7 +1120,7 @@ components:
           example: 'Lidická'
         position:
           $ref: '#/components/schemas/GNSSPosition'
-        notification_phone:
+        notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
     CarStatus:
       type: string

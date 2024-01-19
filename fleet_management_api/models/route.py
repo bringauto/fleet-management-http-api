@@ -37,7 +37,7 @@ class Route(Model):
             'id': 'id',
             'name': 'name',
             'points': 'points',
-            'stop_ids': 'stop_ids'
+            'stop_ids': 'stopIds'
         }
 
         self._id = id
