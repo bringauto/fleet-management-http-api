@@ -46,6 +46,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Car'
+
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -966,7 +967,7 @@ components:
         platformId:
           type: integer
           format: int32
-          example: 1
+          example: 5
         name:
           type: string
           example: 'BAT-2022-01'
@@ -979,6 +980,7 @@ components:
         underTest:
           type: boolean
           default: true
+          example: false
     CarState:
       type: object
       description: Car state object structure
@@ -996,8 +998,8 @@ components:
         fuel:
           type: integer
           format: int32
-          example: 80
           default: 0
+          example: 80
         carId:
           type: integer
           format: int32
@@ -1005,8 +1007,8 @@ components:
         speed:
           type: number
           format: float
-          example: 20.5
           default: 0.0
+          example: 20.5
         position:
           $ref: '#/components/schemas/GNSSPosition'
     Error:
@@ -1132,6 +1134,7 @@ components:
         - charging
         - out_of_order
         - stopped_by_phone
+      example: idle
     GNSSPosition:
       type: object
       description: GNSSPosition primitive structure

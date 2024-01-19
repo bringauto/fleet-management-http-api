@@ -43,6 +43,17 @@ class Test_Creating_Platform_HW_Id(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Adding_Platform_HW_Id_Using_Example_From_Spec(unittest.TestCase):
+
+    def test_adding_state_using_example_from_spec(self):
+        set_test_connection_source()
+        self.app = get_app().app
+        with self.app.test_client() as c:
+            example = c.get('/v1/openapi.json').json["components"]["schemas"]["PlatformHwId"]["example"]
+            response = c.post('/v1/platformhwid', json=example)
+            self.assertEqual(response.status_code, 200)
+
+
 class Test_Retrieving_Platform_HW_Id(unittest.TestCase):
 
     def setUp(self) -> None:

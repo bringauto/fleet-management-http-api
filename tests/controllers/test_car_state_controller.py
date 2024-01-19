@@ -44,5 +44,18 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
+
+    def test_adding_state_using_example_from_spec(self):
+        connection.set_test_connection_source()
+        self.car = Car(id=1, name="Test Car", platform_id=5)
+        self.app = get_app().app
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=self.car)
+            example = c.get('/v1/openapi.json').json["components"]["schemas"]["CarState"]["example"]
+            response = c.post('/v1/carstate', json=example)
+            self.assertEqual(response.status_code, 200)
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

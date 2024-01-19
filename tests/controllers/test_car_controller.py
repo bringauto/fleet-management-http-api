@@ -1,13 +1,14 @@
 import sys
 sys.path.append('.')
 import unittest
+import json
 
 from fleet_management_api.models import Car
 from fleet_management_api.app import get_app
 from fleet_management_api.database.connection import set_test_connection_source
 
 
-class Test_Cars(unittest.TestCase):
+class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
@@ -98,6 +99,21 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
 
+class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_test_connection_source()
+
+    def test_posting_and_getting_car_from_example_in_specification(self):
+        app = get_app()
+        with app.app.test_client() as c:
+            example = c.get('/v1/openapi.json').json["components"]["schemas"]["Car"]["example"]
+            c.post('/v1/car', json=example, content_type='application/json')
+            response = c.get(f"/v1/car/{example['id']}")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json['name'], example['name'])
+
+
 class Test_Logging_Car_Creation(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -177,7 +193,6 @@ class Test_Deleting_Car(unittest.TestCase):
         with app.app.test_client() as c:
             response = c.delete(f'/v1/car/{car_id}')
             self.assertEqual(response.status_code, 404)
-
 
 
 if __name__=="__main__":

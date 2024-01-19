@@ -2084,11 +2084,11 @@ components:
     Car:
       description: Car object structure
       example:
-        underTest: true
+        underTest: false
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
-        platformId: 1
+        platformId: 5
         carAdminPhone:
           phone: "+420123456789"
       properties:
@@ -2098,7 +2098,7 @@ components:
           title: id
           type: integer
         platformId:
-          example: 1
+          example: 5
           format: int32
           title: platformId
           type: integer
@@ -2115,6 +2115,7 @@ components:
           type: integer
         underTest:
           default: true
+          example: false
           title: underTest
           type: boolean
       required:
@@ -2133,7 +2134,7 @@ components:
           latitude: 49.204117
           longitude: 16.606525
         speed: 20.5
-        status: null
+        status: idle
         carId: 1
       properties:
         id:
@@ -2352,6 +2353,7 @@ components:
       - charging
       - out_of_order
       - stopped_by_phone
+      example: idle
       title: CarStatus
       type: string
     GNSSPosition:

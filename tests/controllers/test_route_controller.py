@@ -43,6 +43,17 @@ class Test_Creating_Route(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
+
+    def test_adding_state_using_example_from_spec(self):
+        set_test_connection_source()
+        self.app = get_app().app
+        with self.app.test_client() as c:
+            example = c.get('/v1/openapi.json').json["components"]["schemas"]["Route"]["example"]
+            response = c.post('/v1/route', json=example)
+            self.assertEqual(response.status_code, 200)
+
+
 class Test_Getting_All_Routes(unittest.TestCase):
 
     def setUp(self) -> None:

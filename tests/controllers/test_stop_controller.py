@@ -54,6 +54,17 @@ class Test_Creating_Stop(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
 
+class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
+
+    def test_adding_stop_using_example_from_spec(self):
+        connection.set_test_connection_source()
+        app = get_app().app
+        with app.test_client() as c:
+            example = c.get('/v1/openapi.json').json["components"]["schemas"]["Stop"]["example"]
+            response = c.post('/v1/stop', json=example)
+            self.assertEqual(response.status_code, 200)
+
+
 class Test_Retrieving_All_Stops(unittest.TestCase):
 
     def setUp(self) -> None:
