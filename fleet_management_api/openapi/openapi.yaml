@@ -2144,6 +2144,7 @@ components:
         status:
           $ref: '#/components/schemas/CarStatus'
         fuel:
+          default: 0
           example: 80
           format: int32
           title: fuel
@@ -2154,6 +2155,7 @@ components:
           title: carId
           type: integer
         speed:
+          default: 0.0
           example: 20.5
           format: float
           title: speed
@@ -2360,16 +2362,19 @@ components:
         longitude: 16.606525
       properties:
         latitude:
+          default: 0.0
           example: 49.204117
           format: float
           title: latitude
           type: number
         longitude:
+          default: 0.0
           example: 16.606525
           format: float
           title: longitude
           type: number
         altitude:
+          default: 0.0
           example: 400.25
           format: float
           title: altitude

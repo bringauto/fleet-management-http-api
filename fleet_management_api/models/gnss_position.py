@@ -12,7 +12,7 @@ class GNSSPosition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, latitude=None, longitude=None, altitude=None):  # noqa: E501
+    def __init__(self, latitude=0.0, longitude=0.0, altitude=0.0):  # noqa: E501
         """GNSSPosition - a model defined in OpenAPI
 
         :param latitude: The latitude of this GNSSPosition.  # noqa: E501

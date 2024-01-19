@@ -997,6 +997,7 @@ components:
           type: integer
           format: int32
           example: 80
+          default: 0
         carId:
           type: integer
           format: int32
@@ -1005,6 +1006,7 @@ components:
           type: number
           format: float
           example: 20.5
+          default: 0.0
         position:
           $ref: '#/components/schemas/GNSSPosition'
     Error:
@@ -1138,14 +1140,17 @@ components:
           type: number
           format: float
           example: 49.204117
+          default: 0.0
         longitude:
           type: number
           format: float
           example: 16.606525
+          default: 0.0
         altitude:
           type: number
           format: float
           example: 400.25
+          default: 0.0
     MobilePhone:
       type: object
       description: MobilePhone Primitive structure
