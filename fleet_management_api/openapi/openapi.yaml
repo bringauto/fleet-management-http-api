@@ -851,14 +851,12 @@ paths:
       parameters:
       - description: ID of car with order to return
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -942,14 +940,12 @@ paths:
       parameters:
       - description: ID of order to delete
         example: 1
-        explode: false
         in: path
         name: orderId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful order removal
@@ -1028,14 +1024,12 @@ paths:
       parameters:
       - description: ID of order to return
         example: 1
-        explode: false
         in: path
         name: orderId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -1238,24 +1232,20 @@ paths:
       parameters:
       - description: ID of order for which states shall be returned
         example: 1
-        explode: false
         in: path
         name: orderId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       - description: Whether to return all available order states or only the latest
           one
         example: true
-        explode: true
         in: query
         name: allAvailable
         required: false
         schema:
           type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -2407,89 +2397,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
-    Order:
-      description: Order object structure
-      example:
-        notification: Order notification
-        stopRouteId: 1
-        notificationPhone:
-          phone: "+420123456789"
-        targetStopId: 1
-        id: 1
-        priority: normal
-        userId: 1
-        carId: 1
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        priority:
-          default: normal
-          description: "Priority (low, normal, high)"
-          pattern: ^(low|normal|high)$
-          title: priority
-          type: string
-        userId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        carId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        notification:
-          example: Order notification
-          title: notification
-          type: string
-        targetStopId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        stopRouteId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        notificationPhone:
-          $ref: '#/components/schemas/MobilePhone'
-      required:
-      - carId
-      - id
-      - stopRouteId
-      - targetStopId
-      - userId
-      title: Order
-      type: object
-    OrderState:
-      description: Order state object structure
-      example:
-        orderId: 1
-        id: 1
-        status: to_accept
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        status:
-          $ref: '#/components/schemas/OrderStatus'
-        orderId:
-          example: 1
-          format: int32
-          title: orderId
-          type: integer
-      required:
-      - id
-      - orderId
-      - status
-      title: OrderState
-      type: object
     PlatformHwId:
       description: PlatformHwId object structure
       example:
@@ -2591,23 +2498,6 @@ components:
       - position
       title: Stop
       type: object
-    OrderStatus:
-      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
-      enum:
-      - to_accept
-      - accepted
-      - in_progress
-      - done
-      - canceled
-      example: to_accept
-      title: OrderStatus
-      type: string
-    Priority:
-      default: normal
-      description: "Priority (low, normal, high)"
-      pattern: ^(low|normal|high)$
-      title: priority
-      type: string
     Car:
       description: Car object structure
       example:
@@ -2722,22 +2612,111 @@ components:
       example: idle
       title: CarStatus
       type: string
+    Order:
+      description: Order object structure
+      example:
+        notification: Order notification
+        stopRouteId: 1
+        notificationPhone:
+          phone: "+420123456789"
+        targetStopId: 1
+        id: 1
+        priority: normal
+        userId: 1
+        carId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        priority:
+          default: normal
+          description: "Priority (low, normal, high)"
+          pattern: ^(low|normal|high)$
+          title: priority
+          type: string
+        userId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        notification:
+          example: Order notification
+          title: notification
+          type: string
+        targetStopId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        stopRouteId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        notificationPhone:
+          $ref: '#/components/schemas/MobilePhone'
+      required:
+      - carId
+      - id
+      - stopRouteId
+      - targetStopId
+      - userId
+      title: Order
+      type: object
+    Priority:
+      default: normal
+      description: "Priority (low, normal, high)"
+      pattern: ^(low|normal|high)$
+      title: priority
+      type: string
+    OrderState:
+      description: Order state object structure
+      example:
+        orderId: 1
+        id: 1
+        status: to_accept
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        orderId:
+          example: 1
+          format: int32
+          title: orderId
+          type: integer
+      required:
+      - id
+      - orderId
+      - status
+      title: OrderState
+      type: object
+    OrderStatus:
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+      enum:
+      - to_accept
+      - accepted
+      - in_progress
+      - done
+      - canceled
+      example: to_accept
+      title: OrderStatus
+      type: string
     Id:
       example: 1
       format: int32
       title: id
       type: integer
-    MobilePhone:
-      description: MobilePhone Primitive structure
-      example:
-        phone: "+420123456789"
-      properties:
-        phone:
-          example: "+420123456789"
-          title: phone
-          type: string
-      title: MobilePhone
-      type: object
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
@@ -2764,4 +2743,15 @@ components:
           title: altitude
           type: number
       title: GNSSPosition
+      type: object
+    MobilePhone:
+      description: MobilePhone Primitive structure
+      example:
+        phone: "+420123456789"
+      properties:
+        phone:
+          example: "+420123456789"
+          title: phone
+          type: string
+      title: MobilePhone
       type: object
