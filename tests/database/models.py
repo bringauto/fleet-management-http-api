@@ -11,7 +11,7 @@ class Base(DeclarativeBase):
 @dataclasses.dataclass
 class TestBase(Base):
     __tablename__ = 'test'
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     test_str: Mapped[str] = Column(String)
     test_int: Mapped[int] = Column(Integer)
 
