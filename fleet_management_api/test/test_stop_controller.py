@@ -15,7 +15,7 @@ class TestStopController(BaseTestCase):
 
         Create a new stop
         """
-        stop = {"name":"Lidická","id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"notification_phone":{"phone":"+420123456789"}}
+        stop = {"notificationPhone":{"phone":"+420123456789"},"name":"Lidická","id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525}}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ class TestStopController(BaseTestCase):
 
         Update an existing stop by ID
         """
-        stop = {"name":"Lidická","id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"notification_phone":{"phone":"+420123456789"}}
+        stop = {"notificationPhone":{"phone":"+420123456789"},"name":"Lidická","id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525}}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',

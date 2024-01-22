@@ -15,7 +15,7 @@ class TestCarController(BaseTestCase):
 
         Create a new car
         """
-        car = {"underTest":True,"platform_id":1,"name":"BAT-2022-01","defaultRouteId":1,"id":1,"carAdminPhone":{"phone":"+420123456789"}}
+        car = {"underTest":False,"name":"BAT-2022-01","defaultRouteId":1,"id":1,"platformId":5,"carAdminPhone":{"phone":"+420123456789"}}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ class TestCarController(BaseTestCase):
 
         Update an existing car by ID
         """
-        car = {"underTest":True,"platform_id":1,"name":"BAT-2022-01","defaultRouteId":1,"id":1,"carAdminPhone":{"phone":"+420123456789"}}
+        car = {"underTest":False,"name":"BAT-2022-01","defaultRouteId":1,"id":1,"platformId":5,"carAdminPhone":{"phone":"+420123456789"}}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',

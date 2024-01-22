@@ -15,7 +15,7 @@ class TestRouteController(BaseTestCase):
 
         Create a new route
         """
-        route = {"stop_ids":[1,2,3,4],"name":"Lužánky","id":1,"points":[{"latitude":49.204117,"longitude":16.606525,"altitude":400.25}]}
+        route = {"name":"Lužánky","stopIds":[1,2,3,4],"id":1,"points":[{"latitude":49.204117,"longitude":16.606525,"altitude":400.25}]}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ class TestRouteController(BaseTestCase):
 
         Update an existing route by ID
         """
-        route = {"stop_ids":[1,2,3,4],"name":"Lužánky","id":1,"points":[{"latitude":49.204117,"longitude":16.606525,"altitude":400.25}]}
+        route = {"name":"Lužánky","stopIds":[1,2,3,4],"id":1,"points":[{"latitude":49.204117,"longitude":16.606525,"altitude":400.25}]}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',

@@ -15,7 +15,7 @@ class TestCarStateController(BaseTestCase):
 
         Add a new state for a car by ID
         """
-        car_state = {"fuel":80,"id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"car_id":1,"speed":20.5}
+        car_state = {"fuel":80,"id":1,"position":{"altitude":400.25,"latitude":49.204117,"longitude":16.606525},"speed":20.5,"status":"idle","carId":1}
         headers = { 
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -26,6 +26,38 @@ class TestCarStateController(BaseTestCase):
             headers=headers,
             data=json.dumps(car_state),
             content_type='application/json')
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_get_all_car_states(self):
+        """Test case for get_all_car_states
+
+        Finds all car states
+        """
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/carstate',
+            method='GET',
+            headers=headers)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    def test_get_car_states(self):
+        """Test case for get_car_states
+
+        Finds car states by ID
+        """
+        query_string = [('allAvailable', true)]
+        headers = { 
+            'Accept': 'application/json',
+        }
+        response = self.client.open(
+            '/v1/carstate/{car_id}'.format(car_id=1),
+            method='GET',
+            headers=headers,
+            query_string=query_string)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
