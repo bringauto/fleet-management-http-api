@@ -32,6 +32,11 @@ class CarStateDBModel(Base):
     position: Mapped[dict] = mapped_column(JSON)
     timestamp: Mapped[int] = Column(BigInteger)
 
+    @classmethod
+    @property
+    def max_n_of_states(cls) -> int:
+        return 50
+
 
 @dataclasses.dataclass
 class OrderDBModel(Base):

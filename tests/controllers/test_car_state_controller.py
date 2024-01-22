@@ -3,6 +3,7 @@ import unittest
 from fleet_management_api.app import get_app
 from fleet_management_api.models import Car, CarState, GNSSPosition
 import fleet_management_api.database.connection as connection
+import fleet_management_api.database.db_models as db_models
 
 
 class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
@@ -140,6 +141,48 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["id"], 4)
             self.assertEqual(response.json[1]["id"], 6)
+
+
+class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_test_connection_source()
+        self.app = get_app().app
+        car = Car(id=12, name="car1", platform_id=1, car_admin_phone={})
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=car)
+        self.max_n = db_models.CarStateDBModel.max_n_of_states
+
+    def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
+        test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+        with self.app.test_client() as c:
+            oldest_state = CarState(id=0, status="idle", car_id=12, fuel=50, speed=7, position=test_position)
+            c.post('/v1/carstate', json=oldest_state)
+
+            for i in range(1, self.max_n - 1):
+                car_state = CarState(id=i, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+                c.post('/v1/carstate', json=car_state)
+
+            response = c.get('/v1/carstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n-1)
+
+            car_state = CarState(id=self.max_n, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+            c.post('/v1/carstate', json=car_state)
+            response = c.get('/v1/carstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n)
+
+            newest_state = CarState(id=self.max_n + 1, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+            c.post('/v1/carstate', json=newest_state)
+            response = c.get('/v1/carstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n)
+            self.assertTrue(isinstance(response.json, list))
+
+            ids = [state["id"] for state in response.json]
+            self.assertFalse(oldest_state.id in ids)
+            self.assertTrue(newest_state.id in ids)
 
 
 if __name__ == '__main__':

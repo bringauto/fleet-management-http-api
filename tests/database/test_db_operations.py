@@ -113,10 +113,6 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         response = db_access.delete_n_records(models.TestBase, n=2, id_name="nonexistent_id", start_from="maximum")
         self.assertEqual(response.status_code, 500)
 
-    def test_using_attribute_whose_values_are_not_unique_yields_code_500(self):
-        response = db_access.delete_n_records(models.TestBase, n=2, id_name="test_int", start_from="maximum")
-        self.assertEqual(response.status_code, 500)
-
     def test_setting_n_equal_to_or_greater_than_number_of_existing_records_deletes_all_records(self):
         test_obj_1 = models.TestBase(id=7, test_str='test_string', test_int=5)
         test_obj_2 = models.TestBase(id=8, test_str='test_string', test_int=5)

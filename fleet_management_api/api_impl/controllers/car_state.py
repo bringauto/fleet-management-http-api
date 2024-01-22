@@ -24,6 +24,11 @@ def add_car_state(car_state) -> ConnexionResponse:
             if response.status_code == 200:
                 code, msg = 200, f"Car state with id='{car_state.id}' was succesfully created."
                 log_info(msg)
+                cleanup_response = _remove_old_states(car_state.car_id)
+                if cleanup_response.status_code != 200:
+                    code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
+                    log_error(cleanup_error_msg)
+                    msg = msg + "\n" + cleanup_error_msg
             else:
                 code, msg = response.status_code, f"Car state with id='{car_state.id}' could not be sent. {response.body}",
                 log_error(msg)
@@ -51,3 +56,21 @@ def get_car_states(car_id: int, all_available: bool = False) -> ConnexionRespons
 def _car_exists(car_id: int) -> bool:
     return bool(db_access.get_records(db_models.CarDBModel, equal_to={'id': car_id}))
 
+
+def _remove_old_states(car_id: int) -> ConnexionResponse:
+    car_state_db_models = db_access.get_records(db_models.CarStateDBModel, equal_to={'car_id': car_id})
+    curr_n_of_states = len(car_state_db_models)
+    delta = curr_n_of_states - db_models.CarStateDBModel.max_n_of_states
+    if delta>0:
+        response = db_access.delete_n_records(
+            db_models.CarStateDBModel,
+            delta,
+            id_name="timestamp",
+            start_from="minimum"
+        )
+        if response.status_code != 200:
+            return log_and_respond(response.status_code, response.body)
+        else:
+            return log_and_respond(200, f"Removing oldest state from database (car id = {car_id}).")
+    else:
+        return ConnexionResponse(status_code=200, content_type="text/plain", body="")
