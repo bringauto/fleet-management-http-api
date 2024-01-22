@@ -226,14 +226,12 @@ paths:
       parameters:
       - description: ID of car to start/stop
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful car start/stop
@@ -302,14 +300,12 @@ paths:
       parameters:
       - description: ID of car to delete
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful car removal
@@ -388,14 +384,12 @@ paths:
       parameters:
       - description: ID of car to return
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -582,24 +576,20 @@ paths:
       parameters:
       - description: ID of car for which states shall be returned
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       - description: Whether to return all available car states or only the latest
           one
         example: true
-        explode: true
         in: query
         name: allAvailable
         required: false
         schema:
           type: boolean
-        style: form
       responses:
         "200":
           content:
@@ -2417,94 +2407,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
-    Car:
-      description: Car object structure
-      example:
-        underTest: false
-        name: BAT-2022-01
-        defaultRouteId: 1
-        id: 1
-        platformId: 1
-        carAdminPhone:
-          phone: "+420123456789"
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        platformId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        name:
-          example: BAT-2022-01
-          title: name
-          type: string
-        carAdminPhone:
-          $ref: '#/components/schemas/MobilePhone'
-        defaultRouteId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        underTest:
-          default: true
-          example: false
-          title: underTest
-          type: boolean
-      required:
-      - id
-      - name
-      - platformId
-      title: Car
-      type: object
-    CarState:
-      description: Car state object structure
-      example:
-        fuel: 80
-        id: 1
-        position:
-          altitude: 400.25
-          latitude: 49.204117
-          longitude: 16.606525
-        speed: 20.5
-        status: idle
-        carId: 1
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        status:
-          $ref: '#/components/schemas/CarStatus'
-        fuel:
-          default: 0
-          example: 80
-          format: int32
-          title: fuel
-          type: integer
-        carId:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        speed:
-          default: 0.0
-          example: 20.5
-          format: float
-          title: speed
-          type: number
-        position:
-          $ref: '#/components/schemas/GNSSPosition'
-      required:
-      - carId
-      - id
-      - status
-      title: CarState
-      type: object
     Order:
       description: Order object structure
       example:
@@ -2689,16 +2591,6 @@ components:
       - position
       title: Stop
       type: object
-    CarStatus:
-      description: CarStatus enum
-      enum:
-      - idle
-      - charging
-      - out_of_order
-      - stopped_by_phone
-      example: idle
-      title: CarStatus
-      type: string
     OrderStatus:
       description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
       enum:
@@ -2716,6 +2608,49 @@ components:
       pattern: ^(low|normal|high)$
       title: priority
       type: string
+    Car:
+      description: Car object structure
+      example:
+        underTest: false
+        name: BAT-2022-01
+        defaultRouteId: 1
+        id: 1
+        platformId: 1
+        carAdminPhone:
+          phone: "+420123456789"
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        platformId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        name:
+          example: BAT-2022-01
+          title: name
+          type: string
+        carAdminPhone:
+          $ref: '#/components/schemas/MobilePhone'
+        defaultRouteId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        underTest:
+          default: true
+          example: false
+          title: underTest
+          type: boolean
+      required:
+      - id
+      - name
+      - platformId
+      title: Car
+      type: object
     Error:
       description: Error object structure
       properties:
@@ -2732,6 +2667,61 @@ components:
       - message
       title: Error
       type: object
+    CarState:
+      description: Car state object structure
+      example:
+        fuel: 80
+        id: 1
+        position:
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+        speed: 20.5
+        status: idle
+        carId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        status:
+          $ref: '#/components/schemas/CarStatus'
+        fuel:
+          default: 0
+          example: 80
+          format: int32
+          title: fuel
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        speed:
+          default: 0.0
+          example: 20.5
+          format: float
+          title: speed
+          type: number
+        position:
+          $ref: '#/components/schemas/GNSSPosition'
+      required:
+      - carId
+      - id
+      - status
+      title: CarState
+      type: object
+    CarStatus:
+      description: CarStatus enum
+      enum:
+      - idle
+      - charging
+      - out_of_order
+      - stopped_by_phone
+      example: idle
+      title: CarStatus
+      type: string
     Id:
       example: 1
       format: int32
