@@ -197,7 +197,7 @@ paths:
       operationId: createOrderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
-        - order
+        - orderState
       summary: Create a new order state
       requestBody:
         description: New order state json
@@ -228,7 +228,7 @@ paths:
       operationId: getAllOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
-        - order
+        - orderState
       summary: Finds all order states
       responses:
         '200':
@@ -259,7 +259,7 @@ paths:
       operationId: getOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
-        - order
+        - orderState
       summary: Finds order state by ID
       parameters:
         - name: orderId

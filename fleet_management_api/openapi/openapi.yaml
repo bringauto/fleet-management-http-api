@@ -13,6 +13,8 @@ tags:
   name: carState
 - description: Order related functions
   name: order
+- description: Order state related functions
+  name: orderState
 - description: Platform hardware ID related functions
   name: platformHwId
 - description: Route state related functions
@@ -1148,7 +1150,7 @@ paths:
           description: Unexpected error
       summary: Finds all order states
       tags:
-      - order
+      - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
     post:
       operationId: create_order_state
@@ -1224,7 +1226,7 @@ paths:
           description: Unexpected error
       summary: Create a new order state
       tags:
-      - order
+      - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
   /orderstate/{orderId}:
     get:
@@ -1299,7 +1301,7 @@ paths:
           description: Unexpected error
       summary: Finds order state by ID
       tags:
-      - order
+      - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
   /platformhwid:
     get:
@@ -2149,14 +2151,12 @@ paths:
       parameters:
       - description: ID of stop to delete
         example: 1
-        explode: false
         in: path
         name: stopId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful stop removal
@@ -2235,14 +2235,12 @@ paths:
       parameters:
       - description: ID of stop to return
         example: 1
-        explode: false
         in: path
         name: stopId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -2389,37 +2387,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
-    Stop:
-      description: Stop object structure
-      example:
-        notificationPhone:
-          phone: "+420123456789"
-        name: Lidická
-        id: 1
-        position:
-          altitude: 400.25
-          latitude: 49.204117
-          longitude: 16.606525
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        name:
-          example: Lidická
-          title: name
-          type: string
-        position:
-          $ref: '#/components/schemas/GNSSPosition'
-        notificationPhone:
-          $ref: '#/components/schemas/MobilePhone'
-      required:
-      - id
-      - name
-      - position
-      title: Stop
-      type: object
     Car:
       description: Car object structure
       example:
@@ -2704,11 +2671,53 @@ components:
       - name
       title: Route
       type: object
+    Stop:
+      description: Stop object structure
+      example:
+        notificationPhone:
+          phone: "+420123456789"
+        name: Lidická
+        id: 1
+        position:
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        name:
+          example: Lidická
+          title: name
+          type: string
+        position:
+          $ref: '#/components/schemas/GNSSPosition'
+        notificationPhone:
+          $ref: '#/components/schemas/MobilePhone'
+      required:
+      - id
+      - name
+      - position
+      title: Stop
+      type: object
     Id:
       example: 1
       format: int32
       title: id
       type: integer
+    MobilePhone:
+      description: MobilePhone Primitive structure
+      example:
+        phone: "+420123456789"
+      properties:
+        phone:
+          example: "+420123456789"
+          title: phone
+          type: string
+      title: MobilePhone
+      type: object
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
@@ -2735,15 +2744,4 @@ components:
           title: altitude
           type: number
       title: GNSSPosition
-      type: object
-    MobilePhone:
-      description: MobilePhone Primitive structure
-      example:
-        phone: "+420123456789"
-      properties:
-        phone:
-          example: "+420123456789"
-          title: phone
-          type: string
-      title: MobilePhone
       type: object

@@ -3,6 +3,7 @@ fleet_management_api/controllers/__init__.py
 fleet_management_api/controllers/car_controller.py
 fleet_management_api/controllers/car_state_controller.py
 fleet_management_api/controllers/order_controller.py
+fleet_management_api/controllers/order_state_controller.py
 fleet_management_api/controllers/platform_hw_id_controller.py
 fleet_management_api/controllers/route_controller.py
 fleet_management_api/controllers/security_controller.py
