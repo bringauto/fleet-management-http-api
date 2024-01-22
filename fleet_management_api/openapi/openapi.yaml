@@ -21,8 +21,6 @@ tags:
   name: route
 - description: Stop state related functions
   name: stop
-- description: User related functions
-  name: user
 paths:
   /car:
     get:
