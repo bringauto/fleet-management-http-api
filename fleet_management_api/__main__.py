@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
+from typing import Dict
+import json
 
 import fleet_management_api.app as app
-from fleet_management_api.database.connection import set_connection_source, current_connection_source, Base
+from fleet_management_api.database import set_connection_source, set_up_database
 
 
 def main():
     set_connection_source("fleet_management.db")
-    Base.metadata.create_all(bind=current_connection_source())
     application = app.get_app()
+    config = _load_config()
+    set_up_database(config["database"])
     application.run(port=8080)
+
+
+def _load_config() -> Dict:
+    fp = open("./config/config.json", "r")
+    return json.load(fp)
 
 
 if __name__ == '__main__':

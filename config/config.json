@@ -1,0 +1,11 @@
+{
+    "database": {
+        "maximum_number_of_table_rows": {
+            "car_states": 5,
+            "order_states": 5
+        }
+    },
+    "request_for_messages": {
+        "timeout_in_seconds": 5
+    }
+}

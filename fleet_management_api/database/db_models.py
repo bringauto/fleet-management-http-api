@@ -37,6 +37,11 @@ class CarStateDBModel(Base):
     def max_n_of_states(cls) -> int:
         return 50
 
+    @classmethod
+    def set_max_number_of_stored_states(cls, n: int) -> None:
+        if n>0:
+            cls.max_n_of_states = n
+
 
 @dataclasses.dataclass
 class OrderDBModel(Base):
@@ -86,3 +91,8 @@ class OrderStateDBModel(Base):
     @property
     def max_n_of_states(cls) -> int:
         return 50
+
+    @classmethod
+    def set_max_number_of_stored_states(cls, n: int) -> None:
+        if n>0:
+            cls.max_n_of_states = n
