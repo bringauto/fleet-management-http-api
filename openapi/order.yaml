@@ -335,9 +335,9 @@ components:
         status:
           $ref: '#/components/schemas/OrderStatus'
         orderId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        timestamp:
+          $ref: 'common_models.yaml#/components/schemas/Timestamp'
     OrderStatus:
       type: string
       description: OrderStatus (to_accept, accepted, in_progress, done, canceled)

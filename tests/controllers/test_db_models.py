@@ -200,6 +200,7 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         self.assertEqual(order_state_db_model.id, order_state.id)
         self.assertEqual(order_state_db_model.status, order_state.status)
         self.assertEqual(order_state_db_model.order_id, order_state.order_id)
+        self.assertEqual(order_state_db_model.timestamp, order_state.timestamp)
 
     def test_order_state_converted_to_db_model_and_back_preserves_its_attributes(self):
         order_state_in = OrderState(id=1, status="to_accept", order_id=1)

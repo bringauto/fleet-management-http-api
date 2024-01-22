@@ -2569,6 +2569,7 @@ components:
         orderId: 1
         id: 1
         status: to_accept
+        timestamp: 1616425200000
       properties:
         id:
           example: 1
@@ -2580,7 +2581,13 @@ components:
         orderId:
           example: 1
           format: int32
-          title: orderId
+          title: id
+          type: integer
+        timestamp:
+          description: Unix timestamp in milliseconds
+          example: 1616425200000
+          format: int64
+          title: timestamp
           type: integer
       required:
       - id
@@ -2743,3 +2750,9 @@ components:
           type: number
       title: GNSSPosition
       type: object
+    Timestamp:
+      description: Unix timestamp in milliseconds
+      example: 1616425200000
+      format: int64
+      title: timestamp
+      type: integer

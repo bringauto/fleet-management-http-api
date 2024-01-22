@@ -30,3 +30,8 @@ components:
         phone:
           type: string
           example: '+420123456789'
+    Timestamp:
+      description: Unix timestamp in milliseconds
+      type: integer
+      format: int64
+      example: 1616425200000

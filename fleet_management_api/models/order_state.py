@@ -14,7 +14,7 @@ class OrderState(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, status=None, order_id=None):  # noqa: E501
+    def __init__(self, id=None, status=None, order_id=None, timestamp=None):  # noqa: E501
         """OrderState - a model defined in OpenAPI
 
         :param id: The id of this OrderState.  # noqa: E501
@@ -23,22 +23,27 @@ class OrderState(Model):
         :type status: OrderStatus
         :param order_id: The order_id of this OrderState.  # noqa: E501
         :type order_id: int
+        :param timestamp: The timestamp of this OrderState.  # noqa: E501
+        :type timestamp: int
         """
         self.openapi_types = {
             'id': int,
             'status': OrderStatus,
-            'order_id': int
+            'order_id': int,
+            'timestamp': int
         }
 
         self.attribute_map = {
             'id': 'id',
             'status': 'status',
-            'order_id': 'orderId'
+            'order_id': 'orderId',
+            'timestamp': 'timestamp'
         }
 
         self._id = id
         self._status = status
         self._order_id = order_id
+        self._timestamp = timestamp
 
     @classmethod
     def from_dict(cls, dikt) -> 'OrderState':
@@ -119,3 +124,26 @@ class OrderState(Model):
             raise ValueError("Invalid value for `order_id`, must not be `None`")  # noqa: E501
 
         self._order_id = order_id
+
+    @property
+    def timestamp(self) -> int:
+        """Gets the timestamp of this OrderState.
+
+        Unix timestamp in milliseconds  # noqa: E501
+
+        :return: The timestamp of this OrderState.
+        :rtype: int
+        """
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp: int):
+        """Sets the timestamp of this OrderState.
+
+        Unix timestamp in milliseconds  # noqa: E501
+
+        :param timestamp: The timestamp of this OrderState.
+        :type timestamp: int
+        """
+
+        self._timestamp = timestamp
