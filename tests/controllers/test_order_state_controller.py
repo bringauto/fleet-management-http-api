@@ -3,6 +3,7 @@ import unittest
 from fleet_management_api.app import get_app
 from fleet_management_api.models import OrderState, Order, Car
 import fleet_management_api.database.connection as connection
+import fleet_management_api.database.db_models as db_models
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
@@ -167,6 +168,43 @@ class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestC
             response = c.get('/v1/order/wait/1')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
+
+
+class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_test_connection_source()
+        self.app = get_app().app
+        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=car)
+            c.post('/v1/order', json=order)
+        self.max_n = db_models.OrderStateDBModel.max_n_of_states
+
+    def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
+        with self.app.test_client() as c:
+            oldest_state = OrderState(id=0, status="to_accept", order_id=12)
+            c.post('/v1/orderstate', json=oldest_state)
+            for i in range(1, self.max_n - 1):
+                order_state = OrderState(id=i, status="to_accept", order_id=12)
+                c.post('/v1/orderstate', json=order_state)
+            response = c.get('/v1/orderstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n - 1)
+
+            order_state = OrderState(id=self.max_n, status="to_accept", order_id=12)
+            c.post('/v1/orderstate', json=order_state)
+            response = c.get('/v1/orderstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n)
+
+            order_state = OrderState(id=self.max_n + 1, status="to_accept", order_id=12)
+            c.post('/v1/orderstate', json=order_state)
+            response = c.get('/v1/orderstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), self.max_n)
+            self.assertFalse(oldest_state in response.json)
 
 
 if __name__ == '__main__':

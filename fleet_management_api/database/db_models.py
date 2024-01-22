@@ -74,3 +74,8 @@ class OrderStateDBModel(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     status: Mapped[str] = Column(String)
     order_id: Mapped[int] = Column(Integer)
+
+    @classmethod
+    @property
+    def max_n_of_states(cls) -> int:
+        return 50
