@@ -63,37 +63,6 @@ paths:
           $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
-    put:
-      operationId: updateOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-      tags:
-        - order
-      summary: Update an existing order by ID
-      requestBody:
-        description: Order update json
-        x-body-name: order
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Order'
-        required: true
-      responses:
-        '200':
-          description: Successful order update
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /order/{orderId}:
     get:
       operationId: getOrder

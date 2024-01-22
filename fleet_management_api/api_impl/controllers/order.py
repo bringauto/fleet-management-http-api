@@ -73,26 +73,6 @@ def get_orders() -> ConnexionResponse:
     )
 
 
-def update_order(order) -> ConnexionResponse:
-    if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())
-        order_db_model = obj_to_db.order_to_db_model(order)
-        response = db_access.update_record(updated_obj=order_db_model)
-        if 200 <= response.status_code < 300:
-            log_info(f"Order (id={order.id} has been suchas been succesfully updated.")
-            return ConnexionResponse(status_code=200, content_type="application/json", body=order)
-        elif response.status_code == 404:
-            log_error(f"Order (id={order.id}) was not found and could not be updated. {response.body}")
-            return ConnexionResponse(status_code=404, content_type="application/json", body=order)
-        else:
-            log_error(f"Order (id={order.id}) could not be updated. {response.body}")
-            return ConnexionResponse(status_code=400, content_type="application/json", body=order)
-    else:
-        msg = f"Invalid request format: {connexion.request.data}. JSON is required."
-        log_error(msg)
-        return ConnexionResponse(status_code=400, content_type="text/plain", body=msg)
-
-
 def _car_exist(car_id: int) -> bool:
     return bool(db_access.get_records(db_models.CarDBModel, equal_to={'id': car_id}))
 

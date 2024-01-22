@@ -71,18 +71,3 @@ def get_updated_orders(car_id):  # noqa: E501
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
     """
     return 'do some magic!'
-
-
-def update_order(order):  # noqa: E501
-    """Update an existing order by ID
-
-     # noqa: E501
-
-    :param order: Order update json
-    :type order: dict | bytes
-
-    :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
-    """
-    if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
