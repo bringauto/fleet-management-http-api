@@ -1788,14 +1788,12 @@ paths:
       parameters:
       - description: ID of route to delete
         example: 1
-        explode: false
         in: path
         name: routeId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful route removal
@@ -1874,14 +1872,12 @@ paths:
       parameters:
       - description: ID of route to return
         example: 1
-        explode: false
         in: path
         name: routeId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -2393,56 +2389,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
-    Route:
-      description: Route object structure
-      example:
-        name: Lužánky
-        stopIds:
-        - 1
-        - 2
-        - 3
-        - 4
-        id: 1
-        points:
-        - latitude: 49.204117
-          longitude: 16.606525
-          altitude: 400.25
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        name:
-          example: Lužánky
-          title: name
-          type: string
-        points:
-          default: []
-          example:
-          - latitude: 49.204117
-            longitude: 16.606525
-            altitude: 400.25
-          items:
-            $ref: '#/components/schemas/GNSSPosition'
-          title: points
-          type: array
-        stopIds:
-          default: []
-          example:
-          - 1
-          - 2
-          - 3
-          - 4
-          items:
-            type: integer
-          title: stopIds
-          type: array
-      required:
-      - id
-      - name
-      title: Route
-      type: object
     Stop:
       description: Stop object structure
       example:
@@ -2707,6 +2653,56 @@ components:
       - id
       - name
       title: PlatformHwId
+      type: object
+    Route:
+      description: Route object structure
+      example:
+        name: Lužánky
+        stopIds:
+        - 1
+        - 2
+        - 3
+        - 4
+        id: 1
+        points:
+        - latitude: 49.204117
+          longitude: 16.606525
+          altitude: 400.25
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        name:
+          example: Lužánky
+          title: name
+          type: string
+        points:
+          default: []
+          example:
+          - latitude: 49.204117
+            longitude: 16.606525
+            altitude: 400.25
+          items:
+            $ref: '#/components/schemas/GNSSPosition'
+          title: points
+          type: array
+        stopIds:
+          default: []
+          example:
+          - 1
+          - 2
+          - 3
+          - 4
+          items:
+            type: integer
+          title: stopIds
+          type: array
+      required:
+      - id
+      - name
+      title: Route
       type: object
     Id:
       example: 1
