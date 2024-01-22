@@ -146,5 +146,28 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             self.assertEqual(response.json[1]["id"], 7)
 
 
+class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_test_connection_source()
+        self.app = get_app().app
+        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=car)
+            c.post('/v1/order', json=order_1)
+            c.post('/v1/order', json=order_2)
+
+    def test_adding_state_to_existing_order_makes_the_order_to_appear_as_updated(self):
+        order_state = OrderState(id=3, status="to_accept", order_id=12)
+        with self.app.test_client() as c:
+            c.get('/v1/order/wait/1')
+            c.post('/v1/orderstate', json=order_state)
+            response = c.get('/v1/order/wait/1')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

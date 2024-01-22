@@ -21,6 +21,7 @@ def create_order_state(order_state) -> ConnexionResponse:
     order_state_db_model = obj_to_db.order_state_to_db_model(order_state)
     response = db_access.add_record(db_models.OrderStateDBModel, order_state_db_model)
     if response.status_code == 200:
+        _mark_order_as_updated(order_state.order_id)
         return log_and_respond(200, f"Order state (id={order_state.id}) has been sent.")
     elif response.status_code == 400:
         return log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
@@ -48,3 +49,9 @@ def get_order_states(order_id: int, all_available: bool = False) -> ConnexionRes
 def _order_exists(order_id: int) -> bool:
     order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
     return len(order_db_models) > 0
+
+
+def _mark_order_as_updated(order_id: int) -> None:
+    order_db_model:db_models.OrderDBModel = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})[0]
+    order_db_model.updated = True
+    db_access.update_record(order_db_model)
