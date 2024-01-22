@@ -1424,14 +1424,12 @@ paths:
       parameters:
       - description: ID of platform hwId to delete
         example: 1
-        explode: false
         in: path
         name: platformhwidId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful platform hardware ID removal
@@ -1510,14 +1508,12 @@ paths:
       parameters:
       - description: ID of platform hwId to return
         example: 1
-        explode: false
         in: path
         name: platformhwidId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -2397,26 +2393,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
-    PlatformHwId:
-      description: PlatformHwId object structure
-      example:
-        name: ABCD1234EF56
-        id: 1
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        name:
-          example: ABCD1234EF56
-          title: name
-          type: string
-      required:
-      - id
-      - name
-      title: PlatformHwId
-      type: object
     Route:
       description: Route object structure
       example:
@@ -2712,6 +2688,26 @@ components:
       example: to_accept
       title: OrderStatus
       type: string
+    PlatformHwId:
+      description: PlatformHwId object structure
+      example:
+        name: ABCD1234EF56
+        id: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        name:
+          example: ABCD1234EF56
+          title: name
+          type: string
+      required:
+      - id
+      - name
+      title: PlatformHwId
+      type: object
     Id:
       example: 1
       format: int32
