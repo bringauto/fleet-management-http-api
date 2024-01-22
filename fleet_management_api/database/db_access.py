@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Type
+from typing import Any, Dict, Optional, List, Type, Literal
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
@@ -42,6 +42,24 @@ def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> Connexi
             return ConnexionResponse(body=f"Object with {id_name}={id_value} was deleted from table " \
                                      f"{base_type.__tablename__}.", status_code=200
                                     )
+
+
+def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Literal["minimum", "maximum"]) -> ConnexionResponse:
+    table = base_type.__table__
+    if not id_name in table.columns.keys():
+        return ConnexionResponse(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=404)
+    with current_connection_source().begin() as conn:
+        if start_from == "minimum":
+            subquery = select(table.c.id).order_by(table.c.id).limit(n).alias()
+        else:
+            subquery = select(table.c.id).order_by(table.c.id.desc()).limit(n).alias()
+        stmt = table.delete().where(table.c.id.in_(subquery))
+        result = conn.execute(stmt)
+        n_of_deleted_items = result.rowcount
+        if n_of_deleted_items == 0:
+            return ConnexionResponse(content_type="text/plain", body="Nothing deleted from the database.", status_code=200)
+        else:
+            return ConnexionResponse(content_type="text/plain", body=f"{n_of_deleted_items} objects deleted from the database.", status_code=200)
 
 
 def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
