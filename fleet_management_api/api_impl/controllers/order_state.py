@@ -22,6 +22,7 @@ def create_order_state(order_state) -> ConnexionResponse:
     response = db_access.add_record(db_models.OrderStateDBModel, order_state_db_model)
     if response.status_code == 200:
         _mark_order_as_updated(order_state.order_id)
+        _remove_old_states()
         return log_and_respond(200, f"Order state (id={order_state.id}) has been sent.")
     elif response.status_code == 400:
         return log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
@@ -55,3 +56,20 @@ def _mark_order_as_updated(order_id: int) -> None:
     order_db_model:db_models.OrderDBModel = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})[0]
     order_db_model.updated = True
     db_access.update_record(order_db_model)
+
+
+def _remove_old_states() -> ConnexionResponse:
+    order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
+    if len(order_state_db_models) > db_models.OrderStateDBModel.max_n_of_states:
+        response = db_access.delete_n_records(
+            db_models.OrderStateDBModel,
+            len(order_state_db_models) - db_models.OrderStateDBModel.max_n_of_states,
+            id_name='timestamp',
+            start_from="minimum"
+        )
+        if response.status_code != 200:
+            return log_and_respond(response.status_code, response.body)
+        else:
+            return log_and_respond(200, "Removing oldest order state.")
+    else:
+        return ConnexionResponse(status_code=200, content_type="text/plain", body="")

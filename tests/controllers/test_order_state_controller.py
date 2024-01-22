@@ -199,12 +199,16 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
 
-            order_state = OrderState(id=self.max_n + 1, status="to_accept", order_id=12)
-            c.post('/v1/orderstate', json=order_state)
+            newest_state = OrderState(id=self.max_n + 1, status="to_accept", order_id=12)
+            c.post('/v1/orderstate', json=newest_state)
             response = c.get('/v1/orderstate/12?allAvailable=true')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
-            self.assertFalse(oldest_state in response.json)
+            self.assertTrue(isinstance(response.json, list))
+
+            ids = [state["id"] for state in response.json]
+            self.assertFalse(oldest_state.id in ids)
+            self.assertTrue(newest_state.id in ids)
 
 
 if __name__ == '__main__':
