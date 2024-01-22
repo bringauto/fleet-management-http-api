@@ -46,15 +46,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Car'
-
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -82,11 +81,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
       operationId: updateCar
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -109,15 +108,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Car'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /car/{carId}:
     get:
       operationId: getCar
@@ -142,15 +141,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Car'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     delete:
       operationId: deleteCar
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -170,17 +169,17 @@ paths:
         '200':
           description: Successful car removal
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/MethodNotAllowed'
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /car/startstop/{carId}:
     get:
       operationId: startstopCar
@@ -201,15 +200,15 @@ paths:
         '200':
           description: Successful car start/stop
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
       operationId: addCarState
@@ -233,13 +232,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/CarState'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getAllCarStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -256,11 +255,11 @@ paths:
                 items:
                   $ref: '#/components/schemas/CarState'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
   /carstate/{carId}:
     get:
@@ -293,13 +292,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/CarState'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /order:
     post:
       operationId: createOrder
@@ -323,13 +322,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getOrders
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -359,11 +358,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
       operationId: updateOrder
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -386,15 +385,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /order/{orderId}:
     get:
       operationId: getOrder
@@ -419,15 +418,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     delete:
       operationId: deleteOrder
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -447,17 +446,17 @@ paths:
         '200':
           description: Successful order removal
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/MethodNotAllowed'
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /order/wait/{carId}:
     get:
       operationId: getUpdatedOrders
@@ -482,17 +481,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '408':
-          $ref: '#/components/responses/RequestTimeout'
+          $ref: 'errors.yaml#/components/responses/RequestTimeout'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /orderstate:
     post:
       operationId: createOrderState
@@ -516,15 +515,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrderState'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getAllOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -550,11 +549,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /orderstate/{orderId}:
     get:
       operationId: getOrderStates
@@ -586,13 +585,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrderState'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /platformhwid:
     post:
       operationId: createHwId
@@ -616,13 +615,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlatformHwId'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getHwIds
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
@@ -646,11 +645,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /platformhwid/{platformhwidId}:
     get:
       operationId: getHwId
@@ -675,15 +674,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/PlatformHwId'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     delete:
       operationId: deleteHwId
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
@@ -703,17 +702,17 @@ paths:
         '200':
           description: Successful platform hardware ID removal
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/MethodNotAllowed'
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /route:
     post:
       operationId: createRoute
@@ -737,13 +736,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Route'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getRoutes
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -775,11 +774,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
       operationId: updateRoute
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -802,15 +801,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Route'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /route/{routeId}:
     get:
       operationId: getRoute
@@ -835,15 +834,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Route'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     delete:
       operationId: deleteRoute
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -863,17 +862,17 @@ paths:
         '200':
           description: Successful route removal
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/MethodNotAllowed'
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /stop:
     post:
       operationId: createStop
@@ -897,13 +896,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Stop'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -933,11 +932,11 @@ paths:
                   }
                 ]
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
       operationId: updateStop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -960,15 +959,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Stop'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /stop/{stopId}:
     get:
       operationId: getStop
@@ -993,15 +992,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Stop'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
     delete:
       operationId: deleteStop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -1021,96 +1020,18 @@ paths:
         '200':
           description: Successful stop removal
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'errors.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'errors.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/MethodNotAllowed'
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
-          $ref: '#/components/responses/UnexpectedError'
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
 components:
-  responses:
-    BadRequest:
-      description: Bad request
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '400'
-                message: 'Bad request'
-    Unauthorized:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '401'
-                message: 'Unauthorized'
-    Forbidden:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '403'
-                message: 'Request forbidden'
-    NotFound:
-      description: Not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '404'
-                message: 'Resource not found'
-    MethodNotAllowed:
-      description: Method not allowed
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '405'
-                message: 'Method not allowed'
-    RequestTimeout:
-      description: Request timeout
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '408'
-                message: 'Request timeout'
-    UnexpectedError:
-      description: Unexpected error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            error:
-              value:
-                code: '500'
-                message: 'Unexpected error'
   schemas:
     Car:
       type: object
@@ -1171,19 +1092,6 @@ components:
           example: 20.5
         position:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
-    Error:
-      type: object
-      description: Error object structure
-      properties:
-        code:
-          type: integer
-          example: 404
-        message:
-          type: string
-          example: 'Not found'
-      required:
-        - code
-        - message
     Order:
       type: object
       description: Order object structure

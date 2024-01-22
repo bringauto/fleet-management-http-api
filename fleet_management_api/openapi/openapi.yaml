@@ -2339,17 +2339,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
 components:
   responses:
-    BadRequest:
-      content:
-        application/json:
-          examples:
-            error:
-              value:
-                code: "400"
-                message: Bad request
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Bad request
     Unauthorized:
       content:
         application/json:
@@ -2372,6 +2361,28 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Forbidden
+    UnexpectedError:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "500"
+                message: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unexpected error
+    BadRequest:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "400"
+                message: Bad request
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request
     NotFound:
       content:
         application/json:
@@ -2405,17 +2416,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Request timeout
-    UnexpectedError:
-      content:
-        application/json:
-          examples:
-            error:
-              value:
-                code: "500"
-                message: Unexpected error
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Unexpected error
   schemas:
     Car:
       description: Car object structure
@@ -2504,22 +2504,6 @@ components:
       - id
       - status
       title: CarState
-      type: object
-    Error:
-      description: Error object structure
-      properties:
-        code:
-          example: 404
-          title: code
-          type: integer
-        message:
-          example: Not found
-          title: message
-          type: string
-      required:
-      - code
-      - message
-      title: Error
       type: object
     Order:
       description: Order object structure
@@ -2732,6 +2716,22 @@ components:
       pattern: ^(low|normal|high)$
       title: priority
       type: string
+    Error:
+      description: Error object structure
+      properties:
+        code:
+          example: 404
+          title: code
+          type: integer
+        message:
+          example: Not found
+          title: message
+          type: string
+      required:
+      - code
+      - message
+      title: Error
+      type: object
     MobilePhone:
       description: MobilePhone Primitive structure
       example:
