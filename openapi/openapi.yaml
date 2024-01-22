@@ -1132,7 +1132,7 @@ components:
           type: string
           example: 'BAT-2022-01'
         carAdminPhone:
-          $ref: '#/components/schemas/MobilePhone'
+          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
         defaultRouteId:
           type: integer
           format: int32
@@ -1170,7 +1170,7 @@ components:
           default: 0.0
           example: 20.5
         position:
-          $ref: '#/components/schemas/GNSSPosition'
+          $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
     Error:
       type: object
       description: Error object structure
@@ -1220,7 +1220,7 @@ components:
           format: int32
           example: 1
         notificationPhone:
-          $ref: '#/components/schemas/MobilePhone'
+          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
     OrderState:
       type: object
       description: Order state object structure
@@ -1271,7 +1271,7 @@ components:
           type: array
           default: []
           items:
-            $ref: '#/components/schemas/GNSSPosition'
+            $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
           example:
             [
               {
@@ -1302,9 +1302,9 @@ components:
           type: string
           example: 'Lidická'
         position:
-          $ref: '#/components/schemas/GNSSPosition'
+          $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
         notificationPhone:
-          $ref: '#/components/schemas/MobilePhone'
+          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
     CarStatus:
       type: string
       description: CarStatus enum
@@ -1314,32 +1314,6 @@ components:
         - out_of_order
         - stopped_by_phone
       example: idle
-    GNSSPosition:
-      type: object
-      description: GNSSPosition primitive structure
-      properties:
-        latitude:
-          type: number
-          format: float
-          example: 49.204117
-          default: 0.0
-        longitude:
-          type: number
-          format: float
-          example: 16.606525
-          default: 0.0
-        altitude:
-          type: number
-          format: float
-          example: 400.25
-          default: 0.0
-    MobilePhone:
-      type: object
-      description: MobilePhone Primitive structure
-      properties:
-        phone:
-          type: string
-          example: '+420123456789'
     OrderStatus:
       type: string
       description: OrderStatus (to_accept, accepted, in_progress, done, canceled)

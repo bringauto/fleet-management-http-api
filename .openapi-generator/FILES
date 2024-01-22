@@ -24,11 +24,5 @@ fleet_management_api/models/route.py
 fleet_management_api/models/stop.py
 fleet_management_api/openapi/openapi.yaml
 fleet_management_api/test/__init__.py
-fleet_management_api/test/test_car_controller.py
-fleet_management_api/test/test_car_state_controller.py
-fleet_management_api/test/test_order_controller.py
-fleet_management_api/test/test_platform_hw_id_controller.py
-fleet_management_api/test/test_route_controller.py
-fleet_management_api/test/test_stop_controller.py
 fleet_management_api/typing_utils.py
 fleet_management_api/util.py

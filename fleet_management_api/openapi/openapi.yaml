@@ -2715,6 +2715,34 @@ components:
       example: idle
       title: CarStatus
       type: string
+    OrderStatus:
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+      enum:
+      - to_accept
+      - accepted
+      - in_progress
+      - done
+      - canceled
+      example: to_accept
+      title: OrderStatus
+      type: string
+    Priority:
+      default: normal
+      description: "Priority (low, normal, high)"
+      pattern: ^(low|normal|high)$
+      title: priority
+      type: string
+    MobilePhone:
+      description: MobilePhone Primitive structure
+      example:
+        phone: "+420123456789"
+      properties:
+        phone:
+          example: "+420123456789"
+          title: phone
+          type: string
+      title: MobilePhone
+      type: object
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
@@ -2742,31 +2770,3 @@ components:
           type: number
       title: GNSSPosition
       type: object
-    MobilePhone:
-      description: MobilePhone Primitive structure
-      example:
-        phone: "+420123456789"
-      properties:
-        phone:
-          example: "+420123456789"
-          title: phone
-          type: string
-      title: MobilePhone
-      type: object
-    OrderStatus:
-      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
-      enum:
-      - to_accept
-      - accepted
-      - in_progress
-      - done
-      - canceled
-      example: to_accept
-      title: OrderStatus
-      type: string
-    Priority:
-      default: normal
-      description: "Priority (low, normal, high)"
-      pattern: ^(low|normal|high)$
-      title: priority
-      type: string
