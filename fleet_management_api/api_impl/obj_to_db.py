@@ -10,6 +10,7 @@ from fleet_management_api.models import (
     Stop
 )
 import fleet_management_api.database.db_models as db_models
+import fleet_management_api.database.timestamp as tstamp
 
 
 def car_to_db_model(car: Car) -> db_models.CarDBModel:
@@ -107,7 +108,8 @@ def order_state_to_db_model(order_state: OrderState) -> db_models.OrderStateDBMo
     return db_models.OrderStateDBModel(
         id=order_state.id,
         status=order_state.status,
-        order_id=order_state.order_id
+        order_id=order_state.order_id,
+        timestamp=tstamp.timestamp_in_ms()
     )
 
 

@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, Mock
 
 import fleet_management_api.api_impl.obj_to_db as obj_to_db
 from fleet_management_api.models import (
@@ -206,6 +207,13 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         order_state_in = OrderState(id=1, status="to_accept", order_id=1)
         order_state_out = obj_to_db.order_state_from_db_model(obj_to_db.order_state_to_db_model(order_state_in))
         self.assertEqual(order_state_out, order_state_in)
+
+    @patch('fleet_management_api.database.timestamp.timestamp_in_ms')
+    def test_order_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(self, mock_timestamp_in_ms: Mock):
+        mock_timestamp_in_ms.return_value(1234567890)
+        order_state = OrderState(id=1, status="to_accept", order_id=1)
+        order_state_db_model = obj_to_db.order_state_to_db_model(order_state)
+        self.assertEqual(order_state_db_model.timestamp, 1234567890)
 
 
 if __name__=="__main__":

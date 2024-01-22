@@ -49,12 +49,6 @@ def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Li
     if not id_name in table.columns.keys():
         return ConnexionResponse(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
 
-    id_column = table.columns[id_name]
-    if (id_column.unique is None) and (not id_column.primary_key):
-        return ConnexionResponse(
-            body=f"Values in column {id_name} in table {base_type.__tablename__} are not all unique "\
-                  "and cannot be used for sorting.", status_code=500)
-
     with current_connection_source().begin() as conn:
         if start_from == "minimum":
             subquery = select(table.c.id).order_by(table.c.id).limit(n).alias()

@@ -30,7 +30,7 @@ class CarStateDBModel(Base):
     speed: Mapped[int] = Column(Integer)
     fuel: Mapped[int] = Column(Integer)
     position: Mapped[dict] = mapped_column(JSON)
-    timestamp: Mapped[int] = Column(BigInteger, unique=True)
+    timestamp: Mapped[int] = Column(BigInteger)
 
 
 @dataclasses.dataclass
@@ -75,7 +75,7 @@ class OrderStateDBModel(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, unique=True)
     status: Mapped[str] = Column(String)
     order_id: Mapped[int] = Column(Integer)
-    timestamp: Mapped[int] = Column(BigInteger, unique=True)
+    timestamp: Mapped[int] = Column(BigInteger)
 
     @classmethod
     @property
