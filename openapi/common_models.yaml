@@ -1,6 +1,9 @@
 components:
   schemas:
-
+    Id:
+      type: integer
+      format: int32
+      example: 1
     GNSSPosition:
       type: object
       description: GNSSPosition primitive structure
@@ -20,7 +23,6 @@ components:
           format: float
           example: 400.25
           default: 0.0
-
     MobilePhone:
       type: object
       description: MobilePhone Primitive structure

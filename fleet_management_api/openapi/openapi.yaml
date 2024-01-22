@@ -2424,7 +2424,7 @@ components:
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
-        platformId: 5
+        platformId: 1
         carAdminPhone:
           phone: "+420123456789"
       properties:
@@ -2434,9 +2434,9 @@ components:
           title: id
           type: integer
         platformId:
-          example: 5
+          example: 1
           format: int32
-          title: platformId
+          title: id
           type: integer
         name:
           example: BAT-2022-01
@@ -2447,7 +2447,7 @@ components:
         defaultRouteId:
           example: 1
           format: int32
-          title: defaultRouteId
+          title: id
           type: integer
         underTest:
           default: true
@@ -2489,7 +2489,7 @@ components:
         carId:
           example: 1
           format: int32
-          title: carId
+          title: id
           type: integer
         speed:
           default: 0.0
@@ -2532,12 +2532,12 @@ components:
         userId:
           example: 1
           format: int32
-          title: userId
+          title: id
           type: integer
         carId:
           example: 1
           format: int32
-          title: carId
+          title: id
           type: integer
         notification:
           example: Order notification
@@ -2546,12 +2546,12 @@ components:
         targetStopId:
           example: 1
           format: int32
-          title: targetStopId
+          title: id
           type: integer
         stopRouteId:
           example: 1
           format: int32
-          title: stopRouteId
+          title: id
           type: integer
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
@@ -2732,6 +2732,11 @@ components:
       - message
       title: Error
       type: object
+    Id:
+      example: 1
+      format: int32
+      title: id
+      type: integer
     MobilePhone:
       description: MobilePhone Primitive structure
       example:

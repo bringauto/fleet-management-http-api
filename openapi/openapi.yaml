@@ -1042,12 +1042,9 @@ components:
         - name
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         platformId:
-          type: integer
-          format: int32
+          $ref: 'common_models.yaml#/components/schemas/Id'
           example: 5
         name:
           type: string
@@ -1055,9 +1052,7 @@ components:
         carAdminPhone:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
         defaultRouteId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         underTest:
           type: boolean
           default: true
@@ -1071,9 +1066,7 @@ components:
         - carId
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         status:
           $ref: '#/components/schemas/CarStatus'
         fuel:
@@ -1082,9 +1075,7 @@ components:
           default: 0
           example: 80
         carId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         speed:
           type: number
           format: float
@@ -1103,30 +1094,20 @@ components:
         - stopRouteId
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         priority:
           $ref: "#/components/schemas/Priority"
         userId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         carId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         notification:
           type: string
           example: 'Order notification'
         targetStopId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         stopRouteId:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         notificationPhone:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
     OrderState:
@@ -1138,9 +1119,7 @@ components:
         - orderId
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         status:
           $ref: '#/components/schemas/OrderStatus'
         orderId:
@@ -1155,9 +1134,7 @@ components:
         - name
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         name:
           type: string
           example: 'ABCD1234EF56'
@@ -1169,9 +1146,7 @@ components:
         - name
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         name:
           type: string
           example: 'Lužánky'
@@ -1203,9 +1178,7 @@ components:
         - position
       properties:
         id:
-          type: integer
-          format: int32
-          example: 1
+          $ref: 'common_models.yaml#/components/schemas/Id'
         name:
           type: string
           example: 'Lidická'
