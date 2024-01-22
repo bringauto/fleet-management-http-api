@@ -85,6 +85,13 @@ class Test_Creating_Car_State_DB_Model(unittest.TestCase):
         state_out = obj_to_db.car_state_from_db_model(obj_to_db.car_state_to_db_model(state_in))
         self.assertEqual(state_out, state_in)
 
+    @patch('fleet_management_api.database.timestamp.timestamp_in_ms')
+    def test_car_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(self, mock_timestamp_in_ms: Mock):
+        mock_timestamp_in_ms.return_value = 1234567890
+        order_state = CarState(id=1, status="idle", fuel=50, car_id=2, speed=0, position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50))
+        order_state_db_model = obj_to_db.car_state_to_db_model(order_state)
+        self.assertEqual(order_state_db_model.timestamp, 1234567890)
+
 
 class Test_Creating_Order_DB_Model(unittest.TestCase):
 
@@ -201,7 +208,6 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         self.assertEqual(order_state_db_model.id, order_state.id)
         self.assertEqual(order_state_db_model.status, order_state.status)
         self.assertEqual(order_state_db_model.order_id, order_state.order_id)
-        self.assertEqual(order_state_db_model.timestamp, order_state.timestamp)
 
     def test_order_state_converted_to_db_model_and_back_preserves_its_attributes(self):
         order_state_in = OrderState(id=1, status="to_accept", order_id=1)
@@ -210,7 +216,7 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
 
     @patch('fleet_management_api.database.timestamp.timestamp_in_ms')
     def test_order_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(self, mock_timestamp_in_ms: Mock):
-        mock_timestamp_in_ms.return_value(1234567890)
+        mock_timestamp_in_ms.return_value = 1234567890
         order_state = OrderState(id=1, status="to_accept", order_id=1)
         order_state_db_model = obj_to_db.order_state_to_db_model(order_state)
         self.assertEqual(order_state_db_model.timestamp, 1234567890)

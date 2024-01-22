@@ -46,13 +46,15 @@ def car_state_to_db_model(car_state: CarState) -> db_models.CarStateDBModel:
         car_position = None
     else:
         car_position = car_state.position.to_dict()
+    timestamp = timestamp=tstamp.timestamp_in_ms()
     return db_models.CarStateDBModel(
         id=car_state.id,
         status=car_state.status,
         car_id=car_state.car_id,
         speed=car_state.speed,
         fuel=car_state.fuel,
-        position=car_position
+        position=car_position,
+        timestamp=timestamp
     )
 
 
