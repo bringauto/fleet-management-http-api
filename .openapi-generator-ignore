@@ -29,7 +29,7 @@ Dockerfile
 tox.ini
 test-requirements.txt
 
-/test/*
+/fleet_management_api/test
 /.travis.yml
 /git_push.sh
 /setup.py
