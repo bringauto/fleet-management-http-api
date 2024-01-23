@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import Dict, List, Any, Iterable
+from typing import Dict, List, Any, Iterable, Optional
 import time
 import threading
 
 
 class WaitObjManager:
 
-    _default_timeout_ms: int = 1000
+    _default_timeout_ms: int = 5000
 
     def __init__(self, timeout_ms: int = _default_timeout_ms) -> None:
         WaitObjManager._check_nonnegative_timeout(timeout_ms)
@@ -16,9 +16,11 @@ class WaitObjManager:
     @property
     def timeout_ms(self) -> int: return self._timeout_ms
 
-    def new_wait_obj(self, key: Any) -> WaitObj:
+    def new_wait_obj(self, key: Any, timeout_ms: Optional[int] = None) -> WaitObj:
         """Create a new wait object and adds it to the wait queue for given key."""
-        wait_obj = WaitObj(key, self._timeout_ms)
+        if timeout_ms is None:
+            timeout_ms = self._timeout_ms
+        wait_obj = WaitObj(key, timeout_ms)
         self._wait_dict[key] = wait_obj
         return wait_obj
 
@@ -41,10 +43,10 @@ class WaitObjManager:
         self._check_nonnegative_timeout(timeout_ms)
         self._timeout_ms = timeout_ms
 
-    def wait_and_get_response(self, key: Any) -> List[Any]:
+    def wait_and_get_response(self, key: Any, timeout_ms: Optional[int] = None) -> List[Any]:
         """Wait for the next wait object in queue to respond and returns the response content.
         The queue is identified by given key."""
-        wait_obj = self.new_wait_obj(key)
+        wait_obj = self.new_wait_obj(key, timeout_ms)
         reponse = wait_obj.wait_and_get_response()
         self.remove_wait_obj(wait_obj)
         return reponse

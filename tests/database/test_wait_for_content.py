@@ -3,13 +3,14 @@ import sys
 sys.path.append('.')
 import os
 from concurrent.futures import ThreadPoolExecutor
+import time
 
 import fleet_management_api.database.connection as connection
 import fleet_management_api.database.db_access as db_access
 import tests.database.models as models
 
 
-_TEST_DB_FILE_PATH = "test.db"
+_TEST_DB_FILE_PATH = "test_db_file.db"
 
 
 class Test_Waiting_For_Content(unittest.TestCase):
@@ -30,7 +31,14 @@ class Test_Waiting_For_Content(unittest.TestCase):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(db_access.get_records, models.TestBase, wait=False)
+            time.sleep(0.05)
             executor.submit(db_access.add_record, models.TestBase, test_obj)
+            retrieved_objs = future.result()
+            self.assertListEqual(retrieved_objs, [])
+
+    def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=100)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 

@@ -75,7 +75,7 @@ def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Li
             )
 
 
-def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wait: bool = False) -> List[Base]:
+def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wait: bool = False, timeout_ms: Optional[int] = None) -> List[Base]:
     global _wait_mg
     if equal_to is None:
         equal_to = {}
@@ -85,7 +85,7 @@ def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wai
         stmt = select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
         if not result and wait:
-            result = _wait_mg.wait_and_get_response(base.__tablename__)
+            result = _wait_mg.wait_and_get_response(base.__tablename__, timeout_ms)
         return result
 
 
