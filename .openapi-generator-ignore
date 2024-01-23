@@ -30,6 +30,7 @@ tox.ini
 test-requirements.txt
 
 /fleet_management_api/test
+/fleet_management_api/controllers
 /.travis.yml
 /git_push.sh
 /setup.py
