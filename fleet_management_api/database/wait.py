@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Dict, List, Any, Iterable, Optional
-import time
 import threading
 
 
@@ -77,8 +76,3 @@ class WaitObj:
         with self._condition:
             self._condition.wait(timeout=self._timeout_ms/1000)
         return self._response_content
-
-    @staticmethod
-    def timestamp() -> int:
-        """Unix timestamp in milliseconds."""
-        return int(time.time()*1000)
