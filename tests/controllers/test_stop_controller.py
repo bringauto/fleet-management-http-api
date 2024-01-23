@@ -130,7 +130,6 @@ class Test_Deleting_Stop(unittest.TestCase):
             c.post('/v1/stop', json=stop)
             response = c.get('/v1/stop')
 
-            print(response.json)
             self.assertEqual(len(response.json), 1)
 
             response = c.delete('/v1/stop/1234')
