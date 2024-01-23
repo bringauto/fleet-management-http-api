@@ -7,7 +7,7 @@ from fleet_management_api.database import set_connection_source, set_up_database
 
 
 def main():
-    set_connection_source("fleet_management.db")
+    set_connection_source("localhost:5432", "fleet_management", "postgres", "1234")
     application = app.get_app()
     config = _load_config()
     set_up_database(config["database"])

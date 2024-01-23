@@ -12,13 +12,13 @@ def current_connection_source() -> Engine:
     return _db_connection
 
 
-def db_url_production(location: str, username: str = "", password: str = "", db_name: str = "") -> str:
+def db_url_production(location: str, db_name: str = "", username: str = "", password: str = "") -> str:
     if username == "" and password == "":
-        return f"postgresql:psycopg://{location}/{db_name}"
+        return f"postgresql+psycopg://{location}/{db_name}"
     elif username == "" and password != "":
         return "Error when connecting to database: Missing username."
     else:
-        return f"postgresql:psycopg://{username}:{password}@{location}/{db_name}"
+        return f"postgresql+psycopg://{username}:{password}@{location}/{db_name}"
 
 
 def db_url_test(db_file_location: str = "") -> str:
@@ -28,7 +28,7 @@ def db_url_test(db_file_location: str = "") -> str:
         return f"sqlite:///{db_file_location}"
 
 
-def set_connection_source(db_location: str, db_name: str = "", username: str = "", password: str = "") -> None:
+def set_connection_source(db_location: str, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
     url = db_url_production(db_location, db_name, username, password)
     _set_connection(url)
 

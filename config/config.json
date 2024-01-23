@@ -1,8 +1,8 @@
 {
     "database": {
         "maximum_number_of_table_rows": {
-            "car_states": 5,
-            "order_states": 5
+            "car_states": 10,
+            "order_states": 10
         }
     },
     "request_for_messages": {
