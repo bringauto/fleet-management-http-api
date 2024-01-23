@@ -3,14 +3,14 @@ from typing import Dict
 import json
 
 import fleet_management_api.app as app
-from fleet_management_api.database import set_connection_source, set_up_database
+from fleet_management_api.database import set_up_database
 
 
 def main():
-    set_connection_source("localhost:5432", "fleet_management", "postgres", "1234")
     application = app.get_app()
     config = _load_config()
-    set_up_database(config["database"])
+    db_config = config["database"]
+    set_up_database(db_config)
     application.run(port=8080)
 
 
