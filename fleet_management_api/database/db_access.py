@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional, List, Type, Literal
+import functools
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.orm import Session
@@ -13,7 +14,7 @@ import fleet_management_api.database.wait as wait
 _DATABASE_RECORD_ID_NAME = "id"
 
 
-_wait_mg:wait.WaitObjManager = wait.WaitObjManager()
+_wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
 def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
@@ -75,7 +76,22 @@ def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Li
             )
 
 
-def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wait: bool = False, timeout_ms: Optional[int] = None) -> List[Base]:
+def _result_is_ok(item: Any, equal_to: Dict[str, Any]) -> bool:
+    for attr_label, attr_value in equal_to.items():
+        if not hasattr(item, attr_label):
+            return False
+        if item.__dict__[attr_label] != attr_value:
+            return False
+    return True
+
+
+def get_records(
+    base: Type[Base],
+    equal_to: Optional[Dict[str, Any]] = None,
+    wait: bool = False,
+    timeout_ms: Optional[int] = None
+    ) -> List[Base]:
+
     global _wait_mg
     if equal_to is None:
         equal_to = {}
@@ -85,7 +101,11 @@ def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wai
         stmt = select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
         if not result and wait:
-            result = _wait_mg.wait_and_get_response(base.__tablename__, timeout_ms)
+            result = _wait_mg.wait_and_get_response(
+                base.__tablename__,
+                timeout_ms,
+                validation = functools.partial(_result_is_ok, equal_to=equal_to)
+            )
         return result
 
 

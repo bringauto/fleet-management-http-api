@@ -47,5 +47,30 @@ class Test_Waiting_For_Content(unittest.TestCase):
             os.remove(_TEST_DB_FILE_PATH)
 
 
+class Test_Waiting_For_Specific_Content(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        models.initialize_test_tables(connection.current_connection_source())
+
+    def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
+        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            future = executor.submit(
+                db_access.get_records,
+                models.TestBase,
+                equal_to={"test_int": 456},
+                wait=True,
+                timeout_ms=100
+            )
+            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            retrieved_objs = future.result()
+            self.assertListEqual(retrieved_objs, [])
+
+    def tearDown(self) -> None:
+        if os.path.isfile(_TEST_DB_FILE_PATH):
+            os.remove(_TEST_DB_FILE_PATH)
+
+
 if __name__=="__main__":
     unittest.main() # pragma: no covers
