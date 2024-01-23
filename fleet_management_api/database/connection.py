@@ -34,10 +34,8 @@ def set_connection_source(db_location: str, db_name: str = "", username: str = "
 
 
 def set_test_connection_source(db_file_path: str = "") -> None:
-    global _db_connection
     url = db_url_test(db_file_path)
-    _db_connection = create_engine(url)
-    db_models.Base.metadata.create_all(_db_connection)
+    _set_connection(url)
 
 
 def set_up_database(config: Dict[str, Any]) -> None:
