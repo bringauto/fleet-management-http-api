@@ -14,13 +14,14 @@ OMITTED_FILES = [
     "fleet_management_api/controllers/*",
     "util.py",
     "typing_utils.py",
-    "encoder.py"
+    "encoder.py",
+    "tests/__main__.py"
 ]
 
 HTML_REPORT_FLAG = "-h"
 
 
-def _report_coverage(cov: coverage.Coverage) -> None: # pragma: no cover
+def _report_coverage(cov: coverage.Coverage) -> None:
     if HTML_REPORT_FLAG in sys.argv:
         cov.html_report()
         subprocess.run(["open", "htmlcov/index.html"])
@@ -28,7 +29,7 @@ def _report_coverage(cov: coverage.Coverage) -> None: # pragma: no cover
         cov.report()
 
 
-def _run_tests(show_test_names: bool = True) -> None: # pragma: no cover
+def _run_tests(show_test_names: bool = True) -> None:
     possible_paths = [os.path.join(TEST_DIR_NAME,path) for path in sys.argv[1:]]
     paths = [path for path in possible_paths if os.path.exists(path)]
     if not paths:
@@ -46,7 +47,7 @@ def _run_tests(show_test_names: bool = True) -> None: # pragma: no cover
     unittest.TextTestRunner(verbosity=verbosity, buffer=True).run(suite)
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     cov = coverage.Coverage(branch=True, omit=OMITTED_FILES)
     cov.start()
     _run_tests()
