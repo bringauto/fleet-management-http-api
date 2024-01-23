@@ -26,39 +26,39 @@ tags:
 
 paths:
   /car:
-    $ref: 'car.yaml#/paths/~1car'
+    $ref: 'components/car.yaml#/paths/~1car'
   /car/{carId}:
-    $ref: 'car.yaml#/paths/~1car~1{carId}'
+    $ref: 'components/car.yaml#/paths/~1car~1{carId}'
   /car/startstop/{carId}:
-    $ref: 'car.yaml#/paths/~1car~1startstop~1{carId}'
+    $ref: 'components/car.yaml#/paths/~1car~1startstop~1{carId}'
   /carstate:
-    $ref: 'car.yaml#/paths/~1carstate'
+    $ref: 'components/car.yaml#/paths/~1carstate'
   /carstate/{carId}:
-    $ref: 'car.yaml#/paths/~1carstate~1{carId}'
+    $ref: 'components/car.yaml#/paths/~1carstate~1{carId}'
 
   /order:
-    $ref: 'order.yaml#/paths/~1order'
+    $ref: 'components/order.yaml#/paths/~1order'
   /order/{orderId}:
-    $ref: 'order.yaml#/paths/~1order~1{orderId}'
+    $ref: 'components/order.yaml#/paths/~1order~1{orderId}'
   /order/wait/{carId}:
-    $ref: 'order.yaml#/paths/~1order~1wait~1{carId}'
+    $ref: 'components/order.yaml#/paths/~1order~1wait~1{carId}'
   /orderstate:
-    $ref: 'order.yaml#/paths/~1orderstate'
+    $ref: 'components/order.yaml#/paths/~1orderstate'
   /orderstate/{orderId}:
-    $ref: 'order.yaml#/paths/~1orderstate~1{orderId}'
+    $ref: 'components/order.yaml#/paths/~1orderstate~1{orderId}'
 
   /platformhwid:
-    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid'
+    $ref: 'components/platform_hw_id.yaml#/paths/~1platformhwid'
   /platformhwid/{platformhwidId}:
-    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid~1{platformhwidId}'
+    $ref: 'components/platform_hw_id.yaml#/paths/~1platformhwid~1{platformhwidId}'
 
   /route:
-    $ref: 'route.yaml#/paths/~1route'
+    $ref: 'components/route.yaml#/paths/~1route'
   /route/{routeId}:
-    $ref: 'route.yaml#/paths/~1route~1{routeId}'
+    $ref: 'components/route.yaml#/paths/~1route~1{routeId}'
 
   /stop:
-    $ref: 'stop.yaml#/paths/~1stop'
+    $ref: 'components/stop.yaml#/paths/~1stop'
   /stop/{stopId}:
-    $ref: 'stop.yaml#/paths/~1stop~1{stopId}'
+    $ref: 'components/stop.yaml#/paths/~1stop~1{stopId}'
 
