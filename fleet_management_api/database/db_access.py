@@ -65,7 +65,7 @@ def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Li
             )
 
 
-def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None) -> List[Base]:
+def get_records(base: Type[Base], equal_to: Optional[Dict[str, Any]] = None, wait: bool = False) -> List[Base]:
     if equal_to is None:
         equal_to = {}
     table = base.__table__

@@ -1031,7 +1031,6 @@ paths:
         in: query
         name: wait
         schema:
-          default: false
           type: boolean
       - description: "A Unix timestamp in milliseconds. If specified, only states\
           \ created at the time or later will be returned. If unspecified, all states\
@@ -1039,7 +1038,6 @@ paths:
         in: query
         name: since
         schema:
-          default: 0
           format: int64
           type: integer
       responses:
@@ -2258,7 +2256,6 @@ components:
       in: query
       name: wait
       schema:
-        default: false
         type: boolean
     Since:
       description: "A Unix timestamp in milliseconds. If specified, only states created\
@@ -2267,7 +2264,6 @@ components:
       in: query
       name: since
       schema:
-        default: 0
         format: int64
         type: integer
   responses:

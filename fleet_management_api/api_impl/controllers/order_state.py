@@ -30,7 +30,7 @@ def create_order_state(order_state) -> ConnexionResponse:
         return log_and_respond(response.status_code, response.body)
 
 
-def get_all_order_states() -> ConnexionResponse:
+def get_all_order_states(wait: bool = False, since: int = 0) -> ConnexionResponse:
     order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
     order_states = [obj_to_db.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
     return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
