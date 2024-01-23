@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import fleet_management_api.database.connection as connection
@@ -20,6 +21,23 @@ class Test_Creating_Database_URL(unittest.TestCase):
     def test_test_database_url_with_specified_file_location(self):
         url = connection.db_url_test("test_db_file")
         self.assertEqual(url, "sqlite:///test_db_file")
+
+
+class Test_Creating_A_Test_Database(unittest.TestCase):
+
+    def setUp(self) -> None: # pragma: no cover
+        if os.path.isfile("test_db_file.db"):
+            os.remove("test_db_file.db")
+
+    def test_setting_up_a_test_database(self):
+        db_file_path = os.path.abspath("test_db_file.db")
+        connection.set_test_connection_source("test_db_file.db")
+        self.assertTrue(os.path.isfile(db_file_path))
+
+    def tearDown(self) -> None: # pragma: no cover
+        if os.path.isfile("test_db_file.db"):
+            os.remove("test_db_file.db")
+
 
 
 if __name__=="__main__":
