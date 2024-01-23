@@ -1,4 +1,6 @@
 from typing import Dict, Any
+import os
+
 from sqlalchemy import Engine, create_engine
 
 import fleet_management_api.database.db_models as db_models
@@ -33,9 +35,12 @@ def set_connection_source(db_location: str, db_name: str = "", username: str = "
     _set_connection(url)
 
 
-def set_test_connection_source(db_file_path: str = "") -> None:
+def set_test_connection_source(db_file_path: str = "") -> str:
     url = db_url_test(db_file_path)
+    if os.path.isfile(db_file_path):
+        os.remove(db_file_path)
     _set_connection(url)
+    return db_file_path
 
 
 def set_up_database(config: Dict[str, Any]) -> None:
