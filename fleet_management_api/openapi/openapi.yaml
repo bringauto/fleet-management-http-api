@@ -1023,6 +1023,25 @@ paths:
   /orderstate:
     get:
       operationId: get_all_order_states
+      parameters:
+      - description: "Applies for GET methods when no order statuses would be returned\
+          \ at the moment of request. If wait=true, \\ the request will wait for the\
+          \ next order state to be created and return it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only states\
+          \ created at the time or later will be returned. If unspecified, all states\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          default: 0
+          format: int64
+          type: integer
       responses:
         "200":
           content:
@@ -2230,6 +2249,27 @@ paths:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
 components:
+  parameters:
+    Wait:
+      description: "Applies for GET methods when no order statuses would be returned\
+        \ at the moment of request. If wait=true, \\ the request will wait for the\
+        \ next order state to be created and return it. If wait=False or unspecified,\
+        \ the request will return \\ an empty list."
+      in: query
+      name: wait
+      schema:
+        default: false
+        type: boolean
+    Since:
+      description: "A Unix timestamp in milliseconds. If specified, only states created\
+        \ at the time or later will be returned. If unspecified, all states are returned\
+        \ (since is set to 0 in that case)."
+      in: query
+      name: since
+      schema:
+        default: 0
+        format: int64
+        type: integer
   responses:
     Unauthorized:
       content:

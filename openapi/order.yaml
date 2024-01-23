@@ -199,6 +199,9 @@ paths:
       tags:
         - orderState
       summary: Finds all order states
+      parameters:
+        - $ref: '#/components/parameters/Wait'
+        - $ref: '#/components/parameters/Since'
       responses:
         '200':
           description: Successfuly found all order states
@@ -324,3 +327,26 @@ components:
       description: Priority (low, normal, high)
       pattern: ^(low|normal|high)$
       default: "normal"
+
+  parameters:
+    Wait:
+      name: wait
+      description: Applies for GET methods when no order statuses would be returned at the moment of request. If wait=true, \
+        the request will wait for the next order state to be created and return it. If wait=False or unspecified, the request will return \
+        an empty list.
+      in: query
+      schema:
+        type: boolean
+        default: false
+    Since:
+      name: since
+      description: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified,
+        all states are returned (since is set to 0 in that case).
+      in: query
+      schema:
+        type: integer
+        format: int64
+        default: 0
+
+
+
