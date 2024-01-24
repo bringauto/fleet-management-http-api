@@ -25,7 +25,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_requesting_order_state_without_wait_mechanism_enabled_immediatelly_returns_empty_list_even_if_no_state_was_sent_yet(self):
         with self.app.test_client() as c:
-            response = c.get('/v1/orderstate')
+            response = c.get('/v1/orderstate?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 0)
 
@@ -33,7 +33,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
-                future = executor.submit(c.get, '/v1/orderstate?wait=true')
+                future = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
                 time.sleep(0.01)
                 executor.submit(c.post, '/v1/orderstate', json=order_state)
                 response = future.result()
@@ -44,9 +44,9 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
-                future_1 = executor.submit(c.get, '/v1/orderstate?wait=true')
-                future_2 = executor.submit(c.get, '/v1/orderstate?wait=true')
-                future_3 = executor.submit(c.get, '/v1/orderstate?wait=true')
+                future_1 = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
+                future_2 = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
+                future_3 = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
                 time.sleep(0.01)
                 executor.submit(c.post, '/v1/orderstate', json=order_state)
                 for fut in [future_1, future_2, future_3]:
@@ -76,9 +76,9 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
-                future = executor.submit(c.get, '/v1/orderstate?wait=true')
-                future_1 = executor.submit(c.get, '/v1/orderstate/12?wait=true')
-                future_2 = executor.submit(c.get, '/v1/orderstate/13?wait=true')
+                future = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
+                future_1 = executor.submit(c.get, '/v1/orderstate/12?wait=true&since=0')
+                future_2 = executor.submit(c.get, '/v1/orderstate/13?wait=true&since=0')
                 time.sleep(0.01)
                 executor.submit(c.post, '/v1/orderstate', json=order_state)
 
@@ -110,9 +110,9 @@ class Test_Timeouts(unittest.TestCase):
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
-                future_1 = executor.submit(c.get, '/v1/orderstate?wait=true')
+                future_1 = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
                 time.sleep(0.05)
-                future_2 = executor.submit(c.get, '/v1/orderstate?wait=true')
+                future_2 = executor.submit(c.get, '/v1/orderstate?wait=true&since=0')
                 time.sleep(0.05)
                 executor.submit(c.post, '/v1/orderstate', json=order_state)
                 time.sleep(0.05)
@@ -236,6 +236,20 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             states: List[Dict] = c.get('/v1/orderstate/12').json
             self.assertEqual(len(states), 1)
             self.assertEqual(states[0]["id"], 2)
+
+    def test_waiting_with_since_parameter_unspecified_makes_the_api_wait_for_some_new_state_to_come(self):
+        old_state = OrderState(id=123, order_id=12, status="accepted")
+        new_state = OrderState(id=456, order_id=12, status="accepted")
+        with self.app.test_client() as c:
+            c.post('/v1/orderstate', json=old_state)
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                future = executor.submit(c.get, '/v1/orderstate/12?wait=true')
+                time.sleep(0.01)
+                executor.submit(c.post, '/v1/orderstate', json=new_state)
+                response = future.result()
+                states = response.json
+                self.assertEqual(len(states), 1)
+                self.assertEqual(states[0]["id"], 456)
 
 
     def tearDown(self) -> None:

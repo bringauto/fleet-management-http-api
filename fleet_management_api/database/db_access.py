@@ -163,6 +163,27 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
     return ConnexionResponse(status_code=code, content_type="string", body=msg)
 
 
+def wait_for_new_records(
+    base: Type[Base],
+    attribute_criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
+    equal_to: Optional[Dict[str, Any]] = None,
+    timeout_ms: Optional[int] = None
+    ) -> List[Any]:
+
+    global _wait_mg
+    if equal_to is None:
+        equal_to = {}
+    if attribute_criteria is None:
+        attribute_criteria = {}
+
+    result = _wait_mg.wait_and_get_response(
+        key=base.__tablename__,
+        timeout_ms=timeout_ms,
+        validation=functools.partial(_result_is_ok, equal_to=equal_to)
+    )
+    return result
+
+
 def _check_obj_bases_matches_specifed_base(specified_base: Type[Base], *objs: Base) -> None:
     for obj in objs:
         if not isinstance(obj, specified_base):
