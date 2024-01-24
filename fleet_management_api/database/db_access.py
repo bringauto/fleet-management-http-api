@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Type, Literal
+from typing import Any, Dict, Optional, List, Type, Literal, Callable
 import functools
 
 from sqlalchemy import insert, select, update, delete
@@ -111,6 +111,7 @@ def _result_is_ok(item: Any, equal_to: Dict[str, Any]) -> bool:
 
 def get_records(
     base: Type[Base],
+    attribute_criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     equal_to: Optional[Dict[str, Any]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None
@@ -119,9 +120,14 @@ def get_records(
     global _wait_mg
     if equal_to is None:
         equal_to = {}
+    if attribute_criteria is None:
+        attribute_criteria = {}
     table = base.__table__
     with Session(current_connection_source()) as session:
         clauses = [getattr(table.columns,attr_label)==attr_value for attr_label, attr_value in equal_to.items()]
+        clauses.extend(
+            [attribute_criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in attribute_criteria.keys()]
+        )
         stmt = select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
         if not result and wait:

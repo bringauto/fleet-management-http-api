@@ -243,6 +243,7 @@ paths:
             type: integer
             format: int32
         - $ref: '#/components/parameters/Wait'
+        - $ref: '#/components/parameters/Since'
       responses:
         '200':
           description: Successfuly found order state
@@ -340,7 +341,5 @@ components:
       schema:
         type: integer
         format: int64
-        default: 0
-
 
 

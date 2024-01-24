@@ -1039,7 +1039,6 @@ paths:
         in: query
         name: since
         schema:
-          default: 0
           format: int64
           type: integer
       responses:
@@ -1190,6 +1189,14 @@ paths:
         schema:
           default: false
           type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only states\
+          \ created at the time or later will be returned. If unspecified, all states\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
       responses:
         "200":
           content:
@@ -2268,7 +2275,6 @@ components:
       in: query
       name: since
       schema:
-        default: 0
         format: int64
         type: integer
   responses:

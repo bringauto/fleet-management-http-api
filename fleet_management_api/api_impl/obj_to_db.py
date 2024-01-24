@@ -46,7 +46,7 @@ def car_state_to_db_model(car_state: CarState) -> db_models.CarStateDBModel:
         car_position = None
     else:
         car_position = car_state.position.to_dict()
-    timestamp = timestamp=tstamp.timestamp_in_ms()
+    timestamp = timestamp=tstamp.timestamp_ms()
     return db_models.CarStateDBModel(
         id=car_state.id,
         status=str(car_state.status),
@@ -111,7 +111,7 @@ def order_state_to_db_model(order_state: OrderState) -> db_models.OrderStateDBMo
         id=order_state.id,
         status=str(order_state.status),
         order_id=order_state.order_id,
-        timestamp=tstamp.timestamp_in_ms()
+        timestamp=tstamp.timestamp_ms()
     )
 
 

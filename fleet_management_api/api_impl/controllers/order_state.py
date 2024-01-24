@@ -1,3 +1,5 @@
+from typing import Optional, List
+
 import connexion # type: ignore
 from connexion.lifecycle import ConnexionResponse # type: ignore
 
@@ -30,30 +32,42 @@ def create_order_state(order_state) -> ConnexionResponse:
         return log_and_respond(response.status_code, response.body)
 
 
-def get_all_order_states(wait: bool = False, since: int = 0) -> ConnexionResponse:
-    order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, wait=wait)
+def get_all_order_states(wait: bool = False, since: Optional[int] = None) -> ConnexionResponse:
+    if since is None:
+        since = 0
+    order_state_db_models = db_access.get_records(
+        db_models.OrderStateDBModel,
+        wait=wait,
+        attribute_criteria={'timestamp': lambda x: x>=since}
+    )
     order_states = [obj_to_db.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
     return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
 
 
-def get_order_states(order_id: int, wait: bool = False) -> ConnexionResponse:
+def get_order_states(order_id: int, wait: bool = False, since: Optional[int] = None) -> ConnexionResponse:
     if not _order_exists(order_id):
         return log_and_respond(404, f"Order with id='{order_id}' was not found. Cannot get its state.")
     else:
-        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, wait=wait, equal_to={'order_id': order_id})
+        if since is None:
+            if wait:
+                since = 0
+            else:
+                newest_state = _get_newest_order_state(order_id)
+                if newest_state is None:
+                    return ConnexionResponse(status_code=200, content_type="application/json", body=[])
+                else:
+                    return ConnexionResponse(body=[newest_state], status_code=200, content_type="application/json")
+
+        order_state_db_models = db_access.get_records(
+            db_models.OrderStateDBModel,
+            wait=wait,
+            attribute_criteria={
+                'timestamp': lambda x: x>=since
+            },
+            equal_to={'order_id': order_id}
+        )
         order_states = [obj_to_db.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
         return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
-
-
-def _order_exists(order_id: int) -> bool:
-    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
-    return len(order_db_models) > 0
-
-
-def _mark_order_as_updated(order_id: int) -> None:
-    order_db_model:db_models.OrderDBModel = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})[0]
-    order_db_model.updated = True
-    db_access.update_record(order_db_model)
 
 
 def _remove_old_states() -> ConnexionResponse:
@@ -71,3 +85,37 @@ def _remove_old_states() -> ConnexionResponse:
             return log_and_respond(200, "Removing oldest order state.")
     else:
         return ConnexionResponse(status_code=200, content_type="text/plain", body="")
+
+
+def max_order_state_timestamp(order_id: Optional[int] = None) -> int:
+    if order_id is None:
+        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
+    else:
+        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, equal_to={'order_id': order_id})
+    if len(order_state_db_models) == 0:
+        return 0
+    else:
+        return max([order_state_db_model.timestamp for order_state_db_model in order_state_db_models])
+
+
+def _get_newest_order_state(order_id: Optional[int] = None) -> OrderState|None:
+    if order_id is None:
+        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
+    else:
+        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, equal_to={'order_id': order_id})
+    if len(order_state_db_models) == 0:
+        return None
+    else:
+        newest_state = max(order_state_db_models, key=lambda x: x.timestamp)
+        return obj_to_db.order_state_from_db_model(newest_state)
+
+
+def _order_exists(order_id: int) -> bool:
+    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
+    return len(order_db_models) > 0
+
+
+def _mark_order_as_updated(order_id: int) -> None:
+    order_db_model:db_models.OrderDBModel = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})[0]
+    order_db_model.updated = True
+    db_access.update_record(order_db_model)

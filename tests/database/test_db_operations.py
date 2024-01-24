@@ -23,12 +23,21 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
         data_out = db_access.get_records(models.TestBase)[0]
         self.assertEqual(data_out, data_in)
 
-    def test_filter_attribute_of_given_value(self):
+    def test_filter_records_using_equal_to_attribute_to_get_only_records_whose_attributes_equal_to_something(self):
         test_obj_1 = models.TestBase(id=7, test_str='test_string', test_int=5)
         test_obj_2 = models.TestBase(id=8, test_str='test_string', test_int=8)
         db_access.add_record(models.TestBase, test_obj_1, test_obj_2)
         objs_out = db_access.get_records(models.TestBase, equal_to = {'test_int': 5})
         self.assertListEqual(objs_out, [test_obj_1])
+
+    def test_filter_records_using_attribute_criteria(self):
+        test_obj_1 = models.TestBase(id=7, test_str='test_string', test_int=5)
+        test_obj_2 = models.TestBase(id=8, test_str='test_string', test_int=8)
+        db_access.add_record(models.TestBase, test_obj_1, test_obj_2)
+        objs_out = db_access.get_records(models.TestBase, attribute_criteria = {'test_int': lambda x: x < 6})
+        self.assertListEqual(objs_out, [test_obj_1])
+        objs_out = db_access.get_records(models.TestBase, attribute_criteria = {'test_int': lambda x: x > 6})
+        self.assertListEqual(objs_out, [test_obj_2])
 
     def test_sending_no_object_to_database_has_no_effect(self):
         db_access.add_record(models.TestBase, )
