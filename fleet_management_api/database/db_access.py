@@ -22,7 +22,11 @@ def content_timeout() -> int:
     return _wait_mg.timeout()
 
 
-def set_content_timeout(timeout_ms: int) -> None:
+def set_content_timeout_ms(timeout_ms: int) -> None:
+    """Sets the timeout for waiting for content from the database in milliseconds.
+
+    Sets common value for all endpoints with wait mechanism being applied."
+    """
     global _wait_mg
     _wait_mg.set_timeout(timeout_ms)
 

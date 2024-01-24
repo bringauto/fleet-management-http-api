@@ -67,7 +67,7 @@ class Test_Timeouts(unittest.TestCase):
             c.post('/v1/order', json=order)
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        database.set_content_timeout(100)
+        database.set_content_timeout_ms(100)
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:

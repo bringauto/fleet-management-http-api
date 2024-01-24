@@ -11,7 +11,9 @@
             "order_states": 10
         }
     },
-    "request_for_messages": {
-        "timeout_in_seconds": 5
+    "api": {
+        "request_for_data": {
+            "timeout_in_seconds": 5
+        }
     }
 }
