@@ -1,5 +1,5 @@
 import logging
-from connexion.lifecycle import ConnexionResponse
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 
 API_LOGGER_NAME = "werkzeug"

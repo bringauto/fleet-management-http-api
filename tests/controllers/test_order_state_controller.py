@@ -180,7 +180,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         with self.app.test_client() as c:
             c.post('/v1/car', json=car)
             c.post('/v1/order', json=order)
-        self.max_n = db_models.OrderStateDBModel.max_n_of_states
+        self.max_n = db_models.OrderStateDBModel.max_n_of_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         with self.app.test_client() as c:
@@ -212,4 +212,4 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no coverage
+    unittest.main(verbosity=2, buffer=True) # pragma: no coverage

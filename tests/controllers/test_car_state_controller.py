@@ -151,7 +151,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         car = Car(id=12, name="car1", platform_id=1, car_admin_phone={})
         with self.app.test_client() as c:
             c.post('/v1/car', json=car)
-        self.max_n = db_models.CarStateDBModel.max_n_of_states
+        self.max_n = db_models.CarStateDBModel.max_n_of_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)

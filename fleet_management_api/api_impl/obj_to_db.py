@@ -49,7 +49,7 @@ def car_state_to_db_model(car_state: CarState) -> db_models.CarStateDBModel:
     timestamp = timestamp=tstamp.timestamp_in_ms()
     return db_models.CarStateDBModel(
         id=car_state.id,
-        status=car_state.status,
+        status=str(car_state.status),
         car_id=car_state.car_id,
         speed=car_state.speed,
         fuel=car_state.fuel,
@@ -109,13 +109,13 @@ def order_from_db_model(order_db_model: db_models.OrderDBModel) -> Order:
 def order_state_to_db_model(order_state: OrderState) -> db_models.OrderStateDBModel:
     return db_models.OrderStateDBModel(
         id=order_state.id,
-        status=order_state.status,
+        status=str(order_state.status),
         order_id=order_state.order_id,
         timestamp=tstamp.timestamp_in_ms()
     )
 
 
-def order_state_from_db_model(order_state_db_model: db_models.OrderStateDBModel) -> Order:
+def order_state_from_db_model(order_state_db_model: db_models.OrderStateDBModel) -> OrderState:
     return OrderState(
         id=order_state_db_model.id,
         status=order_state_db_model.status,

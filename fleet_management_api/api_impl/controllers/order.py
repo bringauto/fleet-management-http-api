@@ -1,7 +1,7 @@
 from typing import List
 
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.models import Order
 import fleet_management_api.api_impl.obj_to_db as obj_to_db

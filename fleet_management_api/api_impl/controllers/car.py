@@ -1,7 +1,7 @@
 from typing import Dict
 
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 import fleet_management_api.api_impl.obj_to_db as obj_to_db
 from fleet_management_api.models import Car
@@ -10,7 +10,7 @@ import fleet_management_api.database.db_access as db_access
 from fleet_management_api.api_impl.api_logging import log_info, log_error, log_and_respond
 
 
-def create_car(car: Dict) -> ConnexionResponse:  # noqa: E501
+def create_car(car) -> ConnexionResponse:  # noqa: E501
     if not connexion.request.is_json:
         return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:

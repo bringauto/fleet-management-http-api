@@ -81,6 +81,7 @@ fleet_management_api/test/*
 
 .vscode
 .venv
+.mypy*
 *.pyc
 __pycache__
 .coverage

@@ -1,9 +1,9 @@
 from typing import List
 
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
-from fleet_management_api.api_impl.api_logging import log_and_respond, log_info, log_error
+from fleet_management_api.api_impl.api_logging import log_and_respond, log_info
 from fleet_management_api.models import Route
 import fleet_management_api.api_impl.obj_to_db as obj_to_db
 import fleet_management_api.database.db_access as db_access

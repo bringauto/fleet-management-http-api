@@ -1,7 +1,7 @@
 from typing import List
 
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.api_impl.api_logging import log_and_respond, log_info
 from fleet_management_api.models import PlatformHwId

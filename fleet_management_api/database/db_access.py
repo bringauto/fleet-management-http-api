@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional, List, Type, Literal
 import functools
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.orm import Session
 import sqlalchemy.exc as sqaexc
 from connexion.lifecycle import ConnexionResponse
@@ -19,7 +19,7 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 def content_timeout() -> int:
     global _wait_mg
-    return _wait_mg.timeout()
+    return _wait_mg.timeout_ms
 
 
 def set_content_timeout_ms(timeout_ms: int) -> None:
@@ -56,7 +56,7 @@ def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> Connexi
     table = base_type.__table__
     with current_connection_source().begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
-        stmt = table.delete().where(id_match)
+        stmt = delete(table).where(id_match)
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount
         if n_of_deleted_items == 0:
@@ -69,7 +69,7 @@ def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> Connexi
                                     )
 
 
-def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Literal["minimum", "maximum"]) -> ConnexionResponse:
+def delete_n_records(base_type: Type[Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> ConnexionResponse:
     table = base_type.__table__
     if not id_name in table.columns.keys():
         return ConnexionResponse(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
@@ -79,7 +79,7 @@ def delete_n_records(base_type: Type[Base], n: str, id_name: str, start_from: Li
             subquery = select(table.c.id).order_by(table.c.id).limit(n).alias()
         else:
             subquery = select(table.c.id).order_by(table.c.id.desc()).limit(n).alias()
-        stmt = table.delete().where(table.c.id.in_(subquery))
+        stmt = delete(table).where(table.c.id.in_(subquery))
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount
         if n_of_deleted_items == 0:
@@ -104,7 +104,7 @@ def get_records(
     equal_to: Optional[Dict[str, Any]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None
-    ) -> List[Base]:
+    ) -> List[Any]:
 
     global _wait_mg
     if equal_to is None:
@@ -140,7 +140,7 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
             else:
                 code, msg = 200, "Succesfully updated record"
         except sqaexc.IntegrityError as e:
-            code, msg = 400, e.orig
+            code, msg = 400, str(e.orig)
     return ConnexionResponse(status_code=code, content_type="string", body=msg)
 
 

@@ -36,7 +36,7 @@ def delete_stop(stop_id: int) -> ConnexionResponse:
 
 
 def get_stop(stop_id: int) -> ConnexionResponse:
-    stop_db_models = db_access.get_records(StopDBModel, equal_to={"id": stop_id})
+    stop_db_models: List[StopDBModel] = db_access.get_records(StopDBModel, equal_to={"id": stop_id})
     stops = [obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
         return log_and_respond(404, f"Stop with id={stop_id} was not found.")

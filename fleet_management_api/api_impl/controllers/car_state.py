@@ -1,5 +1,5 @@
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.models.car_state import CarState
 import fleet_management_api.api_impl.obj_to_db as obj_to_db
@@ -60,7 +60,7 @@ def _car_exists(car_id: int) -> bool:
 def _remove_old_states(car_id: int) -> ConnexionResponse:
     car_state_db_models = db_access.get_records(db_models.CarStateDBModel, equal_to={'car_id': car_id})
     curr_n_of_states = len(car_state_db_models)
-    delta = curr_n_of_states - db_models.CarStateDBModel.max_n_of_states
+    delta = curr_n_of_states - db_models.CarStateDBModel.max_n_of_states()
     if delta>0:
         response = db_access.delete_n_records(
             db_models.CarStateDBModel,

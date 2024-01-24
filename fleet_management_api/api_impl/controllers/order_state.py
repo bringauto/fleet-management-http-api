@@ -1,5 +1,5 @@
-import connexion
-from connexion.lifecycle import ConnexionResponse
+import connexion # type: ignore
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.models.order_state import OrderState
 import fleet_management_api.api_impl.obj_to_db as obj_to_db
@@ -60,10 +60,10 @@ def _mark_order_as_updated(order_id: int) -> None:
 
 def _remove_old_states() -> ConnexionResponse:
     order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
-    if len(order_state_db_models) > db_models.OrderStateDBModel.max_n_of_states:
+    if len(order_state_db_models) > db_models.OrderStateDBModel.max_n_of_states():
         response = db_access.delete_n_records(
             db_models.OrderStateDBModel,
-            len(order_state_db_models) - db_models.OrderStateDBModel.max_n_of_states,
+            len(order_state_db_models) - db_models.OrderStateDBModel.max_n_of_states(),
             id_name='timestamp',
             start_from="minimum"
         )

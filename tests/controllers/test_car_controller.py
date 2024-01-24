@@ -1,7 +1,6 @@
 import sys
 sys.path.append('.')
 import unittest
-import json
 
 from fleet_management_api.models import Car
 from fleet_management_api.app import get_app

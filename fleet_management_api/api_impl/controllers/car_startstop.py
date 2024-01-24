@@ -1,4 +1,4 @@
-from connexion.lifecycle import ConnexionResponse
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.models import Car
 import fleet_management_api.database.db_access as db_access

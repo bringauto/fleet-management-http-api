@@ -9,7 +9,7 @@ import fleet_management_api.database.db_models as db_models
 _db_connection: None|Engine = None
 
 
-def current_connection_source() -> Engine:
+def current_connection_source() -> Engine|None:
     global _db_connection
     return _db_connection
 
@@ -46,6 +46,8 @@ def set_test_connection_source(db_file_path: str = "") -> str:
 def set_up_database(config: Dict[str, Any]) -> None:
     conn_config = config["connection"]
     set_connection_source(conn_config["location"], conn_config["database_name"], conn_config["username"], conn_config["password"])
+    if _db_connection is None:
+        raise RuntimeError("Database connection not set up.")
     db_models.Base.metadata.create_all(_db_connection)
     db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["car_states"])
     db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["order_states"])

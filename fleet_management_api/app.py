@@ -1,4 +1,4 @@
-import connexion
+import connexion # type: ignore
 
 from .encoder import JSONEncoder
 
