@@ -27,4 +27,5 @@ class TestBase2(Base):
 def initialize_test_tables(connection_engine: Engine|None) -> None:
     if connection_engine is None:
         raise RuntimeError("Database connection not set up.")
-    Base.metadata.create_all(connection_engine)
+    for table in Base.metadata.tables.values():
+        table.create(connection_engine)

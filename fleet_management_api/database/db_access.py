@@ -4,7 +4,7 @@ import functools
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.orm import Session
 import sqlalchemy.exc as sqaexc
-from connexion.lifecycle import ConnexionResponse
+from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.database.db_models import Base
 from fleet_management_api.database.connection import current_connection_source
@@ -42,7 +42,7 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     if source is None:
         return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
     with source.begin() as conn:
-        stmt = insert(table) # type: ignore
+        stmt = insert(table)
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
             result = conn.execute(stmt, data_list)
