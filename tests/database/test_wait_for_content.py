@@ -14,6 +14,23 @@ import fleet_management_api.database.wait as wait
 _TEST_DB_FILE_PATH = "test_db_file.db"
 
 
+class Test_Wait_Manager(unittest.TestCase):
+
+    def test_setting_default_timeout(self) -> None:
+        wait_manager = wait.WaitObjManager()
+        wait_manager.set_timeout(1234)
+        self.assertEqual(wait_manager.timeout_ms, 1234)
+        wait_manager.set_timeout(4567)
+        self.assertEqual(wait_manager.timeout_ms, 4567)
+
+    def test_setting_negative_timeout_raises_value_error(self) -> None:
+        wait_manager = wait.WaitObjManager()
+        with self.assertRaises(ValueError):
+            wait_manager.set_timeout(-4567)
+
+
+
+
 class Test_Waiting_For_Content(unittest.TestCase):
 
     def setUp(self) -> None:

@@ -57,8 +57,8 @@ class WaitObjManager:
         validation: Optional[Callable[[Any], bool]] = None
         ) -> List[Any]:
         """Wait for the next wait object in queue to respond and returns the response content.
-        The queue is identified by given key."""
-
+        The queue is identified by given key.
+        """
         wait_obj = self.new_wait_obj(key, timeout_ms, validation)
         reponse = wait_obj.wait_and_get_response()
         self._remove_wait_obj(wait_obj)
