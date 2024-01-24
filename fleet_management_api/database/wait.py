@@ -82,22 +82,20 @@ class WaitObjManager:
 
 class WaitObj:
 
-    __default_timeout: int = 0
-
-    def __init__(self, key: Any, timeout_ms: int, validation: Optional[Callable[[Any], bool]]) -> None:
+    def __init__(self, key: Any, timeout_ms: int, validation: Optional[Callable[[Any], bool]] = None) -> None:
         self._key = key
         self._response_content: List[Any] = list()
         self._condition = threading.Condition()
         self._is_valid = validation
-        if timeout_ms < 0:
-            timeout_ms = WaitObj.__default_timeout
-        self._timeout_ms = timeout_ms
+        self._timeout_ms = max(timeout_ms, 0)
         self._is_waiting = False
 
     @property
     def key(self) -> str: return self._key
     @property
     def is_waiting(self) -> bool: return self._is_waiting
+    @property
+    def timeout_ms(self) -> int: return self._timeout_ms
 
     def stop_waiting_if_content_ok(self, content: List[Any]):
         filtered_content = self._filter_content(content)

@@ -16,6 +16,10 @@ _TEST_DB_FILE_PATH = "test_db_file.db"
 
 class Test_Wait_Manager(unittest.TestCase):
 
+    def test_initializing_wait_obj_with_negative_timeout_set_it_to_zero(self) -> None:
+        wait_obj = wait.WaitObj("key", timeout_ms=-1234)
+        self.assertEqual(wait_obj.timeout_ms, 0)
+
     def test_setting_default_timeout(self) -> None:
         wait_manager = wait.WaitObjManager()
         wait_manager.set_timeout(1234)
