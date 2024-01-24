@@ -14,11 +14,7 @@ import fleet_management_api.database.wait as wait
 _TEST_DB_FILE_PATH = "test_db_file.db"
 
 
-class Test_Wait_Manager(unittest.TestCase):
-
-    def test_initializing_wait_obj_with_negative_timeout_set_it_to_zero(self) -> None:
-        wait_obj = wait.WaitObj("key", timeout_ms=-1234)
-        self.assertEqual(wait_obj.timeout_ms, 0)
+class Test_Wait_Objects(unittest.TestCase):
 
     def test_setting_default_timeout(self) -> None:
         wait_manager = wait.WaitObjManager()
@@ -31,6 +27,30 @@ class Test_Wait_Manager(unittest.TestCase):
         wait_manager = wait.WaitObjManager()
         with self.assertRaises(ValueError):
             wait_manager.set_timeout(-4567)
+
+    def test_initializing_wait_obj_with_negative_timeout_set_it_to_zero(self) -> None:
+        wait_obj = wait.WaitObj("key", timeout_ms=-1234)
+        self.assertEqual(wait_obj.timeout_ms, 0)
+
+    def test_content_filtered_by_wait_obj_with_validation_set_to_none_returns_the_unfiltered_content(self):
+        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=None)
+        content = [1, 2, 3, 4, 5]
+        self.assertListEqual(wait_obj.filter_content(content), content)
+
+    def test_content_filtered_by_wait_obj_with_validation_set_to_true_returns_the_unfiltered_content(self):
+        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: True)
+        content = [1, 2, 3, 4, 5]
+        self.assertListEqual(wait_obj.filter_content(content), content)
+
+    def test_content_filtered_by_wait_obj_with_validation_set_to_false_returns_empty_list(self):
+        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: False)
+        content = [1, 2, 3, 4, 5]
+        self.assertListEqual(wait_obj.filter_content(content), [])
+
+    def test_content_filtered_by_wait_obj_with_validation_set_to_filtering_function_returns_filtered_content(self):
+        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: x>2)
+        content = [1, 2, 3, 4, 5]
+        self.assertListEqual(wait_obj.filter_content(content), [3,4,5])
 
 
 class Test_Waiting_For_Content(unittest.TestCase):

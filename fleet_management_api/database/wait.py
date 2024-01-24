@@ -98,7 +98,7 @@ class WaitObj:
     def timeout_ms(self) -> int: return self._timeout_ms
 
     def stop_waiting_if_content_ok(self, content: List[Any]):
-        filtered_content = self._filter_content(content)
+        filtered_content = self.filter_content(content)
         if filtered_content:
             self._response_content = content.copy()
             with self._condition:
@@ -112,7 +112,7 @@ class WaitObj:
             self._condition.wait(timeout=self._timeout_ms/1000)
         return self._response_content
 
-    def _filter_content(self, content: List[Any]) -> List[Any]:
+    def filter_content(self, content: List[Any]) -> List[Any]:
         if self._is_valid is None:
             return content
         else:
