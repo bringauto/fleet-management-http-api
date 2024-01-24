@@ -80,12 +80,9 @@ class WaitObj:
         self._condition = threading.Condition()
         self._is_valid = validation
         self._timeout_ms = max(timeout_ms, 0)
-        self._is_waiting = False
 
     @property
     def key(self) -> str: return self._key
-    @property
-    def is_waiting(self) -> bool: return self._is_waiting
     @property
     def timeout_ms(self) -> int: return self._timeout_ms
 
@@ -94,13 +91,11 @@ class WaitObj:
         if filtered_content:
             self._response_content = content.copy()
             with self._condition:
-                self._is_waiting = False
                 self._condition.notify()
 
     def wait_and_get_response(self) -> List[Any]:
         """Wait for the response object to be set and then return it."""
         with self._condition:
-            self._is_waiting = True
             self._condition.wait(timeout=self._timeout_ms/1000)
         return self._response_content
 
