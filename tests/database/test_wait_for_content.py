@@ -29,15 +29,13 @@ class Test_Wait_Manager(unittest.TestCase):
             wait_manager.set_timeout(-4567)
 
 
-
-
 class Test_Waiting_For_Content(unittest.TestCase):
 
     def setUp(self) -> None:
         connection.set_test_connection_source(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(connection.current_connection_source())
 
-    def test_enabling_wait_mechanism_when_no_content_is_available_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(self):
+    def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(db_access.get_records, models.TestBase, wait=True)
