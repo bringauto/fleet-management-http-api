@@ -85,8 +85,9 @@ class Test_Waiting_For_Content(unittest.TestCase):
     def test_response_is_sent_to_multiple_waiters(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future1 = executor.submit(db_access.get_records, models.TestBase, wait=True)
-            future2 = executor.submit(db_access.get_records, models.TestBase, wait=True)
+            future1 = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=1000)
+            future2 = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=1000)
+            time.sleep(0.05)
             executor.submit(db_access.add_record, models.TestBase, test_obj)
             retrieved_objs1 = future1.result()
             retrieved_objs2 = future2.result()
