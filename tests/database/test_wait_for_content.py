@@ -8,6 +8,7 @@ import time
 import fleet_management_api.database.connection as connection
 import fleet_management_api.database.db_access as db_access
 import tests.database.models as models
+import fleet_management_api.database.wait as wait
 
 
 _TEST_DB_FILE_PATH = "test_db_file.db"
@@ -41,6 +42,17 @@ class Test_Waiting_For_Content(unittest.TestCase):
             future = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=100)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
+
+    def test_response_is_sent_to_multiple_waiters(self):
+        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            future1 = executor.submit(db_access.get_records, models.TestBase, wait=True)
+            future2 = executor.submit(db_access.get_records, models.TestBase, wait=True)
+            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            retrieved_objs1 = future1.result()
+            retrieved_objs2 = future2.result()
+            self.assertEqual(retrieved_objs1, [test_obj])
+            self.assertEqual(retrieved_objs2, [test_obj])
 
     def tearDown(self) -> None:
         if os.path.isfile(_TEST_DB_FILE_PATH):
