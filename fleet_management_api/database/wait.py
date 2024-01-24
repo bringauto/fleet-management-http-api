@@ -38,13 +38,6 @@ class WaitObjManager:
             for wait_obj in self._wait_dict[key]:
                 wait_obj.stop_waiting_if_content_ok(response_content)
 
-            for wait_obj in self._wait_dict[key]:
-                if not wait_obj.is_waiting:
-                    self._wait_dict[key].remove(wait_obj)
-
-            if not self._wait_dict[key]:
-                self._wait_dict.pop(key)
-
     def set_timeout(self, timeout_ms: int) -> None:
         """Set the timeout for wait objects in milliseconds."""
         self._check_nonnegative_timeout(timeout_ms)
@@ -69,7 +62,6 @@ class WaitObjManager:
         key = wait_obj.key
         if key in self._wait_dict:
             if wait_obj in self._wait_dict[key]:
-                wait_obj.stop_waiting_if_content_ok([])
                 self._wait_dict[key].remove(wait_obj)
             if not self._wait_dict[key]:
                 self._wait_dict.pop(key)
