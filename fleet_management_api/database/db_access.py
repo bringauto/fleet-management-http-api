@@ -37,7 +37,11 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
         return ConnexionResponse(status_code=200, content_type="string", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     table = base.__table__
-    with current_connection_source().begin() as conn:
+
+    source = current_connection_source()
+    if source is None:
+        return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
+    with source.begin() as conn:
         stmt = insert(table) # type: ignore
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
@@ -54,7 +58,10 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
 
 def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> ConnexionResponse:
     table = base_type.__table__
-    with current_connection_source().begin() as conn:
+    source = current_connection_source()
+    if source is None:
+        return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
+    with source.begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
         stmt = delete(table).where(id_match)
         result = conn.execute(stmt)
@@ -74,7 +81,10 @@ def delete_n_records(base_type: Type[Base], n: int, id_name: str, start_from: Li
     if not id_name in table.columns.keys():
         return ConnexionResponse(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
 
-    with current_connection_source().begin() as conn:
+    source = current_connection_source()
+    if source is None:
+        return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
+    with source.begin() as conn:
         if start_from == "minimum":
             subquery = select(table.c.id).order_by(table.c.id).limit(n).alias()
         else:
@@ -126,7 +136,10 @@ def get_records(
 def update_record(updated_obj: Base) -> ConnexionResponse:
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
-    with current_connection_source().begin() as conn:
+    source = current_connection_source()
+    if source is None:
+        return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
+    with source.begin() as conn:
         id = updated_obj.__dict__[_DATABASE_RECORD_ID_NAME]
         id_match = getattr(table.columns, _DATABASE_RECORD_ID_NAME) == id
         stmt = update(table).where(id_match).values(dict_data)

@@ -36,13 +36,11 @@ def get_all_order_states(wait: bool = False, since: int = 0) -> ConnexionRespons
     return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
 
 
-def get_order_states(order_id: int, all_available: bool = False) -> ConnexionResponse:
+def get_order_states(order_id: int, wait: bool = False) -> ConnexionResponse:
     if not _order_exists(order_id):
         return log_and_respond(404, f"Order with id='{order_id}' was not found. Cannot get its state.")
     else:
-        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, equal_to={'order_id': order_id})
-        if not all_available and order_state_db_models:
-            order_state_db_models = [order_state_db_models[-1]]
+        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, wait=wait, equal_to={'order_id': order_id})
         order_states = [obj_to_db.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
         return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
 

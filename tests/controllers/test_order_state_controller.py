@@ -123,17 +123,6 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             response = c.get('/v1/orderstate/4651684651')
             self.assertEqual(response.status_code, 404)
 
-    def test_getting_last_order_state(self):
-        order_state_1 = OrderState(id=3, status="to_accept", order_id=12)
-        order_state_2 = OrderState(id=7, status="canceled", order_id=12)
-        with self.app.test_client() as c:
-            c.post('/v1/orderstate', json=order_state_1)
-            c.post('/v1/orderstate', json=order_state_2)
-            response = c.get('/v1/orderstate/12?allAvailable=false')
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
-            self.assertEqual(response.json[0]["id"], 7)
-
     def test_getting_all_order_states(self):
         order_state_1 = OrderState(id=3, status="to_accept", order_id=12)
         order_state_2 = OrderState(id=7, status="canceled", order_id=12)

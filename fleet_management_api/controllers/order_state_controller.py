@@ -38,15 +38,15 @@ def get_all_order_states(wait=None, since=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order_states(order_id, all_available=None):  # noqa: E501
+def get_order_states(order_id, wait=None):  # noqa: E501
     """Finds order state by ID
 
      # noqa: E501
 
     :param order_id: ID of order for which states shall be returned
     :type order_id: int
-    :param all_available: Whether to return all available order states or only the latest one
-    :type all_available: bool
+    :param wait: Applies for GET methods when no order statuses would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next order state to be created and return it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
+    :type wait: bool
 
     :rtype: Union[OrderState, Tuple[OrderState, int], Tuple[OrderState, int, Dict[str, str]]
     """

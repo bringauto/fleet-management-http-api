@@ -242,13 +242,7 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: allAvailable
-          in: query
-          description: Whether to return all available order states or only the latest one
-          required: false
-          example: true
-          schema:
-            type: boolean
+        - $ref: '#/components/parameters/Wait'
       responses:
         '200':
           description: Successfuly found order state

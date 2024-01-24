@@ -1031,6 +1031,7 @@ paths:
         in: query
         name: wait
         schema:
+          default: false
           type: boolean
       - description: "A Unix timestamp in milliseconds. If specified, only states\
           \ created at the time or later will be returned. If unspecified, all states\
@@ -1038,6 +1039,7 @@ paths:
         in: query
         name: since
         schema:
+          default: 0
           format: int64
           type: integer
       responses:
@@ -1179,13 +1181,14 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: Whether to return all available order states or only the latest
-          one
-        example: true
+      - description: "Applies for GET methods when no order statuses would be returned\
+          \ at the moment of request. If wait=true, \\ the request will wait for the\
+          \ next order state to be created and return it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
         in: query
-        name: allAvailable
-        required: false
+        name: wait
         schema:
+          default: false
           type: boolean
       responses:
         "200":
@@ -2256,6 +2259,7 @@ components:
       in: query
       name: wait
       schema:
+        default: false
         type: boolean
     Since:
       description: "A Unix timestamp in milliseconds. If specified, only states created\
@@ -2264,6 +2268,7 @@ components:
       in: query
       name: since
       schema:
+        default: 0
         format: int64
         type: integer
   responses:

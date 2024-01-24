@@ -55,6 +55,43 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
             os.remove("test_db.db")
 
 
+class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
+
+    def setUp(self) -> None:
+        connection.set_test_connection_source("test_db.db")
+        database.set_content_timeout_ms(1000)
+        self.app = get_app().app
+        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        order_2 = Order(id=13, user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        with self.app.test_client() as c:
+            c.post('/v1/car', json=car)
+            c.post('/v1/order', json=order_1)
+            c.post('/v1/order', json=order_2)
+
+    def test_waiting_for_order_state_for_given_order(self):
+        order_state = OrderState(id=1, order_id=12, status="in_progress")
+        with self.app.test_client() as c:
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                future = executor.submit(c.get, '/v1/orderstate?wait=true')
+                future_1 = executor.submit(c.get, '/v1/orderstate/12?wait=true')
+                future_2 = executor.submit(c.get, '/v1/orderstate/13?wait=true')
+                time.sleep(0.01)
+                executor.submit(c.post, '/v1/orderstate', json=order_state)
+
+                response = future.result()
+                self.assertEqual(len(response.json), 1)
+                response = future_1.result()
+                self.assertEqual(len(response.json), 1)
+                response = future_2.result()
+                self.assertEqual(len(response.json), 0)
+
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
+
+
 class Test_Timeouts(unittest.TestCase):
 
     def setUp(self) -> None:
