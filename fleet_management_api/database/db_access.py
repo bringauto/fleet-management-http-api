@@ -159,18 +159,18 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
 
 def wait_for_new_records(
     base: Type[Base],
-    attribute_criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
+    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     timeout_ms: Optional[int] = None
     ) -> List[Any]:
 
     global _wait_mg
-    if attribute_criteria is None:
-        attribute_criteria = {}
+    if criteria is None:
+        criteria = {}
 
     result = _wait_mg.wait_and_get_response(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
-        validation=functools.partial(_result_is_ok, attribute_criteria)
+        validation=functools.partial(_result_is_ok, criteria)
     )
     return result
 

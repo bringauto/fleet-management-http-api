@@ -83,7 +83,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         with self.app.test_client() as c:
             c.post('/v1/orderstate', json=order_state_1)
             c.post('/v1/orderstate', json=order_state_2)
-            response = c.get('/v1/orderstate')
+            response = c.get('/v1/orderstate?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 

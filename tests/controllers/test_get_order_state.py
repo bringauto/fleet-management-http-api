@@ -128,43 +128,6 @@ class Test_Timeouts(unittest.TestCase):
             os.remove("test_db.db")
 
 
-class Test_Getting_Maximum_Order_State_Timestamp(unittest.TestCase):
-
-    def setUp(self) -> None:
-        connection.set_test_connection_source("test_db.db")
-        self.app = get_app().app
-        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
-        order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
-        order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
-        with self.app.test_client() as c:
-            c.post('/v1/car', json=car)
-            c.post('/v1/order', json=order_1)
-            c.post('/v1/order', json=order_2)
-
-    def test_getting_maximum_order_state_timestamp_from_empty_table_yields_max_timestamp_equal_to_zero(self):
-        max_timestamp = order_state.max_order_state_timestamp()
-        self.assertEqual(max_timestamp, 0)
-
-    @patch('fleet_management_api.database.timestamp.timestamp_ms')
-    def test_getting_maximum_order_state_timestamp_from_non_empty_table_yields_max_timestamp(self, mock_timestamp_ms: Mock):
-        order_state_1 = OrderState(id=1, order_id=12, status="accepted")
-        order_state_2 = OrderState(id=2, order_id=12, status="in_progress")
-        order_state_3 = OrderState(id=3, order_id=13, status="accepted")
-        with self.app.test_client() as c:
-            mock_timestamp_ms.return_value = 50
-            c.post('/v1/orderstate', json=order_state_1)
-            mock_timestamp_ms.return_value = 150
-            c.post('/v1/orderstate', json=order_state_2)
-            mock_timestamp_ms.return_value = 120
-            c.post('/v1/orderstate', json=order_state_3)
-            max_timestamp = order_state.max_order_state_timestamp()
-            self.assertEqual(max_timestamp, 150)
-
-    def tearDown(self) -> None:
-        if os.path.isfile("test_db.db"):
-            os.remove("test_db.db")
-
-
 class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
 
     def setUp(self) -> None:
