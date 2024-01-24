@@ -7,7 +7,7 @@ from fleet_management_api.database.db_models import CarDBModel
 
 
 def startstop_car(car_id):  # noqa: E501
-    cars_db_models = db_access.get_records(CarDBModel, equal_to={'id': car_id})
+    cars_db_models = db_access.get_records(CarDBModel, criteria={'id': lambda x: x==car_id})
     if cars_db_models:
         car = obj_to_db.car_from_db_model(cars_db_models[0])
         _start_or_stop_car(car)

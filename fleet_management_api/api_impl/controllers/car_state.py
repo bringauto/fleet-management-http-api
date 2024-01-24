@@ -15,7 +15,7 @@ def add_car_state(car_state) -> ConnexionResponse:
     else:
         car_state = CarState.from_dict(connexion.request.get_json())  # noqa: E501
         state_db_model = obj_to_db.car_state_to_db_model(car_state)
-        car_db_model = db_access.get_records(db_models.CarDBModel, equal_to={'id': car_state.car_id})
+        car_db_model = db_access.get_records(db_models.CarDBModel, criteria={'id': lambda x: x==car_state.car_id})
         if len(car_db_model) == 0:
             code, msg = 404, f"Car with id='{car_state.car_id}' was not found."
             log_error(msg)
@@ -46,7 +46,7 @@ def get_car_states(car_id: int, all_available: bool = False) -> ConnexionRespons
     if not _car_exists(car_id):
         return log_and_respond(404, f"Car with id='{car_id}' was not found. Cannot get its state.")
     else:
-        car_state_db_models = db_access.get_records(db_models.CarStateDBModel, equal_to={'car_id': car_id})
+        car_state_db_models = db_access.get_records(db_models.CarStateDBModel, criteria={'car_id': lambda x: x==car_id})
         if not all_available and car_state_db_models:
             car_state_db_models = [car_state_db_models[-1]]
         car_states = [obj_to_db.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]
@@ -54,11 +54,11 @@ def get_car_states(car_id: int, all_available: bool = False) -> ConnexionRespons
 
 
 def _car_exists(car_id: int) -> bool:
-    return bool(db_access.get_records(db_models.CarDBModel, equal_to={'id': car_id}))
+    return bool(db_access.get_records(db_models.CarDBModel, criteria={'id': lambda x: x==car_id}))
 
 
 def _remove_old_states(car_id: int) -> ConnexionResponse:
-    car_state_db_models = db_access.get_records(db_models.CarStateDBModel, equal_to={'car_id': car_id})
+    car_state_db_models = db_access.get_records(db_models.CarStateDBModel, criteria={'car_id': lambda x: x==car_id})
     curr_n_of_states = len(car_state_db_models)
     delta = curr_n_of_states - db_models.CarStateDBModel.max_n_of_states()
     if delta>0:

@@ -129,7 +129,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         with self.app.test_client() as c:
             c.post('/v1/orderstate', json=order_state_1)
             c.post('/v1/orderstate', json=order_state_2)
-            response = c.get('/v1/orderstate/12?allAvailable=true')
+            response = c.get('/v1/orderstate/12?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["id"], 3)
@@ -178,19 +178,19 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             for i in range(1, self.max_n - 1):
                 order_state = OrderState(id=i, status="to_accept", order_id=12)
                 c.post('/v1/orderstate', json=order_state)
-            response = c.get('/v1/orderstate/12?allAvailable=true')
+            response = c.get('/v1/orderstate/12?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n - 1)
 
             order_state = OrderState(id=self.max_n, status="to_accept", order_id=12)
             c.post('/v1/orderstate', json=order_state)
-            response = c.get('/v1/orderstate/12?allAvailable=true')
+            response = c.get('/v1/orderstate/12?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
 
             newest_state = OrderState(id=self.max_n + 1, status="to_accept", order_id=12)
             c.post('/v1/orderstate', json=newest_state)
-            response = c.get('/v1/orderstate/12?allAvailable=true')
+            response = c.get('/v1/orderstate/12?since=0')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
             self.assertTrue(isinstance(response.json, list))

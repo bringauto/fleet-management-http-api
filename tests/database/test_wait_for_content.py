@@ -117,7 +117,7 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
             future = executor.submit(
                 db_access.get_records,
                 models.TestBase,
-                equal_to={"test_int": 456},
+                criteria={"test_int": lambda x: x==456},
                 wait=True,
                 timeout_ms=500
             )

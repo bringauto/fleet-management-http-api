@@ -39,7 +39,7 @@ def delete_order(order_id: int) -> ConnexionResponse:
 
 
 def get_order(order_id: int) -> ConnexionResponse:
-    order_db_models = db_access.get_records(db_models.OrderDBModel, equal_to={'id': order_id})
+    order_db_models = db_access.get_records(db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})
     if len(order_db_models) == 0:
         return ConnexionResponse(body=f"Order with id={order_id} was not found.", status_code=404)
     else:
@@ -55,7 +55,7 @@ def get_updated_orders(car_id: int) -> ConnexionResponse:
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
 
     order_db_models: List[db_models.OrderDBModel] = db_access.get_records(
-        db_models.OrderDBModel, equal_to={'car_id': car_id, 'updated': True}
+        db_models.OrderDBModel, criteria={'car_id': lambda x: x==car_id, 'updated': lambda x: x==True},
     )
     for m in order_db_models:
         m.updated = False
@@ -74,5 +74,5 @@ def get_orders() -> ConnexionResponse:
 
 
 def _car_exist(car_id: int) -> bool:
-    return bool(db_access.get_records(db_models.CarDBModel, equal_to={'id': car_id}))
+    return bool(db_access.get_records(db_models.CarDBModel, criteria={'id': lambda x: x==car_id}))
 

@@ -251,7 +251,6 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
                 self.assertEqual(len(states), 1)
                 self.assertEqual(states[0]["id"], 456)
 
-
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")

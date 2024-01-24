@@ -33,7 +33,7 @@ def get_hw_ids() -> ConnexionResponse:
 
 
 def get_hw_id(platformhwid_id: int) -> ConnexionResponse:
-    hw_id_moodels = db_access.get_records(PlatformHwIdDBModel, equal_to={"id": platformhwid_id})
+    hw_id_moodels = db_access.get_records(PlatformHwIdDBModel, criteria={"id": lambda x: x==platformhwid_id})
     platform_hw_ids = [obj_to_db.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     if len(platform_hw_ids) == 0:
         return log_and_respond(404, f"Platform HW Id  with id={platformhwid_id} was not found.")

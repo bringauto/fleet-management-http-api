@@ -36,7 +36,7 @@ def delete_route(route_id: int) -> ConnexionResponse:
 
 
 def get_route(route_id: int) -> Route:
-    route_db_models = db_access.get_records(RouteDBModel, equal_to={"id": route_id})
+    route_db_models = db_access.get_records(RouteDBModel, criteria={"id": lambda x: x==route_id})
     routes = [obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     if len(routes) == 0:
         return log_and_respond(404, f"Route with id={route_id} was not found.")

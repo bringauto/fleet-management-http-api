@@ -100,41 +100,35 @@ def delete_n_records(base_type: Type[Base], n: int, id_name: str, start_from: Li
             )
 
 
-def _result_is_ok(item: Any, equal_to: Dict[str, Any]) -> bool:
-    for attr_label, attr_value in equal_to.items():
+def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
+    for attr_label, attr_criterion in attribute_criteria.items():
         if not hasattr(item, attr_label):
             return False
-        if item.__dict__[attr_label] != attr_value:
+        if not attr_criterion(item.__dict__[attr_label]):
             return False
     return True
 
 
 def get_records(
     base: Type[Base],
-    attribute_criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
-    equal_to: Optional[Dict[str, Any]] = None,
+    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None
     ) -> List[Any]:
 
     global _wait_mg
-    if equal_to is None:
-        equal_to = {}
-    if attribute_criteria is None:
-        attribute_criteria = {}
+    if criteria is None:
+        criteria = {}
     table = base.__table__
     with Session(current_connection_source()) as session:
-        clauses = [getattr(table.columns,attr_label)==attr_value for attr_label, attr_value in equal_to.items()]
-        clauses.extend(
-            [attribute_criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in attribute_criteria.keys()]
-        )
+        clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
         stmt = select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
         if not result and wait:
             result = _wait_mg.wait_and_get_response(
                 base.__tablename__,
                 timeout_ms,
-                validation = functools.partial(_result_is_ok, equal_to=equal_to)
+                validation = functools.partial(_result_is_ok, criteria)
             )
         return result
 
@@ -166,20 +160,17 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
 def wait_for_new_records(
     base: Type[Base],
     attribute_criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
-    equal_to: Optional[Dict[str, Any]] = None,
     timeout_ms: Optional[int] = None
     ) -> List[Any]:
 
     global _wait_mg
-    if equal_to is None:
-        equal_to = {}
     if attribute_criteria is None:
         attribute_criteria = {}
 
     result = _wait_mg.wait_and_get_response(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
-        validation=functools.partial(_result_is_ok, equal_to=equal_to)
+        validation=functools.partial(_result_is_ok, attribute_criteria)
     )
     return result
 
