@@ -3,7 +3,7 @@ from typing import Dict
 import json
 
 import fleet_management_api.app as app
-from fleet_management_api.database import set_up_database
+from fleet_management_api.database import set_up_database, set_content_timeout, content_timeout
 
 
 def main():

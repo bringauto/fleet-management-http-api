@@ -17,6 +17,16 @@ _DATABASE_RECORD_ID_NAME = "id"
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
+def content_timeout() -> int:
+    global _wait_mg
+    return _wait_mg.timeout()
+
+
+def set_content_timeout(timeout_ms: int) -> None:
+    global _wait_mg
+    _wait_mg.set_timeout(timeout_ms)
+
+
 def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     global _wait_mg
     if not sent_objs:
