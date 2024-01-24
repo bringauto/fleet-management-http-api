@@ -52,6 +52,12 @@ class Test_Wait_Objects(unittest.TestCase):
         content = [1, 2, 3, 4, 5]
         self.assertListEqual(wait_obj.filter_content(content), [3,4,5])
 
+    def test_removing_wait_object_for_which_no_key_exists_in_the_wait_obj_manager_dict_raises_key_error(self):
+        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=None)
+        wait_manager = wait.WaitObjManager()
+        with self.assertRaises(wait.WaitObjManager.UnknownWaitingObj):
+            wait_manager._remove_wait_obj(wait_obj)
+
 
 class Test_Waiting_For_Content(unittest.TestCase):
 

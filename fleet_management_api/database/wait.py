@@ -58,18 +58,22 @@ class WaitObjManager:
         return reponse
 
     def _remove_wait_obj(self, wait_obj:WaitObj) -> None:
-        """Remove the wait object from the wait queue."""
+        """Remove the wait obejct from the wait queue."""
         key = wait_obj.key
-        if key in self._wait_dict:
-            if wait_obj in self._wait_dict[key]:
-                self._wait_dict[key].remove(wait_obj)
-            if not self._wait_dict[key]:
-                self._wait_dict.pop(key)
+        if not key in self._wait_dict or not wait_obj in self._wait_dict[key]:
+            raise __class__.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
+        else:
+            self._wait_dict[key].remove(wait_obj)
+        if not self._wait_dict[key]:
+            self._wait_dict.pop(key)
 
     @staticmethod
     def _check_nonnegative_timeout(timeout_ms: int) -> None:
         if timeout_ms < 0:
             raise ValueError(f"Timeout must be non-negative, got {timeout_ms}.")
+
+    class UnknownWaitingObj(Exception):
+        pass
 
 
 class WaitObj:
