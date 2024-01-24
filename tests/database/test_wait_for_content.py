@@ -119,9 +119,11 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
                 models.TestBase,
                 equal_to={"test_int": 456},
                 wait=True,
-                timeout_ms=100
+                timeout_ms=500
             )
+            time.sleep(0.01)
             executor.submit(db_access.add_record, models.TestBase, test_obj)
+            time.sleep(0.01)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
