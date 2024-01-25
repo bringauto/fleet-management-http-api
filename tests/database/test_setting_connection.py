@@ -19,6 +19,10 @@ class Test_Creating_Database_URL(unittest.TestCase):
         url = _connection.db_url_production("localhost", db_name="test_db")
         self.assertEqual(url, "postgresql+psycopg://localhost/test_db")
 
+    def test_production_database_url_without_specifying_database_name_gives_valid_url(self):
+        url = _connection.db_url_production("localhost", username="test_user", password="test_password")
+        self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost")
+
     def test_test_database_url(self):
         url = _connection.db_url_test()
         self.assertEqual(url, "sqlite:///:memory:")
@@ -26,6 +30,10 @@ class Test_Creating_Database_URL(unittest.TestCase):
     def test_test_database_url_with_specified_file_location(self):
         url = _connection.db_url_test("test_db_file")
         self.assertEqual(url, "sqlite:///test_db_file")
+
+    def test_value_error_is_raises_when_specifying_password_without_username(self):
+        with self.assertRaises(ValueError):
+            _connection.db_url_production("localhost", "test_db", password="test_password", username="")
 
 
 class Test_Creating_A_Test_Database(unittest.TestCase):
@@ -49,6 +57,7 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
 
         _connection.set_test_connection_source("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
+
         self.assertEqual(len(_db_access.get(_TestBase)), 0)
 
     def tearDown(self) -> None: # pragma: no cover
@@ -64,6 +73,8 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
             _db_access.add(_TestBase, test_obj)
+
+
 
 
 if __name__=="__main__":

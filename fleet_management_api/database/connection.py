@@ -18,7 +18,7 @@ def db_url_production(location: str, db_name: str = "", username: str = "", pass
     if username == "" and password == "":
         url = f"postgresql+psycopg://{location}"
     elif username == "" and password != "":
-        return "Error when connecting to database: Missing username."
+        raise ValueError("Cannot specify password without username.")
     else:
         url = f"postgresql+psycopg://{username}:{password}@{location}"
 
