@@ -65,6 +65,14 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
             os.remove("test_db_file.db")
 
 
+class Test_Initializing_Tables(unittest.TestCase):
+
+    def test_initializing_tables_without_connection_being_set_raises_exception(self):
+        _connection.unset_connection_source()
+        with self.assertRaises(RuntimeError):
+            _initialize_test_tables(_connection.current_connection_source())
+
+
 class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):
 
     def test_calling_add_method_without_setting_connection_raises_runtime_error(self):
@@ -73,7 +81,6 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
             _db_access.add(_TestBase, test_obj)
-
 
 
 
