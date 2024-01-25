@@ -573,20 +573,7 @@ paths:
       summary: Add a new state for a car by ID
       tags:
       - carState
-      x-openapi-router-controller: fleet_management_api.controllers.car_state_controller
-  /login:
-    get:
-      description: Login using keycloak.
-      operationId: login
-      responses:
-        "302":
-          description: Redirect to keycloak authentication.
-        "500":
-          description: Login failed due to internal server error.
-      security: []
-      tags:
-      - login
-      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
   /carstate/{carId}:
     get:
       operationId: get_car_states
@@ -662,6 +649,19 @@ paths:
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+  /login:
+    get:
+      description: Login using keycloak.
+      operationId: login
+      responses:
+        "302":
+          description: Redirect to keycloak authentication.
+        "500":
+          description: Login failed due to internal server error.
+      security: []
+      tags:
+      - login
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /order:
     get:
       operationId: get_orders
@@ -2272,7 +2272,7 @@ paths:
       summary: Finds stop by ID
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
   /token_get:
     get:
       description: Callback endpoint for keycloak to receive jwt token.
@@ -2346,365 +2346,6 @@ paths:
       tags:
       - login
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
-  /user:
-    get:
-      operationId: get_users
-      responses:
-        "200":
-          content:
-            application/json:
-              example:
-              - id: 1
-                email: bringauto@bringauto.com
-                userName: Admin
-                password: abcd
-              schema:
-                items:
-                  $ref: '#/components/schemas/User'
-                type: array
-          description: Successfuly found all users
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Finds all users
-      tags:
-      - user
-      x-openapi-router-controller: fleet_management_api.controllers.user_controller
-    post:
-      operationId: create_user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: New user json
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: Successful user creation
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Create a new user
-      tags:
-      - user
-      x-openapi-router-controller: fleet_management_api.controllers.user_controller
-    put:
-      operationId: update_user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: User update json
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: Successful user update
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Update an existing user by ID
-      tags:
-      - user
-      x-openapi-router-controller: fleet_management_api.controllers.user_controller
-  /user/{userId}:
-    delete:
-      operationId: delete_user
-      parameters:
-      - description: ID of user to delete
-        example: 1
-        explode: false
-        in: path
-        name: userId
-        required: true
-        schema:
-          format: int32
-          type: integer
-        style: simple
-      responses:
-        "200":
-          description: Successful user removal
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        "405":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "405"
-                    message: Method not allowed
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Method not allowed
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Delete a user
-      tags:
-      - user
-      x-openapi-router-controller: fleet_management_api.controllers.user_controller
-    get:
-      operationId: get_user
-      parameters:
-      - description: ID of user to return
-        example: 1
-        explode: false
-        in: path
-        name: userId
-        required: true
-        schema:
-          format: int32
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: Successfuly found user
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Finds user by ID
-      tags:
-      - user
-      x-openapi-router-controller: fleet_management_api.controllers.user_controller
 components:
   parameters:
     kcState:
@@ -2757,9 +2398,6 @@ components:
       schema:
         type: string
       style: form
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
-components:
-  parameters:
     Wait:
       description: "Applies for GET methods when no order statuses would be returned\
         \ at the moment of request. If wait=true, \\ the request will wait for the\
@@ -3196,18 +2834,6 @@ components:
           type: string
       title: MobilePhone
       type: object
-  securitySchemes:
-    oAuth2AuthCode:
-      description: oAuth2 authorization
-      flows:
-        authorizationCode:
-          authorizationUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/auth
-          refreshUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
-          scopes: {}
-          tokenUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
-      type: oauth2
-      x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
-      x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
     GNSSPosition:
       description: GNSSPosition primitive structure
       example:
@@ -3241,3 +2867,15 @@ components:
       format: int64
       title: timestamp
       type: integer
+  securitySchemes:
+    oAuth2AuthCode:
+      description: oAuth2 authorization
+      flows:
+        authorizationCode:
+          authorizationUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/auth
+          refreshUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+          scopes: {}
+          tokenUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+      type: oauth2
+      x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
+      x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
