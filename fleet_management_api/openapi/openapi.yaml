@@ -15,14 +15,14 @@ tags:
   name: carState
 - description: Order related functions
   name: order
+- description: Order state related functions
+  name: orderState
 - description: Platform hardware ID related functions
   name: platformHwId
 - description: Route state related functions
   name: route
 - description: Stop state related functions
   name: stop
-- description: User related functions
-  name: user
 - description: Authentication related functions
   name: login
 paths:
@@ -35,7 +35,7 @@ paths:
             application/json:
               example:
               - id: 1
-                platform_id: 1
+                platformId: 1
                 name: BAT-2022-01
                 carAdminPhone:
                   phone: "+420123456789"
@@ -82,7 +82,7 @@ paths:
       summary: Finds all cars
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     post:
       operationId: create_car
       requestBody:
@@ -147,7 +147,7 @@ paths:
       summary: Create a new car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     put:
       operationId: update_car
       requestBody:
@@ -223,21 +223,19 @@ paths:
       summary: Update an existing car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
   /car/startstop/{carId}:
     get:
       operationId: startstop_car
       parameters:
       - description: ID of car to start/stop
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful car start/stop
@@ -299,21 +297,19 @@ paths:
       summary: Start/stop car by ID (intended for phonecalls)
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_startstop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
   /car/{carId}:
     delete:
       operationId: delete_car
       parameters:
       - description: ID of car to delete
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful car removal
@@ -386,20 +382,18 @@ paths:
       summary: Delete a car
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     get:
       operationId: get_car
       parameters:
       - description: ID of car to return
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -465,8 +459,56 @@ paths:
       summary: Finds car by ID
       tags:
       - car
-      x-openapi-router-controller: fleet_management_api.api_impl.car_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
   /carstate:
+    get:
+      operationId: get_all_car_states
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
+          description: Successfuly found all car states
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds all car states
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
       operationId: add_car_state
       requestBody:
@@ -545,6 +587,81 @@ paths:
       tags:
       - login
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+  /carstate/{carId}:
+    get:
+      operationId: get_car_states
+      parameters:
+      - description: ID of car for which states shall be returned
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: Whether to return all available car states or only the latest
+          one
+        example: true
+        in: query
+        name: allAvailable
+        required: false
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarState'
+          description: Successfuly found car state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds car states by ID
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
   /order:
     get:
       operationId: get_orders
@@ -558,8 +675,8 @@ paths:
                 userId: 1
                 status: to_accept
                 carId: 1
-                targetStop: 1
-                stopRoute: 1
+                targetStopId: 1
+                stopRouteId: 1
                 notificationPhone:
                   phone: "+420123456789"
               schema:
@@ -603,7 +720,7 @@ paths:
       summary: Finds all orders
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     post:
       operationId: create_order
       requestBody:
@@ -613,6 +730,7 @@ paths:
               $ref: '#/components/schemas/Order'
         description: New order json
         required: true
+        x-body-name: order
       responses:
         "200":
           content:
@@ -667,96 +785,19 @@ paths:
       summary: Create a new order
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
-    put:
-      operationId: update_order
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Order'
-        description: Order update json
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-          description: Successful order update
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Update an existing order by ID
-      tags:
-      - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/wait/{carId}:
     get:
-      operationId: get_order_wait
+      operationId: get_updated_orders
       parameters:
       - description: ID of car with order to return
         example: 1
-        explode: false
         in: path
         name: carId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -833,21 +874,19 @@ paths:
       summary: Get order by car ID only if it changed
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/{orderId}:
     delete:
       operationId: delete_order
       parameters:
       - description: ID of order to delete
         example: 1
-        explode: false
         in: path
         name: orderId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful order removal
@@ -920,20 +959,18 @@ paths:
       summary: Delete an order
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     get:
       operationId: get_order
       parameters:
       - description: ID of order to return
         example: 1
-        explode: false
         in: path
         name: orderId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -999,7 +1036,239 @@ paths:
       summary: Finds order by ID
       tags:
       - order
-      x-openapi-router-controller: fleet_management_api.controllers.order_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+  /orderstate:
+    get:
+      operationId: get_all_order_states
+      parameters:
+      - description: "Applies for GET methods when no order statuses would be returned\
+          \ at the moment of request. If wait=true, \\ the request will wait for the\
+          \ next order state to be created and return it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only states\
+          \ created at the time or later will be returned. If unspecified, all states\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                orderId: 1
+                status: to_accept
+                carId: 1
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
+          description: Successfuly found all order states
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds all order states
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+    post:
+      operationId: create_order_state
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderState'
+        description: New order state json
+        required: true
+        x-body-name: orderState
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+          description: Succesfully added new order state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new order state
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+  /orderstate/{orderId}:
+    get:
+      operationId: get_order_states
+      parameters:
+      - description: ID of order for which states shall be returned
+        example: 1
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: "Applies for GET methods when no order statuses would be returned\
+          \ at the moment of request. If wait=true, \\ the request will wait for the\
+          \ next order state to be created and return it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only states\
+          \ created at the time or later will be returned. If unspecified, all states\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+          description: Successfuly found order state
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds order state by ID
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
   /platformhwid:
     get:
       operationId: get_hw_ids
@@ -1051,7 +1320,7 @@ paths:
       summary: Finds all platform hwIds
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
     post:
       operationId: create_hw_id
       requestBody:
@@ -1061,6 +1330,7 @@ paths:
               $ref: '#/components/schemas/PlatformHwId'
         description: Platform hardware ID json
         required: true
+        x-body-name: platformHwId
       responses:
         "200":
           content:
@@ -1115,21 +1385,19 @@ paths:
       summary: Create a new platform hwId
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
   /platformhwid/{platformhwidId}:
     delete:
       operationId: delete_hw_id
       parameters:
       - description: ID of platform hwId to delete
         example: 1
-        explode: false
         in: path
         name: platformhwidId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful platform hardware ID removal
@@ -1202,20 +1470,18 @@ paths:
       summary: Delete a platform hwId
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
     get:
       operationId: get_hw_id
       parameters:
       - description: ID of platform hwId to return
         example: 1
-        explode: false
         in: path
         name: platformhwidId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -1281,7 +1547,7 @@ paths:
       summary: Finds platform hwId by ID
       tags:
       - platformHwId
-      x-openapi-router-controller: fleet_management_api.controllers.platform_hw_id_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
   /route:
     get:
       operationId: get_routes
@@ -1342,7 +1608,7 @@ paths:
       summary: Finds all routes
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     post:
       operationId: create_route
       requestBody:
@@ -1352,6 +1618,7 @@ paths:
               $ref: '#/components/schemas/Route'
         description: New route json
         required: true
+        x-body-name: route
       responses:
         "200":
           content:
@@ -1406,7 +1673,7 @@ paths:
       summary: Create a new route
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     put:
       operationId: update_route
       requestBody:
@@ -1416,6 +1683,7 @@ paths:
               $ref: '#/components/schemas/Route'
         description: Route update json
         required: true
+        x-body-name: route
       responses:
         "200":
           content:
@@ -1481,21 +1749,19 @@ paths:
       summary: Update an existing route by ID
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
   /route/{routeId}:
     delete:
       operationId: delete_route
       parameters:
       - description: ID of route to delete
         example: 1
-        explode: false
         in: path
         name: routeId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful route removal
@@ -1568,20 +1834,18 @@ paths:
       summary: Delete a route
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     get:
       operationId: get_route
       parameters:
       - description: ID of route to return
         example: 1
-        explode: false
         in: path
         name: routeId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -1647,7 +1911,7 @@ paths:
       summary: Finds route by ID
       tags:
       - route
-      x-openapi-router-controller: fleet_management_api.controllers.route_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
   /stop:
     get:
       operationId: get_stops
@@ -1705,7 +1969,7 @@ paths:
       summary: Finds all stops
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     post:
       operationId: create_stop
       requestBody:
@@ -1715,6 +1979,7 @@ paths:
               $ref: '#/components/schemas/Stop'
         description: New stop json
         required: true
+        x-body-name: stop
       responses:
         "200":
           content:
@@ -1769,7 +2034,7 @@ paths:
       summary: Create a new stop
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     put:
       operationId: update_stop
       requestBody:
@@ -1779,6 +2044,7 @@ paths:
               $ref: '#/components/schemas/Stop'
         description: Stop update json
         required: true
+        x-body-name: stop
       responses:
         "200":
           content:
@@ -1844,21 +2110,19 @@ paths:
       summary: Update an existing stop by ID
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
   /stop/{stopId}:
     delete:
       operationId: delete_stop
       parameters:
       - description: ID of stop to delete
         example: 1
-        explode: false
         in: path
         name: stopId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           description: Successful stop removal
@@ -1931,20 +2195,18 @@ paths:
       summary: Delete a stop
       tags:
       - stop
-      x-openapi-router-controller: fleet_management_api.controllers.stop_controller
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     get:
       operationId: get_stop
       parameters:
       - description: ID of stop to return
         example: 1
-        explode: false
         in: path
         name: stopId
         required: true
         schema:
           format: int32
           type: integer
-        style: simple
       responses:
         "200":
           content:
@@ -2495,18 +2757,29 @@ components:
       schema:
         type: string
       style: form
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+components:
+  parameters:
+    Wait:
+      description: "Applies for GET methods when no order statuses would be returned\
+        \ at the moment of request. If wait=true, \\ the request will wait for the\
+        \ next order state to be created and return it. If wait=False or unspecified,\
+        \ the request will return \\ an empty list."
+      in: query
+      name: wait
+      schema:
+        default: false
+        type: boolean
+    Since:
+      description: "A Unix timestamp in milliseconds. If specified, only states created\
+        \ at the time or later will be returned. If unspecified, all states are returned\
+        \ (since is set to 0 in that case)."
+      in: query
+      name: since
+      schema:
+        format: int64
+        type: integer
   responses:
-    BadRequest:
-      content:
-        application/json:
-          examples:
-            error:
-              value:
-                code: "400"
-                message: Bad request
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Bad request
     Unauthorized:
       content:
         application/json:
@@ -2529,6 +2802,28 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Forbidden
+    UnexpectedError:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "500"
+                message: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unexpected error
+    BadRequest:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "400"
+                message: Bad request
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request
     NotFound:
       content:
         application/json:
@@ -2562,26 +2857,15 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Request timeout
-    UnexpectedError:
-      content:
-        application/json:
-          examples:
-            error:
-              value:
-                code: "500"
-                message: Unexpected error
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Unexpected error
   schemas:
     Car:
       description: Car object structure
       example:
-        underTest: true
-        platform_id: 1
+        underTest: false
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
+        platformId: 1
         carAdminPhone:
           phone: "+420123456789"
       properties:
@@ -2590,10 +2874,10 @@ components:
           format: int32
           title: id
           type: integer
-        platform_id:
+        platformId:
           example: 1
           format: int32
-          title: platform_id
+          title: id
           type: integer
         name:
           example: BAT-2022-01
@@ -2604,60 +2888,18 @@ components:
         defaultRouteId:
           example: 1
           format: int32
-          title: defaultRouteId
+          title: id
           type: integer
         underTest:
           default: true
+          example: false
           title: underTest
           type: boolean
       required:
       - id
       - name
-      - platform_id
+      - platformId
       title: Car
-      type: object
-    CarState:
-      description: Car state object structure
-      example:
-        fuel: 80
-        id: 1
-        position:
-          altitude: 400.25
-          latitude: 49.204117
-          longitude: 16.606525
-        car_id: 1
-        speed: 20.5
-        status: null
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        status:
-          $ref: '#/components/schemas/CarStatus'
-        fuel:
-          example: 80
-          format: int32
-          title: fuel
-          type: integer
-        car_id:
-          example: 1
-          format: int32
-          title: car_id
-          type: integer
-        speed:
-          example: 20.5
-          format: float
-          title: speed
-          type: number
-        position:
-          $ref: '#/components/schemas/GNSSPosition'
-      required:
-      - car_id
-      - id
-      - status
-      title: CarState
       type: object
     Error:
       description: Error object structure
@@ -2675,17 +2917,72 @@ components:
       - message
       title: Error
       type: object
+    CarState:
+      description: Car state object structure
+      example:
+        fuel: 80
+        id: 1
+        position:
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+        speed: 20.5
+        status: idle
+        carId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        status:
+          $ref: '#/components/schemas/CarStatus'
+        fuel:
+          default: 0
+          example: 80
+          format: int32
+          title: fuel
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        speed:
+          default: 0.0
+          example: 20.5
+          format: float
+          title: speed
+          type: number
+        position:
+          $ref: '#/components/schemas/GNSSPosition'
+      required:
+      - carId
+      - id
+      - status
+      title: CarState
+      type: object
+    CarStatus:
+      description: CarStatus enum
+      enum:
+      - idle
+      - charging
+      - out_of_order
+      - stopped_by_phone
+      example: idle
+      title: CarStatus
+      type: string
     Order:
       description: Order object structure
       example:
+        notification: Order notification
         stopRouteId: 1
         notificationPhone:
           phone: "+420123456789"
         targetStopId: 1
         id: 1
-        priority: null
+        priority: normal
         userId: 1
-        status: null
         carId: 1
       properties:
         id:
@@ -2694,39 +2991,94 @@ components:
           title: id
           type: integer
         priority:
-          $ref: '#/components/schemas/Priority'
+          default: normal
+          description: "Priority (low, normal, high)"
+          pattern: ^(low|normal|high)$
+          title: priority
+          type: string
         userId:
           example: 1
           format: int32
-          title: userId
+          title: id
           type: integer
-        status:
-          $ref: '#/components/schemas/OrderStatus'
         carId:
           example: 1
           format: int32
-          title: carId
+          title: id
           type: integer
+        notification:
+          example: Order notification
+          title: notification
+          type: string
         targetStopId:
           example: 1
           format: int32
-          title: targetStopId
+          title: id
           type: integer
         stopRouteId:
           example: 1
           format: int32
-          title: stopRouteId
+          title: id
           type: integer
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
       required:
       - carId
       - id
-      - stopRoute
-      - targetStop
+      - stopRouteId
+      - targetStopId
       - userId
       title: Order
       type: object
+    Priority:
+      default: normal
+      description: "Priority (low, normal, high)"
+      pattern: ^(low|normal|high)$
+      title: priority
+      type: string
+    OrderState:
+      description: Order state object structure
+      example:
+        orderId: 1
+        id: 1
+        status: to_accept
+        timestamp: 1616425200000
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        orderId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        timestamp:
+          description: Unix timestamp in milliseconds
+          example: 1616425200000
+          format: int64
+          title: timestamp
+          type: integer
+      required:
+      - id
+      - orderId
+      - status
+      title: OrderState
+      type: object
+    OrderStatus:
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)"
+      enum:
+      - to_accept
+      - accepted
+      - in_progress
+      - done
+      - canceled
+      example: to_accept
+      title: OrderStatus
+      type: string
     PlatformHwId:
       description: PlatformHwId object structure
       example:
@@ -2772,6 +3124,7 @@ components:
           title: name
           type: string
         points:
+          default: []
           example:
           - latitude: 49.204117
             longitude: 16.606525
@@ -2781,6 +3134,7 @@ components:
           title: points
           type: array
         stopIds:
+          default: []
           example:
           - 1
           - 2
@@ -2826,91 +3180,11 @@ components:
       - position
       title: Stop
       type: object
-    User:
-      description: User object structure
-      example:
-        password: Admin1
-        id: 1
-        userName: Admin
-        email: bringauto@bringauto.com
-      properties:
-        id:
-          example: 1
-          format: int32
-          title: id
-          type: integer
-        email:
-          example: bringauto@bringauto.com
-          format: email
-          title: email
-          type: string
-        userName:
-          example: Admin
-          title: userName
-          type: string
-        password:
-          example: Admin1
-          format: password
-          title: password
-          type: string
-      required:
-      - email
-      - id
-      - password
-      - userName
-      title: User
-      type: object
-    CarStatus:
-      description: CarStatus enum
-      enum:
-      - idle
-      - charging
-      - out_of_order
-      - stopped_by_phone
-      title: CarStatus
-      type: string
-    OrderStatus:
-      description: OrderStatus enum
-      enum:
-      - to_accept
-      - accepted
-      - in_progress
-      - done
-      - canceled
-      title: OrderStatus
-      type: string
-    Priority:
-      description: Priority enum
-      enum:
-      - low
-      - normal
-      - high
-      title: Priority
-      type: string
-    GNSSPosition:
-      description: GNSSPosition primitive structure
-      example:
-        altitude: 400.25
-        latitude: 49.204117
-        longitude: 16.606525
-      properties:
-        latitude:
-          example: 49.204117
-          format: float
-          title: latitude
-          type: number
-        longitude:
-          example: 16.606525
-          format: float
-          title: longitude
-          type: number
-        altitude:
-          example: 400.25
-          format: float
-          title: altitude
-          type: number
-      title: GNSSPosition
-      type: object
+    Id:
+      example: 1
+      format: int32
+      title: id
+      type: integer
     MobilePhone:
       description: MobilePhone Primitive structure
       example:
@@ -2934,3 +3208,36 @@ components:
       type: oauth2
       x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
       x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
+    GNSSPosition:
+      description: GNSSPosition primitive structure
+      example:
+        altitude: 400.25
+        latitude: 49.204117
+        longitude: 16.606525
+      properties:
+        latitude:
+          default: 0.0
+          example: 49.204117
+          format: float
+          title: latitude
+          type: number
+        longitude:
+          default: 0.0
+          example: 16.606525
+          format: float
+          title: longitude
+          type: number
+        altitude:
+          default: 0.0
+          example: 400.25
+          format: float
+          title: altitude
+          type: number
+      title: GNSSPosition
+      type: object
+    Timestamp:
+      description: Unix timestamp in milliseconds
+      example: 1616425200000
+      format: int64
+      title: timestamp
+      type: integer

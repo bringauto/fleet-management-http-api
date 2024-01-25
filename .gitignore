@@ -77,15 +77,15 @@ tox.ini
 .dockerignore
 requirements.txt
 
-
-fleetman_http_api/test/*
-
+fleet_management_api/test/*
 
 .vscode
 .venv
+.mypy*
 *.pyc
 __pycache__
 .coverage
+/htmlcov
 
 /restart.sh
 /*.db

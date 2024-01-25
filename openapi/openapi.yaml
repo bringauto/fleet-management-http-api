@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: BringAuto Fleet Management API
+  description: Specification for BringAuto fleet backend HTTP API
+  version: 1.0.0
+
+servers:
+  - url: /v1
+    description: Local server
+
+tags:
+  - name: car
+    description: Car related functions
+  - name: carState
+    description: Car state related functions
+  - name: order
+    description: Order related functions
+  - name: orderState
+    description: Order state related functions
+  - name: platformHwId
+    description: Platform hardware ID related functions
+  - name: route
+    description: Route state related functions
+  - name: stop
+    description: Stop state related functions
+
+paths:
+  /car:
+    $ref: 'car.yaml#/paths/~1car'
+  /car/{carId}:
+    $ref: 'car.yaml#/paths/~1car~1{carId}'
+  /car/startstop/{carId}:
+    $ref: 'car.yaml#/paths/~1car~1startstop~1{carId}'
+  /carstate:
+    $ref: 'car.yaml#/paths/~1carstate'
+  /carstate/{carId}:
+    $ref: 'car.yaml#/paths/~1carstate~1{carId}'
+
+  /order:
+    $ref: 'order.yaml#/paths/~1order'
+  /order/{orderId}:
+    $ref: 'order.yaml#/paths/~1order~1{orderId}'
+  /order/wait/{carId}:
+    $ref: 'order.yaml#/paths/~1order~1wait~1{carId}'
+  /orderstate:
+    $ref: 'order.yaml#/paths/~1orderstate'
+  /orderstate/{orderId}:
+    $ref: 'order.yaml#/paths/~1orderstate~1{orderId}'
+
+  /platformhwid:
+    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid'
+  /platformhwid/{platformhwidId}:
+    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid~1{platformhwidId}'
+
+  /route:
+    $ref: 'route.yaml#/paths/~1route'
+  /route/{routeId}:
+    $ref: 'route.yaml#/paths/~1route~1{routeId}'
+
+  /stop:
+    $ref: 'stop.yaml#/paths/~1stop'
+  /stop/{stopId}:
+    $ref: 'stop.yaml#/paths/~1stop~1{stopId}'
+

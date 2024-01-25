@@ -1,0 +1,137 @@
+paths:
+  /platformhwid:
+    post:
+      operationId: createHwId
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      tags:
+        - platformHwId
+      summary: Create a new platform hwId
+      requestBody:
+        description: Platform hardware ID json
+        x-body-name: platformHwId
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformHwId'
+        required: true
+      responses:
+        '200':
+          description: Successful platform hardware ID creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformHwId'
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+    get:
+      operationId: getHwIds
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      tags:
+        - platformHwId
+      summary: Finds all platform hwIds
+      responses:
+        '200':
+          description: Successfuly found all platform hardware IDs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformHwId'
+              example:
+                [
+                  {
+                    "id": 1,
+                    "name": 'ABCD1234EF56'
+                  }
+                ]
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+  /platformhwid/{platformhwidId}:
+    get:
+      operationId: getHwId
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      tags:
+        - platformHwId
+      summary: Finds platform hwId by ID
+      parameters:
+        - name: platformhwidId
+          in: path
+          description: ID of platform hwId to return
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Successfuly found platform hardware ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformHwId'
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+    delete:
+      operationId: deleteHwId
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      tags:
+        - platformHwId
+      summary: Delete a platform hwId
+      parameters:
+        - name: platformhwidId
+          in: path
+          description: ID of platform hwId to delete
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Successful platform hardware ID removal
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+
+components:
+  schemas:
+    PlatformHwId:
+      type: object
+      description: PlatformHwId object structure
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        name:
+          type: string
+          example: 'ABCD1234EF56'

@@ -16,7 +16,7 @@ class CarState(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, status=None, fuel=None, car_id=None, speed=None, position=None):  # noqa: E501
+    def __init__(self, id=None, status=None, fuel=0, car_id=None, speed=0.0, position=None):  # noqa: E501
         """CarState - a model defined in OpenAPI
 
         :param id: The id of this CarState.  # noqa: E501
@@ -45,7 +45,7 @@ class CarState(Model):
             'id': 'id',
             'status': 'status',
             'fuel': 'fuel',
-            'car_id': 'car_id',
+            'car_id': 'carId',
             'speed': 'speed',
             'position': 'position'
         }

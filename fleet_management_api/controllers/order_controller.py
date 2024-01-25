@@ -49,19 +49,6 @@ def get_order(order_id):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order_wait(car_id):  # noqa: E501
-    """Get order by car ID only if it changed
-
-     # noqa: E501
-
-    :param car_id: ID of car with order to return
-    :type car_id: int
-
-    :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
-    """
-    return 'do some magic!'
-
-
 def get_orders():  # noqa: E501
     """Finds all orders
 
@@ -73,16 +60,14 @@ def get_orders():  # noqa: E501
     return 'do some magic!'
 
 
-def update_order(order):  # noqa: E501
-    """Update an existing order by ID
+def get_updated_orders(car_id):  # noqa: E501
+    """Get order by car ID only if it changed
 
      # noqa: E501
 
-    :param order: Order update json
-    :type order: dict | bytes
+    :param car_id: ID of car with order to return
+    :type car_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
     """
-    if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'

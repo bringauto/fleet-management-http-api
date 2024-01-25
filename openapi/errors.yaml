@@ -1,0 +1,93 @@
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '400'
+                message: 'Bad request'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '401'
+                message: 'Unauthorized'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '403'
+                message: 'Request forbidden'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '404'
+                message: 'Resource not found'
+    MethodNotAllowed:
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '405'
+                message: 'Method not allowed'
+    RequestTimeout:
+      description: Request timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '408'
+                message: 'Request timeout'
+    UnexpectedError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '500'
+                message: 'Unexpected error'
+  schemas:
+    Error:
+      type: object
+      description: Error object structure
+      properties:
+        code:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: 'Not found'
+      required:
+        - code
+        - message
