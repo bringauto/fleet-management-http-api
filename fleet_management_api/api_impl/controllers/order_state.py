@@ -15,13 +15,11 @@ def create_order_state(order_state) -> ConnexionResponse:
         return log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
     order_state = OrderState.from_dict(connexion.request.get_json())
-    order_db_model = db_access.get_records(db_models.OrderDBModel, criteria={'id': lambda x: x==order_state.order_id})
-    if len(order_db_model) == 0:
-        code, msg = 404, f"Order with id='{order_state.order_id}' was not found."
-        return log_and_respond(code, msg)
+    if not _order_exists(order_state.order_id):
+        return log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")
 
     order_state_db_model = obj_to_db.order_state_to_db_model(order_state)
-    response = db_access.add_record(db_models.OrderStateDBModel, order_state_db_model)
+    response = db_access.add(db_models.OrderStateDBModel, order_state_db_model)
     if response.status_code == 200:
         _mark_order_as_updated(order_state.order_id)
         _remove_old_states()
@@ -47,27 +45,23 @@ def get_order_states(order_id: int, wait: bool = False, since: Optional[int] = N
 def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool = False, since: Optional[int] = None) -> ConnexionResponse:
     if since is None:
         if wait:
-            order_state_db_models = db_access.wait_for_new_records(db_models.OrderStateDBModel, criteria=criteria)
+            order_state_db_models = db_access.wait_for_new(db_models.OrderStateDBModel, criteria=criteria)
         else:
-            order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, criteria=criteria)
+            order_state_db_models = db_access.get(db_models.OrderStateDBModel, criteria=criteria)
             if order_state_db_models:
                 order_state_db_models = [max(order_state_db_models, key=lambda x: x.timestamp)]
     else:
         criteria['timestamp'] = lambda x: x>=since
-        order_state_db_models = db_access.get_records(db_models.OrderStateDBModel, wait=wait, criteria=criteria)
+        order_state_db_models = db_access.get(db_models.OrderStateDBModel, wait=wait, criteria=criteria)
     order_states = [obj_to_db.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
     return ConnexionResponse(body=order_states, status_code=200, content_type="application/json")
 
 
 def _remove_old_states() -> ConnexionResponse:
-    order_state_db_models = db_access.get_records(db_models.OrderStateDBModel)
-    if len(order_state_db_models) > db_models.OrderStateDBModel.max_n_of_states():
-        response = db_access.delete_n_records(
-            db_models.OrderStateDBModel,
-            len(order_state_db_models) - db_models.OrderStateDBModel.max_n_of_states(),
-            id_name='timestamp',
-            start_from="minimum"
-        )
+    order_state_db_models = db_access.get(db_models.OrderStateDBModel)
+    extras = max(len(order_state_db_models) - db_models.OrderStateDBModel.max_n_of_states(), 0)
+    if extras>0:
+        response = db_access.delete_n(db_models.OrderStateDBModel, n=extras, id_name='timestamp', start_from="minimum")
         if response.status_code != 200:
             return log_and_respond(response.status_code, response.body)
         else:
@@ -77,14 +71,11 @@ def _remove_old_states() -> ConnexionResponse:
 
 
 def _order_exists(order_id: int) -> bool:
-    order_db_models = db_access.get_records(
-        db_models.OrderDBModel,
-        criteria={'id': lambda x: x==order_id}
-    )
+    order_db_models = db_access.get(db_models.OrderDBModel,criteria={'id': lambda x: x==order_id})
     return len(order_db_models) > 0
 
 
 def _mark_order_as_updated(order_id: int) -> None:
-    order_db_model:db_models.OrderDBModel = db_access.get_records(db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})[0]
+    order_db_model:db_models.OrderDBModel = db_access.get(db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})[0]
     order_db_model.updated = True
-    db_access.update_record(order_db_model)
+    db_access.update(order_db_model)

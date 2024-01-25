@@ -1,9 +1,9 @@
 from typing import Any, Dict, Optional, List, Type, Literal, Callable
 import functools
 
-from sqlalchemy import insert, select, update, delete
-from sqlalchemy.orm import Session
+import sqlalchemy as sqa
 import sqlalchemy.exc as sqaexc
+from sqlalchemy.orm import Session
 from connexion.lifecycle import ConnexionResponse # type: ignore
 
 from fleet_management_api.database.db_models import Base
@@ -31,7 +31,7 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
+def add(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     global _wait_mg
     if not sent_objs:
         return ConnexionResponse(status_code=200, content_type="string", body="Nothing to add to database")
@@ -42,7 +42,7 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
     if source is None:
         return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
     with source.begin() as conn:
-        stmt = insert(table)
+        stmt = sqa.insert(table)
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
             result = conn.execute(stmt, data_list)
@@ -56,14 +56,14 @@ def add_record(base: Type[Base], *sent_objs: Base) -> ConnexionResponse:
             return ConnexionResponse(status_code=400, content_type="string", body=f"Nothing added to the database. {e.orig}")
 
 
-def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> ConnexionResponse:
+def delete(base_type: Type[Base], id_name: str, id_value: Any) -> ConnexionResponse:
     table = base_type.__table__
     source = current_connection_source()
     if source is None:
         return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
     with source.begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
-        stmt = delete(table).where(id_match)
+        stmt = sqa.delete(table).where(id_match)
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount
         if n_of_deleted_items == 0:
@@ -76,7 +76,7 @@ def delete_record(base_type: Type[Base], id_name: str, id_value: Any) -> Connexi
                                     )
 
 
-def delete_n_records(base_type: Type[Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> ConnexionResponse:
+def delete_n(base_type: Type[Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> ConnexionResponse:
     table = base_type.__table__
     if not id_name in table.columns.keys():
         return ConnexionResponse(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
@@ -86,10 +86,10 @@ def delete_n_records(base_type: Type[Base], n: int, id_name: str, start_from: Li
         return ConnexionResponse(status_code=500, content_type="string", body="No connection source")
     with source.begin() as conn:
         if start_from == "minimum":
-            subquery = select(table.c.id).order_by(table.c.id).limit(n).alias()
+            subquery = sqa.select(table.c.id).order_by(table.c.id).limit(n).alias()
         else:
-            subquery = select(table.c.id).order_by(table.c.id.desc()).limit(n).alias()
-        stmt = delete(table).where(table.c.id.in_(subquery))
+            subquery = sqa.select(table.c.id).order_by(table.c.id.desc()).limit(n).alias()
+        stmt = sqa.delete(table).where(table.c.id.in_(subquery))
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount
         if n_of_deleted_items == 0:
@@ -109,7 +109,7 @@ def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: An
     return True
 
 
-def get_records(
+def get(
     base: Type[Base],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     wait: bool = False,
@@ -122,7 +122,7 @@ def get_records(
     table = base.__table__
     with Session(current_connection_source()) as session:
         clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
-        stmt = select(base).where(*clauses)
+        stmt = sqa.select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
         if not result and wait:
             result = _wait_mg.wait_and_get_response(
@@ -133,7 +133,7 @@ def get_records(
         return result
 
 
-def update_record(updated_obj: Base) -> ConnexionResponse:
+def update(updated_obj: Base) -> ConnexionResponse:
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     source = current_connection_source()
@@ -142,7 +142,7 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
     with source.begin() as conn:
         id = updated_obj.__dict__[_DATABASE_RECORD_ID_NAME]
         id_match = getattr(table.columns, _DATABASE_RECORD_ID_NAME) == id
-        stmt = update(table).where(id_match).values(dict_data)
+        stmt = sqa.update(table).where(id_match).values(dict_data)
         try:
             result = conn.execute(stmt)
             n_of_updated_items = result.rowcount
@@ -157,7 +157,7 @@ def update_record(updated_obj: Base) -> ConnexionResponse:
     return ConnexionResponse(status_code=code, content_type="string", body=msg)
 
 
-def wait_for_new_records(
+def wait_for_new(
     base: Type[Base],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     timeout_ms: Optional[int] = None

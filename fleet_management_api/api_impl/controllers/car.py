@@ -16,7 +16,7 @@ def create_car(car) -> ConnexionResponse:  # noqa: E501
     else:
         car = Car.from_dict(connexion.request.get_json())
         car_db_model = obj_to_db.car_to_db_model(car)
-        response = db_access.add_record(CarDBModel, car_db_model)
+        response = db_access.add(CarDBModel, car_db_model)
         if response.status_code == 200:
             return log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been sent.")
         elif response.status_code == 400:
@@ -26,7 +26,7 @@ def create_car(car) -> ConnexionResponse:  # noqa: E501
 
 
 def delete_car(car_id) -> ConnexionResponse:
-    response = db_access.delete_record(CarDBModel, 'id', car_id)
+    response = db_access.delete(CarDBModel, 'id', car_id)
     if 200 <= response.status_code < 300:
         msg = f"Car (id={car_id}) has been deleted."
         log_info(msg)
@@ -38,7 +38,7 @@ def delete_car(car_id) -> ConnexionResponse:
 
 
 def get_car(car_id) -> ConnexionResponse:
-    cars = db_access.get_records(CarDBModel, criteria={'id': lambda x: x==car_id})
+    cars = db_access.get(CarDBModel, criteria={'id': lambda x: x==car_id})
     if len(cars) == 0:
         return ConnexionResponse(body=f"Car with id={car_id} was not found.", status_code=404)
     else:
@@ -46,7 +46,7 @@ def get_car(car_id) -> ConnexionResponse:
 
 
 def get_cars() -> ConnexionResponse:  # noqa: E501
-    cars = db_access.get_records(CarDBModel)
+    cars = db_access.get(CarDBModel)
     return ConnexionResponse(body=cars, status_code=200)
 
 
@@ -54,7 +54,7 @@ def update_car(car) -> ConnexionResponse:
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = obj_to_db.car_to_db_model(car)
-        response = db_access.update_record(updated_obj=car_db_model)
+        response = db_access.update(updated_obj=car_db_model)
         if 200 <= response.status_code < 300:
             log_info(f"Car (id={car.id} has been suchas been succesfully updated")
             return ConnexionResponse(body=f"Car (id='{car.id}') has been succesfully updated", status_code=200)

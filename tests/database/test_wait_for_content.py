@@ -68,33 +68,33 @@ class Test_Waiting_For_Content(unittest.TestCase):
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(db_access.get_records, models.TestBase, wait=True)
-            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            future = executor.submit(db_access.get, models.TestBase, wait=True)
+            executor.submit(db_access.add, models.TestBase, test_obj)
             retrieved_objs = future.result()
             self.assertEqual(retrieved_objs, [test_obj])
 
     def test_not_enabling_wait_mechanism_when_no_content_is_available_makes_the_db_request_immediatelly_return_empty_list(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(db_access.get_records, models.TestBase, wait=False)
+            future = executor.submit(db_access.get, models.TestBase, wait=False)
             time.sleep(0.05)
-            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            executor.submit(db_access.add, models.TestBase, test_obj)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=100)
+            future = executor.submit(db_access.get, models.TestBase, wait=True, timeout_ms=100)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_response_is_sent_to_multiple_waiters(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future1 = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=1000)
-            future2 = executor.submit(db_access.get_records, models.TestBase, wait=True, timeout_ms=1000)
+            future1 = executor.submit(db_access.get, models.TestBase, wait=True, timeout_ms=1000)
+            future2 = executor.submit(db_access.get, models.TestBase, wait=True, timeout_ms=1000)
             time.sleep(0.05)
-            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            executor.submit(db_access.add, models.TestBase, test_obj)
             retrieved_objs1 = future1.result()
             retrieved_objs2 = future2.result()
             self.assertEqual(retrieved_objs1, [test_obj])
@@ -115,14 +115,14 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(
-                db_access.get_records,
+                db_access.get,
                 models.TestBase,
                 criteria={"test_int": lambda x: x==456},
                 wait=True,
                 timeout_ms=500
             )
             time.sleep(0.01)
-            executor.submit(db_access.add_record, models.TestBase, test_obj)
+            executor.submit(db_access.add, models.TestBase, test_obj)
             time.sleep(0.01)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
@@ -141,15 +141,15 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
     def test_waiting_for_new_record_to_be_sent_to_database(self):
         old_record = models.TestBase(id=111, test_str="test_1", test_int=123)
         new_record = models.TestBase(id=222, test_str="test_2", test_int=456)
-        db_access.add_record(models.TestBase, old_record)
+        db_access.add(models.TestBase, old_record)
         with ThreadPoolExecutor(max_workers=3) as executor:
             future = executor.submit(
-                db_access.wait_for_new_records,
+                db_access.wait_for_new,
                 models.TestBase,
                 timeout_ms=5000
             )
             time.sleep(0.5)
-            executor.submit(db_access.add_record, models.TestBase, new_record)
+            executor.submit(db_access.add, models.TestBase, new_record)
             time.sleep(0.05)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [new_record])
