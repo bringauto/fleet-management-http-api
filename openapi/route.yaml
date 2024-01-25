@@ -203,19 +203,6 @@ components:
         name:
           type: string
           example: 'Lužánky'
-        points:
-          type: array
-          default: []
-          items:
-            $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
-          example:
-            [
-              {
-                "latitude": 49.204117,
-                "longitude": 16.606525,
-                "altitude": 400.25
-              }
-            ]
         stopIds:
           type: array
           default: []
