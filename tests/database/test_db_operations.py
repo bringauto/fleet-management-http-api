@@ -2,7 +2,7 @@ import unittest
 import sys
 sys.path.append('.')
 
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 
@@ -10,8 +10,8 @@ import tests.database.models as models
 class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source()
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_table_is_initially_empty(self):
         objs_out = _db_access.get(models.TestBase)
@@ -54,8 +54,8 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
 class Test_Updating_Records(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source()
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_updating_an_existing_record(self):
         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
@@ -76,8 +76,8 @@ class Test_Updating_Records(unittest.TestCase):
 class Test_Deleting_Database_Record(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source()
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_deleting_an_existing_record(self):
         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
@@ -95,8 +95,8 @@ class Test_Deleting_Database_Record(unittest.TestCase):
 class Test_Deleting_N_Database_Records(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source()
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_deleting_n_records_with_least_ids(self):
         test_obj_1 = models.TestBase(id=7, test_str='test_string', test_int=5)

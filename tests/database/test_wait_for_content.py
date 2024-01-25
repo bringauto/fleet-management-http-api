@@ -5,7 +5,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
@@ -62,8 +62,8 @@ class Test_Wait_Objects(unittest.TestCase):
 class Test_Waiting_For_Content(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
@@ -100,7 +100,7 @@ class Test_Waiting_For_Content(unittest.TestCase):
             self.assertEqual(retrieved_objs1, [test_obj])
             self.assertEqual(retrieved_objs2, [test_obj])
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
             os.remove(_TEST_DB_FILE_PATH)
 
@@ -108,8 +108,8 @@ class Test_Waiting_For_Content(unittest.TestCase):
 class Test_Waiting_For_Specific_Content(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
@@ -127,7 +127,7 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
             os.remove(_TEST_DB_FILE_PATH)
 
@@ -135,8 +135,8 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
 class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(connection.current_connection_source())
+        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_waiting_for_new_record_to_be_sent_to_database(self):
         old_record = models.TestBase(id=111, test_str="test_1", test_int=123)
@@ -154,7 +154,7 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [new_record])
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
             os.remove(_TEST_DB_FILE_PATH)
 

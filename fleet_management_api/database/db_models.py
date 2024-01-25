@@ -37,11 +37,11 @@ class CarStateDBModel(Base):
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     @classmethod
-    def max_n_of_states(cls) -> int:
+    def max_n_of_stored_states(cls) -> int:
         return cls._max_n_of_states
 
     @classmethod
-    def set_max_number_of_stored_states(cls, n: int) -> None:
+    def set_max_n_of_stored_states(cls, n: int) -> None:
         if n>0:
             cls._max_n_of_states = n
 
@@ -92,10 +92,10 @@ class OrderStateDBModel(Base):
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     @classmethod
-    def max_n_of_states(cls) -> int:
+    def max_n_of_stored_states(cls) -> int:
         return cls._max_n_of_states
 
     @classmethod
-    def set_max_number_of_stored_states(cls, n: int) -> None:
+    def set_max_n_of_stored_states(cls, n: int) -> None:
         if n>0:
             cls._max_n_of_states = n

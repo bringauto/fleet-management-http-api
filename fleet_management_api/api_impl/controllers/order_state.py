@@ -23,10 +23,8 @@ def create_order_state(order_state) -> _Response:
         _mark_order_as_updated(order_state.order_id)
         _remove_old_states()
         return _api.log_and_respond(200, f"Order state (id={order_state.id}) has been sent.")
-    elif response.status_code == 400:
-        return _api.log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
     else:
-        return _api.log_and_respond(response.status_code, response.body)
+        return _api.log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
 
 
 def get_all_order_states(wait: bool = False, since: Optional[int] = None) -> _Response:
@@ -58,7 +56,7 @@ def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool = Fa
 
 def _remove_old_states() -> _Response:
     order_state_db_models = _db_access.get(_db_models.OrderStateDBModel)
-    extras = max(len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_states(), 0)
+    extras = max(len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states(), 0)
     if extras>0:
         response = _db_access.delete_n(_db_models.OrderStateDBModel, n=extras, id_name='timestamp', start_from="minimum")
         if response.status_code != 200:

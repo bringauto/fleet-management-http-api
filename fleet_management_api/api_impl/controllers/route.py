@@ -18,20 +18,16 @@ def create_route(route: _models.Route) -> _Response:
         response = _db_access.add(_RouteDBModel, route_db_model)
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
-        elif response.status_code == 400:
-            return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
         else:
-            return _api.log_and_respond(response.status_code, response.body)
-
+            return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
 
 def delete_route(route_id: int) -> _Response:
     response = _db_access.delete(_RouteDBModel, id_name="id", id_value=route_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Route with id={route_id} has been deleted.")
-    elif response.status_code == 404:
-        return _api.log_and_respond(404, f"Route with id={route_id} was not found.")
     else:
-        return _api.log_and_respond(response.status_code, f"Could not delete route (id={route_id}). {response.json()}")
+        note = " (not found)" if response.status_code == 404 else ""
+        return _api.log_and_respond(response.status_code, f"Could not delete route with id={route_id}{note}. {response.body}")
 
 
 def get_route(route_id: int) -> _models.Route:
@@ -51,16 +47,15 @@ def get_routes() -> List[_models.Route]:
 
 
 def update_route(route: _models.Route) -> _Response:
-    if connexion.request.is_json:
+    if not connexion.request.is_json:
+        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
+    else:
         route = _models.Route.from_dict(connexion.request.get_json())
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.update(updated_obj=route_db_model)
         if 200 <= response.status_code < 300:
             _api.log_info(f"Route (id={route.id} has been succesfully updated.")
             return _Response(status_code=response.status_code, content_type="application/json", body=route)
-        elif response.status_code == 404:
-            return _api.log_and_respond(404, f"Route (id={route.id}) was not found and could not be updated. {response.body}")
         else:
-            return _api.log_and_respond(response.status_code, f"Route (id={route.id}) could not be updated. {response.body}")
-    else:
-        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
+            note = " (not found)" if response.status_code == 404 else ""
+            return _api.log_and_respond(404, f"Route (id={route.id}) was not found and could not be updated{note}. {response.body}")

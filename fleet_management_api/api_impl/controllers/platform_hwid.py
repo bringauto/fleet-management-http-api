@@ -10,20 +10,18 @@ import fleet_management_api.database.db_models as _db_models
 
 
 def create_hw_id(platform_hw_id) -> _Response:
-    if connexion.request.is_json:
+    if not connexion.request.is_json:
+        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
+    else:
         platform_hw_id = _PlatformHwId.from_dict(connexion.request.get_json())
         platform_hwid_db_model = _api.platform_hw_id_to_db_model(platform_hw_id)
         response = _db_access.add(_db_models.PlatformHwIdDBModel, platform_hwid_db_model)
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Platform HW Id (id={platform_hw_id.id}, name='{platform_hw_id.name}) has been created.")
-        elif response.status_code == 400:
+        else:
             return _api.log_and_respond(
                 response.status_code,
                 f"Platform HW Id (id={platform_hw_id.id}, name='{platform_hw_id.name}) could not be created. {response.body}")
-        else:
-            return _api.log_and_respond(response.status_code, response.body)
-    else:
-        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
 
 def get_hw_ids() -> _Response:
@@ -46,8 +44,7 @@ def delete_hw_id(platformhwid_id: int) -> _Response:
     response = _db_access.delete(_db_models.PlatformHwIdDBModel, id_name="id", id_value=platformhwid_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Platform HW Id with id={platformhwid_id} has been deleted.")
-    elif response.status_code == 404:
-        return _api.log_and_respond(404, f"Platform HW Id with id={platformhwid_id} was not found.")
     else:
-        return _api.log_and_respond(response.status_code, f"Could not delete platform HW id (id={platformhwid_id}). {response.json()}")
+        note = " (not found)" if response.status_code == 404 else ""
+        return _api.log_and_respond(response.status_code, f"Could not delete platform HW id with id={platformhwid_id}{note}. {response.body}")
 

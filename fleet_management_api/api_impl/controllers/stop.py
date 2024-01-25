@@ -18,20 +18,17 @@ def create_stop(stop) -> _Response:
         response = _db_access.add(_db_models.StopDBModel, stop_db_model)
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Stop (id={stop.id}, name='{stop.name}) has been sent.")
-        elif response.status_code == 400:
-            return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}, name='{stop.name}) could not be sent. {response.body}")
         else:
-            return _api.log_and_respond(response.status_code, response.body)
+            return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}, name='{stop.name}) could not be sent. {response.body}")
 
 
 def delete_stop(stop_id: int) -> _Response:
     response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
-    elif response.status_code == 404:
-        return _api.log_and_respond(404, f"Stop with id={stop_id} was not found.")
     else:
-        return _api.log_and_respond(response.status_code, f"Could not delete stop (id={stop_id}). {response.json()}")
+        note = " (not found)" if response.status_code == 404 else ""
+        return _api.log_and_respond(response.status_code, f"Could not delete stop with id={stop_id}{note}. {response.body}")
 
 
 def get_stop(stop_id: int) -> _Response:
@@ -58,9 +55,8 @@ def update_stop(stop) -> _Response:
         if 200 <= response.status_code < 300:
             _api.log_info(f"Stop (id={stop.id} has been succesfully updated.")
             return _Response(status_code=response.status_code, content_type="application/json", body=stop)
-        elif response.status_code == 404:
-            return _api.log_and_respond(404, f"Stop (id={stop.id}) was not found and could not be updated. {response.body}")
         else:
-            return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}) could not be updated. {response.body}")
+            note = " (not found)" if response.status_code == 404 else ""
+            return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}) could not be updated {note}. {response.body}")
     else:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")

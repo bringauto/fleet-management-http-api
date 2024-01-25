@@ -1,25 +1,30 @@
 import os
 import unittest
+import sys
+sys.path.append('.')
 
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
+import fleet_management_api.database.db_access as _db_access
+from tests.database.models import TestBase as _TestBase # type: ignore
+from tests.database.models import initialize_test_tables as _initialize_test_tables
 
 
 class Test_Creating_Database_URL(unittest.TestCase):
 
     def test_production_database_url_with_specified_username_and_password(self):
-        url = connection.db_url_production("localhost", "test_db", "test_user", "test_password")
+        url = _connection.db_url_production("localhost", "test_db", "test_user", "test_password")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost/test_db")
 
     def test_production_database_url_without_username_and_password(self):
-        url = connection.db_url_production("localhost", db_name="test_db")
+        url = _connection.db_url_production("localhost", db_name="test_db")
         self.assertEqual(url, "postgresql+psycopg://localhost/test_db")
 
     def test_test_database_url(self):
-        url = connection.db_url_test()
+        url = _connection.db_url_test()
         self.assertEqual(url, "sqlite:///:memory:")
 
     def test_test_database_url_with_specified_file_location(self):
-        url = connection.db_url_test("test_db_file")
+        url = _connection.db_url_test("test_db_file")
         self.assertEqual(url, "sqlite:///test_db_file")
 
 
@@ -31,13 +36,34 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
 
     def test_setting_up_a_test_database(self):
         db_file_path = os.path.abspath("test_db_file.db")
-        connection.set_test_connection_source("test_db_file.db")
+        _connection.set_test_connection_source("test_db_file.db")
         self.assertTrue(os.path.isfile(db_file_path))
+
+    def test_test_database_file_is_always_removed_and_created_anew_when_setting_new_test_connection_using_the_same_file(self):
+        _connection.set_test_connection_source("test_db_file.db")
+        _initialize_test_tables(_connection.current_connection_source())
+        test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
+        response = _db_access.add(_TestBase, test_obj)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(_db_access.get(_TestBase)), 1)
+
+        _connection.set_test_connection_source("test_db_file.db")
+        _initialize_test_tables(_connection.current_connection_source())
+        self.assertEqual(len(_db_access.get(_TestBase)), 0)
 
     def tearDown(self) -> None: # pragma: no cover
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
 
+
+class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):
+
+    def test_calling_add_method_without_setting_connection_raises_runtime_error(self):
+        _connection.unset_connection_source()
+        self.assertTrue(_connection.current_connection_source() is None)
+        test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
+        with self.assertRaises(RuntimeError):
+            _db_access.add(_TestBase, test_obj)
 
 
 if __name__=="__main__":

@@ -1,6 +1,6 @@
 import unittest
 
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone
 from fleet_management_api.app import get_app
 
@@ -8,7 +8,7 @@ from fleet_management_api.app import get_app
 class Test_Sending_And_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -69,7 +69,7 @@ class Test_Sending_And_Order(unittest.TestCase):
 class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
 
     def test_creating_order_from_example_in_spec(self):
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         app = get_app().app
         with app.test_client() as c:
             example = c.get('/v1/openapi.json').json["components"]["schemas"]["Order"]["example"]
@@ -83,7 +83,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
 class Test_All_Retrieving_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -115,7 +115,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
     def setUp(self):
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -145,7 +145,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
 class Test_Deleting_Order(unittest.TestCase):
     def setUp(self):
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:
@@ -181,7 +181,7 @@ class Test_Deleting_Order(unittest.TestCase):
 class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         self.car = Car(id=12, name='test_car', platform_id=5)
         with self.app.test_client() as c:

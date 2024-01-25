@@ -2,14 +2,14 @@ import unittest
 
 from fleet_management_api.app import get_app
 from fleet_management_api.models import Car, CarState, GNSSPosition
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 
 
 class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.car = Car(id=1, name="Test Car", platform_id=5)
         self.app = get_app().app
         with self.app.test_client() as c:
@@ -48,7 +48,7 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
 class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.car = Car(id=1, name="Test Car", platform_id=5)
         self.app = get_app().app
         with self.app.test_client() as c:
@@ -61,7 +61,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 class Test_Getting_All_Car_States(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car_1 = Car(id=12, platform_id=1, name="car1", car_admin_phone={}, default_route_id=1, under_test=False)
         car_2 = Car(id=14, platform_id=1, name="car2", car_admin_phone={}, default_route_id=1, under_test=False)
@@ -89,7 +89,7 @@ class Test_Getting_All_Car_States(unittest.TestCase):
 class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car_1 = Car(id=12, platform_id=1, name="car1", car_admin_phone={}, default_route_id=1, under_test=False)
         car_2 = Car(id=13, platform_id=78, name="car2", car_admin_phone={}, default_route_id=1, under_test=False)
@@ -146,12 +146,12 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=12, name="car1", platform_id=1, car_admin_phone={})
         with self.app.test_client() as c:
             c.post('/v1/car', json=car)
-        self.max_n = _db_models.CarStateDBModel.max_n_of_states()
+        self.max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)

@@ -5,7 +5,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 from fleet_management_api.app import get_app
 from fleet_management_api.models import Car, Order, OrderState
 import fleet_management_api.database as database
@@ -14,7 +14,7 @@ import fleet_management_api.database as database
 class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source("test_db.db")
+        _connection.set_test_connection_source("test_db.db")
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -52,7 +52,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
                     response = fut.result()
                     self.assertEqual(len(response.json), 1)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -60,7 +60,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source("test_db.db")
+        _connection.set_test_connection_source("test_db.db")
         database.set_content_timeout_ms(1000)
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
@@ -88,7 +88,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
                 response = future_2.result()
                 self.assertEqual(len(response.json), 0)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -96,7 +96,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
 class Test_Timeouts(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source("test_db.db")
+        _connection.set_test_connection_source("test_db.db")
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -122,7 +122,7 @@ class Test_Timeouts(unittest.TestCase):
                 response = future_2.result()
                 self.assertEqual(len(response.json), 1)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -130,7 +130,7 @@ class Test_Timeouts(unittest.TestCase):
 class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source("test_db.db")
+        _connection.set_test_connection_source("test_db.db")
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -213,7 +213,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
                 self.assertEqual(len(states), 1)
                 self.assertEqual(states[0]["id"], 456)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 

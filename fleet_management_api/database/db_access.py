@@ -22,12 +22,9 @@ def add(base: Type[_Base], *sent_objs: _Base) -> _Response:
     if not sent_objs:
         return _Response(status_code=200, content_type="string", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
-    table = base.__table__
-
-    source = current_connection_source()
-    if source is None:
-        return _Response(status_code=500, content_type="string", body="No connection source")
+    source = _check_and_return_current_connection_source()
     with source.begin() as conn:
+        table = base.__table__
         stmt = _sqa.insert(table)
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
@@ -44,9 +41,7 @@ def add(base: Type[_Base], *sent_objs: _Base) -> _Response:
 
 def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
     table = base_type.__table__
-    source = current_connection_source()
-    if source is None:
-        return _Response(status_code=500, content_type="string", body="No connection source")
+    source = _check_and_return_current_connection_source()
     with source.begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
         stmt = _sqa.delete(table).where(id_match)
@@ -66,10 +61,7 @@ def delete_n(base_type: Type[_Base], n: int, id_name: str, start_from: Literal["
     table = base_type.__table__
     if not id_name in table.columns.keys():
         return _Response(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
-
-    source = current_connection_source()
-    if source is None:
-        return _Response(status_code=500, content_type="string", body="No connection source")
+    source = _check_and_return_current_connection_source()
     with source.begin() as conn:
         if start_from == "minimum":
             subquery = _sqa.select(table.c.id).order_by(table.c.id).limit(n).alias()
@@ -106,7 +98,8 @@ def get(
     if criteria is None:
         criteria = {}
     table = base.__table__
-    with _Session(current_connection_source()) as session:
+    source = _check_and_return_current_connection_source()
+    with _Session(source) as session:
         clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
         stmt = _sqa.select(base).where(*clauses)
         result = [row[0] for row in session.execute(stmt)]
@@ -122,9 +115,7 @@ def get(
 def update(updated_obj: _Base) -> _Response:
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
-    source = current_connection_source()
-    if source is None:
-        return _Response(status_code=500, content_type="string", body="No connection source")
+    source = _check_and_return_current_connection_source()
     with source.begin() as conn:
         id = updated_obj.__dict__[_DATABASE_RECORD_ID_NAME]
         id_match = getattr(table.columns, _DATABASE_RECORD_ID_NAME) == id
@@ -168,11 +159,17 @@ def content_timeout() -> int:
 
 def set_content_timeout_ms(timeout_ms: int) -> None:
     """Sets the timeout for waiting for content from the database in milliseconds.
-
     Sets common value for all endpoints with wait mechanism being applied."
     """
     global _wait_mg
     _wait_mg.set_timeout(timeout_ms)
+
+
+def _check_and_return_current_connection_source() -> _sqa.engine.base.Engine:
+    source = current_connection_source()
+    if source is None:
+        raise RuntimeError("No connection source")
+    return source
 
 
 def _check_obj_bases_matches_specifed_base(specified_base: Type[_Base], *objs: _Base) -> None:

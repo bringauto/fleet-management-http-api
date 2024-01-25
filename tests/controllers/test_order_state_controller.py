@@ -2,14 +2,14 @@ import unittest
 
 from fleet_management_api.app import get_app
 from fleet_management_api.models import OrderState, Order, Car
-import fleet_management_api.database.connection as connection
+import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -46,7 +46,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
 class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         with self.app.test_client() as c:
@@ -63,7 +63,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -91,7 +91,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
 class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -139,7 +139,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
 class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -162,14 +162,14 @@ class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestC
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
     def setUp(self) -> None:
-        connection.set_test_connection_source()
+        _connection.set_test_connection_source()
         self.app = get_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
             c.post('/v1/car', json=car)
             c.post('/v1/order', json=order)
-        self.max_n = _db_models.OrderStateDBModel.max_n_of_states()
+        self.max_n = _db_models.OrderStateDBModel.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         with self.app.test_client() as c:

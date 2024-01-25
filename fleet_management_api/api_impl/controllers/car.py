@@ -16,10 +16,8 @@ def create_car(car) -> _Response:  # noqa: E501
         response = _db_access.add(_db_models.CarDBModel, car_db_model)
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been sent.")
-        elif response.status_code == 400:
-            return _api.log_and_respond(response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}")
         else:
-            return _api.log_and_respond(response.status_code, response.body)
+            return _api.log_and_respond(response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}")
 
 
 def delete_car(car_id) -> _Response:

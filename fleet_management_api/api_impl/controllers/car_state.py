@@ -58,7 +58,7 @@ def _car_exists(car_id: int) -> bool:
 def _remove_old_states(car_id: int) -> _Response:
     car_state_db_models = _db_access.get(_db_models.CarStateDBModel, criteria={'car_id': lambda x: x==car_id})
     curr_n_of_states = len(car_state_db_models)
-    delta = curr_n_of_states - _db_models.CarStateDBModel.max_n_of_states()
+    delta = curr_n_of_states - _db_models.CarStateDBModel.max_n_of_stored_states()
     if delta>0:
         response = _db_access.delete_n(
             _db_models.CarStateDBModel,
