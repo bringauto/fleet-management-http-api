@@ -1,15 +1,15 @@
 from typing import Dict, Any
 import os
 
-from sqlalchemy import Engine, create_engine
-
-import fleet_management_api.database.db_models as db_models
-
-
-_db_connection: None|Engine = None
+from sqlalchemy import Engine as _Engine
+from sqlalchemy import create_engine as _create_engine
+import fleet_management_api.database.db_models as _db_models
 
 
-def current_connection_source() -> Engine|None:
+_db_connection: None|_Engine = None
+
+
+def current_connection_source() -> _Engine|None:
     global _db_connection
     return _db_connection
 
@@ -48,12 +48,12 @@ def set_up_database(config: Dict[str, Any]) -> None:
     set_connection_source(conn_config["location"], conn_config["database_name"], conn_config["username"], conn_config["password"])
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    db_models.Base.metadata.create_all(_db_connection)
-    db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["car_states"])
-    db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["order_states"])
+    _db_models.Base.metadata.create_all(_db_connection)
+    _db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["car_states"])
+    _db_models.CarStateDBModel.set_max_number_of_stored_states(config["maximum_number_of_table_rows"]["order_states"])
 
 
 def _set_connection(url: str) -> None:
     global _db_connection
-    _db_connection = create_engine(url)
-    db_models.Base.metadata.create_all(_db_connection)
+    _db_connection = _create_engine(url)
+    _db_models.Base.metadata.create_all(_db_connection)

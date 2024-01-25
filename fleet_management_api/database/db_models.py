@@ -1,38 +1,40 @@
 from typing import ClassVar
 import dataclasses
 
-from sqlalchemy import Integer, String, JSON, Boolean, BigInteger, Float
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
+import sqlalchemy as _sqa
+from sqlalchemy.orm import Mapped as _Mapped
+from sqlalchemy.orm import DeclarativeBase as _DeclarativeBase
+from sqlalchemy.orm import mapped_column as _mapped_column
 
 
 DATABASE_URL = "sqlite:///:memory:"
 
 
-class Base(DeclarativeBase):
+class Base(_DeclarativeBase):
     pass
 
 
 @dataclasses.dataclass
 class CarDBModel(Base):
     __tablename__ = 'cars'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
-    platform_id: Mapped[int] = mapped_column(Integer)
-    car_admin_phone: Mapped[dict] = mapped_column(JSON, nullable=True)
-    default_route_id: Mapped[int] = mapped_column(Integer, nullable=True)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    platform_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
+    default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
 
 
 @dataclasses.dataclass
 class CarStateDBModel(Base):
     __tablename__ = 'car_states'
     _max_n_of_states: ClassVar[int] = 50
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    status: Mapped[str] = mapped_column(String)
-    car_id: Mapped[int] = mapped_column(Integer)
-    speed: Mapped[float] = mapped_column(Float)
-    fuel: Mapped[int] = mapped_column(Integer)
-    position: Mapped[dict] = mapped_column(JSON)
-    timestamp: Mapped[int] = mapped_column(BigInteger)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    status: _Mapped[str] = _mapped_column(_sqa.String)
+    car_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    speed: _Mapped[float] = _mapped_column(_sqa.Float)
+    fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
+    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     @classmethod
     def max_n_of_states(cls) -> int:
@@ -47,47 +49,47 @@ class CarStateDBModel(Base):
 @dataclasses.dataclass
 class OrderDBModel(Base):
     __tablename__ = 'orders'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    priority: Mapped[str] = mapped_column(String)
-    user_id: Mapped[int] = mapped_column(Integer)
-    car_id: Mapped[int] = mapped_column(Integer)
-    target_stop_id: Mapped[int] = mapped_column(Integer)
-    stop_route_id: Mapped[int] = mapped_column(Integer)
-    notification_phone: Mapped[dict] = mapped_column(JSON)
-    updated: Mapped[bool] = mapped_column(Boolean)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    priority: _Mapped[str] = _mapped_column(_sqa.String)
+    user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    car_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    target_stop_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
+    updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
 
 
 @dataclasses.dataclass
 class PlatformHwIdDBModel(Base):
     __tablename__ = 'platform_hw_ids'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
 
 
 @dataclasses.dataclass
 class RouteDBModel(Base):
     __tablename__ = 'routes'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
 
 
 @dataclasses.dataclass
 class StopDBModel(Base):
     __tablename__ = 'stops'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String, unique=True)
-    position: Mapped[dict] = mapped_column(JSON)
-    notification_phone: Mapped[dict] = mapped_column(JSON)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
+    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
 
 
 @dataclasses.dataclass
 class OrderStateDBModel(Base):
     __tablename__ = 'order_states'
     _max_n_of_states: ClassVar[int] = 50
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    status: Mapped[str] = mapped_column(String)
-    order_id: Mapped[int] = mapped_column(Integer)
-    timestamp: Mapped[int] = mapped_column(BigInteger)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    status: _Mapped[str] = _mapped_column(_sqa.String)
+    order_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     @classmethod
     def max_n_of_states(cls) -> int:

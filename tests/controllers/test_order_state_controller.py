@@ -3,7 +3,7 @@ import unittest
 from fleet_management_api.app import get_app
 from fleet_management_api.models import OrderState, Order, Car
 import fleet_management_api.database.connection as connection
-import fleet_management_api.database.db_models as db_models
+import fleet_management_api.database.db_models as _db_models
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
@@ -169,7 +169,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         with self.app.test_client() as c:
             c.post('/v1/car', json=car)
             c.post('/v1/order', json=order)
-        self.max_n = db_models.OrderStateDBModel.max_n_of_states()
+        self.max_n = _db_models.OrderStateDBModel.max_n_of_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         with self.app.test_client() as c:

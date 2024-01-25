@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Dict, List, Any, Iterable, Optional, Callable
-import threading
+import threading as _threading
 
 
 class WaitObjManager:
@@ -81,7 +81,7 @@ class WaitObj:
     def __init__(self, key: Any, timeout_ms: int, validation: Optional[Callable[[Any], bool]] = None) -> None:
         self._key = key
         self._response_content: List[Any] = list()
-        self._condition = threading.Condition()
+        self._condition = _threading.Condition()
         self._is_valid = validation
         self._timeout_ms = max(timeout_ms, 0)
 

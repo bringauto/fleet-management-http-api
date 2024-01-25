@@ -9,7 +9,6 @@ import fleet_management_api.database.connection as connection
 from fleet_management_api.app import get_app
 from fleet_management_api.models import Car, Order, OrderState
 import fleet_management_api.database as database
-import fleet_management_api.api_impl.controllers.order_state as order_state
 
 
 class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
