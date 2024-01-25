@@ -11,7 +11,8 @@ from fleet_management_api.models import (
     OrderState,
     PlatformHwId,
     Route,
-    Stop
+    Stop,
+    RoutePoints
 )
 
 
@@ -220,6 +221,32 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         order_state = OrderState(id=1, status="to_accept", order_id=1)
         order_state_db_model = _obj_to_db.order_state_to_db_model(order_state)
         self.assertEqual(order_state_db_model.timestamp, 1234567890)
+
+
+class Test_Creating_RoutePointsDBModel(unittest.TestCase):
+
+    def test_creating_db_model_from_route_points_preserves_attribute_values(self):
+        route_points = RoutePoints(
+            route_id=1,
+            points=[
+                GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+                GNSSPosition(latitude=49.8645611, longitude=1.337644, altitude=10)
+            ]
+        )
+        route_points_db_model = _obj_to_db.route_points_to_db_model(route_points)
+        self.assertEqual(route_points_db_model.route_id, route_points.route_id)
+        self.assertEqual(route_points_db_model.points, route_points.points)
+
+    def test_route_points_converted_to_db_model_and_back_preserves_its_attributes(self):
+        route_points_in = RoutePoints(
+            route_id=1,
+            points=[
+                GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+                GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+            ]
+        )
+        route_points_out = _obj_to_db.route_points_from_db_model(_obj_to_db.route_points_to_db_model(route_points_in))
+        self.assertEqual(route_points_out, route_points_in)
 
 
 if __name__=="__main__":

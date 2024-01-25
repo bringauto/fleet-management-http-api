@@ -141,6 +141,20 @@ def route_from_db_model(route_db_model: _db_models.RouteDBModel) -> _models.Rout
     )
 
 
+def route_points_to_db_model(route_points: _models.RoutePoints) -> _db_models.RoutePointsDBModel:
+    return _db_models.RoutePointsDBModel(
+        route_id=route_points.route_id,
+        points=route_points.points
+    )
+
+
+def route_points_from_db_model(route_points_db_model: _db_models.RoutePointsDBModel) -> _models.RoutePoints:
+    return _models.RoutePoints(
+        route_id=route_points_db_model.route_id,
+        points=route_points_db_model.points
+    )
+
+
 def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
     return _db_models.StopDBModel(
         id=stop.id,
