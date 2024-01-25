@@ -178,6 +178,38 @@ paths:
           $ref: 'errors.yaml#/components/responses/NotFound'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
+  /routepoints:
+    post:
+      operationId: redefineRoutePoints
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
+      tags:
+        - route
+      summary: Finds route points gor given route identified by the route's ID
+      requestBody:
+        description: Route points json
+        x-body-name: routePoints
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutePoints'
+        required: true
+      responses:
+        '200':
+          description: Successfuly found route points
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
 components:
   parameters:
@@ -210,19 +242,29 @@ components:
             type: integer
           example: [1, 2, 3, 4]
     RoutePoints:
-      type: array
-      items:
-        $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
-      example:
-        [
-          {
-            "latitude": 49.204117,
-            "longitude": 16.606525,
-            "altitude": 400.25
-          },
-          {
-            "latitude": 49.70425,
-            "longitude": 16.65151,
-            "altitude": 400.78
-          }
-        ]
+      type: object
+      description: Route points object structure
+      required:
+        - routeId
+        - points
+      properties:
+        routeId:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        points:
+          type: array
+          default: []
+          items:
+            $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+          example:
+            [
+              {
+                "latitude": 49.204117,
+                "longitude": 16.606525,
+                "altitude": 400.25
+              },
+              {
+                "latitude": 49.70425,
+                "longitude": 16.65151,
+                "altitude": 400.78
+              }
+            ]
