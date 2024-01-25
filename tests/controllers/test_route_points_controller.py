@@ -36,6 +36,20 @@ class Test_Posting_New_Route_Points(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 
+    def test_updating_route_points(self):
+        old_points = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0), GNSSPosition(47.0, 23.0, 400.0)]
+        new_points = [GNSSPosition(50.0, 22.0, 350.0), GNSSPosition(-48.0, -22.0, 250.0)]
+        with self.app.test_client() as c:
+            c.post('/v1/route', json=self.route)
+            c.post('/v1/routepoints', json=RoutePoints(id=12, points=old_points))
+            response_1 = c.get('/v1/routepoints/12')
+            self.assertEqual(response_1.json["points"][0]["latitude"], 49)
+            self.assertEqual(len(response_1.json["points"]), 3)
+            c.post('/v1/routepoints', json=RoutePoints(id=12, points=new_points))
+            response_2 = c.get('/v1/routepoints/12')
+            self.assertEqual(response_2.json["points"][0]["latitude"], 50)
+            self.assertEqual(len(response_2.json), 2)
+
 
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage

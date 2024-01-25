@@ -235,7 +235,8 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
         )
         route_points_db_model = _obj_to_db.route_points_to_db_model(route_points)
         self.assertEqual(route_points_db_model.id, route_points.route_id)
-        self.assertEqual(route_points_db_model.points, route_points.points)
+        self.assertEqual(route_points_db_model.points[0], route_points.points[0])
+        self.assertEqual(route_points_db_model.points[1], route_points.points[1])
 
     def test_route_points_converted_to_db_model_and_back_preserves_its_attributes(self):
         route_points_in = RoutePoints(
