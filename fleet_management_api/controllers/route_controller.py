@@ -4,8 +4,8 @@ from typing import Tuple
 from typing import Union
 
 from fleet_management_api.models.error import Error  # noqa: E501
-from fleet_management_api.models.gnss_position import GNSSPosition  # noqa: E501
 from fleet_management_api.models.route import Route  # noqa: E501
+from fleet_management_api.models.route_points import RoutePoints  # noqa: E501
 from fleet_management_api import util
 
 
@@ -58,7 +58,7 @@ def get_route_points(route_id):  # noqa: E501
     :param route_id: ID of route to delete
     :type route_id: int
 
-    :rtype: Union[List[GNSSPosition], Tuple[List[GNSSPosition], int], Tuple[List[GNSSPosition], int, Dict[str, str]]
+    :rtype: Union[RoutePoints, Tuple[RoutePoints, int], Tuple[RoutePoints, int, Dict[str, str]]
     """
     return 'do some magic!'
 
@@ -71,6 +71,21 @@ def get_routes():  # noqa: E501
 
     :rtype: Union[List[Route], Tuple[List[Route], int], Tuple[List[Route], int, Dict[str, str]]
     """
+    return 'do some magic!'
+
+
+def redefine_route_points(route_points):  # noqa: E501
+    """Finds route points gor given route identified by the route&#39;s ID
+
+     # noqa: E501
+
+    :param route_points: Route points json
+    :type route_points: dict | bytes
+
+    :rtype: Union[str, Tuple[str, int], Tuple[str, int, Dict[str, str]]
+    """
+    if connexion.request.is_json:
+        route_points = RoutePoints.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

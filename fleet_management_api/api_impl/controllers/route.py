@@ -7,6 +7,7 @@ import fleet_management_api.api_impl  as _api
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import RouteDBModel as _RouteDBModel
+from fleet_management_api.database.db_models import RoutePointsDBModel as _RoutePointsDBModel
 
 
 def create_route(route: _models.Route) -> _Response:
@@ -17,7 +18,11 @@ def create_route(route: _models.Route) -> _Response:
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(_RouteDBModel, route_db_model)
         if response.status_code == 200:
-            return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
+            points_response = _create_empty_route_points_list(route.id)
+            if points_response.status_code == 200:
+                return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
+            else:
+                return _api.log_and_respond(points_response.status_code, f"Route (id={route.id}, name='{route.name}) has been sent, but route points could not. {points_response.body}")
         else:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
 
@@ -59,3 +64,7 @@ def update_route(route: _models.Route) -> _Response:
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _api.log_and_respond(404, f"Route (id={route.id}) was not found and could not be updated{note}. {response.body}")
+
+
+def _create_empty_route_points_list(route_id: int) -> _Response:
+    return _db_access.add(_RoutePointsDBModel, _RoutePointsDBModel(id=route_id, points=[]))

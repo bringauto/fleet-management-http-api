@@ -1895,6 +1895,83 @@ paths:
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+  /routepoints:
+    post:
+      operationId: redefine_route_points
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutePoints'
+        description: Route points json
+        required: true
+        x-body-name: routePoints
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Successfuly found route points
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds route points gor given route identified by the route's ID
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
   /routepoints/{routeId}:
     get:
       operationId: get_route_points
@@ -2694,10 +2771,6 @@ components:
         - 3
         - 4
         id: 1
-        points:
-        - latitude: 49.204117
-          longitude: 16.606525
-          altitude: 400.25
       properties:
         id:
           example: 1
@@ -2708,16 +2781,6 @@ components:
           example: Lužánky
           title: name
           type: string
-        points:
-          default: []
-          example:
-          - latitude: 49.204117
-            longitude: 16.606525
-            altitude: 400.25
-          items:
-            $ref: '#/components/schemas/GNSSPosition'
-          title: points
-          type: array
         stopIds:
           default: []
           example:
@@ -2735,16 +2798,40 @@ components:
       title: Route
       type: object
     RoutePoints:
+      description: Route points object structure
       example:
-      - latitude: 49.204117
-        longitude: 16.606525
-        altitude: 400.25
-      - latitude: 49.70425
-        longitude: 16.65151
-        altitude: 400.78
-      items:
-        $ref: '#/components/schemas/GNSSPosition'
-      type: array
+        routeId: 1
+        points:
+        - latitude: 49.204117
+          longitude: 16.606525
+          altitude: 400.25
+        - latitude: 49.70425
+          longitude: 16.65151
+          altitude: 400.78
+      properties:
+        routeId:
+          example: 1
+          format: int32
+          title: id
+          type: integer
+        points:
+          default: []
+          example:
+          - latitude: 49.204117
+            longitude: 16.606525
+            altitude: 400.25
+          - latitude: 49.70425
+            longitude: 16.65151
+            altitude: 400.78
+          items:
+            $ref: '#/components/schemas/GNSSPosition'
+          title: points
+          type: array
+      required:
+      - points
+      - routeId
+      title: RoutePoints
+      type: object
     Stop:
       description: Stop object structure
       example:

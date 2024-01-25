@@ -76,7 +76,7 @@ class RouteDBModel(Base):
 @dataclasses.dataclass
 class RoutePointsDBModel(Base):
     __tablename__ = 'route_points'
-    route_id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     points: _Mapped[dict] = _mapped_column(_sqa.JSON)
 
 
