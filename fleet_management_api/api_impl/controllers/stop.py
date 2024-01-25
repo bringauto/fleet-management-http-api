@@ -48,7 +48,9 @@ def get_stops() -> _Response:
 
 
 def update_stop(stop) -> _Response:
-    if connexion.request.is_json:
+    if not connexion.request.is_json:
+        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
+    else:
         stop = _Stop.from_dict(connexion.request.get_json())
         stop_db_model = _api.stop_to_db_model(stop)
         response = _db_access.update(stop_db_model)
@@ -58,5 +60,3 @@ def update_stop(stop) -> _Response:
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}) could not be updated {note}. {response.body}")
-    else:
-        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")

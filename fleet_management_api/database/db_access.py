@@ -29,14 +29,12 @@ def add(base: Type[_Base], *sent_objs: _Base) -> _Response:
         data_list = [obj.__dict__ for obj in sent_objs]
         try:
             result = conn.execute(stmt, data_list)
-            if result.rowcount == 0:
-                return _Response(status_code=200, content_type="string", body="Nothing added to the database")
-            else:
-                _wait_mg.notify(base.__tablename__, sent_objs)
-                return _Response(status_code=200, content_type="string", body="Succesfully added record to database")
-
+            _wait_mg.notify(base.__tablename__, sent_objs)
+            return _Response(status_code=200, content_type="string", body=f"Succesfully sent to database (number of sent objects: {result.rowcount}).")
         except _sqaexc.IntegrityError as e:
             return _Response(status_code=400, content_type="string", body=f"Nothing added to the database. {e.orig}")
+        except Exception as e:
+            return _Response(status_code=500, content_type="string", body=f"Error: {e}")
 
 
 def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
