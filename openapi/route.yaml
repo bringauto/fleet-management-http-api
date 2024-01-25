@@ -136,14 +136,7 @@ paths:
         - route
       summary: Delete a route
       parameters:
-        - name: routeId
-          in: path
-          description: ID of route to delete
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+      - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
           description: Successful route removal
@@ -159,8 +152,44 @@ paths:
           $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
+  /routepoints/{routeId}:
+    get:
+      operationId: getRoutePoints
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
+      tags:
+        - route
+      summary: Finds route points gor given route identified by the route's ID
+      parameters:
+        - $ref: '#/components/parameters/RouteId'
+      responses:
+        '200':
+          description: Successfuly found route points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePoints'
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
 components:
+  parameters:
+    RouteId:
+      name: routeId
+      in: path
+      description: ID of route to delete
+      required: true
+      example: 1
+      schema:
+        type: integer
+        format: int32
   schemas:
     Route:
       type: object
@@ -193,3 +222,20 @@ components:
           items:
             type: integer
           example: [1, 2, 3, 4]
+    RoutePoints:
+      type: array
+      items:
+        $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+      example:
+        [
+          {
+            "latitude": 49.204117,
+            "longitude": 16.606525,
+            "altitude": 400.25
+          },
+          {
+            "latitude": 49.70425,
+            "longitude": 16.65151,
+            "altitude": 400.78
+          }
+        ]

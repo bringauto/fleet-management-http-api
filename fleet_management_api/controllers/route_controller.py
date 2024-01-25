@@ -4,6 +4,7 @@ from typing import Tuple
 from typing import Union
 
 from fleet_management_api.models.error import Error  # noqa: E501
+from fleet_management_api.models.gnss_position import GNSSPosition  # noqa: E501
 from fleet_management_api.models.route import Route  # noqa: E501
 from fleet_management_api import util
 
@@ -45,6 +46,19 @@ def get_route(route_id):  # noqa: E501
     :type route_id: int
 
     :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
+    """
+    return 'do some magic!'
+
+
+def get_route_points(route_id):  # noqa: E501
+    """Finds route points gor given route identified by the route&#39;s ID
+
+     # noqa: E501
+
+    :param route_id: ID of route to delete
+    :type route_id: int
+
+    :rtype: Union[List[GNSSPosition], Tuple[List[GNSSPosition], int], Tuple[List[GNSSPosition], int, Dict[str, str]]
     """
     return 'do some magic!'
 

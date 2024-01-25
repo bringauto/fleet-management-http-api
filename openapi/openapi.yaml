@@ -56,6 +56,8 @@ paths:
     $ref: 'route.yaml#/paths/~1route'
   /route/{routeId}:
     $ref: 'route.yaml#/paths/~1route~1{routeId}'
+  /routepoints/{routeId}:
+    $ref: 'route.yaml#/paths/~1routepoints~1{routeId}'
 
   /stop:
     $ref: 'stop.yaml#/paths/~1stop'
