@@ -33,8 +33,10 @@ class _TestApp:
             self._api_key = api_key
 
         def test_client(self) -> _FlaskClient:
-            return _TestApp._TestClient(self._app, self._api_key)
-
+            if self._api_key == "":
+                return _TestApp._TestClient(self._app, self._api_key)
+            else:
+                return self._app.test_client()
 
     class _TestClient(_FlaskClient):
         def __init__(self, application, api_key: str, *args, **kwargs) -> None:

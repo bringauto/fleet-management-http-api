@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import patch, Mock
 
@@ -48,16 +49,29 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
             response = c.get('/v1/car')
             self.assertEqual(response.status_code, 200)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("db_file.db"):
+            os.remove("db_file.db")
+
+
+class Test_Using_Already_Existing_API_Key(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_test_connection_source("db_file.db")
+        self.app = _app.get_test_app(predef_api_key="abcd")
+
     @patch("fleet_management_api.api_impl.api_keys._generate_key")
-    def test_using_existing_key_yields_code_200(self, mock_generate_key: Mock):
-        key_name = "test_key_2"
-        mock_generate_key.return_value = "1234"
-        code, msg = _api_keys.create_key(key_name)
-        self.assertEqual(code, 200)
+    def test_using_existing_key(self, mock_generate_key: Mock):
+        mock_generate_key.return_value = "abcd"
         with self.app.app.test_client() as c:
             response = c.get('/v1/car')
+            self.assertEqual(response.status_code, 401)
+            response = c.get('/v1/car?api_key=abcd')
             self.assertEqual(response.status_code, 200)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("db_file.db"):
+            os.remove("db_file.db")
 
 
 if __name__ == '__main__':
