@@ -9,7 +9,8 @@ servers:
     description: Local server
 
 security:
-- oAuth2AuthCode: []
+  - APIKeyAuth: []
+  - oAuth2AuthCode: []
 
 tags:
   - name: car
@@ -28,7 +29,7 @@ tags:
     description: Stop state related functions
   - name: login
     description: Authentication related functions
-    
+
 
 
 paths:
@@ -86,7 +87,7 @@ paths:
       tags:
       - login
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
-      
+
   /token_get:
     get:
       description: Callback endpoint for keycloak to receive jwt token.
@@ -214,8 +215,9 @@ components:
       schema:
         type: string
       style: form
-      
+
   securitySchemes:
+
     oAuth2AuthCode:
       description: oAuth2 authorization
       flows:
@@ -228,3 +230,9 @@ components:
       x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
       x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
 
+    APIKeyAuth:
+      description: Authentication using API key
+      type: apiKey
+      in: query
+      name: api_key
+      # x-scopeValidateFunc: fleet_management_api.api_impl.api_keys

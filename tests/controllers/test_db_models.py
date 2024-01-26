@@ -227,7 +227,7 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
 
     def test_creating_db_model_from_route_points_preserves_attribute_values(self):
         route_points = RoutePoints(
-            id=1,
+            route_id=1,
             points=[
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
                 GNSSPosition(latitude=49.8645611, longitude=1.337644, altitude=10)
@@ -240,7 +240,7 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
 
     def test_route_points_converted_to_db_model_and_back_preserves_its_attributes(self):
         route_points_in = RoutePoints(
-            id=1,
+            route_id=1,
             points=[
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)

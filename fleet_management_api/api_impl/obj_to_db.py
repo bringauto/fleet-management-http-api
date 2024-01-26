@@ -149,9 +149,8 @@ def route_points_to_db_model(route_points: _models.RoutePoints) -> _db_models.Ro
 
 
 def route_points_from_db_model(route_points_db_model: _db_models.RoutePointsDBModel) -> _models.RoutePoints:
-
     return _models.RoutePoints(
-        id=route_points_db_model.id,
+        route_id=route_points_db_model.id,
         points=route_points_db_model.points
     )
 

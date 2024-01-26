@@ -1,6 +1,6 @@
 import unittest
 
-from fleet_management_api.app import get_app
+import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_test_connection_source
 from fleet_management_api.models import Route
 
@@ -9,7 +9,7 @@ class Test_Creating_Route(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_creating_route(self):
         route = Route(id=5, name="test_route")
@@ -47,7 +47,7 @@ class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         with self.app.test_client() as c:
             example = c.get('/v1/openapi.json').json["components"]["schemas"]["Route"]["example"]
             response = c.post('/v1/route', json=example)
@@ -58,7 +58,7 @@ class Test_Getting_All_Routes(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_retrieving_existing_routes(self):
         route_1 = Route(id=1, name="test_route_1")
@@ -82,7 +82,7 @@ class Test_Getting_Single_Route(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         self.route_1 = Route(id=78, name="test_route_1")
         self.route_2 = Route(id=142, name="test_route_2")
         with self.app.test_client() as c:
@@ -109,7 +109,7 @@ class Test_Deleting_Route(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         self.route_1 = Route(id=78, name="test_route_1")
         with self.app.test_client() as c:
             c.post('/v1/route', json=self.route_1)
@@ -131,7 +131,7 @@ class Test_Updating_Route(unittest.TestCase):
 
     def setUp(self) -> None:
         set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         self.route = Route(id=78, name="test_route_1")
         with self.app.test_client() as c:
             c.post('/v1/route', json=self.route)

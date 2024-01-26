@@ -1,5 +1,8 @@
-from typing import List
+from typing import List, Dict
+
 import jwt
+
+from fleet_management_api.api_impl.api_keys import verify_key_and_return_key_info as _verify_key_and_return_key_info
 
 
 _public_key: str
@@ -24,14 +27,14 @@ def info_from_oAuth2AuthCode(token):
         decoded_token = jwt.decode(token, _public_key, algorithms=['RS256'], audience='account')
     except:
         return None
-    
+
     #TODO temporary until keycloak configuration is decided
     #roles = decoded_token["realm_access"]["roles"]
-    
+
     #for role in roles:
     #    if role == "test_role":
     #        return {'scopes': {}, 'uid': ''}
-    
+
     return {'scopes': {}, 'uid': ''}
     #return None # type: ignore
 
@@ -51,3 +54,20 @@ def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
     #return set(required_scopes).issubset(set(token_scopes))
     return True
 
+
+def info_from_APIKeyAuth(api_key, *args) -> None|Dict:
+    """
+    Check and retrieve authentication information from api_key.
+    Returned value will be passed in 'token_info' parameter of your operation function, if there is one.
+    'sub' or 'uid' will be set in 'user' parameter of your operation function, if there is one.
+
+    :param api_key API key provided by Authorization header
+    :type api_key: str
+    :return: Information attached to provided api_key or None if api_key is invalid or does not allow access to called API
+    :rtype: dict | None
+    """
+    code, info = _verify_key_and_return_key_info(api_key)
+    if code==401:
+        return None
+    else:
+        return {'name': info.name} # type: ignore

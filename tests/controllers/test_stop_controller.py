@@ -2,14 +2,14 @@ import unittest
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Stop, GNSSPosition, MobilePhone
-from fleet_management_api.app import get_app
+import fleet_management_api.app as _app
 
 
 class Test_Creating_Stop(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_creating_stops(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
@@ -58,7 +58,7 @@ class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_stop_using_example_from_spec(self):
         _connection.set_test_connection_source()
-        app = get_app().app
+        app = _app.get_test_app().app
         with app.test_client() as c:
             example = c.get('/v1/openapi.json').json["components"]["schemas"]["Stop"]["example"]
             response = c.post('/v1/stop', json=example)
@@ -69,7 +69,7 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_retrieving_all_stops_without_creating_any_yields_code_200_and_empty_list(self):
         with self.app.test_client() as client:
@@ -93,7 +93,7 @@ class Test_Retrieving_Single_Stop(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_retrieving_single_existing_stop(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
@@ -121,7 +121,7 @@ class Test_Deleting_Stop(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_deleting_single_existing_stop(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
@@ -148,7 +148,7 @@ class Test_Updating_Stop(unittest.TestCase):
 
     def setUp(self):
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
 
     def test_updating_single_existing_stop(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)

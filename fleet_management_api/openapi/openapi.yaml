@@ -7,6 +7,7 @@ servers:
 - description: Local server
   url: /v1
 security:
+- APIKeyAuth: []
 - oAuth2AuthCode: []
 tags:
 - description: Car related functions
@@ -3064,3 +3065,9 @@ components:
       type: oauth2
       x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
       x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
+    APIKeyAuth:
+      description: Authentication using API key
+      in: query
+      name: api_key
+      type: apiKey
+      x-apikeyInfoFunc: fleet_management_api.controllers.security_controller.info_from_APIKeyAuth

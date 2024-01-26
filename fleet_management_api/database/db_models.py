@@ -1,4 +1,4 @@
-from typing import ClassVar
+from typing import ClassVar, Dict
 import dataclasses
 
 import sqlalchemy as _sqa
@@ -106,3 +106,12 @@ class OrderStateDBModel(Base):
     def set_max_n_of_stored_states(cls, n: int) -> None:
         if n>0:
             cls._max_n_of_states = n
+
+
+@dataclasses.dataclass
+class ApiKeyDBModel(Base):
+    __tablename__ = 'api_keys'
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    key: _Mapped[str] = _mapped_column(_sqa.String, unique=True, nullable=True)
+    creation_timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)

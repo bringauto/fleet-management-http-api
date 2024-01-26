@@ -6,7 +6,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import fleet_management_api.database.connection as _connection
-from fleet_management_api.app import get_app
+import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState
 import fleet_management_api.database as database
 
@@ -15,7 +15,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source("test_db.db")
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
@@ -62,7 +62,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_test_connection_source("test_db.db")
         database.set_content_timeout_ms(1000)
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -97,7 +97,7 @@ class Test_Timeouts(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source("test_db.db")
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
@@ -131,7 +131,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source("test_db.db")
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})

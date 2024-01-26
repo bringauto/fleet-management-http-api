@@ -2,14 +2,14 @@ import unittest
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import RoutePoints, Route, GNSSPosition
-from fleet_management_api.app import get_app
+import fleet_management_api.app as _app
 
 
 class Test_Posting_New_Route_Points(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_test_connection_source()
-        self.app = get_app().app
+        self.app = _app.get_test_app().app
         self.route = Route(id=12, name='test_route')
 
     def test_getting_routepoints_for_newly_defined_route_yields_empty_list(self):
@@ -26,7 +26,7 @@ class Test_Posting_New_Route_Points(unittest.TestCase):
 
     def test_post_route_points_to_existing_route(self):
         points = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
-        route_points = RoutePoints(id=12, points=points)
+        route_points = RoutePoints(route_id=12, points=points)
         with self.app.test_client() as c:
             c.post('/v1/route', json=self.route)
         with self.app.test_client() as c:
@@ -41,11 +41,11 @@ class Test_Posting_New_Route_Points(unittest.TestCase):
         new_points = [GNSSPosition(50.0, 22.0, 350.0), GNSSPosition(-48.0, -22.0, 250.0)]
         with self.app.test_client() as c:
             c.post('/v1/route', json=self.route)
-            c.post('/v1/routepoints', json=RoutePoints(id=12, points=old_points))
+            c.post('/v1/routepoints', json=RoutePoints(route_id=12, points=old_points))
             response_1 = c.get('/v1/routepoints/12')
             self.assertEqual(response_1.json["points"][0]["latitude"], 49)
             self.assertEqual(len(response_1.json["points"]), 3)
-            c.post('/v1/routepoints', json=RoutePoints(id=12, points=new_points))
+            c.post('/v1/routepoints', json=RoutePoints(route_id=12, points=new_points))
             response_2 = c.get('/v1/routepoints/12')
             self.assertEqual(response_2.json["points"][0]["latitude"], 50)
             self.assertEqual(len(response_2.json), 2)
