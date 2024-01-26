@@ -10,11 +10,15 @@ from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_m
 def create_key(key_name: str) -> Tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
-    response = _db_access.add(_ApiKeyDBModel, _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now))
-    if response.status_code == 400:
-        return 400, str(response.body)
+    already_existing_keys = _db_access.get(_ApiKeyDBModel, criteria={"name": lambda x: x==key_name})
+    if len(already_existing_keys) > 0:
+        return 400, _key_already_exists_msg(key_name)
     else:
-        return 200, _key_added_msg(key_name, key)
+        response = _db_access.add(_ApiKeyDBModel, _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now))
+        if response.status_code == 400:
+            return 400, str(response.body)
+        else:
+            return 200, _key_added_msg(key_name, key)
 
 
 def verify_key_and_return_key_info(api_key: str) -> Tuple[int, str|_ApiKeyDBModel]:
