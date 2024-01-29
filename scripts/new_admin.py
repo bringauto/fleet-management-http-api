@@ -2,7 +2,7 @@ from sqlalchemy.engine import Engine
 
 from fleet_management_api.api_impl.api_keys import create_key as _create_key
 from fleet_management_api.database.connection import get_connection_source
-from fleet_management_api.script_args import (
+from fleet_management_api.script_args.args import (
     request_and_get_script_arguments,
     PositionalArgInfo,
 )
