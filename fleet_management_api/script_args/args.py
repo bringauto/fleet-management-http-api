@@ -65,17 +65,18 @@ def _new_arg_parser(script_description: str) -> argparse.ArgumentParser:
     return argparse.ArgumentParser(description=script_description)
 
 
-def _load_config_file(path: str) -> Dict[str,Any]:
+def load_config_file(path: str) -> Dict[str,Any]:
     try:
-        config = json.load(open(path))
+        with open(path) as config_file:
+            config = json.load(config_file)
+            return config
     except:
         raise ConfigFileNotFound(f"Could not load config file from path '{path}'.")
-    return config
 
 
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     args = parser.parse_args().__dict__
-    config = _load_config_file(args.pop("<config-file-path>"))
+    config = load_config_file(args.pop("<config-file-path>"))
     db_config = config["database"]["connection"]
     for key in args:
         if args[key] == _EMPTY_VALUE: args[key] = db_config[key]

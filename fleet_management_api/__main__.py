@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-import fleet_management_api.script_args as _script_args
+import fleet_management_api.script_args.args as _script_args
 import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
 from fleet_management_api.controllers.security_controller import set_public_key
