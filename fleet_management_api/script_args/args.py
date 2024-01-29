@@ -56,6 +56,9 @@ def _add_db_args_to_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-db", "--database-name", type=str, help="The name of the database.", default=_EMPTY_VALUE, required=False
     )
+    parser.add_argument(
+        "-t", "--test", type=str, help="Connect to a sqlite database. Username and password are ignored.", default="", required=False
+    )
 
 
 def _add_positional_args_to_parser(parser: argparse.ArgumentParser, *args: PositionalArgInfo) -> None:

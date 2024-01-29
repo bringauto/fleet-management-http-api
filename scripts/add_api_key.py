@@ -1,7 +1,7 @@
 from sqlalchemy.engine import Engine
 
 from fleet_management_api.api_impl.api_keys import create_key as _create_key
-from fleet_management_api.database.connection import get_connection_source
+import fleet_management_api.database.connection as _connection
 from fleet_management_api.script_args.args import (
     request_and_get_script_arguments,
     PositionalArgInfo,
@@ -22,10 +22,13 @@ if __name__=="__main__":
     )
     arguments = vals.argvals
     config = vals.config
-    source = get_connection_source(
-        db_location=(arguments["location"]+":"+str(arguments["port"])),
-        db_name=arguments["database_name"],
-        username=arguments["username"],
-        password=arguments["password"]
-    )
+    if "test" in arguments.keys():
+        source = _connection.get_connection_source_test(db_file_path=arguments["test"])
+    else: # pragma: no cover
+        source = _connection.get_connection_source(
+            db_location=(arguments["location"]+":"+str(arguments["port"])),
+            db_name=arguments["database_name"],
+            username=arguments["username"],
+            password=arguments["password"]
+        )
     _add_key_if_admin_name_not_already_in_db(source, arguments["<admin-name>"])
