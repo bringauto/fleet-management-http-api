@@ -17,12 +17,12 @@ _DATABASE_RECORD_ID_NAME = "id"
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
-def add(base: Type[_Base], *sent_objs: _Base) -> _Response:
+def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine] = None) -> _Response:
     global _wait_mg
     if not sent_objs:
         return _Response(status_code=200, content_type="string", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
-    source = _check_and_return_current_connection_source()
+    source = _get_checked_connection_source(conn_source)
     with source.begin() as conn:
         table = base.__table__
         stmt = _sqa.insert(table)
@@ -89,14 +89,15 @@ def get(
     base: Type[_Base],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     wait: bool = False,
-    timeout_ms: Optional[int] = None
+    timeout_ms: Optional[int] = None,
+    conn_source: Optional[_sqa.Engine] = None
     ) -> List[Any]:
 
     global _wait_mg
     if criteria is None:
         criteria = {}
     table = base.__table__
-    source = _check_and_return_current_connection_source()
+    source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
         stmt = _sqa.select(base).where(*clauses)
@@ -163,8 +164,12 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def _check_and_return_current_connection_source() -> _sqa.engine.base.Engine:
-    source = current_connection_source()
+def _check_and_return_current_connection_source(conn_source: Optional[_sqa.Engine] = None) -> _sqa.engine.base.Engine:
+    source: _sqa.Engine|None = None
+    if conn_source is not None:
+        source = conn_source
+    else:
+        source = current_connection_source()
     if source is None:
         raise RuntimeError("No connection source")
     return source
@@ -174,6 +179,13 @@ def _check_obj_bases_matches_specifed_base(specified_base: Type[_Base], *objs: _
     for obj in objs:
         if not isinstance(obj, specified_base):
             raise TypeError(f"Object {obj} is not of type {specified_base}")
+
+
+def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa.engine.base.Engine:
+    if source is None:
+        return _check_and_return_current_connection_source()
+    else:
+        return _check_and_return_current_connection_source(source)
 
 
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:

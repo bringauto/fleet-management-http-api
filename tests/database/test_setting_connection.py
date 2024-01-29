@@ -12,15 +12,15 @@ from tests.database.models import initialize_test_tables as _initialize_test_tab
 class Test_Creating_Database_URL(unittest.TestCase):
 
     def test_production_database_url_with_specified_username_and_password(self):
-        url = _connection.db_url_production("localhost", "test_db", "test_user", "test_password")
+        url = _connection.db_url("localhost", "test_db", "test_user", "test_password")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost/test_db")
 
     def test_production_database_url_without_username_and_password(self):
-        url = _connection.db_url_production("localhost", db_name="test_db")
+        url = _connection.db_url("localhost", db_name="test_db")
         self.assertEqual(url, "postgresql+psycopg://localhost/test_db")
 
     def test_production_database_url_without_specifying_database_name_gives_valid_url(self):
-        url = _connection.db_url_production("localhost", username="test_user", password="test_password")
+        url = _connection.db_url("localhost", username="test_user", password="test_password")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost")
 
     def test_test_database_url(self):
@@ -33,7 +33,7 @@ class Test_Creating_Database_URL(unittest.TestCase):
 
     def test_value_error_is_raises_when_specifying_password_without_username(self):
         with self.assertRaises(ValueError):
-            _connection.db_url_production("localhost", "test_db", password="test_password", username="")
+            _connection.db_url("localhost", "test_db", password="test_password", username="")
 
 
 class Test_Creating_A_Test_Database(unittest.TestCase):
@@ -44,18 +44,18 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
 
     def test_setting_up_a_test_database(self):
         db_file_path = os.path.abspath("test_db_file.db")
-        _connection.set_test_connection_source("test_db_file.db")
+        _connection.set_connection_source_test("test_db_file.db")
         self.assertTrue(os.path.isfile(db_file_path))
 
     def test_test_database_file_is_always_removed_and_created_anew_when_setting_new_test_connection_using_the_same_file(self):
-        _connection.set_test_connection_source("test_db_file.db")
+        _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         response = _db_access.add(_TestBase, test_obj)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(_db_access.get(_TestBase)), 1)
 
-        _connection.set_test_connection_source("test_db_file.db")
+        _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
 
         self.assertEqual(len(_db_access.get(_TestBase)), 0)
@@ -82,6 +82,19 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
         with self.assertRaises(RuntimeError):
             _db_access.add(_TestBase, test_obj)
 
+
+class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):
+
+    def test_getting_connection_source_does_not_set_current_connection_source_in_connection_module(self):
+        source_1 = _connection.get_connection_source_test("test_db_file.db")
+        source_2 = _connection.current_connection_source()
+        self.assertTrue(source_1 is not None)
+        self.assertFalse(source_1 is source_2)
+        self.assertTrue(source_2 is not None)
+
+    def tearDown(self) -> None: # pragma: no cover
+        if os.path.isfile("test_db_file.db"):
+            os.remove("test_db_file.db")
 
 
 if __name__=="__main__":

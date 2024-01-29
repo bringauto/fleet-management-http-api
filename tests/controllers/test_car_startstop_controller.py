@@ -8,7 +8,7 @@ from fleet_management_api.models import Car
 class Test_Car_StartStop_Controller(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
 
     def test_starting_or_stopping_existing_car_returns_code_200(self):
         car_id = 123

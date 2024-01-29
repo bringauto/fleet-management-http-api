@@ -14,7 +14,7 @@ def current_connection_source() -> _Engine|None:
     return _db_connection
 
 
-def db_url_production(location: str, db_name: str = "", username: str = "", password: str = "") -> str:
+def db_url(location: str, db_name: str = "", username: str = "", password: str = "") -> str:
     if username == "" and password == "":
         url = f"postgresql+psycopg://{location}"
     elif username == "" and password != "":
@@ -35,11 +35,21 @@ def db_url_test(db_file_location: str = "") -> str:
 
 
 def set_connection_source(db_location: str, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
-    url = db_url_production(db_location, db_name, username, password)
+    url = db_url(db_location, db_name, username, password)
     _set_connection(url)
 
 
-def set_test_connection_source(db_file_path: str = "") -> str:
+def get_connection_source(db_location: str, db_name: str = "", username: str = "", password: str = "") -> _Engine:
+    url = db_url(db_location, db_name, username, password)
+    return _get_connection(url)
+
+
+def get_connection_source_test(db_file_path: str = "") -> _Engine:
+    url = db_url_test(db_file_path)
+    return _get_connection(url)
+
+
+def set_connection_source_test(db_file_path: str = "") -> str:
     url = db_url_test(db_file_path)
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
@@ -66,3 +76,10 @@ def _set_connection(url: str) -> None:
     global _db_connection
     _db_connection = _create_engine(url)
     _db_models.Base.metadata.create_all(_db_connection)
+
+
+def _get_connection(url: str) -> _Engine:
+    global _db_connection
+    connection_src = _create_engine(url)
+    _db_models.Base.metadata.create_all(connection_src)
+    return connection_src

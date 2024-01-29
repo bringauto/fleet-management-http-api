@@ -9,7 +9,7 @@ import fleet_management_api.database.db_models as _db_models
 class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.car = Car(id=1, name="Test Car", platform_id=5)
         self.app = _app.get_test_app().app
         with self.app.test_client() as c:
@@ -48,7 +48,7 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
 class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.car = Car(id=1, name="Test Car", platform_id=5)
         self.app = _app.get_test_app().app
         with self.app.test_client() as c:
@@ -61,7 +61,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 class Test_Getting_All_Car_States(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
         car_1 = Car(id=12, platform_id=1, name="car1", car_admin_phone={}, default_route_id=1, under_test=False)
         car_2 = Car(id=14, platform_id=1, name="car2", car_admin_phone={}, default_route_id=1, under_test=False)
@@ -89,7 +89,7 @@ class Test_Getting_All_Car_States(unittest.TestCase):
 class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
         car_1 = Car(id=12, platform_id=1, name="car1", car_admin_phone={}, default_route_id=1, under_test=False)
         car_2 = Car(id=13, platform_id=78, name="car2", car_admin_phone={}, default_route_id=1, under_test=False)
@@ -146,7 +146,7 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
         car = Car(id=12, name="car1", platform_id=1, car_admin_phone={})
         with self.app.test_client() as c:

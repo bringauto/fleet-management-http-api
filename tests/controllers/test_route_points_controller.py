@@ -8,7 +8,7 @@ import fleet_management_api.app as _app
 class Test_Posting_New_Route_Points(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
         self.route = Route(id=12, name='test_route')
 

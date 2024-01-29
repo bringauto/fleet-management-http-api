@@ -1,14 +1,14 @@
 import unittest
 
 import fleet_management_api.app as _app
-from fleet_management_api.database.connection import set_test_connection_source
+from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.models import PlatformHwId
 
 
 class Test_Creating_Platform_HW_Id(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
         self.app = _app.get_test_app().app
 
     def test_creating_platform_hw_id(self):
@@ -46,7 +46,7 @@ class Test_Creating_Platform_HW_Id(unittest.TestCase):
 class Test_Adding_Platform_HW_Id_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
-        set_test_connection_source()
+        set_connection_source_test()
         self.app = _app.get_test_app().app
         with self.app.test_client() as c:
             example = c.get('/v1/openapi.json').json["components"]["schemas"]["PlatformHwId"]["example"]
@@ -57,7 +57,7 @@ class Test_Adding_Platform_HW_Id_Using_Example_From_Spec(unittest.TestCase):
 class Test_Retrieving_Platform_HW_Id(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
         self.app = _app.get_test_app().app
 
     def test_retrieving_existing_platform_hw_ids(self):
@@ -81,7 +81,7 @@ class Test_Retrieving_Platform_HW_Id(unittest.TestCase):
 class Test_Getting_Single_Platform_HW_Id(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
         self.app = _app.get_test_app().app
 
     def test_getting_single_existing_platform_hw_id(self):
@@ -109,7 +109,7 @@ class Test_Getting_Single_Platform_HW_Id(unittest.TestCase):
 class Test_Deleting_Platform_HW_Id(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
         self.app = _app.get_test_app().app
 
     def test_deleting_an_existing_platform_hw_id(self):

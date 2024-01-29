@@ -5,13 +5,13 @@ import unittest
 from fleet_management_api.models import Car
 import fleet_management_api.app as _app
 from fleet_management_api.app import get_app
-from fleet_management_api.database.connection import set_test_connection_source
+from fleet_management_api.database.connection import set_connection_source_test
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_cars_list_is_initially_available_and_empty(self):
         app = _app.get_test_app()
@@ -76,7 +76,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 class Test_Retrieving_Single_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_retrieving_single_existing_car(self):
         car_id = 17
@@ -102,7 +102,7 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
 class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_posting_and_getting_car_from_example_in_specification(self):
         app = _app.get_test_app()
@@ -117,7 +117,7 @@ class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
 class Test_Logging_Car_Creation(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs('werkzeug', level='INFO') as logs:
@@ -141,7 +141,7 @@ class Test_Logging_Car_Creation(unittest.TestCase):
 class Test_Updating_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_add_and_succesfully_update_car(self) -> None:
         car = Car(id=1, name="Test Car", platform_id=5)
@@ -174,7 +174,7 @@ class Test_Updating_Car(unittest.TestCase):
 class Test_Deleting_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_test_connection_source()
+        set_connection_source_test()
 
     def test_add_and_delete_car(self) -> None:
         car_id = 4

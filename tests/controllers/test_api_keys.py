@@ -10,21 +10,21 @@ import fleet_management_api.app as _app
 class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source()
+        self.src = _connection.get_connection_source_test("test_db_file.db")
 
     def test_verifying_nonexistent_key_yields_code_401(self):
         nonexistent_key = "123456789_nonexistent_key"
-        code, data = _api_keys.verify_key_and_return_key_info(nonexistent_key)
+        code, data = _api_keys.verify_key_and_return_key_info(nonexistent_key, self.src)
         self.assertEqual(code, 401)
 
     @patch("fleet_management_api.api_impl.api_keys._generate_key")
     def test_creating_and_verifying_API_key(self, mock_generate_key: Mock):
         key_name = "test_key"
         mock_generate_key.return_value = "abcd"
-        code, msg = _api_keys.create_key(key_name)
+        code, msg = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 200)
 
-        code, data = _api_keys.verify_key_and_return_key_info("abcd")
+        code, data = _api_keys.verify_key_and_return_key_info("abcd", self.src)
         self.assertEqual(code, 200)
         self.assertTrue(isinstance(data, _api_keys._ApiKeyDBModel))
         self.assertEqual(data.name, key_name) # type: ignore
@@ -32,16 +32,20 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 
     def test_creating_duplicate_key_yields_code_400(self):
         key_name = "test_key"
-        code, msg = _api_keys.create_key(key_name)
+        code, msg = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 200)
-        code, msg = _api_keys.create_key(key_name)
+        code, msg = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 400)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db_file.db"):
+            os.remove("test_db_file.db")
 
 
 class Test_Using_API_Key_In_App(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source("db_file.db")
+        _connection.set_connection_source_test("db_file.db")
         self.app = _app.get_test_app()
 
     def test_using_nonexistent_key_yields_code_401(self):
@@ -57,7 +61,7 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
 class Test_Using_Already_Existing_API_Key(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source("db_file.db")
+        _connection.set_connection_source_test("db_file.db")
         self.app = _app.get_test_app(predef_api_key="abcd")
 
     @patch("fleet_management_api.api_impl.api_keys._generate_key")

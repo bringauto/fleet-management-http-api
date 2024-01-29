@@ -62,7 +62,7 @@ class Test_Wait_Objects(unittest.TestCase):
 class Test_Waiting_For_Content(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(_connection.current_connection_source())
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(self):
@@ -108,7 +108,7 @@ class Test_Waiting_For_Content(unittest.TestCase):
 class Test_Waiting_For_Specific_Content(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(_connection.current_connection_source())
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
@@ -135,7 +135,7 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
 class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_test_connection_source(_TEST_DB_FILE_PATH)
+        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(_connection.current_connection_source())
 
     def test_waiting_for_new_record_to_be_sent_to_database(self):

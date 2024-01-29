@@ -12,10 +12,11 @@
     },
     "database": {
         "connection": {
-            "location": "localhost:5432",
+            "location": "localhost",
             "database_name": "fleet_management",
             "username": "postgres",
-            "password": "1234"
+            "password": "1234",
+            "port": 5432
         },
         "maximum_number_of_table_rows": {
             "car_states": 10,

@@ -7,7 +7,6 @@ import coverage
 
 
 TEST_DIR_NAME = "tests"
-
 OMITTED_FILES = [
     "__init__.py",
     "*/models/*",
@@ -17,7 +16,6 @@ OMITTED_FILES = [
     "encoder.py",
     "tests/__main__.py"
 ]
-
 HTML_REPORT_FLAG = "-h"
 
 
