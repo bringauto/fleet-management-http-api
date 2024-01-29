@@ -26,7 +26,7 @@ if __name__=="__main__":
     )
     arguments = vals.argvals
     config = vals.config
-    if "test" in arguments.keys():
+    if "test" in arguments.keys() and arguments["test"].strip()!= "":
         source = _connection.get_connection_source_test(db_file_path=arguments["test"])
     else: # pragma: no cover
         source = _connection.get_connection_source(
