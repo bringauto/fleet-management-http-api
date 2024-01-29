@@ -30,10 +30,5 @@ def main():
     application.run(port=8080)
 
 
-def _load_config() -> Dict:
-    fp = open("./config/config.json", "r")
-    return json.load(fp)
-
-
 if __name__ == '__main__':
     main()
