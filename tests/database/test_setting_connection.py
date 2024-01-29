@@ -1,10 +1,13 @@
 import os
 import unittest
+from unittest.mock import patch, Mock
 import sys
 sys.path.append('.')
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
+import fleet_management_api.script_args as _args
+import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestBase as _TestBase # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
 
@@ -71,6 +74,56 @@ class Test_Initializing_Tables(unittest.TestCase):
         _connection.unset_connection_source()
         with self.assertRaises(RuntimeError):
             _initialize_test_tables(_connection.current_connection_source())
+
+
+class Test_Setting_Up_Database(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self._orig_connection_source = _connection.current_connection_source()
+        _connection.set_connection_source_test("test_db_file.db")
+
+    @patch("fleet_management_api.database.connection._set_connection")
+    def test_setting_max_number_of_table_rows(self, mock_settting_connection: Mock):
+        _connection.set_up_database(
+            _args.Database(
+                connection=_args.Database.Connection(
+                    location="test_db_file.db",
+                    database_name="test_db",
+                    username="test_user",
+                    password="test_password",
+                    port=5432
+                ),
+                maximum_number_of_table_rows={
+                    "car_states": 18,
+                    "order_states": 124
+                }
+            )
+        )
+        self.assertEqual(_db_models.CarStateDBModel.max_n_of_stored_states(), 18)
+        self.assertEqual(_db_models.OrderStateDBModel.max_n_of_stored_states(), 124)
+
+    @patch("fleet_management_api.database.connection._set_connection")
+    def test_setting_up_database_without_connection_being_set_raises_exception(self, mock_settting_connection: Mock):
+        _connection.unset_connection_source()
+        with self.assertRaises(RuntimeError):
+            _connection.set_up_database(
+                _args.Database(
+                    connection=_args.Database.Connection(
+                        location="test_db_file.db",
+                        database_name="test_db",
+                        username="test_user",
+                        password="test_password",
+                        port=5432
+                    ),
+                    maximum_number_of_table_rows={
+                        "car_states": 18,
+                        "order_states": 124
+                    }
+                )
+            )
+
+    def tearDown(self) -> None:
+        _connection.replace_connection_source(self._orig_connection_source)
 
 
 class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):

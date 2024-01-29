@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session as _Session
 from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
-from fleet_management_api.database.connection import current_connection_source
+from fleet_management_api.database.connection import current_connection_source, check_and_return_current_connection_source
 import fleet_management_api.database.wait as wait
 
 
@@ -39,7 +39,7 @@ def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine]
 
 def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
     table = base_type.__table__
-    source = _check_and_return_current_connection_source()
+    source = check_and_return_current_connection_source()
     with source.begin() as conn:
         id_match = getattr(table.columns,id_name) == id_value
         stmt = _sqa.delete(table).where(id_match)
@@ -59,7 +59,7 @@ def delete_n(base_type: Type[_Base], n: int, id_name: str, start_from: Literal["
     table = base_type.__table__
     if not id_name in table.columns.keys():
         return _Response(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
-    source = _check_and_return_current_connection_source()
+    source = check_and_return_current_connection_source()
     with source.begin() as conn:
         if start_from == "minimum":
             subquery = _sqa.select(table.c.id).order_by(table.c.id).limit(n).alias()
@@ -114,7 +114,7 @@ def get(
 def update(updated_obj: _Base) -> _Response:
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
-    source = _check_and_return_current_connection_source()
+    source = check_and_return_current_connection_source()
     with source.begin() as conn:
         id = updated_obj.__dict__[_DATABASE_RECORD_ID_NAME]
         id_match = getattr(table.columns, _DATABASE_RECORD_ID_NAME) == id
@@ -164,17 +164,6 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def _check_and_return_current_connection_source(conn_source: Optional[_sqa.Engine] = None) -> _sqa.engine.base.Engine:
-    source: _sqa.Engine|None = None
-    if conn_source is not None:
-        source = conn_source
-    else:
-        source = current_connection_source()
-    if source is None:
-        raise RuntimeError("No connection source")
-    return source
-
-
 def _check_obj_bases_matches_specifed_base(specified_base: Type[_Base], *objs: _Base) -> None:
     for obj in objs:
         if not isinstance(obj, specified_base):
@@ -183,9 +172,9 @@ def _check_obj_bases_matches_specifed_base(specified_base: Type[_Base], *objs: _
 
 def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa.engine.base.Engine:
     if source is None:
-        return _check_and_return_current_connection_source()
+        return check_and_return_current_connection_source()
     else:
-        return _check_and_return_current_connection_source(source)
+        return check_and_return_current_connection_source(source)
 
 
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
