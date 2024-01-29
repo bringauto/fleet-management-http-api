@@ -3,6 +3,8 @@ from typing import Type, Dict, Any
 import argparse
 import json
 
+from fleet_management_api.script_args.configs import APIConfig as _APIConfig
+
 
 _EMPTY_VALUE = None
 
@@ -17,7 +19,7 @@ class PositionalArgInfo:
 @dataclasses.dataclass(frozen=True)
 class ScriptArgs:
     argvals: Dict[str,str]
-    config: Dict[str,Any] = dataclasses.field(default_factory=dict)
+    config: _APIConfig
 
 
 def request_and_get_script_arguments(
@@ -76,10 +78,10 @@ def load_config_file(path: str) -> Dict[str,Any]:
 
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     args = parser.parse_args().__dict__
-    config = load_config_file(args.pop("<config-file-path>"))
-    db_config = config["database"]["connection"]
+    config = _APIConfig(**load_config_file(args.pop("<config-file-path>")))
+    db_config = config.database.connection
     for key in args:
-        if args[key] == _EMPTY_VALUE: args[key] = db_config[key]
+        if args[key] == _EMPTY_VALUE: args[key] = db_config.__dict__[key]
     return ScriptArgs(args, config)
 
 

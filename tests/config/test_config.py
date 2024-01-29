@@ -26,16 +26,16 @@ class Test_HTTP_Server_Config(unittest.TestCase):
         self.config_dict = main_config["http_server"]
 
     def test_loading_http_server_config(self):
-        config_obj = _configs.APIConfig.HTTPServer(**self.config_dict)
+        config_obj = _configs.HTTPServer(**self.config_dict)
         self.assertEqual(str(config_obj.base_uri), self.config_dict["base_uri"])
 
     def test_raise_error_when_http_server_base_uri_is_invalid(self):
         self.config_dict["base_uri"] = ""
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.HTTPServer(**self.config_dict)
+            _configs.HTTPServer(**self.config_dict)
         self.config_dict["base_uri"] = "http://"
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.HTTPServer(**self.config_dict)
+            _configs.HTTPServer(**self.config_dict)
 
     def test_raise_error_when_data_is_missing(self):
         for key in self.config_dict.keys():
@@ -53,37 +53,37 @@ class Test_Database_Config(unittest.TestCase):
         self.config_dict = main_config["database"]
 
     def test_loading_database_config(self):
-        config_obj = _configs.APIConfig.Database(**self.config_dict)
+        config_obj = _configs.Database(**self.config_dict)
         self.assertEqual(config_obj.connection.model_dump(), self.config_dict["connection"])
         self.assertEqual(config_obj.maximum_number_of_table_rows, self.config_dict["maximum_number_of_table_rows"])
 
     def test_raise_error_when_maximum_number_of_table_rows_are_missing(self):
         self.config_dict.pop("maximum_number_of_table_rows")
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Database(**self.config_dict)
+            _configs.Database(**self.config_dict)
 
     def test_raise_error_when_database_connection_is_missing(self):
         self.config_dict.pop("connection")
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Database(**self.config_dict)
+            _configs.Database(**self.config_dict)
 
     def test_raise_exception_on_empty_database_connection_location(self):
         self.config_dict["connection"]["location"] = ""
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Database(**self.config_dict)
+            _configs.Database(**self.config_dict)
 
     def test_allow_empty_username_and_password(self):
         self.config_dict["connection"]["username"] = ""
         self.config_dict["connection"]["password"] = ""
-        _configs.APIConfig.Database(**self.config_dict)
+        _configs.Database(**self.config_dict)
 
     def test_maximum_number_of_table_rows_must_be_at_least_one(self):
         self.config_dict["maximum_number_of_table_rows"]["test_table_2"] = 0
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Database(**self.config_dict)
+            _configs.Database(**self.config_dict)
         self.config_dict["maximum_number_of_table_rows"]["test_table_2"] = -5
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Database(**self.config_dict)
+            _configs.Database(**self.config_dict)
 
 
 class Test_Security_Config(unittest.TestCase):
@@ -93,7 +93,7 @@ class Test_Security_Config(unittest.TestCase):
         self.config_dict = main_config["security"]
 
     def test_loading_security_config(self):
-        config_obj = _configs.APIConfig.Security(**self.config_dict)
+        config_obj = _configs.Security(**self.config_dict)
         self.assertEqual(str(config_obj.keycloak_url), self.config_dict["keycloak_url"])
         self.assertEqual(config_obj.client_id, self.config_dict["client_id"])
         self.assertEqual(config_obj.client_secret_key, self.config_dict["client_secret_key"])
@@ -107,16 +107,16 @@ class Test_Security_Config(unittest.TestCase):
                 invalid_config_dict = self.config_dict.copy()
                 invalid_config_dict.pop(key)
                 with self.assertRaises(pydantic.ValidationError):
-                    _configs.APIConfig.Security(**invalid_config_dict)
+                    _configs.Security(**invalid_config_dict)
 
     def test_nonempty_invalid_file_path_of_keycloak_public_key_file_raises_error(self):
         self.config_dict["keycloak_public_key_file"] = "invalid_file_path"
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.Security(**self.config_dict)
+            _configs.Security(**self.config_dict)
 
     def test_empty_keycloak_public_key_file_path_is_allowed(self):
         self.config_dict["keycloak_public_key_file"] = ""
-        config_obj = _configs.APIConfig.Security(**self.config_dict)
+        config_obj = _configs.Security(**self.config_dict)
         self.assertEqual(str(config_obj.keycloak_public_key_file), "")
 
 
@@ -127,13 +127,13 @@ class Test_API_Config(unittest.TestCase):
         self.config_dict = main_config["api"]
 
     def test_loading_api_config(self):
-        config_obj = _configs.APIConfig.API(**self.config_dict)
+        config_obj = _configs.API(**self.config_dict)
         self.assertEqual(config_obj.request_for_data.timeout_in_seconds, self.config_dict["request_for_data"]["timeout_in_seconds"])
 
     def test_raise_error_when_request_for_data_is_missing(self):
         self.config_dict.pop("request_for_data")
         with self.assertRaises(pydantic.ValidationError):
-            _configs.APIConfig.API(**self.config_dict)
+            _configs.API(**self.config_dict)
 
 
 if __name__ == "__main__":
