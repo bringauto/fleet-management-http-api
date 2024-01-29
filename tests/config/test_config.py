@@ -78,6 +78,7 @@ class Test_Database_Config(unittest.TestCase):
         _configs.Database(**self.config_dict)
 
     def test_maximum_number_of_table_rows_must_be_at_least_one(self):
+        self.config_dict["maximum_number_of_table_rows"]["test_table_1"] = 0
         self.config_dict["maximum_number_of_table_rows"]["test_table_2"] = 0
         with self.assertRaises(pydantic.ValidationError):
             _configs.Database(**self.config_dict)
