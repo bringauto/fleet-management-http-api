@@ -1,6 +1,6 @@
 {
     "http_server": {
-        "base_uri": "https://portal.bringautofleet.com"
+        "base_uri": "http://localhost:8080/v1"
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com",

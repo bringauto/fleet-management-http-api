@@ -3,6 +3,7 @@ import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
 from fleet_management_api.controllers.security_controller import set_public_key
 from fleet_management_api.database import set_up_database, set_content_timeout_ms
+import time
 
 
 def set_up_oauth(config: _args.Security) -> None:
@@ -31,4 +32,5 @@ if __name__ == '__main__':
     set_up_database(db_config)
     set_content_timeout_ms(api_config.request_for_data.timeout_in_seconds*1000)
     set_up_oauth(security_config)
+
     application.run(port=8080)

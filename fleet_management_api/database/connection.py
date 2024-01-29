@@ -81,7 +81,6 @@ def set_up_database(config: _configs.Database) -> None:
     set_connection_source(conn_config.location, conn_config.database_name, conn_config.username, conn_config.password)
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _db_models.Base.metadata.create_all(_db_connection)
     _db_models.CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
     _db_models.OrderStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["order_states"])
 
@@ -94,7 +93,6 @@ def unset_connection_source() -> None:
 def _set_connection(url: str) -> None:
     global _db_connection
     _db_connection = _create_engine(url)
-    _db_models.Base.metadata.create_all(_db_connection)
 
 
 def _get_connection(url: str) -> _Engine:
