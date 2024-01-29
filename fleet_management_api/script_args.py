@@ -79,11 +79,9 @@ def _parse_arguments(parser:argparse.ArgumentParser, use_config:bool) -> ScriptA
     args = parser.parse_args().__dict__
     config = _load_config_file(args.pop("<config-file-path>"))
     db_config = config["database"]["connection"]
-
     if use_config:
         for key in args:
             if args[key] == _EMPTY_VALUE: args[key] = db_config[key]
-
     return ScriptArgs(args, config)
 
 
