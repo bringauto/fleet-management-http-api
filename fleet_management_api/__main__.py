@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-from typing import Dict
-import json
-
 import fleet_management_api.script_args as _script_args
 import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
