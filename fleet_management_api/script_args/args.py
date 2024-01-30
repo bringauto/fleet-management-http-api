@@ -81,7 +81,12 @@ def load_config_file(path: str) -> Dict[str,Any]:
 
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     args = parser.parse_args().__dict__
-    config = _APIConfig(**load_config_file(args.pop("<config-file-path>")))
+    config_path = args.pop("<config-file-path>")
+    try:
+        config = _APIConfig(**load_config_file(config_path))
+    except Exception as e:
+        print(f"\nCheck the configuration file ('{config_path}').\n")
+        raise e
     _update_config_with_args(args, config)
     return ScriptArgs(args, config)
 
