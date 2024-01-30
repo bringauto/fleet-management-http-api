@@ -60,7 +60,7 @@ python -m tests [-h] [PATH1] [PATH2] ...
 ```
 Each PATH is specified relative to the `tests` folder. If no PATH is specified, all the tests will run. Otherwise
 - when PATH is directory, the script will run all tests in this directory (and subdirectories),
-- when PATH is a python file, the script will run all tests in the file
+- when PATH is a python file, the script will run all tests in the file.
 
 The `-h` flag makes the script to output the test coverage analysis results in html format and opens up the `index.html`.
 

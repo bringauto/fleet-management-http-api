@@ -14,7 +14,7 @@ services:
     networks:
       - api-network
     entrypoint:
-      ["python3", "-m", "fleet_management_api", "config/config.json", "--location", "postgresql-database", "--database-name", ""]
+      ["python", "-m", "fleet_management_api", "config/config.json", "--location", "postgresql-database", "--database-name", ""]
 
   postgresql-database:
     image: postgres:16

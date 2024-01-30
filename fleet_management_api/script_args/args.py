@@ -81,7 +81,6 @@ def load_config_file(path: str) -> Dict[str,Any]:
 
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     args = parser.parse_args().__dict__
-    print(args)
     config_path = args.pop("<config-file-path>")
     try:
         config_dict = load_config_file(config_path)
