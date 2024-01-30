@@ -14,7 +14,7 @@
     "database": {
         "connection": {
             "location": "localhost",
-            "database_name": "fleet_management",
+            "database_name": "fleet_management_api_db",
             "username": "postgres",
             "password": "1234",
             "port": 5432
