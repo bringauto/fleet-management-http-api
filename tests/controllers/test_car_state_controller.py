@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, GNSSPosition
@@ -146,44 +147,69 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app().app
         car = Car(id=12, name="car1", platform_id=1, car_admin_phone={})
         with self.app.test_client() as c:
             c.post('/v2/management/car', json=car)
-        self.max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(self):
         test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+        max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
         with self.app.test_client() as c:
             oldest_state = CarState(id=0, status="idle", car_id=12, fuel=50, speed=7, position=test_position)
             c.post('/v2/management/carstate', json=oldest_state)
-
-            for i in range(1, self.max_n - 1):
+            for i in range(1, max_n - 1):
                 car_state = CarState(id=i, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
                 c.post('/v2/management/carstate', json=car_state)
 
             response = c.get('/v2/management/carstate/12?allAvailable=true')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), self.max_n-1)
+            self.assertEqual(len(response.json), max_n-1)
 
-            car_state = CarState(id=self.max_n, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+            car_state = CarState(id=max_n, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
             c.post('/v2/management/carstate', json=car_state)
             response = c.get('/v2/management/carstate/12?allAvailable=true')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), self.max_n)
+            self.assertEqual(len(response.json), max_n)
 
-            newest_state = CarState(id=self.max_n + 1, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+            newest_state = CarState(id=max_n + 1, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
             c.post('/v2/management/carstate', json=newest_state)
             response = c.get('/v2/management/carstate/12?allAvailable=true')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), self.max_n)
+            self.assertEqual(len(response.json), max_n)
             self.assertTrue(isinstance(response.json, list))
 
             ids = [state["id"] for state in response.json]
             self.assertFalse(oldest_state.id in ids)
             self.assertTrue(newest_state.id in ids)
 
+    def test_maximum_number_of_states_in_db_for_two_cars_is_double_of_max_n_of_states_for_single_car(self):
+        test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+        car_2 = Car(id=13, name="car2", platform_id=7, car_admin_phone={})
+        with self.app.test_client() as c:
+            c.post('/v2/management/car', json=car_2)
 
-if __name__ == '__main__':
-    unittest.main() # pragma: no coverage
+        _db_models.CarStateDBModel.set_max_n_of_stored_states(5)
+        max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
+        with self.app.test_client() as c:
+            for i in range(0, max_n + 5):
+                car_state = CarState(id=i, status="stopped_by_phone", car_id=12, fuel=50, speed=7, position=test_position)
+                c.post('/v2/management/carstate', json=car_state)
+
+            for i in range(max_n, 2*max_n + 5):
+                car_state = CarState(id=i, status="stopped_by_phone", car_id=13, fuel=50, speed=7, position=test_position)
+                c.post('/v2/management/carstate', json=car_state)
+
+            response = c.get('/v2/management/carstate')
+            self.assertEqual(len(response.json), 2*max_n)
+
+
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
+
+
+if __name__ == '__main__': # pragma: no coverage
+    unittest.main(buffer=True)
