@@ -153,7 +153,8 @@ class Test_Updating_Car(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
             response = c.get('/v1/car')
-            self.assertEqual(response.json[0]['name'], "Updated Test Car")
+            self.assertTrue(len(response.json) == 1) # type: ignore
+            self.assertEqual(response.json[0]['name'], "Updated Test Car") # type: ignore
 
     def test_updating_nonexistent_car_yields_404_error(self) -> None:
         car = Car(id=1, name="Test Car", platform_id=5)

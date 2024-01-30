@@ -24,24 +24,27 @@ def delete_car(car_id) -> _Response:
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
     if 200 <= response.status_code < 300:
         msg = f"Car (id={car_id}) has been deleted."
-        _api.log_info(msg)
-        return _Response(body="Car has been succesfully deleted", status_code=200)
+        return _api.log_and_respond(200, msg)
     else:
         msg = f"Car (id={car_id}) could not be deleted. {response.body}"
-        _api.log_error(msg)
-        return _Response(body=msg, status_code=response.status_code)
+        return _api.log_and_respond(response.status_code, msg)
 
 
 def get_car(car_id) -> _Response:
     cars = _db_access.get(_db_models.CarDBModel, criteria={'id': lambda x: x==car_id})
     if len(cars) == 0:
-        return _Response(body=f"Car with id={car_id} was not found.", status_code=404)
+        return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
     else:
+        _api.log_info(f"Car with id={car_id} was found.")
         return _Response(body=cars[0], status_code=200)
 
 
 def get_cars() -> _Response:  # noqa: E501
     cars = _db_access.get(_db_models.CarDBModel)
+    if len(cars) == 0:
+        _api.log_info("Listing all cars: no cars found.")
+    else:
+        _api.log_info(f"Listing all cars: {len(cars)} cars found.")
     return _Response(body=cars, status_code=200)
 
 
@@ -51,14 +54,11 @@ def update_car(car) -> _Response:
         car_db_model = _api.car_to_db_model(car)
         response = _db_access.update(updated_obj=car_db_model)
         if 200 <= response.status_code < 300:
-            _api.log_info(f"Car (id={car.id} has been suchas been succesfully updated")
-            return _Response(body=f"Car (id='{car.id}') has been succesfully updated", status_code=200)
+            return _api.log_and_respond(response.status_code, f"Car (id={car.id}) has been succesfully updated")
         else:
             msg = f"Car (id={car.id}) could not be updated. {response.body}"
-            _api.log_error(msg)
-            return _Response(body=msg, status_code=response.status_code)
+            return _api.log_and_respond(response.status_code, msg)
     else:
-        _api.log_error(f"Invalid request format: {connexion.request.data}. JSON is required")
-        return _Response(body='Invalid request format.', status_code=400)
+        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
 
