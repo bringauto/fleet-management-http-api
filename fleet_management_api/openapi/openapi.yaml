@@ -11,8 +11,7 @@ info:
   title: BringAuto Fleet Management v2 API
   version: 1.0.0
 servers:
-- description: Local server
-  url: /v2/management
+- url: /v2/management
 security:
 - APIKeyAuth: []
 - oAuth2AuthCode: []
@@ -2436,7 +2435,7 @@ paths:
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
-  /token_get:
+  /token-get:
     get:
       description: Callback endpoint for keycloak to receive jwt token.
       operationId: token_get
@@ -2486,7 +2485,7 @@ paths:
       tags:
       - login
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
-  /token_refresh:
+  /token-refresh:
     get:
       description: Endpoint to receive jwt token from refresh token.
       operationId: token_refresh
@@ -2511,56 +2510,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 components:
   parameters:
-    kcState:
-      description: State returned by keycloak authentication.
-      example: your_state_info
-      explode: true
-      in: query
-      name: state
-      required: false
-      schema:
-        type: string
-      style: form
-    kcSessionState:
-      description: Session state returned by keycloak authentication.
-      example: 167e141d-2f55-4d...
-      explode: true
-      in: query
-      name: session_state
-      required: false
-      schema:
-        type: string
-      style: form
-    kcIss:
-      description: Code issuer returned by keycloak authentication.
-      example: http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fmaster
-      explode: true
-      in: query
-      name: iss
-      required: false
-      schema:
-        type: string
-      style: form
-    kcCode:
-      description: Code used for jwt token generation returned by keycloak authentication.
-      example: 5dea27d2-4b2d-48...
-      explode: true
-      in: query
-      name: code
-      required: false
-      schema:
-        type: string
-      style: form
-    RefreshToken:
-      description: Refresh token used for jwt token generation.
-      example: eyJhbGciOiJIUzI1NiIsI...
-      explode: true
-      in: query
-      name: refresh_token
-      required: true
-      schema:
-        type: string
-      style: form
     Wait:
       description: "Applies for GET methods when no order statuses would be returned\
         \ at the moment of request. If wait=true, \\ the request will wait for the\
@@ -3061,6 +3010,12 @@ components:
       title: timestamp
       type: integer
   securitySchemes:
+    APIKeyAuth:
+      description: Authentication using API key
+      in: query
+      name: api_key
+      type: apiKey
+      x-apikeyInfoFunc: fleet_management_api.controllers.security_controller.info_from_APIKeyAuth
     oAuth2AuthCode:
       description: oAuth2 authorization
       flows:
@@ -3072,9 +3027,3 @@ components:
       type: oauth2
       x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
       x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
-    APIKeyAuth:
-      description: Authentication using API key
-      in: query
-      name: api_key
-      type: apiKey
-      x-apikeyInfoFunc: fleet_management_api.controllers.security_controller.info_from_APIKeyAuth
