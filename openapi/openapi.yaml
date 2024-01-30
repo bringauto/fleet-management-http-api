@@ -33,7 +33,7 @@ tags:
     description: Route state related functions
   - name: stop
     description: Stop state related functions
-  - name: login
+  - name: security
     description: Authentication related functions
 
 paths:

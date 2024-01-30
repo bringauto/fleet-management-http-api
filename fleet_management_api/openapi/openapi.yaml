@@ -31,7 +31,7 @@ tags:
 - description: Stop state related functions
   name: stop
 - description: Authentication related functions
-  name: login
+  name: security
 paths:
   /car:
     get:
@@ -667,7 +667,7 @@ paths:
           description: Login failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /order:
     get:
@@ -2483,7 +2483,7 @@ paths:
           description: Login failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
   /token-refresh:
     get:
@@ -2506,7 +2506,7 @@ paths:
           description: Token refresh failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 components:
   parameters:

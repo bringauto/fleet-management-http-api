@@ -14,7 +14,7 @@ paths:
           description: Login failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 
   /token-get:
@@ -65,7 +65,7 @@ paths:
           description: Login failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 
   /token-refresh:
@@ -89,7 +89,7 @@ paths:
           description: Token refresh failed due to internal server error.
       security: []
       tags:
-      - login
+      - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 
 components:
