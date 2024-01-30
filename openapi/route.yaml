@@ -245,9 +245,12 @@ components:
       type: object
       description: Route points object structure
       required:
+        - id
         - routeId
         - points
       properties:
+        id:
+          $ref: 'common_models.yaml#/components/schemas/Id'
         routeId:
           $ref: 'common_models.yaml#/components/schemas/Id'
         points:

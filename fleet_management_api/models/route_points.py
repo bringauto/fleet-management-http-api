@@ -14,24 +14,29 @@ class RoutePoints(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, route_id=None, points=[]):  # noqa: E501
+    def __init__(self, id=None, route_id=None, points=[]):  # noqa: E501
         """RoutePoints - a model defined in OpenAPI
 
+        :param id: The id of this RoutePoints.  # noqa: E501
+        :type id: int
         :param route_id: The route_id of this RoutePoints.  # noqa: E501
         :type route_id: int
         :param points: The points of this RoutePoints.  # noqa: E501
         :type points: List[GNSSPosition]
         """
         self.openapi_types = {
+            'id': int,
             'route_id': int,
             'points': List[GNSSPosition]
         }
 
         self.attribute_map = {
+            'id': 'id',
             'route_id': 'routeId',
             'points': 'points'
         }
 
+        self._id = id
         self._route_id = route_id
         self._points = points
 
@@ -45,6 +50,29 @@ class RoutePoints(Model):
         :rtype: RoutePoints
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def id(self) -> int:
+        """Gets the id of this RoutePoints.
+
+
+        :return: The id of this RoutePoints.
+        :rtype: int
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id: int):
+        """Sets the id of this RoutePoints.
+
+
+        :param id: The id of this RoutePoints.
+        :type id: int
+        """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
+
+        self._id = id
 
     @property
     def route_id(self) -> int:

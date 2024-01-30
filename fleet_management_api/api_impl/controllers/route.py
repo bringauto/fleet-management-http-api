@@ -22,7 +22,10 @@ def create_route(route: _models.Route) -> _Response:
             if points_response.status_code == 200:
                 return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
             else:
-                return _api.log_and_respond(points_response.status_code, f"Route (id={route.id}, name='{route.name}) has been sent, but route points could not. {points_response.body}")
+                return _api.log_and_respond(
+                    points_response.status_code,
+                    f"Route (id={route.id}, name='{route.name}) has been sent, but route points could not."
+                    f"{points_response.body}")
         else:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
 
@@ -67,4 +70,4 @@ def update_route(route: _models.Route) -> _Response:
 
 
 def _create_empty_route_points_list(route_id: int) -> _Response:
-    return _db_access.add(_RoutePointsDBModel, _RoutePointsDBModel(id=route_id, points=[]))
+    return _db_access.add(_RoutePointsDBModel, _RoutePointsDBModel(id=route_id, route_id=route_id, points=[]))

@@ -77,6 +77,7 @@ class RouteDBModel(Base):
 class RoutePointsDBModel(Base):
     __tablename__ = 'route_points'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    route_id: _Mapped[int] = _mapped_column(_sqa.Integer, unique=True)
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
 
 

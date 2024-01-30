@@ -2898,6 +2898,7 @@ components:
       description: Route points object structure
       example:
         routeId: 1
+        id: 1
         points:
         - latitude: 49.204117
           longitude: 16.606525
@@ -2906,6 +2907,11 @@ components:
           longitude: 16.65151
           altitude: 400.78
       properties:
+        id:
+          example: 1
+          format: int32
+          title: id
+          type: integer
         routeId:
           example: 1
           format: int32
@@ -2925,6 +2931,7 @@ components:
           title: points
           type: array
       required:
+      - id
       - points
       - routeId
       title: RoutePoints

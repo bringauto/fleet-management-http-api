@@ -227,6 +227,7 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
 
     def test_creating_db_model_from_route_points_preserves_attribute_values(self):
         route_points = RoutePoints(
+            id=8,
             route_id=1,
             points=[
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
@@ -234,12 +235,14 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
             ]
         )
         route_points_db_model = _obj_to_db.route_points_to_db_model(route_points)
-        self.assertEqual(route_points_db_model.id, route_points.route_id)
+        self.assertEqual(route_points_db_model.id, route_points.id)
+        self.assertEqual(route_points_db_model.route_id, route_points.route_id)
         self.assertEqual(route_points_db_model.points[0], route_points.points[0])
         self.assertEqual(route_points_db_model.points[1], route_points.points[1])
 
     def test_route_points_converted_to_db_model_and_back_preserves_its_attributes(self):
         route_points_in = RoutePoints(
+            id=2,
             route_id=1,
             points=[
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),

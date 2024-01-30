@@ -11,7 +11,7 @@ def get_route_points(route_id: int) -> _Response:
     if not _route_exists(route_id):
         return _Response(content_type="text/plain", status_code=404, body=f"Route (id={route_id}) not found")
     else:
-        rp_db_models = _db_access.get(_db_models.RoutePointsDBModel, criteria={"id": lambda x: x==route_id})
+        rp_db_models = _db_access.get(_db_models.RoutePointsDBModel, criteria={"route_id": lambda x: x==route_id})
         if len(rp_db_models) == 0:
             return _Response(content_type="text/plain", status_code=404, body=f"Route points for EXISTING route with id={route_id} not found")
         else:
