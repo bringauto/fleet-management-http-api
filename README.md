@@ -1,4 +1,4 @@
-# Fleet Management v1 HTTP API
+# Fleet Management v2 HTTP API (v1.0.0)
 
 The HTTP API is described by the `openapi/openapi.yaml` according to [OpenAPI Specification](https://openapis.org).
 
