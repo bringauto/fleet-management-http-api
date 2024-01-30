@@ -20,8 +20,8 @@
             "port": 5432
         },
         "maximum_number_of_table_rows": {
-            "car_states": 10,
-            "order_states": 10
+            "car_states": 100,
+            "order_states": 100
         }
     },
     "api": {
