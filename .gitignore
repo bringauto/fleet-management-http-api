@@ -69,7 +69,6 @@ target/
 .travis.yml
 Dockerfile
 git_push.sh
-openapitools.json
 README.md
 setup.py
 test-requirements.txt
