@@ -13,7 +13,6 @@ info:
 
 servers:
   - url: /v2/management
-    description: Local server
 
 security:
   - APIKeyAuth: []

@@ -41,9 +41,9 @@ The server automatically connects to the PostgreSQL database using data from the
 |`--test`|`-t`|Valid path to file of testing database. Ignores previous options and use sqlite database instead.
 
 
-To visualize the API of the running server, go to `http://localhost:8080/v1/ui/`.
+To visualize the API of the running server, go to `http://localhost:8080/v2/management/ui`.
 
-Your OpenAPI definition lives here: `http://localhost:8080/v1/openapi.json`.
+Your OpenAPI definition lives here: `http://localhost:8080/v2/management/openapi.json`.
 
 ## Starting in Docker container
 
