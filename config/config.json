@@ -1,6 +1,6 @@
 {
     "http_server": {
-        "base_uri": "http://localhost:8080/v1",
+        "base_uri": "http://localhost:8080/v2/management",
         "port": 8080
     },
     "security": {
