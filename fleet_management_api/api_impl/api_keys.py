@@ -10,6 +10,9 @@ from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_m
 import fleet_management_api.database.connection as _connection
 
 
+_KEY_LENGHT = 30
+
+
 def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
@@ -51,7 +54,7 @@ def verify_key_and_return_key_info(
 
 
 def _generate_key() -> str: # pragma: no cover
-    return ''.join(_random.choice(_string.ascii_letters) for _ in range(30))
+    return ''.join(_random.choice(_string.ascii_letters) for _ in range(_KEY_LENGHT))
 
 
 def _key_added_msg(name: str, key: str) -> str:
