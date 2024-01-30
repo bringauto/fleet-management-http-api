@@ -16,9 +16,9 @@ class Test_Creating_Stop(unittest.TestCase):
         stop_1 = Stop(id=1, name="stop_1", position=position, notification_phone=MobilePhone(phone="123456789"))
         stop_2 = Stop(id=2, name="stop_2", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            response = c.post('/v1/stop', json=stop_1)
+            response = c.post('/v2/management/stop', json=stop_1)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/stop', json=stop_2)
+            response = c.post('/v2/management/stop', json=stop_2)
             self.assertEqual(response.status_code, 200)
 
     def test_creating_stop_with_identical_id_yields_code_400(self):
@@ -26,9 +26,9 @@ class Test_Creating_Stop(unittest.TestCase):
         stop_1 = Stop(id=1, name="stop_1", position=position, notification_phone=MobilePhone(phone="123456789"))
         stop_2 = Stop(id=1, name="stop_2", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            response = c.post('/v1/stop', json=stop_1)
+            response = c.post('/v2/management/stop', json=stop_1)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/stop', json=stop_2)
+            response = c.post('/v2/management/stop', json=stop_2)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_stop_with_identical_name_yields_code_400(self):
@@ -36,21 +36,21 @@ class Test_Creating_Stop(unittest.TestCase):
         stop_1 = Stop(id=1, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         stop_2 = Stop(id=2, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            response = c.post('/v1/stop', json=stop_1)
+            response = c.post('/v2/management/stop', json=stop_1)
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v1/stop', json=stop_2)
+            response = c.post('/v2/management/stop', json=stop_2)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_stop_with_invalid_json_yields_code_400(self):
         with self.app.test_client() as c:
-            response = c.post('/v1/stop', json="invalid json")
+            response = c.post('/v2/management/stop', json="invalid json")
             self.assertEqual(response.status_code, 400)
 
     def test_creating_stop_with_incomplete_data_yields_code_400(self):
         with self.app.test_client() as c:
-            response = c.post('/v1/stop', json={})
+            response = c.post('/v2/management/stop', json={})
             self.assertEqual(response.status_code, 400)
-            response = c.post('/v1/stop', json={"id": 1, "name": "stop_1"})
+            response = c.post('/v2/management/stop', json={"id": 1, "name": "stop_1"})
             self.assertEqual(response.status_code, 400)
 
 
@@ -60,8 +60,8 @@ class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         app = _app.get_test_app().app
         with app.test_client() as c:
-            example = c.get('/v1/openapi.json').json["components"]["schemas"]["Stop"]["example"]
-            response = c.post('/v1/stop', json=example)
+            example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Stop"]["example"]
+            response = c.post('/v2/management/stop', json=example)
             self.assertEqual(response.status_code, 200)
 
 
@@ -73,7 +73,7 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
 
     def test_retrieving_all_stops_without_creating_any_yields_code_200_and_empty_list(self):
         with self.app.test_client() as client:
-            response = client.get('/v1/stop')
+            response = client.get('/v2/management/stop')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
@@ -82,9 +82,9 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
         stop_1 = Stop(id=1, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         stop_2 = Stop(id=2, name="stop_Y", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            c.post('/v1/stop', json=stop_1)
-            c.post('/v1/stop', json=stop_2)
-            response = c.get('/v1/stop')
+            c.post('/v2/management/stop', json=stop_1)
+            c.post('/v2/management/stop', json=stop_2)
+            response = c.get('/v2/management/stop')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 
@@ -100,20 +100,20 @@ class Test_Retrieving_Single_Stop(unittest.TestCase):
         stop_1 = Stop(id=1234, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         stop_2 = Stop(id=4321, name="stop_Y", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            c.post('/v1/stop', json=stop_1)
-            c.post('/v1/stop', json=stop_2)
+            c.post('/v2/management/stop', json=stop_1)
+            c.post('/v2/management/stop', json=stop_2)
 
-            response = c.get('/v1/stop/1234')
+            response = c.get('/v2/management/stop/1234')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["name"], stop_1.name)
 
-            response = c.get('/v1/stop/4321')
+            response = c.get('/v2/management/stop/4321')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["name"], stop_2.name)
 
     def test_retrieving_single_non_existing_stop_yields_code_404(self):
         with self.app.test_client() as c:
-            response = c.get('/v1/stop/1234')
+            response = c.get('/v2/management/stop/1234')
             self.assertEqual(response.status_code, 404)
 
 
@@ -127,20 +127,20 @@ class Test_Deleting_Stop(unittest.TestCase):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
         stop = Stop(id=1234, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            c.post('/v1/stop', json=stop)
-            response = c.get('/v1/stop')
+            c.post('/v2/management/stop', json=stop)
+            response = c.get('/v2/management/stop')
 
             self.assertEqual(len(response.json), 1)
 
-            response = c.delete('/v1/stop/1234')
+            response = c.delete('/v2/management/stop/1234')
             self.assertEqual(response.status_code, 200)
 
-            response = c.get('/v1/stop')
+            response = c.get('/v2/management/stop')
             self.assertEqual(len(response.json), 0)
 
     def test_deleting_single_non_existing_stop_yields_code_404(self):
         with self.app.test_client() as c:
-            response = c.delete('/v1/stop/1234')
+            response = c.delete('/v2/management/stop/1234')
             self.assertEqual(response.status_code, 404)
 
 
@@ -154,12 +154,12 @@ class Test_Updating_Stop(unittest.TestCase):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
         stop = Stop(id=1234, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            c.post('/v1/stop', json=stop)
+            c.post('/v2/management/stop', json=stop)
             stop.name = "stop_Y"
-            response = c.put('/v1/stop', json=stop)
+            response = c.put('/v2/management/stop', json=stop)
             self.assertEqual(response.status_code, 200)
 
-            response = c.get('/v1/stop/1234')
+            response = c.get('/v2/management/stop/1234')
             self.assertEqual(response.json["name"], "stop_Y")
 
     def test_updating_nonexisting_stop_yields_code_404(self):
@@ -167,16 +167,16 @@ class Test_Updating_Stop(unittest.TestCase):
         stop = Stop(id=1234, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
 
         with self.app.test_client() as c:
-            response = c.put('/v1/stop', json=stop)
+            response = c.put('/v2/management/stop', json=stop)
             self.assertEqual(response.status_code, 404)
 
     def test_updating_stop_with_incomplete_data_yields_code_400(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
         stop = Stop(id=1234, name="stop_X", position=position, notification_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
-            c.post('/v1/stop', json=stop)
+            c.post('/v2/management/stop', json=stop)
 
-            response = c.put('/v1/stop', json={"id": 1234, "name": "stop_Y"})
+            response = c.put('/v2/management/stop', json={"id": 1234, "name": "stop_Y"})
             self.assertEqual(response.status_code, 400)
 
 

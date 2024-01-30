@@ -50,7 +50,7 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
 
     def test_using_nonexistent_key_yields_code_401(self):
         with self.app.app.test_client() as c:
-            response = c.get('/v1/car')
+            response = c.get('/v2/management/car')
             self.assertEqual(response.status_code, 200)
 
     def tearDown(self) -> None: # pragma: no cover
@@ -68,9 +68,9 @@ class Test_Using_Already_Existing_API_Key(unittest.TestCase):
     def test_using_existing_key(self, mock_generate_key: Mock):
         mock_generate_key.return_value = "abcd"
         with self.app.app.test_client() as c:
-            response = c.get('/v1/car')
+            response = c.get('/v2/management/car')
             self.assertEqual(response.status_code, 401)
-            response = c.get('/v1/car?api_key=abcd')
+            response = c.get('/v2/management/car?api_key=abcd')
             self.assertEqual(response.status_code, 200)
 
     def tearDown(self) -> None: # pragma: no cover
