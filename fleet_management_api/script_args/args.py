@@ -82,10 +82,21 @@ def load_config_file(path: str) -> Dict[str,Any]:
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     args = parser.parse_args().__dict__
     config = _APIConfig(**load_config_file(args.pop("<config-file-path>")))
-    db_config = config.database.connection
-    for key in args:
-        if args[key] == _EMPTY_VALUE: args[key] = db_config.__dict__[key]
+    _update_config_with_args(args, config)
     return ScriptArgs(args, config)
+
+
+def _update_config_with_args(args:Dict[str, Any], config: _APIConfig) -> None:
+    if args["username"] != _EMPTY_VALUE:
+        config.database.connection.username = args["username"]
+    if args["password"] != _EMPTY_VALUE:
+        config.database.connection.password = args["password"]
+    if args["location"] != _EMPTY_VALUE:
+        config.database.connection.location = args["location"]
+    if args["port"] != _EMPTY_VALUE:
+        config.database.connection.port = args["port"]
+    if args["database_name"] != _EMPTY_VALUE:
+        config.database.connection.database_name = args["database_name"]
 
 
 class ConfigFileNotFound(Exception): pass
