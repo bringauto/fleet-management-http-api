@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session as _Session
 from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
-from fleet_management_api.database.connection import current_connection_source, check_and_return_current_connection_source
+from fleet_management_api.database.connection import check_and_return_current_connection_source
 import fleet_management_api.database.wait as wait
 
 
