@@ -8,10 +8,20 @@ Python 3.10.12+
 ## Usage
 To run the server, please execute the following from the root directory:
 
-```
+```bash
 pip3 install -r requirements.txt
-python -m fleet_management_api
+python -m fleet_management_api <path-to-config-file> [OPTIONS]
 ```
+The server automatically connects to the PostgreSQL database using data from the config file. If you want to override these values, start the server with some of the following options:
+
+|Option|Short|Description|
+|------------|-----|--|
+|`--username`|`-usr`|Username for the PostgreSQL database|
+|`--password`|`-pwd`|Password for the PostgreSQL database|
+|`--location`|`-l`  |Location of the database (e.g., `localhost`)|
+|`--port`    |`-p`  |Port number (e.g., `5430`)|
+|`--database-name`|`-db`|Database name| |
+|`--test`|`-t`|Name of testing database. Ignores previous options and use sqlite database instead.
 
 and open your browser to here:
 

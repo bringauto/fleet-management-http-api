@@ -18,6 +18,7 @@ class HTTPServer(pydantic.BaseModel):
 
 class Database(pydantic.BaseModel):
     connection: Connection
+    test: str = pydantic.Field(default="")
     maximum_number_of_table_rows: Dict[str, int]
 
     class Connection(pydantic.BaseModel):

@@ -74,23 +74,35 @@ def set_connection_source_test(db_file_path: str = "") -> str:
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
     _set_connection(url)
+    _api.log_info(f"Using sqlite database stored in file '{db_file_path}'.")
     return db_file_path
 
 
 def set_up_database(config: _configs.Database) -> None:
     conn_config = config.connection
-    set_connection_source(
-        db_location=conn_config.location,
-        port=conn_config.port,
-        db_name=conn_config.database_name,
-        username=conn_config.username,
-        password=conn_config.password
-    )
+    if config.test.strip()!="":
+        set_connection_source_test(config.test)
+    else:
+        set_connection_source(
+            db_location=conn_config.location,
+            port=conn_config.port,
+            db_name=conn_config.database_name,
+            username=conn_config.username,
+            password=conn_config.password
+        )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _api.log_info("Setting up database tables.")
     _db_models.CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
     _db_models.OrderStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["order_states"])
+    src = current_connection_source()
+    if src is None:
+        msg = "Database connection not set up."
+        _api.log_error(msg)
+        raise RuntimeError(msg)
+    else:
+        msg = f"\nConnected to PostgreSQL database (database url = '{src.url}').\n"
+        print(msg)
+        _api.log_info(msg)
 
 
 def unset_connection_source() -> None:
