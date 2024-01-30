@@ -2,10 +2,7 @@ from sqlalchemy.engine import Engine
 
 from fleet_management_api.api_impl.api_keys import create_key as _create_key
 import fleet_management_api.database.connection as _connection
-from fleet_management_api.script_args.args import (
-    request_and_get_script_arguments,
-    PositionalArgInfo,
-)
+import fleet_management_api.script_args as _args
 
 
 def _add_key_if_key_name_not_already_in_db(connection_source: Engine, api_key_name: str) -> int:
@@ -20,20 +17,22 @@ def _add_key_if_key_name_not_already_in_db(connection_source: Engine, api_key_na
 
 
 if __name__=="__main__":
-    vals = request_and_get_script_arguments(
+    args = _args.request_and_get_script_arguments(
         "Add a new API key to the database and if successful, print his or hers API key.",
-        PositionalArgInfo("<api-key-name>", str, "The name of the new api key.")
+        _args.PositionalArgInfo("<api-key-name>", str, "The name of the new api key.")
     )
-    arguments = vals.argvals
-    config = vals.config
+
+    arguments = args.argvals
+    config = args.config
+
     if "test" in arguments.keys() and arguments["test"].strip()!= "":
         source = _connection.get_connection_source_test(db_file_path=arguments["test"])
     else: # pragma: no cover
         source = _connection.get_connection_source(
-            db_location=(arguments["location"]+":"+str(arguments["port"])),
-            db_name=arguments["database_name"],
-            username=arguments["username"],
-            password=arguments["password"]
+            db_location=config.database.connection.location,
+            db_name=config.database.connection.database_name,
+            username=config.database.connection.username,
+            password=config.database.connection.password,
         )
     code = _add_key_if_key_name_not_already_in_db(source, arguments["<api-key-name>"])
     exit(code)
