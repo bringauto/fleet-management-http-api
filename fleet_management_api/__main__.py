@@ -25,6 +25,7 @@ if __name__ == '__main__':
 
     db_config = args.config.database
     api_config = args.config.api
+    http_server_config = args.config.http_server
     security_config = args.config.security
     security_config.callback = args.config.http_server.base_uri
 
@@ -32,5 +33,5 @@ if __name__ == '__main__':
     set_content_timeout_ms(api_config.request_for_data.timeout_in_seconds*1000)
     _set_up_oauth(security_config)
 
-    application.run(port=8080)
+    application.run(port=http_server_config.port)
 

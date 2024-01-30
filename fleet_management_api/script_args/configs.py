@@ -14,6 +14,7 @@ class APIConfig(pydantic.BaseModel):
 
 class HTTPServer(pydantic.BaseModel):
     base_uri: pydantic.AnyUrl
+    port: pydantic.PositiveInt
 
 
 class Database(pydantic.BaseModel):
