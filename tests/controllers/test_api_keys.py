@@ -37,7 +37,7 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
         code, msg = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 400)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None: # pragma: no cover
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
 
@@ -53,7 +53,7 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
             response = c.get('/v1/car')
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None: # pragma: no cover
         if os.path.isfile("db_file.db"):
             os.remove("db_file.db")
 
@@ -73,7 +73,7 @@ class Test_Using_Already_Existing_API_Key(unittest.TestCase):
             response = c.get('/v1/car?api_key=abcd')
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None: # pragma: no cover
         if os.path.isfile("db_file.db"):
             os.remove("db_file.db")
 

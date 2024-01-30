@@ -44,7 +44,7 @@ class Test_Running_New_Admin_Script(unittest.TestCase):
         )
         self.assertEqual(process.returncode, 1)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.exists("db_file.db"):
             os.remove("db_file.db")
 

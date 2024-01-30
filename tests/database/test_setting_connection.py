@@ -122,7 +122,7 @@ class Test_Setting_Up_Database(unittest.TestCase):
                 )
             )
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         _connection.replace_connection_source(self._orig_connection_source)
 
 

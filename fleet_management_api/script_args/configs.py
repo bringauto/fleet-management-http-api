@@ -49,7 +49,7 @@ class Security(pydantic.BaseModel):
 
     @pydantic.validator("keycloak_public_key_file")
     @classmethod
-    def keycloak_public_key_file_is_valid_or_empty(cls, file_path: str) -> str:
+    def keycloak_public_key_file_must_be_valid_or_empty(cls, file_path: str) -> str:
         if file_path == "":
             return file_path
         if not os.path.isfile(file_path):
