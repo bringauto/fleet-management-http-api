@@ -150,13 +150,13 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             mock_timestamp_ms.return_value = 100
             c.post('/v2/management/orderstate', json=order_state_2)
             response = c.get('/v2/management/orderstate?since=0')
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 2) # type: ignore
             response = c.get('/v2/management/orderstate?since=60')
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 1) # type: ignore
             response = c.get('/v2/management/orderstate?since=100')
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 1) # type: ignore
             response = c.get('/v2/management/orderstate?since=110')
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(len(response.json), 0) # type: ignore
 
 
     @patch('fleet_management_api.database.timestamp.timestamp_ms')
@@ -173,45 +173,30 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             c.post('/v2/management/orderstate', json=order_state_3)
 
             response = c.get('/v2/management/orderstate/12?since=110')
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(len(response.json), 0) # type: ignore
             response = c.get('/v2/management/orderstate/12?since=60')
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 1) # type: ignore
 
             response = c.get('/v2/management/orderstate/13?since=110')
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 1) # type: ignore
             response = c.get('/v2/management/orderstate/13?since=160')
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(len(response.json), 0) # type: ignore
 
     @patch('fleet_management_api.database.timestamp.timestamp_ms')
-    def test_unspecified_since_parameter_yields_the_list_containing_the_newest_order_state_or_empty_list(self, mock_timestamp_ms: Mock):
+    def test_unspecified_since_parameter_yields_the_list_containing_all_the_order_states(self, mock_timestamp_ms: Mock):
         order_state_1 = OrderState(id=1, order_id=12, status="accepted")
         order_state_2 = OrderState(id=2, order_id=12, status="in_progress")
         with self.app.test_client() as c:
             response = c.get('/v2/management/orderstate/12')
 
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(len(response.json), 0) # type: ignore
             mock_timestamp_ms.return_value = 50
             c.post('/v2/management/orderstate', json=order_state_1)
             mock_timestamp_ms.return_value = 100
             c.post('/v2/management/orderstate', json=order_state_2)
 
-            states: List[Dict] = c.get('/v2/management/orderstate/12').json
-            self.assertEqual(len(states), 1)
-            self.assertEqual(states[0]["id"], 2)
-
-    def test_waiting_with_since_parameter_unspecified_makes_the_api_wait_for_some_new_state_to_come(self):
-        old_state = OrderState(id=123, order_id=12, status="accepted")
-        new_state = OrderState(id=456, order_id=12, status="accepted")
-        with self.app.test_client() as c:
-            c.post('/v2/management/orderstate', json=old_state)
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                future = executor.submit(c.get, '/v2/management/orderstate/12?wait=true')
-                time.sleep(0.01)
-                executor.submit(c.post, '/v2/management/orderstate', json=new_state)
-                response = future.result()
-                states = response.json
-                self.assertEqual(len(states), 1)
-                self.assertEqual(states[0]["id"], 456)
+            states: List[Dict] = c.get('/v2/management/orderstate/12').json  # type: ignore
+            self.assertEqual(len(states), 2)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):

@@ -28,11 +28,19 @@ def create_order_state(order_state) -> _Response:
         return _api.log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
 
 
-def get_all_order_states(wait: bool = False, since: Optional[int] = None) -> _Response:
+def get_all_order_states(wait: bool = False, since: int = 0) -> _Response:
+    """Get all order states for all the existing orders."""
     return _get_order_states({}, wait, since)
 
 
-def get_order_states(order_id: int, wait: bool = False, since: Optional[int] = None) -> _Response:
+def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _Response:
+    """Get all order states for an order identified by 'order_id' of an existing order.
+
+    :param order_id: Id of the order.
+
+    :param since: If not None, get only states with timestamp >= since.
+    :param wait: If True, wait for new states if there are no states for the order yet.
+    """
     if not _order_exists(order_id):
         return _api.log_and_respond(404, f"Order with id='{order_id}' was not found. Cannot get its state.")
     else:
