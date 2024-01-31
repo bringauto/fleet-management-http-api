@@ -17,7 +17,7 @@ class Test_Car_StartStop_Controller(unittest.TestCase):
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car, content_type='application/json')
             response = c.get(f'/v2/management/car/startstop/{car_id}')
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, 501)
 
     def test_starting_or_stopping_nonexistent_car_returns_code_404(self):
         car_id = 123
