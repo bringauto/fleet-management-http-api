@@ -29,6 +29,7 @@ def create_route(route: _models.Route) -> _Response:
         else:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
 
+
 def delete_route(route_id: int) -> _Response:
     response = _db_access.delete(_RouteDBModel, id_name="id", id_value=route_id)
     if response.status_code == 200:

@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import fleet_management_api.app as _app
@@ -159,4 +160,4 @@ class Test_Updating_Route(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no coverages
+    unittest.main(buffer=True) # pragma: no coverages
