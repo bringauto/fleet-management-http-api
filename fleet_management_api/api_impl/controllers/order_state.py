@@ -10,6 +10,7 @@ import fleet_management_api.database.db_models as _db_models
 
 
 def create_order_state(order_state) -> _Response:
+    """Post a new state of an existing order."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 

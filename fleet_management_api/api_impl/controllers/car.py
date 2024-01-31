@@ -1,3 +1,5 @@
+from typing import Dict
+
 import connexion # type: ignore
 from connexion.lifecycle import ConnexionResponse as _Response# type: ignore
 
@@ -8,7 +10,7 @@ import fleet_management_api.database.db_access as _db_access
 
 
 def create_car(car) -> _Response:  # noqa: E501
-    """Create a new car
+    """Create a new car.
 
     The car must have a unique id and name.
     """
@@ -49,6 +51,7 @@ def get_car(car_id: int) -> _Response:
 
 
 def get_cars() -> _Response:  # noqa: E501
+    """List all cars."""
     cars = _db_access.get(_db_models.CarDBModel)
     if len(cars) == 0:
         _api.log_info("Listing all cars: no cars found.")
@@ -57,7 +60,11 @@ def get_cars() -> _Response:  # noqa: E501
     return _Response(body=cars, status_code=200)
 
 
-def update_car(car) -> _Response:
+def update_car(car: Dict|_models.Car) -> _Response:
+    """Update an existing car.
+
+    :param car: Updated car object.
+    """
     if connexion.request.is_json:
         car = _models.Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = _api.car_to_db_model(car)
