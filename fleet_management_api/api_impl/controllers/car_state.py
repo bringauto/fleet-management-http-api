@@ -8,6 +8,15 @@ import fleet_management_api.database.db_access as _db_access
 
 
 def add_car_state(car_state) -> _Response:
+    """Post new car state
+
+    :param car_state: Car state to be added
+
+    :rtype: CarState
+
+    The state must have a unique id.
+    The car defined by 'car_id' must exist.
+    """
     if not connexion.request.is_json:
         code, msg = 400, f"Invalid request format: {connexion.request.data}. JSON is required"
         _api.log_error(msg)
@@ -35,12 +44,16 @@ def add_car_state(car_state) -> _Response:
 
 
 def get_all_car_states() -> _Response:
+    """Get all car states for all the cars."""
     car_state_db_models = _db_access.get(_db_models.CarStateDBModel)
     car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]
     return _Response(body=car_states, status_code=200, content_type="application/json")
 
 
 def get_car_states(car_id: int, all_available: bool = False) -> _Response:
+    """Get all car states for a car idenfified by 'car_id' of an existing car.
+
+    """
     if not _car_exists(car_id):
         return _api.log_and_respond(404, f"Car with id='{car_id}' was not found. Cannot get its state.")
     else:

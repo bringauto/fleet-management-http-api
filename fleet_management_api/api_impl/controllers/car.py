@@ -8,6 +8,10 @@ import fleet_management_api.database.db_access as _db_access
 
 
 def create_car(car) -> _Response:  # noqa: E501
+    """Create a new car
+
+    The car must have a unique id and name.
+    """
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:
@@ -20,7 +24,11 @@ def create_car(car) -> _Response:  # noqa: E501
             return _api.log_and_respond(response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}")
 
 
-def delete_car(car_id) -> _Response:
+def delete_car(car_id: int) -> _Response:
+    """Deletes an existing car identified by 'car_id'.
+
+    :param car_id: Id of the car to be deleted.
+    """
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
     if 200 <= response.status_code < 300:
         msg = f"Car (id={car_id}) has been deleted."
@@ -30,7 +38,8 @@ def delete_car(car_id) -> _Response:
         return _api.log_and_respond(response.status_code, msg)
 
 
-def get_car(car_id) -> _Response:
+def get_car(car_id: int) -> _Response:
+    """Get a car identified by 'car_id'."""
     cars = _db_access.get(_db_models.CarDBModel, criteria={'id': lambda x: x==car_id})
     if len(cars) == 0:
         return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
