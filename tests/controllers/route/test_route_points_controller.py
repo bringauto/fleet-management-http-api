@@ -51,5 +51,30 @@ class Test_Posting_New_Route_Points(unittest.TestCase):
             self.assertEqual(len(response_2.json["points"]), 2)
 
 
+class Test_Route_Removal(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app().app
+
+    def test_route_points_are_not_accessible_after_route_is_removed(self):
+        route = Route(id=12, name='test_route')
+        with self.app.test_client() as c:
+            c.post('/v2/management/route', json=route)
+            response = c.delete('/v2/management/route/12')
+            self.assertEqual(response.status_code, 200)
+            response = c.get('/v2/management/routepoints/12')
+            self.assertEqual(response.status_code, 404)
+
+    def test_route_can_be_recreated_under_the_same_id_after_removal_of_the_original_one(self):
+        old_route = Route(id=12, name='old_test_route')
+        new_route = Route(id=12, name='new_test_route')
+        with self.app.test_client() as c:
+            c.post('/v2/management/route', json=old_route)
+            c.delete('/v2/management/route/12')
+            response = c.post('/v2/management/route', json=new_route)
+            self.assertEqual(response.status_code, 200)
+
+
 if __name__ == '__main__':
     unittest.main() # pragma: no coverage
