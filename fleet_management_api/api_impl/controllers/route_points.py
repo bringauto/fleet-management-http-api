@@ -8,6 +8,7 @@ import fleet_management_api.api_impl as _api
 
 
 def get_route_points(route_id: int) -> _Response:
+    """Get route points for an existing route identified by 'route_id'."""
     if not _route_exists(route_id):
         return _Response(content_type="text/plain", status_code=404, body=f"Route (id={route_id}) not found")
     else:
@@ -20,6 +21,7 @@ def get_route_points(route_id: int) -> _Response:
 
 
 def redefine_route_points() -> _Response:
+    """Redefine route points for an existing route."""
     if not _connexion.request.is_json:
         return _Response(content_type="text/plain", status_code=400, body="Expected JSON body")
     else:

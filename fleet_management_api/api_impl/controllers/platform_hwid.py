@@ -1,7 +1,7 @@
 from typing import List
 
 import connexion # type: ignore
-from connexion.lifecycle import ConnexionResponse as _Response# type: ignore
+from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 import fleet_management_api.api_impl as _api
 from fleet_management_api.models import PlatformHwId as _PlatformHwId
@@ -10,6 +10,7 @@ import fleet_management_api.database.db_models as _db_models
 
 
 def create_hw_id(platform_hw_id) -> _Response:
+    """Post a new platform HW Id. The platform HW Id must have a unique id."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:
@@ -25,12 +26,14 @@ def create_hw_id(platform_hw_id) -> _Response:
 
 
 def get_hw_ids() -> _Response:
+    """Get all existing platform HW Ids."""
     hw_id_moodels = _db_access.get(_db_models.PlatformHwIdDBModel)
     platform_hw_ids: List[_PlatformHwId] = [_api.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     return _Response(body=platform_hw_ids, status_code=200, content_type="application/json")
 
 
 def get_hw_id(platformhwid_id: int) -> _Response:
+    """Get an existing platform HW Id identified by 'platformhwid_id'."""
     hw_id_moodels = _db_access.get(_db_models.PlatformHwIdDBModel, criteria={"id": lambda x: x==platformhwid_id})
     platform_hw_ids = [_api.platform_hw_id_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
     if len(platform_hw_ids) == 0:
@@ -41,6 +44,7 @@ def get_hw_id(platformhwid_id: int) -> _Response:
 
 
 def delete_hw_id(platformhwid_id: int) -> _Response:
+    """Delete an existing platform HW Id identified by 'platformhwid_id'."""
     response = _db_access.delete(_db_models.PlatformHwIdDBModel, id_name="id", id_value=platformhwid_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Platform HW Id with id={platformhwid_id} has been deleted.")

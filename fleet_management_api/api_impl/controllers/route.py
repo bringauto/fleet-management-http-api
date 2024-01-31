@@ -12,6 +12,7 @@ from fleet_management_api.database.db_models import StopDBModel as _StopDBModel
 
 
 def create_route(route: _models.Route) -> _Response:
+    """Post a new route. The route must have a unique id and all the stops identified by stop ids must exist."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:
@@ -29,6 +30,7 @@ def create_route(route: _models.Route) -> _Response:
 
 
 def delete_route(route_id: int) -> _Response:
+    """Delete an existing route identified by 'route_id'."""
     response = _db_access.delete(_RouteDBModel, id_name="id", id_value=route_id)
     if not response.status_code == 200:
         note = " (not found)" if response.status_code == 404 else ""
@@ -44,6 +46,7 @@ def delete_route(route_id: int) -> _Response:
 
 
 def get_route(route_id: int) -> _models.Route:
+    """Get an existing route identified by 'route_id'."""
     route_db_models = _db_access.get(_RouteDBModel, criteria={"id": lambda x: x==route_id})
     routes = [_api.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     if len(routes) == 0:
@@ -54,12 +57,14 @@ def get_route(route_id: int) -> _models.Route:
 
 
 def get_routes() -> List[_models.Route]:
+    """Get all existing routes."""
     route_db_models = _db_access.get(_RouteDBModel)
     route: List[_models.Route] = [_api.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     return _Response(body=route, status_code=200, content_type="application/json")
 
 
 def update_route(route: _models.Route) -> _Response:
+    """Update an existing route identified by 'route_id'."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
     else:

@@ -38,7 +38,10 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _Resp
 
     :param order_id: Id of the order.
 
-    :param since: If not None, get only states with timestamp >= since.
+    :param since: Only statuses with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+        and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
+        Default value is 0.
+
     :param wait: If True, wait for new states if there are no states for the order yet.
     """
     if not _order_exists(order_id):

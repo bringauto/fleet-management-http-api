@@ -10,6 +10,7 @@ import fleet_management_api.database.db_access as _db_access
 
 
 def create_order(order) -> _Response:
+    """Post a new order. The order must have a unique id and the car must exist."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
@@ -26,6 +27,7 @@ def create_order(order) -> _Response:
 
 
 def delete_order(order_id: int) -> _Response:
+    """Delete an existing order."""
     response = _db_access.delete(_db_models.OrderDBModel, 'id', order_id)
     if 200 <= response.status_code < 300:
         msg = f"Order (id={order_id}) has been deleted."
@@ -38,6 +40,7 @@ def delete_order(order_id: int) -> _Response:
 
 
 def get_order(order_id: int) -> _Response:
+    """Get an existing order."""
     order_db_models = _db_access.get(_db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})
     if len(order_db_models) == 0:
         return _Response(body=f"Order with id={order_id} was not found.", status_code=404)
@@ -64,6 +67,7 @@ def get_updated_orders(car_id: int) -> _Response:
 
 
 def get_orders() -> _Response:
+    """Get all existing orders."""
     _api.log_info("Listing all existing orders")
     return _Response(
         content_type="application/json",

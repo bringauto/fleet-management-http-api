@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import connexion # type: ignore
 from connexion.lifecycle import ConnexionResponse as _Response# type: ignore
@@ -9,7 +9,8 @@ import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 
 
-def create_stop(stop) -> _Response:
+def create_stop(stop: Dict|_Stop) -> _Response:
+    """Post a new stop. The stop must have a unique id."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:
@@ -23,6 +24,10 @@ def create_stop(stop) -> _Response:
 
 
 def delete_stop(stop_id: int) -> _Response:
+    """Delete an existing stop identified by 'stop_id'.
+
+    The stop cannot be deleted if it is referenced by any route.
+    """
     related_routes_response = _get_routes_referencing_stop(stop_id)
     if related_routes_response.status_code != 200:
         return related_routes_response
@@ -35,6 +40,7 @@ def delete_stop(stop_id: int) -> _Response:
 
 
 def get_stop(stop_id: int) -> _Response:
+    """Get an existing stop identified by 'stop_id'."""
     stop_db_models: List[_db_models.StopDBModel] = _db_access.get(_db_models.StopDBModel, criteria={"id": lambda x: x==stop_id})
     stops = [_api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
@@ -45,12 +51,14 @@ def get_stop(stop_id: int) -> _Response:
 
 
 def get_stops() -> _Response:
+    """Get all existing stops."""
     stop_db_models = _db_access.get(_db_models.StopDBModel)
     stops: List[_Stop] = [_api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     return _Response(body=stops, status_code=200, content_type="application/json")
 
 
-def update_stop(stop) -> _Response:
+def update_stop(stop: Dict|_Stop) -> _Response:
+    """Update an existing stop."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
     else:
