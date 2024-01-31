@@ -1,6 +1,7 @@
 {
     "http_server": {
-        "base_uri": "https://someadress.com/"
+        "base_uri": "https://someadress.com/",
+        "port": 8080
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com/",
