@@ -16,20 +16,16 @@ def create_route(route: _models.Route) -> _Response:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
     else:
         route = _models.Route.from_dict(connexion.request.get_json())
-
-        route_points_response = _create_empty_route_points_list(route)
-        if not route_points_response.status_code == 200:
-            return route_points_response
-        check_stops_response = _find_nonexistent_stops(route)
-        if not check_stops_response.status_code == 200:
-            return check_stops_response
+        check_response = _check_route_model(route)
+        if not check_response.status_code == 200:
+            return check_response
 
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(_RouteDBModel, route_db_model)
         if not response.status_code == 200:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
-
-        return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
+        else:
+            return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
 
 
 def delete_route(route_id: int) -> _Response:
@@ -69,12 +65,22 @@ def update_route(route: _models.Route) -> _Response:
 
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.update(updated_obj=route_db_model)
-        if 200 <= response.status_code < 300:
+        if response.status_code == 200:
             _api.log_info(f"Route (id={route.id} has been succesfully updated.")
             return _Response(status_code=response.status_code, content_type="application/json", body=route)
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _api.log_and_respond(404, f"Route (id={route.id}) was not found and could not be updated{note}. {response.body}")
+
+
+def _check_route_model(route: _models.Route) -> _Response:
+    route_points_response = _create_empty_route_points_list(route)
+    if not route_points_response.status_code == 200:
+        return route_points_response
+    check_stops_response = _find_nonexistent_stops(route)
+    if not check_stops_response.status_code == 200:
+        return check_stops_response
+    return _Response(status_code=200, content_type="text/plain", body=f"Route (id={route.id}, name='{route.name}) has been checked.")
 
 
 def _create_empty_route_points_list(route: _models.Route) -> _Response:
