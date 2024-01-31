@@ -23,6 +23,9 @@ def create_stop(stop) -> _Response:
 
 
 def delete_stop(stop_id: int) -> _Response:
+    related_routes_response = _get_routes_referencing_stop(stop_id)
+    if related_routes_response.status_code != 200:
+        return related_routes_response
     response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
@@ -60,3 +63,16 @@ def update_stop(stop) -> _Response:
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}) could not be updated {note}. {response.body}")
+
+
+def _get_routes_referencing_stop(stop_id: int) -> _Response:
+    route_db_models = _db_access.get(_db_models.RouteDBModel)
+    referenced_route_models = []
+    for route_model in route_db_models:
+        if stop_id in route_model.stop_ids:
+            referenced_route_models.append(route_model)
+
+    if len(route_db_models) > 0:
+        return _api.log_and_respond(400, f"Stop with id={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}")
+    else:
+        return _api.log_and_respond(200, f"Stop with id={stop_id} is not referenced by any route.")
