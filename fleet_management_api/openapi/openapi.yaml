@@ -2435,7 +2435,7 @@ paths:
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
-  /token-get:
+  /token_get:
     get:
       description: Callback endpoint for keycloak to receive jwt token.
       operationId: token_get
@@ -2485,7 +2485,7 @@ paths:
       tags:
       - security
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
-  /token-refresh:
+  /token_refresh:
     get:
       description: Endpoint to receive jwt token from refresh token.
       operationId: token_refresh
