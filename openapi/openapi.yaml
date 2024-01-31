@@ -80,10 +80,10 @@ paths:
 
   /login:
     $ref: 'security.yaml#/paths/~1login'
-  /token-get:
-    $ref: 'security.yaml#/paths/~1token-get'
-  /token-refresh:
-    $ref: 'security.yaml#/paths/~1token-refresh'
+  /token_get:
+    $ref: 'security.yaml#/paths/~1token_get'
+  /token_refresh:
+    $ref: 'security.yaml#/paths/~1token_refresh'
 
 components:
   securitySchemes:
