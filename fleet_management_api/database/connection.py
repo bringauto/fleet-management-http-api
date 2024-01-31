@@ -14,11 +14,16 @@ _db_connection: None|_Engine = None
 
 
 def current_connection_source() -> _Engine|None:
+    """Return the current connection source (sqlalchemy Engine object) stored in the module variable."""
     global _db_connection
     return _db_connection
 
 
 def check_and_return_current_connection_source(conn_source: Optional[_Engine] = None) -> _sqa.engine.base.Engine:
+    """Check whether currently set module variable storing connection source (sqlalchemy Engine object) is not None.
+
+    If it is None, raise RuntimeError. Otherwise return its value.
+    """
     source: _Engine|None = None
     if conn_source is not None:
         source = conn_source
@@ -30,6 +35,7 @@ def check_and_return_current_connection_source(conn_source: Optional[_Engine] = 
 
 
 def db_url(username: str = "", password: str = "", location: str = "", port: Optional[int] = None, db_name: str = "") -> str:
+    """Compose and return a url used to connect API to the database."""
     if port is not None:
         location = f"{location}:{port}"
     if username == "" and password == "":
@@ -44,6 +50,7 @@ def db_url(username: str = "", password: str = "", location: str = "", port: Opt
 
 
 def db_url_test(db_file_location: str = "") -> str:
+    """Compose and return a url used to connect API to a sqlite database."""
     if db_file_location == "":
         return f"sqlite:///:memory:"
     else:
@@ -51,26 +58,31 @@ def db_url_test(db_file_location: str = "") -> str:
 
 
 def set_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
+    """Set the module variable storing the connection source (sqlalchemy Engine object)."""
     url = db_url(username, password, db_location, port, db_name)
     _set_connection(url)
 
 
 def get_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> _Engine: # pragma: no cover
+    """Return a new connection source (sqlalchemy Engine object) (distinct from the one stored in the module variable)."""
     url = db_url(username, password, db_location, port, db_name)
     return _get_connection(url)
 
 
-def get_connection_source_test(db_file_path: str = "") -> _Engine:
-    url = db_url_test(db_file_path)
-    return _get_connection(url)
-
-
 def replace_connection_source(source: _Engine|None) -> None:
+    """Replace the module variable storing the connection source (sqlalchemy Engine object)."""
     global _db_connection
     _db_connection = source
 
 
+def get_connection_source_test(db_file_path: str = "") -> _Engine:
+    """Return a new connection source (sqlalchemy Engine object) (distinct from the one stored in the module variable)."""
+    url = db_url_test(db_file_path)
+    return _get_connection(url)
+
+
 def set_connection_source_test(db_file_path: str = "") -> str:
+    """Set the module variable storing the connection source (sqlalchemy Engine object) to a sqlite database."""
     url = db_url_test(db_file_path)
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
@@ -80,6 +92,10 @@ def set_connection_source_test(db_file_path: str = "") -> str:
 
 
 def set_up_database(config: _configs.Database) -> None:
+    """Set up the database connection source (sqlalchemy Engine object) based on the given configuration.
+
+    Set class attributes of the DB models.
+    """
     conn_config = config.connection
     if config.test.strip()!="":
         set_connection_source_test(config.test)
@@ -107,6 +123,7 @@ def set_up_database(config: _configs.Database) -> None:
 
 
 def unset_connection_source() -> None:
+    """Set the module variable storing the connection source (sqlalchemy Engine object) to None."""
     global _db_connection
     _db_connection = None
 

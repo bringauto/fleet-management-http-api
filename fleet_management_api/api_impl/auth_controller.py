@@ -2,7 +2,8 @@ import sys
 sys.path.append('./server')
 from typing import Optional
 
-from connexion.lifecycle import ConnexionResponse
+from connexion.lifecycle import ConnexionResponse # type: ignore
+
 from fleet_management_api.api_impl.security import SecurityObj
 from flask import redirect
 from fleet_management_api.api_impl.api_logging import log_info, log_error

@@ -14,6 +14,10 @@ _KEY_LENGHT = 30
 
 
 def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
+    """Create a new API key with name 'key_name'.
+
+    The key name must not be already used.
+    """
     key = _generate_key()
     now = _timestamp_ms()
     already_existing_keys = _db_access.get(
@@ -39,6 +43,8 @@ def verify_key_and_return_key_info(
     api_key: str,
     connection_source: Optional[_Engine] = None
     ) -> Tuple[int, str|_ApiKeyDBModel]:
+
+    """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()

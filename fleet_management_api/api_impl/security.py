@@ -28,7 +28,7 @@ class SecurityObj:
         )
         return auth_url
 
-    def token_get(self, state: str, session_state: str, iss: str, code: str) -> dict:
+    def token_get(self, state: str|None, session_state: str|None, iss: str|None, code: str|None) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
         if state != self._state:
             raise Exception("Invalid state")
