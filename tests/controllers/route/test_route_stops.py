@@ -22,15 +22,49 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
             c.post('/v2/management/stop', json=self.stop_D)
 
     def test_defining_route_list_of_stops(self):
-        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, self.stop_B.id])
+        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, self.stop_C.id])
         with self.app.test_client() as c:
-            response = c.post('/v2/management/route', json=route)
-            self.assertEqual(response.status_code, 200)
-
+            c.post('/v2/management/route', json=route)
             response = c.get(f'/v2/management/route/{route.id}')
             self.assertEqual(response.status_code, 200)
-            print(response.json)
+            self.assertEqual(response.json["stopIds"], [self.stop_A.id, self.stop_C.id])
 
+    def test_updating_list_of_stops(self):
+        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, self.stop_C.id])
+        with self.app.test_client() as c:
+            response=c.post('/v2/management/route', json=route)
+            self.assertEqual(response.status_code, 200)
+            route.stop_ids.append(self.stop_B.id)
+            c.put('/v2/management/route', json=route)
+            response = c.get(f'/v2/management/route/{route.id}')
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["stopIds"], [self.stop_A.id, self.stop_C.id, self.stop_B.id])
+
+    def test_creating_list_of_routes_with_nonexistent_stop_yields_code_404(self):
+        nonexistent_stop_id = 123
+        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, nonexistent_stop_id])
+        with self.app.test_client() as c:
+            response = c.post('/v2/management/route', json=route)
+            self.assertEqual(response.status_code, 404)
+
+    def test_route_is_not_created_if_any_of_its_stops_does_not_exist(self):
+        nonexistent_stop_id = 123
+        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, nonexistent_stop_id])
+        with self.app.test_client() as c:
+            response = c.post('/v2/management/route', json=route)
+            self.assertEqual(response.status_code, 404)
+
+            response = c.get(f'/v2/management/route')
+            self.assertEqual(response.json, [])
+
+    def test_updating_list_of_stops_with_nonexistent_stop_yields_code_404(self):
+        nonexistent_stop_id = 123
+        route = Route(id=5, name="test_route", stop_ids=[self.stop_A.id, self.stop_C.id])
+        with self.app.test_client() as c:
+            c.post('/v2/management/route', json=route)
+            route.stop_ids.append(nonexistent_stop_id)
+            response = c.put('/v2/management/route', json=route)
+            self.assertEqual(response.status_code, 404)
 
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):

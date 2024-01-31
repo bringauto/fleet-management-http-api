@@ -51,6 +51,8 @@ class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
         self.app = _app.get_test_app().app
         with self.app.test_client() as c:
             example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Route"]["example"]
+            # remove stop ids (these stops are not defined for this test)
+            example["stopIds"] = []
             response = c.post('/v2/management/route', json=example)
             self.assertEqual(response.status_code, 200)
 

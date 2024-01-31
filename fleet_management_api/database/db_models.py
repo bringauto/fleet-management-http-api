@@ -1,4 +1,4 @@
-from typing import ClassVar, Dict
+from typing import ClassVar
 import dataclasses
 
 import sqlalchemy as _sqa
@@ -71,6 +71,7 @@ class RouteDBModel(Base):
     __tablename__ = 'routes'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
 
 
 @dataclasses.dataclass
