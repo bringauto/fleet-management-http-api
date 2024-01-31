@@ -112,13 +112,13 @@ To get keycloak authentication working, all parameters in the security section o
 
 ```json
 "security": {
-        "keycloak_url": "https://keycloak.bringauto.com",
-        "client_id": "",
-        "client_secret_key": "",
-        "scope": "",
-        "realm": "",
-        "keycloak_public_key_file": "config/keycloak.pem"
-    }
+    "keycloak_url": "https://keycloak.bringauto.com",
+    "client_id": "",
+    "client_secret_key": "",
+    "scope": "",
+    "realm": "",
+    "keycloak_public_key_file": "config/keycloak.pem"
+}
 ```
 
 - keycloak_url : base url of a working keycloak instance
