@@ -4,6 +4,7 @@ import subprocess
 import unittest
 
 import coverage
+import coverage.exceptions as _cov_exceptions
 
 
 TEST_DIR_NAME = "tests"
@@ -24,14 +25,25 @@ def _report_coverage(cov: coverage.Coverage) -> None:
         cov.html_report()
         subprocess.run(["open", "htmlcov/index.html"])
     else:
-        cov.report()
+        try:
+            cov.report()
+        except _cov_exceptions.NoDataError:
+            print("No data from coverage analysis to report.")
+        except Exception as e:
+            print(f"Problem reporting coverage. {e}")
 
 
 def _run_tests(show_test_names: bool = True) -> None:
     possible_paths = [os.path.join(TEST_DIR_NAME,path) for path in sys.argv[1:]]
-    paths = [path for path in possible_paths if os.path.exists(path)]
-    if not paths:
+    if not possible_paths:
         paths = [TEST_DIR_NAME]
+    else:
+        paths = []
+        for path in possible_paths:
+            if os.path.exists(path):
+                paths.append(path)
+            else:
+                print(f"Path '{path}' does not exist. Skipping.")
     suite = unittest.TestSuite()
     for path in paths:
         if os.path.isfile(path):
