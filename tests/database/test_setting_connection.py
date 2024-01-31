@@ -14,16 +14,20 @@ from tests.database.models import initialize_test_tables as _initialize_test_tab
 
 class Test_Creating_Database_URL(unittest.TestCase):
 
+    def test_production_database_url_with_specified_port_username_and_password(self):
+        url = _connection.db_url( "test_user", "test_password", "localhost", 5432, "test_db")
+        self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost:5432/test_db")
+
     def test_production_database_url_with_specified_username_and_password(self):
-        url = _connection.db_url("localhost", "test_db", "test_user", "test_password")
+        url = _connection.db_url("test_user", "test_password", "localhost", db_name="test_db")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost/test_db")
 
     def test_production_database_url_without_username_and_password(self):
-        url = _connection.db_url("localhost", db_name="test_db")
+        url = _connection.db_url(location="localhost", db_name="test_db")
         self.assertEqual(url, "postgresql+psycopg://localhost/test_db")
 
     def test_production_database_url_without_specifying_database_name_gives_valid_url(self):
-        url = _connection.db_url("localhost", username="test_user", password="test_password")
+        url = _connection.db_url("test_user", "test_password", "localhost")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost")
 
     def test_test_database_url(self):
@@ -36,7 +40,7 @@ class Test_Creating_Database_URL(unittest.TestCase):
 
     def test_value_error_is_raises_when_specifying_password_without_username(self):
         with self.assertRaises(ValueError):
-            _connection.db_url("localhost", "test_db", password="test_password", username="")
+            _connection.db_url(location="localhost", db_name="test_db", password="test_password", username="")
 
 
 class Test_Creating_A_Test_Database(unittest.TestCase):
@@ -151,4 +155,4 @@ class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):
 
 
 if __name__=="__main__":
-    unittest.main() # pragma: no cover
+    unittest.main(buffer=True) # pragma: no cover

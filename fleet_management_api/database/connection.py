@@ -29,7 +29,9 @@ def check_and_return_current_connection_source(conn_source: Optional[_Engine] = 
     return source
 
 
-def db_url(location: str, db_name: str = "", username: str = "", password: str = "") -> str:
+def db_url(username: str = "", password: str = "", location: str = "", port: Optional[int] = None, db_name: str = "") -> str:
+    if port is not None:
+        location = f"{location}:{port}"
     if username == "" and password == "":
         url = f"postgresql+psycopg://{location}"
     elif username == "" and password != "":
@@ -48,14 +50,13 @@ def db_url_test(db_file_location: str = "") -> str:
         return f"sqlite:///{db_file_location}"
 
 
-def set_connection_source(db_location: str, port: int = 5432, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
-    full_location = f"{db_location}:{port}"
-    url = db_url(full_location, db_name, username, password)
+def set_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
+    url = db_url(username, password, db_location, port, db_name)
     _set_connection(url)
 
 
-def get_connection_source(db_location: str, port: int = 5432, db_name: str = "", username: str = "", password: str = "") -> _Engine: # pragma: no cover
-    url = db_url(db_location, db_name, username, password)
+def get_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> _Engine: # pragma: no cover
+    url = db_url(username, password, db_location, port, db_name)
     return _get_connection(url)
 
 
