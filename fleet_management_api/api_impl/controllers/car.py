@@ -32,9 +32,13 @@ def delete_car(car_id: int) -> _Response:
     :param car_id: Id of the car to be deleted.
     """
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
-    if 200 <= response.status_code < 300:
-        msg = f"Car (id={car_id}) has been deleted."
-        return _api.log_and_respond(200, msg)
+    if response.status_code == 200:
+        states_response = _remove_states_of_car_to_be_deleted(car_id)
+        if states_response.status_code != 200:
+            return states_response
+        else:
+            msg = f"Car (id={car_id}) has been deleted."
+            return _api.log_and_respond(200, msg)
     else:
         msg = f"Car (id={car_id}) could not be deleted. {response.body}"
         return _api.log_and_respond(response.status_code, msg)
@@ -78,3 +82,9 @@ def update_car(car: Dict|_models.Car) -> _Response:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
 
+def _remove_states_of_car_to_be_deleted(car_id: int) -> _Response:
+    response = _db_access.delete(_db_models.CarStateDBModel, id_name='car_id', id_value=car_id)
+    if response.status_code != 200:
+        return _Response(response.status_code, f"Cannot delete states for car (car id = {car_id}). {response.body}")
+    else:
+        return _Response(200, f"Removing all states of car with id = {car_id} from database.")

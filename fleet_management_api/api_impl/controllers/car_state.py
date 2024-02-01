@@ -85,3 +85,4 @@ def _remove_old_states(car_id: int) -> _Response:
             return _Response(200, f"Removing oldest state from database (car id = {car_id}).")
     else:
         return _Response(status_code=200, content_type="text/plain", body="")
+

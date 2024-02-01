@@ -204,11 +204,38 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             response = c.get('/v2/management/carstate')
             self.assertEqual(len(response.json), 2*max_n)
 
-
-
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
+
+
+class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app().app
+        car = Car(id=12, platform_id=1, name="car1", car_admin_phone={}, default_route_id=1, under_test=False)
+        with self.app.test_client() as c:
+            c.post('/v2/management/car', json=car)
+
+    def test_list_of_cars_is_deleted_when_car_is_deleted(self):
+        state_1 = CarState(id=3, status="idle", car_id=12, speed=7, fuel=80, position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50))
+        state_2 = CarState(id=7, status="charging", car_id=12, speed=7, fuel=80, position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50))
+
+        with self.app.test_client() as c:
+            c.post('/v2/management/carstate', json=state_1)
+            c.post('/v2/management/carstate', json=state_2)
+            response = c.get('/v2/management/carstate?allAvailable=true')
+            self.assertEqual(len(response.json), 2)
+            response = c.get('/v2/management/carstate/12?allAvailable=true')
+            print(response.json)
+            self.assertEqual(len(response.json), 2)
+
+            c.delete('/v2/management/car/12')
+            response = c.get('/v2/management/carstate?allAvailable=true')
+            self.assertEqual(len(response.json), 0)
+            response = c.get('/v2/management/carstate/12?allAvailable=true')
+            self.assertEqual(response.status_code, 404)
 
 
 if __name__ == '__main__': # pragma: no coverage
