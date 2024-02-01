@@ -2,7 +2,7 @@ import unittest
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
-from fleet_management_api.models import PlatformHwId
+from fleet_management_api.models import PlatformHwId, Car, MobilePhone
 
 
 class Test_Creating_Platform_HW_Id(unittest.TestCase):
@@ -128,6 +128,25 @@ class Test_Deleting_Platform_HW_Id(unittest.TestCase):
             response = c.delete(f'/v2/management/platformhwid/{nonexistent_platform_id}')
             self.assertEqual(response.status_code, 404)
 
+    def test_platform_hw_id_cannot_be_deleted_if_it_is_used_by_some_car(self):
+        platform_hw_id = PlatformHwId(id=123, name="test_platform")
+        car = Car(id=1, platform_hw_id=123, name="test_car", car_admin_phone=MobilePhone(phone="123456789"))
+        with self.app.test_client() as c:
+            c.post('/v2/management/platformhwid', json=platform_hw_id)
+            response = c.post('/v2/management/car', json=car)
+            self.assertEqual(response.status_code, 200)
+
+            response = c.delete('/v2/management/platformhwid/123')
+            self.assertEqual(response.status_code, 400)
+            response = c.get('/v2/management/platformhwid')
+            self.assertEqual(len(response.json), 1)
+
+            c.delete('/v2/management/car/1')
+            response = c.delete('/v2/management/platformhwid/123')
+            self.assertEqual(response.status_code, 200)
+            response = c.get('/v2/management/platformhwid')
+            self.assertEqual(len(response.json), 0)
+
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no coverages
+    unittest.main(buffer=True) # pragma: no coverages

@@ -14,13 +14,13 @@ class Car(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, platform_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=True):  # noqa: E501
+    def __init__(self, id=None, platform_hw_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=True):  # noqa: E501
         """Car - a model defined in OpenAPI
 
         :param id: The id of this Car.  # noqa: E501
         :type id: int
-        :param platform_id: The platform_id of this Car.  # noqa: E501
-        :type platform_id: int
+        :param platform_hw_id: The platform_hw_id of this Car.  # noqa: E501
+        :type platform_hw_id: int
         :param name: The name of this Car.  # noqa: E501
         :type name: str
         :param car_admin_phone: The car_admin_phone of this Car.  # noqa: E501
@@ -32,7 +32,7 @@ class Car(Model):
         """
         self.openapi_types = {
             'id': int,
-            'platform_id': int,
+            'platform_hw_id': int,
             'name': str,
             'car_admin_phone': MobilePhone,
             'default_route_id': int,
@@ -41,7 +41,7 @@ class Car(Model):
 
         self.attribute_map = {
             'id': 'id',
-            'platform_id': 'platformId',
+            'platform_hw_id': 'platformHwId',
             'name': 'name',
             'car_admin_phone': 'carAdminPhone',
             'default_route_id': 'defaultRouteId',
@@ -49,7 +49,7 @@ class Car(Model):
         }
 
         self._id = id
-        self._platform_id = platform_id
+        self._platform_hw_id = platform_hw_id
         self._name = name
         self._car_admin_phone = car_admin_phone
         self._default_route_id = default_route_id
@@ -90,27 +90,27 @@ class Car(Model):
         self._id = id
 
     @property
-    def platform_id(self) -> int:
-        """Gets the platform_id of this Car.
+    def platform_hw_id(self) -> int:
+        """Gets the platform_hw_id of this Car.
 
 
-        :return: The platform_id of this Car.
+        :return: The platform_hw_id of this Car.
         :rtype: int
         """
-        return self._platform_id
+        return self._platform_hw_id
 
-    @platform_id.setter
-    def platform_id(self, platform_id: int):
-        """Sets the platform_id of this Car.
+    @platform_hw_id.setter
+    def platform_hw_id(self, platform_hw_id: int):
+        """Sets the platform_hw_id of this Car.
 
 
-        :param platform_id: The platform_id of this Car.
-        :type platform_id: int
+        :param platform_hw_id: The platform_hw_id of this Car.
+        :type platform_hw_id: int
         """
-        if platform_id is None:
-            raise ValueError("Invalid value for `platform_id`, must not be `None`")  # noqa: E501
+        if platform_hw_id is None:
+            raise ValueError("Invalid value for `platform_hw_id`, must not be `None`")  # noqa: E501
 
-        self._platform_id = platform_id
+        self._platform_hw_id = platform_hw_id
 
     @property
     def name(self) -> str:

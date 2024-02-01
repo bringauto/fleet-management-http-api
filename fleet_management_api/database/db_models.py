@@ -19,7 +19,7 @@ class CarDBModel(Base):
     __tablename__ = 'cars'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    platform_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    platform_hw_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
 

@@ -282,12 +282,12 @@ components:
       description: Car object structure
       required:
         - id
-        - platformId
+        - platformHwId
         - name
       properties:
         id:
           $ref: 'common_models.yaml#/components/schemas/Id'
-        platformId:
+        platformHwId:
           $ref: 'common_models.yaml#/components/schemas/Id'
           example: 5
         name:

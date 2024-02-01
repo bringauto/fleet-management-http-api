@@ -2624,16 +2624,16 @@ components:
         name: BAT-2022-01
         defaultRouteId: 1
         id: 1
-        platformId: 1
         carAdminPhone:
           phone: "+420123456789"
+        platformHwId: 1
       properties:
         id:
           example: 1
           format: int32
           title: id
           type: integer
-        platformId:
+        platformHwId:
           example: 1
           format: int32
           title: id
@@ -2657,7 +2657,7 @@ components:
       required:
       - id
       - name
-      - platformId
+      - platformHwId
       title: Car
       type: object
     Error:

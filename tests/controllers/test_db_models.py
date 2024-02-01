@@ -29,7 +29,7 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
         self.assertEqual(car_db_model.name, car.name)
-        self.assertEqual(car_db_model.platform_id, car.platform_id)
+        self.assertEqual(car_db_model.platform_hw_id, car.platform_id)
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
         phone_in_db_model = MobilePhone.from_dict(car_db_model.car_admin_phone)
         self.assertEqual(phone_in_db_model, car.car_admin_phone)
@@ -39,7 +39,7 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
         self.assertEqual(car_db_model.name, car.name)
-        self.assertEqual(car_db_model.platform_id, car.platform_id)
+        self.assertEqual(car_db_model.platform_hw_id, car.platform_id)
         self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone)
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
 
