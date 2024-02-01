@@ -28,9 +28,9 @@ def delete_stop(stop_id: int) -> _Response:
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    related_routes_response = _get_routes_referencing_stop(stop_id)
-    if related_routes_response.status_code != 200:
-        return related_routes_response
+    object_using_stop_response = _get_objects_referencing_stop(stop_id)
+    if object_using_stop_response.status_code != 200:
+        return object_using_stop_response
     response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
@@ -73,6 +73,16 @@ def update_stop(stop: Dict|_Stop) -> _Response:
             return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}) could not be updated {note}. {response.body}")
 
 
+def _get_objects_referencing_stop(stop_id: int) -> _Response:
+    related_routes_response = _get_routes_referencing_stop(stop_id)
+    if related_routes_response.status_code != 200:
+        return related_routes_response
+    related_orders_response = _get_orders_referencing_stop(stop_id)
+    if related_orders_response.status_code != 200:
+        return related_orders_response
+    return _api.log_and_respond(200, f"Stop with id={stop_id} is not referenced by any object.")
+
+
 def _get_routes_referencing_stop(stop_id: int) -> _Response:
     route_db_models = _db_access.get(_db_models.RouteDBModel)
     referenced_route_models = []
@@ -84,3 +94,16 @@ def _get_routes_referencing_stop(stop_id: int) -> _Response:
         return _api.log_and_respond(400, f"Stop with id={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}")
     else:
         return _api.log_and_respond(200, f"Stop with id={stop_id} is not referenced by any route.")
+
+
+def _get_orders_referencing_stop(stop_id: int) -> _Response:
+    order_db_models = _db_access.get(_db_models.OrderDBModel)
+    referenced_order_models = []
+    for order_model in order_db_models:
+        if stop_id == order_model.stop_route_id:
+            referenced_order_models.append(order_model)
+
+    if len(order_db_models) > 0:
+        return _api.log_and_respond(400, f"Stop with id={stop_id} cannot be deleted because it is referenced by orders: {order_db_models}")
+    else:
+        return _api.log_and_respond(200, f"Stop with id={stop_id} is not referenced by any order.")
