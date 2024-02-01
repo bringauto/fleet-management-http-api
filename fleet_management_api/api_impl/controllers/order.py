@@ -29,7 +29,10 @@ def create_order(order) -> _Response:
 def delete_order(order_id: int) -> _Response:
     """Delete an existing order."""
     response = _db_access.delete(_db_models.OrderDBModel, 'id', order_id)
-    if 200 <= response.status_code < 300:
+    if response.status_code == 200:
+        states_response = _remove_states_of_order_to_be_deleted(order_id)
+        if states_response.status_code != 200:
+            return states_response
         msg = f"Order (id={order_id}) has been deleted."
         _api.log_info(msg)
         return _Response(body=f"Order (id={order_id})has been succesfully deleted", status_code=200)
@@ -79,3 +82,10 @@ def get_orders() -> _Response:
 def _car_exist(car_id: int) -> bool:
     return bool(_db_access.get(_db_models.CarDBModel, criteria={'id': lambda x: x==car_id}))
 
+
+def _remove_states_of_order_to_be_deleted(order_id: int) -> _Response:
+    response = _db_access.delete(_db_models.OrderStateDBModel, id_name='order_id', id_value=order_id)
+    if response.status_code != 200:
+        return _Response(response.status_code, f"Cannot delete states for order (order id = {order_id}). {response.body}")
+    else:
+        return _Response(200, f"Removing all states of order with id = {order_id} from database.")
