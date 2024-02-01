@@ -16,7 +16,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app().app
-        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
             c.post('/v2/management/car', json=car)
@@ -63,7 +63,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         database.set_content_timeout_ms(1000)
         self.app = _app.get_test_app().app
-        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
@@ -98,7 +98,7 @@ class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app().app
-        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
             c.post('/v2/management/car', json=car)
@@ -132,7 +132,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app().app
-        car = Car(id=1, name="car1", platform_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:

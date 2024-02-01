@@ -20,7 +20,7 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine] = None) -> _Response:
     global _wait_mg
     if not sent_objs:
-        return _Response(status_code=200, content_type="string", body="Nothing to add to database")
+        return _Response(status_code=200, content_type="text/plain", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     source = _get_checked_connection_source(conn_source)
     with source.begin() as conn:
@@ -30,14 +30,14 @@ def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine]
         try:
             result = conn.execute(stmt, data_list)
             _wait_mg.notify(base.__tablename__, sent_objs)
-            return _Response(status_code=200, content_type="string", body=f"Succesfully sent to database (number of sent objects: {result.rowcount}).")
+            return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {result.rowcount}).")
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="string", body=f"Nothing added to the database. {e.orig}")
+            return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
         except Exception as e:
-            return _Response(status_code=500, content_type="string", body=f"Error: {e}")
+            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
-def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
+def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_is_ok: bool = False) -> _Response:
     table = base_type.__table__
     source = check_and_return_current_connection_source()
     with source.begin() as conn:
@@ -45,7 +45,7 @@ def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
         stmt = _sqa.delete(table).where(id_match)
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount
-        if n_of_deleted_items == 0:
+        if n_of_deleted_items == 0 and not nothing_deleted_is_ok:
             return _Response(body=f"Object with {id_name}={id_value} was not found in table " \
                                      f"{base_type.__tablename__}. Nothing to delete.", status_code=404
                                     )
@@ -130,7 +130,7 @@ def update(updated_obj: _Base) -> _Response:
                 code, msg = 200, "Succesfully updated record"
         except _sqaexc.IntegrityError as e:
             code, msg = 400, str(e.orig)
-    return _Response(status_code=code, content_type="string", body=msg)
+    return _Response(status_code=code, content_type="text/plain", body=msg)
 
 
 def wait_for_new(

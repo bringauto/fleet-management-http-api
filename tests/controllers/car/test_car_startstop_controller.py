@@ -12,7 +12,7 @@ class Test_Car_StartStop_Controller(unittest.TestCase):
 
     def test_starting_or_stopping_existing_car_returns_code_200(self):
         car_id = 123
-        car = Car(id=car_id, name="Test Car", platform_id=5)
+        car = Car(id=car_id, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car, content_type='application/json')

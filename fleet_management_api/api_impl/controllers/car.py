@@ -83,7 +83,7 @@ def update_car(car: Dict|_models.Car) -> _Response:
 
 
 def _remove_states_of_car_to_be_deleted(car_id: int) -> _Response:
-    response = _db_access.delete(_db_models.CarStateDBModel, id_name='car_id', id_value=car_id)
+    response = _db_access.delete(_db_models.CarStateDBModel, id_name='car_id', id_value=car_id, nothing_deleted_is_ok=True)
     if response.status_code != 200:
         return _Response(response.status_code, f"Cannot delete states for car (car id = {car_id}). {response.body}")
     else:

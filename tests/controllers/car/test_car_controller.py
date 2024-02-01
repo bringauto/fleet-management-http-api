@@ -1,8 +1,9 @@
+import os
 import sys
 sys.path.append('.')
 import unittest
 
-from fleet_management_api.models import Car
+from fleet_management_api.models import Car, PlatformHwId
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 
@@ -20,7 +21,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.json, [])
 
     def test_creating_and_retrieving_a_car(self):
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post('/v2/management/car', json=car, content_type='application/json')
@@ -30,8 +31,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(len(response.json), 1)
 
     def test_creating_and_retrieving_two_cars(self):
-        car_1 = Car(id=1, name="Test Car 1", platform_id=5)
-        car_2 = Car(id=2, name="Test Car 2", platform_id=5)
+        car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
+        car_2 = Car(id=2, name="Test Car 2", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -48,8 +49,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_with_already_existing_id_returns_400_error_code(self):
-        car_1 = Car(id=1, name="Test Car 1", platform_id=5)
-        car_2 = Car(id=1, name="Test Car 2", platform_id=5)
+        car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
+        car_2 = Car(id=1, name="Test Car 2", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -57,8 +58,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_with_already_existing_name_returns_400_error_code(self):
-        car_1 = Car(id=1, name="Test Car", platform_id=5)
-        car_2 = Car(id=2, name="Test Car", platform_id=5)
+        car_1 = Car(id=1, name="Test Car", platform_hw_id=5)
+        car_2 = Car(id=2, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -79,7 +80,7 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
 
     def test_retrieving_single_existing_car(self):
         car_id = 17
-        car = Car(id=car_id, name="Test Car", platform_id=5)
+        car = Car(id=car_id, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car, content_type='application/json')
@@ -90,7 +91,7 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
     def test_retrieving_nonexistent_car_returns_code_404(self):
         car_id = 17
         nonexistent_car_id = 25
-        car = Car(id=car_id, name="Test Car", platform_id=5)
+        car = Car(id=car_id, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car, content_type='application/json')
@@ -120,7 +121,7 @@ class Test_Logging_Car_Creation(unittest.TestCase):
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs('werkzeug', level='INFO') as logs:
-            car = Car(id=1, name="Test Car", platform_id=5)
+            car = Car(id=1, name="Test Car", platform_hw_id=5)
             app = _app.get_test_app()
             with app.app.test_client() as c:
                 c.post('/v2/management/car', json=car, content_type='application/json')
@@ -129,7 +130,7 @@ class Test_Logging_Car_Creation(unittest.TestCase):
 
     def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(self):
         with self.assertLogs('werkzeug', level='ERROR') as logs:
-            car = Car(id=1, name="Test Car", platform_id=5)
+            car = Car(id=1, name="Test Car", platform_hw_id=5)
             app = _app.get_test_app()
             with app.app.test_client() as c:
                 c.post('/v2/management/car', json=car, content_type='application/json')
@@ -143,10 +144,10 @@ class Test_Updating_Car(unittest.TestCase):
         set_connection_source_test()
 
     def test_add_and_succesfully_update_car(self) -> None:
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car, content_type='application/json')
+            response = c.post('/v2/management/car', json=car, content_type='application/json')
             car.name = "Updated Test Car"
             response = c.put('/v2/management/car', json=car, content_type='application/json')
             self.assertEqual(response.status_code, 200)
@@ -156,17 +157,17 @@ class Test_Updating_Car(unittest.TestCase):
             self.assertEqual(response.json[0]['name'], "Updated Test Car") # type: ignore
 
     def test_updating_nonexistent_car_yields_404_error(self) -> None:
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.put('/v2/management/car', json=car, content_type='application/json')
             self.assertEqual(response.status_code, 404)
 
     def test_passing_other_object_when_updating_car_yields_400_error(self) -> None:
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car, content_type='application/json')
+            c.post('/v2/management/car', json=car)
             response = c.put('/v2/management/car', json={'id': 1}, content_type='application/json')
             self.assertEqual(response.status_code, 400)
 
@@ -174,15 +175,20 @@ class Test_Updating_Car(unittest.TestCase):
 class Test_Deleting_Car(unittest.TestCase):
 
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test_db.db")
 
     def test_add_and_delete_car(self) -> None:
-        car_id = 4
-        car = Car(id=car_id, name="Test Car", platform_id=5)
         app = _app.get_test_app()
+        platform_hw_id = PlatformHwId(id=5, name="Test Platform Hw Id")
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car, content_type='application/json')
-            response = c.delete(f'/v2/management/car/{car_id}')
+            c.post('/v2/management/platformhwid', json=platform_hw_id)
+            c.post('/v2/management/car', json=car)
+            response = c.get('/v2/management/car')
+            self.assertEqual(response.json[0]['name'], "Test Car")
+
+            response = c.delete('/v2/management/car/1')
+
             self.assertEqual(response.status_code, 200)
             response = c.get('/v2/management/car')
             self.assertEqual(response.json, [])
@@ -193,6 +199,10 @@ class Test_Deleting_Car(unittest.TestCase):
         with app.app.test_client() as c:
             response = c.delete(f'/v2/management/car/{car_id}')
             self.assertEqual(response.status_code, 404)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
 
 
 
