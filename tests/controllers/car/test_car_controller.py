@@ -3,7 +3,7 @@ import sys
 sys.path.append('.')
 import unittest
 
-from fleet_management_api.models import Car, PlatformHwId
+from fleet_management_api.models import Car, PlatformHwId, Order
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 
@@ -184,11 +184,7 @@ class Test_Deleting_Car(unittest.TestCase):
         with app.app.test_client() as c:
             c.post('/v2/management/platformhwid', json=platform_hw_id)
             c.post('/v2/management/car', json=car)
-            response = c.get('/v2/management/car')
-            self.assertEqual(response.json[0]['name'], "Test Car")
-
             response = c.delete('/v2/management/car/1')
-
             self.assertEqual(response.status_code, 200)
             response = c.get('/v2/management/car')
             self.assertEqual(response.json, [])
@@ -200,11 +196,26 @@ class Test_Deleting_Car(unittest.TestCase):
             response = c.delete(f'/v2/management/car/{car_id}')
             self.assertEqual(response.status_code, 404)
 
+    def test_car_with_assigned_order_cannot_be_deleted(self):
+        order = Order(
+            id=1,
+            user_id=789,
+            car_id=1,
+            target_stop_id=7,
+            stop_route_id=8,
+        )
+        app = _app.get_test_app()
+        car = Car(id=1, name="Test Car", platform_hw_id=5)
+        with app.app.test_client() as c:
+            c.post('/v2/management/car', json=car)
+            c.post('/v2/management/order', json=order)
+            response = c.delete('/v2/management/car/1')
+            self.assertEqual(response.status_code, 400)
+
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
 
-
 if __name__=="__main__": # pragma: no cover
-    unittest.main()
+    unittest.main(buffer=True)

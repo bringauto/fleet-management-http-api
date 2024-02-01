@@ -31,10 +31,14 @@ def delete_car(car_id: int) -> _Response:
 
     :param car_id: Id of the car to be deleted.
     """
+    orders_response = _orders_related_to_car(car_id)
+    if orders_response.status_code != 200:
+        return orders_response
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
     if response.status_code == 200:
         states_response = _remove_states_of_car_to_be_deleted(car_id)
         if states_response.status_code != 200:
+            states_response.body = f"Cannot delete car. {states_response.body}."
             return states_response
         else:
             msg = f"Car (id={car_id}) has been deleted."
@@ -88,3 +92,11 @@ def _remove_states_of_car_to_be_deleted(car_id: int) -> _Response:
         return _Response(response.status_code, f"Cannot delete states for car (car id = {car_id}). {response.body}")
     else:
         return _Response(200, f"Removing all states of car with id = {car_id} from database.")
+
+
+def _orders_related_to_car(car_id: int) -> _Response:
+    orders = _db_access.get(_db_models.OrderDBModel, criteria={'car_id': lambda x: x==car_id})
+    if len(orders) == 0:
+        return _Response(200, f"No orders related to car with id = {car_id} were found.")
+    else:
+        return _Response(400, f"Found {len(orders)} orders related to car with id = {car_id}.")
