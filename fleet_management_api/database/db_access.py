@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List, Type, Literal, Callable
+from typing import Any, Dict, Optional, List, Type, Literal, Callable, Set
 import functools as _functools
 
 import sqlalchemy as _sqa
@@ -37,22 +37,39 @@ def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine]
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
+# def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_is_ok: bool = False) -> _Response:
+#     table = base_type.__table__
+#     source = check_and_return_current_connection_source()
+#     with source.begin() as conn:
+#         id_match = getattr(table.columns,id_name) == id_value
+#         stmt = _sqa.delete(table).where(id_match)
+#         result = conn.execute(stmt)
+#         n_of_deleted_items = result.rowcount
+#         if n_of_deleted_items == 0 and not nothing_deleted_is_ok:
+#             return _Response(body=f"Object with {id_name}={id_value} was not found in table " \
+#                                      f"{base_type.__tablename__}. Nothing to delete.", status_code=404
+#                                     )
+#         else:
+#             return _Response(body=f"Object with {id_name}={id_value} was deleted from table " \
+#                                      f"{base_type.__tablename__}.", status_code=200
+#                                     )
+
+
 def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_is_ok: bool = False) -> _Response:
     table = base_type.__table__
     source = check_and_return_current_connection_source()
-    with source.begin() as conn:
+    with _Session(source) as session:
         id_match = getattr(table.columns,id_name) == id_value
-        stmt = _sqa.delete(table).where(id_match)
-        result = conn.execute(stmt)
-        n_of_deleted_items = result.rowcount
-        if n_of_deleted_items == 0 and not nothing_deleted_is_ok:
+        item = session.query(base_type).filter(id_match).first()
+        if item is None:
             return _Response(body=f"Object with {id_name}={id_value} was not found in table " \
                                      f"{base_type.__tablename__}. Nothing to delete.", status_code=404
                                     )
         else:
-            return _Response(body=f"Object with {id_name}={id_value} was deleted from table " \
-                                     f"{base_type.__tablename__}.", status_code=200
-                                    )
+
+            session.delete(item)
+            session.commit()
+            return _Response(body=f"Object with {id_name}={id_value} was deleted from table.", status_code=200)
 
 
 def delete_n(base_type: Type[_Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> _Response:
@@ -108,7 +125,25 @@ def get(
                 timeout_ms,
                 validation = _functools.partial(_result_is_ok, criteria)
             )
+        result = result
         return result
+
+
+def get_children(
+    parent_type:Type[_Base],
+    parent_id: int,
+    children_col_name: str,
+    conn_source: Optional[_sqa.Engine] = None
+    ) -> List[_Base]:
+
+    global _wait_mg
+    source = _get_checked_connection_source(conn_source)
+    with _Session(source) as session:
+        parent = session.query(parent_type).filter(parent_type.id==parent_id).first() # type: ignore
+        if parent is None:
+            return []
+        children = list(getattr(parent, children_col_name))
+        return children
 
 
 def update(updated_obj: _Base) -> _Response:

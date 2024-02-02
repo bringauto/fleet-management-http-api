@@ -1,10 +1,12 @@
-from typing import ClassVar
+from __future__ import annotations
+from typing import ClassVar, List
 import dataclasses
 
 import sqlalchemy as _sqa
 from sqlalchemy.orm import Mapped as _Mapped
 from sqlalchemy.orm import DeclarativeBase as _DeclarativeBase
 from sqlalchemy.orm import mapped_column as _mapped_column
+from sqlalchemy.orm import relationship as _relationship
 
 
 DATABASE_URL = "sqlite:///:memory:"
@@ -45,6 +47,22 @@ class CarStateDBModel(Base):
         if n>0:
             cls._max_n_of_states = n
 
+# @dataclasses.dataclass
+# class ParentDBModel(Base):
+#     __tablename__ = 'parents'
+#     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
+#     name: Mapped[str] = mapped_column(String)
+#     children: Mapped[List["ChildDBModel"]] = relationship("ChildDBModel", cascade='save-update, merge, delete', back_populates="parent")
+
+
+# @dataclasses.dataclass
+# class ChildDBModel(Base):
+#     __tablename__ = 'children'
+#     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
+#     name: Mapped[str] = mapped_column(String)
+#     parent_id: Mapped[int] = mapped_column(ForeignKey("parents.id"), nullable=False)
+#     parent = relationship("ParentDBModel", back_populates="children")
+
 
 @dataclasses.dataclass
 class OrderDBModel(Base):
@@ -57,6 +75,7 @@ class OrderDBModel(Base):
     stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
+    orders: _Mapped[List["OrderStateDBModel"]] = _relationship("OrderStateDBModel", cascade='save-update, merge, delete', back_populates="order")
 
 
 @dataclasses.dataclass
@@ -97,8 +116,9 @@ class OrderStateDBModel(Base):
     _max_n_of_states: ClassVar[int] = 50
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     status: _Mapped[str] = _mapped_column(_sqa.String)
-    order_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    order_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("orders.id"), nullable=False)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+    order: _Mapped[OrderDBModel] = _relationship("OrderDBModel", back_populates="orders")
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:

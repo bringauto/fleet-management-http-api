@@ -207,25 +207,30 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         self.app = _app.get_test_app().app
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        other_order = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.test_client() as c:
             c.post('/v2/management/car', json=car)
             c.post('/v2/management/order', json=order)
+            c.post('/v2/management/order', json=other_order)
 
     def test_deleting_order_deletes_all_its_states(self):
         order_state_1 = OrderState(id=3, status="to_accept", order_id=12)
         order_state_2 = OrderState(id=7, status="canceled", order_id=12)
+        other_order_state = OrderState(id=8, status="canceled", order_id=13)
         with self.app.test_client() as c:
             c.post('/v2/management/orderstate', json=order_state_1)
             c.post('/v2/management/orderstate', json=order_state_2)
+            c.post('/v2/management/orderstate', json=other_order_state)
             response = c.get('/v2/management/orderstate/12?since=0')
             self.assertEqual(len(response.json), 2)
 
             c.delete('/v2/management/order/12')
             response = c.get('/v2/management/orderstate/12?since=0')
             self.assertEqual(response.status_code, 404)
+
             response = c.get('/v2/management/orderstate?since=0')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(len(response.json), 1)
 
 
 if __name__ == '__main__':

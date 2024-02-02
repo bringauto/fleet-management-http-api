@@ -45,7 +45,8 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _Resp
     :param wait: If True, wait for new states if there are no states for the order yet.
     """
     if not _order_exists(order_id):
-        return _api.log_and_respond(404, f"Order with id='{order_id}' was not found. Cannot get its state.")
+        _api.log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
+        return _Response(404, [])
     else:
         criteria: Dict[str, Callable[[Any],bool]] = {'order_id': lambda x: x==order_id}
         return _get_order_states(criteria, wait, since)

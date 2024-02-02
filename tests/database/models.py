@@ -1,7 +1,9 @@
+from __future__ import annotations
+from typing import List
 import dataclasses
 
-from sqlalchemy import Integer, String, Engine
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
+from sqlalchemy import Integer, String, Engine, ForeignKey
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -29,3 +31,20 @@ def initialize_test_tables(connection_engine: Engine|None) -> None:
         raise RuntimeError("Database connection not set up.")
     for table in Base.metadata.tables.values():
         table.create(connection_engine)
+
+
+@dataclasses.dataclass
+class ParentDBModel(Base):
+    __tablename__ = 'parents'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
+    name: Mapped[str] = mapped_column(String)
+    children: Mapped[List["ChildDBModel"]] = relationship("ChildDBModel", cascade='save-update, merge, delete', back_populates="parent")
+
+
+@dataclasses.dataclass
+class ChildDBModel(Base):
+    __tablename__ = 'children'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
+    name: Mapped[str] = mapped_column(String)
+    parent_id: Mapped[int] = mapped_column(ForeignKey("parents.id"), nullable=False)
+    parent = relationship("ParentDBModel", back_populates="children")

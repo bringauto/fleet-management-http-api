@@ -150,23 +150,19 @@ class Test_Deleting_Order(unittest.TestCase):
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
-        self.order = Order(
-            id=78,
-            user_id=789,
-            car_id=12,
-            target_stop_id=7,
-            stop_route_id=8,
-            notification_phone=MobilePhone(phone='1234567890')
-        )
-        c.post('/v2/management/order', json=self.order)
+            self.order = Order(
+                id=78,
+                user_id=789,
+                car_id=12,
+                target_stop_id=7,
+                stop_route_id=8,
+                notification_phone=MobilePhone(phone='1234567890')
+            )
+            c.post('/v2/management/order', json=self.order)
 
     def test_deleting_existing_order(self):
         with self.app.test_client() as c:
-            # verify that order is in the database
-            response = c.get(f'/v2/management/order')
-            self.assertEqual(len(response.json), 1)
-
-            response = c.delete(f'/v2/management/order/{self.order.id}')
+            response = c.delete(f'/v2/management/order/78')
             self.assertEqual(response.status_code, 200)
             response = c.get(f'/v2/management/order')
             self.assertEqual(response.json, [])
@@ -223,4 +219,4 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no coverage
+    unittest.main(buffer=True) # pragma: no coverage
