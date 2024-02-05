@@ -11,7 +11,7 @@ from fleet_management_api.database.connection import check_and_return_current_co
 import fleet_management_api.database.wait as wait
 
 
-_DATABASE_RECORD_ID_NAME = "id"
+_ID_NAME = "id"
 
 
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
@@ -142,15 +142,15 @@ def update(updated_obj: _Base) -> _Response:
     dict_data = _obj_to_dict(updated_obj)
     source = check_and_return_current_connection_source()
     with source.begin() as conn:
-        id = updated_obj.__dict__[_DATABASE_RECORD_ID_NAME]
-        id_match = getattr(table.columns, _DATABASE_RECORD_ID_NAME) == id
+        id = updated_obj.__dict__[_ID_NAME]
+        id_match = getattr(table.columns, _ID_NAME) == id
         stmt = _sqa.update(table).where(id_match).values(dict_data)
         try:
             result = conn.execute(stmt)
             n_of_updated_items = result.rowcount
             if n_of_updated_items == 0:
                 code = 404
-                msg = f"Object with {_DATABASE_RECORD_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. " \
+                msg = f"Object with {_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. " \
                     "Nothing to update."
             else:
                 code, msg = 200, "Succesfully updated record"
