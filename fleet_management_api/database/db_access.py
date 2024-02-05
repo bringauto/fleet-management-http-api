@@ -3,6 +3,7 @@ import functools as _functools
 
 import sqlalchemy as _sqa
 import sqlalchemy.exc as _sqaexc
+from sqlalchemy.orm.exc import NoResultFound as _NoResultFound
 from sqlalchemy.orm import Session as _Session
 from sqlalchemy.orm import noload as _noload
 from sqlalchemy.orm import InstrumentedAttribute as _InstrumentedAttribute
@@ -19,6 +20,10 @@ _ID_NAME = "id"
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
+class ParentNotFound(Exception):
+    pass
+
+
 def add(
     base: Type[_Base],
     *sent_objs: _Base,
@@ -32,15 +37,16 @@ def add(
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
-        if check_reference_existence is not None:
-            response = _check_referenced_obj_exists(session, check_reference_existence)
-            if response.status_code != 200:
-                return response
         try:
+            if check_reference_existence is not None:
+                for ref_type, ref_id in check_reference_existence.items():
+                    session.get_one(ref_type, ref_id)
             session.add_all([obj.copy() for obj in sent_objs])
             session.commit()
             _wait_mg.notify(base.__tablename__, sent_objs)
             return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {len(sent_objs)}).")
+        except _NoResultFound as e:
+            return _Response(status_code=404, content_type="text/plain", body=f"Reference to {ref_type.__name__} with id={ref_id} does not exist in the database.")
         except _sqaexc.IntegrityError as e:
             return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
         except Exception as e:
@@ -133,11 +139,14 @@ def get_children(
     global _wait_mg
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
-        parent = session.query(parent_type).filter(parent_type.id==parent_id).first() # type: ignore
-        if parent is None:
-            return []
-        children = list(getattr(parent, children_col_name))
-        return children
+        try:
+            parent = session.get_one(parent_type, parent_id)
+            children = list(getattr(parent, children_col_name))
+            return children
+        except _NoResultFound as e:
+            raise ParentNotFound(f"Parent with id={parent_id} not found in table {parent_type.__tablename__}. {e}")
+        except Exception as e:
+            raise e
 
 
 def update(updated_obj: _Base) -> _Response:
@@ -209,11 +218,3 @@ def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
     return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
 
-
-def _check_referenced_obj_exists(session: _Session, check_reference_existence: Dict[Type[_Base], int]) -> _Response:
-    for ref_type, ref_id in check_reference_existence.items():
-        result = session.query(ref_type).filter(ref_type.id == ref_id).first()
-        if result is None:
-            return _Response(status_code=404, content_type="text/plain", body=f"Reference to {ref_type.__name__} with id={ref_id} does not exist in the database.")
-
-    return _Response(status_code=200, content_type="text/plain", body=f"All referenced objects exist in the database.")
