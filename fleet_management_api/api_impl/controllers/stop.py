@@ -104,6 +104,9 @@ def _get_orders_referencing_stop(stop_id: int) -> _Response:
             referenced_order_models.append(order_model)
 
     if len(order_db_models) > 0:
-        return _api.log_and_respond(400, f"Stop with id={stop_id} cannot be deleted because it is referenced by orders: {order_db_models}")
+        return _api.log_and_respond(
+            400,
+            f"Stop with id={stop_id} cannot be deleted because it is referenced by orders: {order_db_models}"
+        )
     else:
         return _api.log_and_respond(200, f"Stop with id={stop_id} is not referenced by any order.")

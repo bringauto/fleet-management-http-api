@@ -19,7 +19,7 @@ def create_car(car) -> _Response:  # noqa: E501
     else:
         car = _models.Car.from_dict(connexion.request.get_json())
         car_db_model = _api.car_to_db_model(car)
-        response = _db_access.add(_db_models.CarDBModel, car_db_model)
+        response = _db_access.add(_db_models.CarDBModel, car_db_model, check_reference_existence={_db_models.PlatformHwIdDBModel: car.platform_hw_id})
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been sent.")
         else:
@@ -36,13 +36,8 @@ def delete_car(car_id: int) -> _Response:
         return orders_response
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
     if response.status_code == 200:
-        states_response = _remove_states_of_car_to_be_deleted(car_id)
-        if states_response.status_code != 200:
-            states_response.body = f"Cannot delete car. {states_response.body}."
-            return states_response
-        else:
-            msg = f"Car (id={car_id}) has been deleted."
-            return _api.log_and_respond(200, msg)
+        msg = f"Car (id={car_id}) has been deleted."
+        return _api.log_and_respond(200, msg)
     else:
         msg = f"Car (id={car_id}) could not be deleted. {response.body}"
         return _api.log_and_respond(response.status_code, msg)
@@ -55,6 +50,7 @@ def get_car(car_id: int) -> _Response:
         return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
     else:
         _api.log_info(f"Car with id={car_id} was found.")
+        car = _api.car_from_db_model(cars[0])
         return _Response(body=cars[0], status_code=200)
 
 
@@ -84,14 +80,6 @@ def update_car(car: Dict|_models.Car) -> _Response:
             return _api.log_and_respond(response.status_code, msg)
     else:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
-
-
-def _remove_states_of_car_to_be_deleted(car_id: int) -> _Response:
-    response = _db_access.delete(_db_models.CarStateDBModel, id_name='car_id', id_value=car_id, nothing_deleted_is_ok=True)
-    if response.status_code != 200:
-        return _Response(response.status_code, f"Cannot delete states for car (car id = {car_id}). {response.body}")
-    else:
-        return _Response(200, f"Removing all states of car with id = {car_id} from database.")
 
 
 def _orders_related_to_car(car_id: int) -> _Response:

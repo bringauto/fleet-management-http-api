@@ -48,7 +48,7 @@ paths:
                 [
                   {
                     "id": 1,
-                    "platformId": 1,
+                    "platformId": 5,
                     "name": 'BAT-2022-01',
                     "carAdminPhone": {"phone":'+420123456789'},
                     "defaultRouteId": 1,

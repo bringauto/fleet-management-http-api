@@ -11,7 +11,7 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
     return _db_models.CarDBModel(
         id=car.id,
         name=car.name,
-        platform_hw_id=car.platform_hw_id,
+        platformhwid_id=car.platform_hw_id,
         car_admin_phone=car_mobile_phone,
         default_route_id=car.default_route_id
     )
@@ -25,7 +25,7 @@ def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
         name=car_db_model.name,
-        platform_hw_id=car_db_model.platform_hw_id,
+        platform_hw_id=car_db_model.platformhwid_id,
         car_admin_phone=car_mobile_phone,
         default_route_id=car_db_model.default_route_id
     )

@@ -17,13 +17,23 @@ _DATABASE_RECORD_ID_NAME = "id"
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
-def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine] = None) -> _Response:
+def add(
+    base: Type[_Base],
+    *sent_objs: _Base,
+    conn_source: Optional[_sqa.Engine] = None,
+    check_reference_existence: Optional[Dict[Type[_Base], int]] = None
+    ) -> _Response:
+
     global _wait_mg
     if not sent_objs:
         return _Response(status_code=200, content_type="text/plain", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     source = _get_checked_connection_source(conn_source)
     with source.begin() as conn:
+        if check_reference_existence is not None:
+            response = _check_referenced_obj_exists(conn, check_reference_existence)
+            if response.status_code != 200:
+                return response
         table = base.__table__
         stmt = _sqa.insert(table)
         data_list = [obj.__dict__ for obj in sent_objs]
@@ -37,25 +47,7 @@ def add(base: Type[_Base], *sent_objs: _Base, conn_source: Optional[_sqa.Engine]
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
-# def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_is_ok: bool = False) -> _Response:
-#     table = base_type.__table__
-#     source = check_and_return_current_connection_source()
-#     with source.begin() as conn:
-#         id_match = getattr(table.columns,id_name) == id_value
-#         stmt = _sqa.delete(table).where(id_match)
-#         result = conn.execute(stmt)
-#         n_of_deleted_items = result.rowcount
-#         if n_of_deleted_items == 0 and not nothing_deleted_is_ok:
-#             return _Response(body=f"Object with {id_name}={id_value} was not found in table " \
-#                                      f"{base_type.__tablename__}. Nothing to delete.", status_code=404
-#                                     )
-#         else:
-#             return _Response(body=f"Object with {id_name}={id_value} was deleted from table " \
-#                                      f"{base_type.__tablename__}.", status_code=200
-#                                     )
-
-
-def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_is_ok: bool = False) -> _Response:
+def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
     table = base_type.__table__
     source = check_and_return_current_connection_source()
     with _Session(source) as session:
@@ -66,7 +58,6 @@ def delete(base_type: Type[_Base], id_name: str, id_value: Any, nothing_deleted_
                                      f"{base_type.__tablename__}. Nothing to delete.", status_code=404
                                     )
         else:
-
             session.delete(item)
             session.commit()
             return _Response(body=f"Object with {id_name}={id_value} was deleted from table.", status_code=200)
@@ -214,3 +205,13 @@ def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa
 
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
     return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
+
+
+def _check_referenced_obj_exists(connection: _sqa.Connection, check_reference_existence: Dict[Type[_Base], int]) -> _Response:
+    for ref_type, ref_id in check_reference_existence.items():
+        stmt = _sqa.select(ref_type).where(ref_type.id == ref_id)
+        result = connection.execute(stmt).first()
+        if result is None:
+            return _Response(status_code=404, content_type="text/plain", body=f"Reference to {ref_type.__name__} with id={ref_id} does not exist in the database.")
+
+    return _Response(status_code=200, content_type="text/plain", body=f"All referenced objects exist in the database.")
