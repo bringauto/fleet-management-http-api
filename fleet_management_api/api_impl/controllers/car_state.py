@@ -23,23 +23,22 @@ def add_car_state(car_state) -> _Response:
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
         state_db_model = _api.car_state_to_db_model(car_state)
-        car_db_model = _db_access.get(_db_models.CarDBModel, criteria={'id': lambda x: x==car_state.car_id})
-        if len(car_db_model) == 0:
-            code, msg = 404, f"Car with id='{car_state.car_id}' was not found."
-            _api.log_error(msg)
+        response = _db_access.add(
+            _db_models.CarStateDBModel,
+            state_db_model,
+            check_reference_existence={_db_models.CarDBModel: car_state.car_id}
+        )
+        if response.status_code == 200:
+            code, msg = 200, f"Car state with id='{car_state.id}' was succesfully created."
+            _api.log_info(msg)
+            cleanup_response = _remove_old_states(car_state.car_id)
+            if cleanup_response.status_code != 200:
+                code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
+                _api.log_error(cleanup_error_msg)
+                msg = msg + "\n" + cleanup_error_msg
         else:
-            response = _db_access.add(_db_models.CarStateDBModel, state_db_model)
-            if response.status_code == 200:
-                code, msg = 200, f"Car state with id='{car_state.id}' was succesfully created."
-                _api.log_info(msg)
-                cleanup_response = _remove_old_states(car_state.car_id)
-                if cleanup_response.status_code != 200:
-                    code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
-                    _api.log_error(cleanup_error_msg)
-                    msg = msg + "\n" + cleanup_error_msg
-            else:
-                code, msg = response.status_code, f"Car state with id='{car_state.id}' could not be sent. {response.body}",
-                _api.log_error(msg)
+            code, msg = response.status_code, f"Car state with id='{car_state.id}' could not be sent. {response.body}",
+            _api.log_error(msg)
     return _Response(body=msg, status_code=code)
 
 

@@ -15,6 +15,9 @@ DATABASE_URL = "sqlite:///:memory:"
 class Base(_DeclarativeBase):
     pass
 
+    def copy(self) -> Base:
+        return self.__class__(**{col.name: getattr(self, col.name) for col in self.__table__.columns})
+
 
 @dataclasses.dataclass
 class PlatformHwIdDBModel(Base):
@@ -32,11 +35,11 @@ class CarDBModel(Base):
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
     platformhwid_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False)
-    platformhwid: _Mapped[PlatformHwIdDBModel] = _relationship("PlatformHwIdDBModel", back_populates="cars", lazy="joined")
+    platformhwid: _Mapped[PlatformHwIdDBModel] = _relationship("PlatformHwIdDBModel", back_populates="cars", lazy="noload")
     states: _Mapped[List["CarStateDBModel"]] = \
-        _relationship("CarStateDBModel", cascade='all, delete', back_populates="car", lazy="noload")
+        _relationship("CarStateDBModel", cascade='save-update, merge, delete', back_populates="car")
     orders: _Mapped[List["OrderDBModel"]] = \
-        _relationship("OrderDBModel", cascade='all, delete', back_populates="car", lazy="noload")
+        _relationship("OrderDBModel", cascade='save-update, merge, delete', back_populates="car")
 
     def __repr__(self) -> str:
         return f"Car(id={self.id}, name={self.name}, platform_hw_id={self.platformhwid_id})"
@@ -76,7 +79,7 @@ class OrderDBModel(Base):
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
     states: _Mapped[List["OrderStateDBModel"]] = \
-        _relationship("OrderStateDBModel", cascade='all, delete', back_populates="order", lazy="noload")
+        _relationship("OrderStateDBModel", cascade='save-update, merge, delete', back_populates="order")
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
 

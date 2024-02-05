@@ -249,6 +249,4 @@ class Test_Deleting_Car(unittest.TestCase):
 
 
 if __name__=="__main__": # pragma: no cover
-    # runner = unittest.TextTestRunner()
-    # runner.run(Test_Creating_And_Getting_Cars("test_creating_car_without_existing_platform_hw_id_yields_404_error_code"))
     unittest.main(buffer=True)

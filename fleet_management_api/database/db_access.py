@@ -1,9 +1,11 @@
-from typing import Any, Dict, Optional, List, Type, Literal, Callable, Set
+from typing import Any, Dict, Optional, List, Type, Literal, Callable
 import functools as _functools
 
 import sqlalchemy as _sqa
 import sqlalchemy.exc as _sqaexc
 from sqlalchemy.orm import Session as _Session
+from sqlalchemy.orm import noload as _noload
+from sqlalchemy.orm import InstrumentedAttribute as _InstrumentedAttribute
 from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
@@ -29,18 +31,16 @@ def add(
         return _Response(status_code=200, content_type="text/plain", body="Nothing to add to database")
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     source = _get_checked_connection_source(conn_source)
-    with source.begin() as conn:
+    with _Session(source) as session:
         if check_reference_existence is not None:
-            response = _check_referenced_obj_exists(conn, check_reference_existence)
+            response = _check_referenced_obj_exists(session, check_reference_existence)
             if response.status_code != 200:
                 return response
-        table = base.__table__
-        stmt = _sqa.insert(table)
-        data_list = [obj.__dict__ for obj in sent_objs]
         try:
-            result = conn.execute(stmt, data_list)
+            session.add_all([obj.copy() for obj in sent_objs])
+            session.commit()
             _wait_mg.notify(base.__tablename__, sent_objs)
-            return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {result.rowcount}).")
+            return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {len(sent_objs)}).")
         except _sqaexc.IntegrityError as e:
             return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
         except Exception as e:
@@ -98,7 +98,8 @@ def get(
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
-    conn_source: Optional[_sqa.Engine] = None
+    conn_source: Optional[_sqa.Engine] = None,
+    omitted_relationships: Optional[List[_InstrumentedAttribute]] = None
     ) -> List[Any]:
 
     global _wait_mg
@@ -106,17 +107,19 @@ def get(
         criteria = {}
     table = base.__table__
     source = _get_checked_connection_source(conn_source)
-    with _Session(source) as session:
+    with _Session(source) as session, session.begin():
         clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
         stmt = _sqa.select(base).where(*clauses)
-        result = [row[0] for row in session.execute(stmt)]
+        if omitted_relationships is not None:
+            for item in omitted_relationships:
+                stmt = stmt.options(_noload(item))
+        result = [item.copy() for item in session.scalars(stmt).all()]
         if not result and wait:
             result = _wait_mg.wait_and_get_response(
                 base.__tablename__,
                 timeout_ms,
                 validation = _functools.partial(_result_is_ok, criteria)
             )
-        result = result
         return result
 
 
@@ -207,10 +210,9 @@ def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
     return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
 
 
-def _check_referenced_obj_exists(connection: _sqa.Connection, check_reference_existence: Dict[Type[_Base], int]) -> _Response:
+def _check_referenced_obj_exists(session: _Session, check_reference_existence: Dict[Type[_Base], int]) -> _Response:
     for ref_type, ref_id in check_reference_existence.items():
-        stmt = _sqa.select(ref_type).where(ref_type.id == ref_id)
-        result = connection.execute(stmt).first()
+        result = session.query(ref_type).filter(ref_type.id == ref_id).first()
         if result is None:
             return _Response(status_code=404, content_type="text/plain", body=f"Reference to {ref_type.__name__} with id={ref_id} does not exist in the database.")
 

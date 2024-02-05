@@ -9,6 +9,9 @@ from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 class Base(DeclarativeBase):
     pass
 
+    def copy(self) -> Base:
+        return self.__class__(**{col.name: getattr(self, col.name) for col in self.__table__.columns})
+
 
 @dataclasses.dataclass
 class TestBase(Base):
@@ -47,4 +50,4 @@ class ChildDBModel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
     name: Mapped[str] = mapped_column(String)
     parent_id: Mapped[int] = mapped_column(ForeignKey("parents.id"), nullable=False)
-    parent = relationship("ParentDBModel", back_populates="children")
+    parent = relationship("ParentDBModel", back_populates="children", lazy="noload")

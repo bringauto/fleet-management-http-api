@@ -19,7 +19,11 @@ def create_car(car) -> _Response:  # noqa: E501
     else:
         car = _models.Car.from_dict(connexion.request.get_json())
         car_db_model = _api.car_to_db_model(car)
-        response = _db_access.add(_db_models.CarDBModel, car_db_model, check_reference_existence={_db_models.PlatformHwIdDBModel: car.platform_hw_id})
+        response = _db_access.add(
+            _db_models.CarDBModel,
+            car_db_model,
+            check_reference_existence={_db_models.PlatformHwIdDBModel: car.platform_hw_id}
+        )
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been sent.")
         else:
@@ -45,18 +49,24 @@ def delete_car(car_id: int) -> _Response:
 
 def get_car(car_id: int) -> _Response:
     """Get a car identified by 'car_id'."""
-    cars = _db_access.get(_db_models.CarDBModel, criteria={'id': lambda x: x==car_id})
+    cars = _db_access.get(
+        _db_models.CarDBModel,
+        criteria={'id': lambda x: x==car_id},
+        omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders]
+    )
     if len(cars) == 0:
         return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
     else:
         _api.log_info(f"Car with id={car_id} was found.")
-        car = _api.car_from_db_model(cars[0])
         return _Response(body=cars[0], status_code=200)
 
 
 def get_cars() -> _Response:  # noqa: E501
     """List all cars."""
-    cars = _db_access.get(_db_models.CarDBModel)
+    cars = _db_access.get(
+        _db_models.CarDBModel,
+        omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders]
+    )
     if len(cars) == 0:
         _api.log_info("Listing all cars: no cars found.")
     else:

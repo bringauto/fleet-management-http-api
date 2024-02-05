@@ -1,9 +1,12 @@
 import os
 import unittest
+import sys
+sys.path.append('.')
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
+from tests.utils.setup_utils import create_platform_hw_ids
 
 
 class Test_Creating_Stop(unittest.TestCase):
@@ -185,21 +188,22 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app()
         self.stop = _models.Stop(
             id=1,
             name="stop_X",
             position=_models.GNSSPosition(latitude=49,longitude=16,altitude=50),
             notification_phone=_models.MobilePhone(phone="123456789")
         )
+        create_platform_hw_ids(self.app, 123)
         self.car = _models.Car(id=1, platform_hw_id=123, name="test_car", car_admin_phone=_models.MobilePhone(phone="123456789"))
         self.order = _models.Order(id=1, priority="normal", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1)
-        with self.app.test_client() as c:
+        with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
             c.post('/v2/management/order', json=self.order)
 
     def test_stop_cannot_be_deleted_if_referenced_by_some_order(self):
-        with self.app.test_client() as c:
+        with self.app.app.test_client() as c:
             c.post('/v2/management/stop', json=self.stop)
 
             response = c.delete('/v2/management/stop/1')
