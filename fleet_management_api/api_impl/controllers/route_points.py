@@ -25,6 +25,5 @@ def redefine_route_points() -> _Response:
         rp = _RoutePoints.from_dict(_connexion.request.get_json())
         rp_db_model = _api.route_points_to_db_model(rp)
         response = _db_access.update(rp_db_model)
-        print(response.status_code, response.body)
         return _api.log_and_respond(response.status_code, response.body)
 
