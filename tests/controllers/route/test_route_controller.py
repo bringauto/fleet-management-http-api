@@ -5,7 +5,6 @@ sys.path.append('.')
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.models import Route, Order, Car, PlatformHwId
-from tests.utils.setup_utils import create_platform_hw_ids
 
 
 class Test_Creating_Route(unittest.TestCase):
