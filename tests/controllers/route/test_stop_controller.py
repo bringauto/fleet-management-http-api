@@ -219,4 +219,5 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order)
     unittest.main(buffer=True) # pragma: no cover

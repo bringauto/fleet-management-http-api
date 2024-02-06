@@ -28,10 +28,11 @@ def delete_stop(stop_id: int) -> _Response:
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    object_using_stop_response = _get_objects_referencing_stop(stop_id)
-    if object_using_stop_response.status_code != 200:
-        return object_using_stop_response
+    # object_using_stop_response = _get_objects_referencing_stop(stop_id)
+    # if object_using_stop_response.status_code != 200:
+    #     return object_using_stop_response
     response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
+    print(response.status_code, response.body)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
     else:

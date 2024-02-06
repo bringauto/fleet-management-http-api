@@ -35,11 +35,10 @@ class CarDBModel(Base):
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
     platformhwid_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False)
+
     platformhwid: _Mapped[PlatformHwIdDBModel] = _relationship("PlatformHwIdDBModel", back_populates="cars", lazy="noload")
-    states: _Mapped[List["CarStateDBModel"]] = \
-        _relationship("CarStateDBModel", cascade='save-update, merge, delete', back_populates="car")
-    orders: _Mapped[List["OrderDBModel"]] = \
-        _relationship("OrderDBModel", back_populates="car")
+    states: _Mapped[List["CarStateDBModel"]] = _relationship("CarStateDBModel", cascade='save-update, merge, delete', back_populates="car")
+    orders: _Mapped[List["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
 
     def __repr__(self) -> str:
         return f"Car(id={self.id}, name={self.name}, platform_hw_id={self.platformhwid_id})"
@@ -56,6 +55,7 @@ class CarStateDBModel(Base):
     fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="noload")
 
     @classmethod
@@ -74,14 +74,15 @@ class OrderDBModel(Base):
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
-    target_stop_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    target_stop_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("stops.id"), nullable=False)
     stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
-    states: _Mapped[List["OrderStateDBModel"]] = \
-        _relationship("OrderStateDBModel", cascade='save-update, merge, delete', back_populates="order")
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
-    car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
+
+    states: _Mapped[List["OrderStateDBModel"]] = _relationship("OrderStateDBModel", cascade='save-update, merge, delete', back_populates="order")
+    target_stop: _Mapped["StopDBModel"] = _relationship("StopDBModel", back_populates="orders", lazy="noload")
+    car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
 
     def __repr__(self) -> str:
         return f"Order(id={self.id}, priority={self.priority}, user_id={self.user_id}, car_id={self.car_id}, target_stop_id={self.target_stop_id}, stop_route_id={self.stop_route_id}, notification_phone={self.notification_phone})"
@@ -108,6 +109,17 @@ class OrderStateDBModel(Base):
 
 
 @dataclasses.dataclass
+class StopDBModel(Base):
+    __tablename__ = 'stops'
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
+    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
+
+    orders: _Mapped[List["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="target_stop")
+
+
+@dataclasses.dataclass
 class RouteDBModel(Base):
     __tablename__ = 'routes'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
@@ -124,15 +136,6 @@ class RoutePointsDBModel(Base):
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
     route: _Mapped[RouteDBModel] = _relationship("RouteDBModel", back_populates="route_points", lazy="noload")
     route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
-
-
-@dataclasses.dataclass
-class StopDBModel(Base):
-    __tablename__ = 'stops'
-    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
 
 
 @dataclasses.dataclass

@@ -60,7 +60,7 @@ def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
             inst = session.get_one(base_type, id_value)
             session.delete(inst)
             session.commit()
-            return _Response(body=f"Object with {id_name}={id_value} was deleted from table.", status_code=200)
+            return _Response(body=f"Object with {id_name}={id_value} was deleted from table '{base_type.__tablename__}'.", status_code=200)
         except _NoResultFound as e:
             return _Response(status_code=404, content_type="text/plain", body=f"Object with {id_name}={id_value} not found in table {base_type.__tablename__}. {e}")
         except _sqaexc.IntegrityError as e:
