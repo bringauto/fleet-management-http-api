@@ -113,6 +113,7 @@ class RouteDBModel(Base):
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
+    route_points: _Mapped[object] = _relationship("RoutePointsDBModel", cascade='save-update, merge, delete', back_populates="route")
 
 
 @dataclasses.dataclass
@@ -121,6 +122,8 @@ class RoutePointsDBModel(Base):
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     route_id: _Mapped[int] = _mapped_column(_sqa.Integer, unique=True)
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
+    route: _Mapped[RouteDBModel] = _relationship("RouteDBModel", back_populates="route_points", lazy="noload")
+    route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
 
 
 @dataclasses.dataclass

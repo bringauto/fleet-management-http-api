@@ -39,11 +39,6 @@ def delete_route(route_id: int) -> _Response:
         return _api.log_and_respond(response.status_code, f"Could not delete route with id={route_id}{note}. {response.body}")
     else:
         route_deletion_msg = f"Route with id={route_id} has been deleted."
-        response = _db_access.delete(_db_models.RoutePointsDBModel, id_name="id", id_value=route_id)
-        if not response.status_code == 200:
-            note = " (not found)" if response.status_code == 404 else ""
-            _api.log_info(route_deletion_msg)
-            return _api.log_and_respond(response.status_code, f"Could not delete route points for route with id={route_id}{note}. {response.body}")
         return _api.log_and_respond(200, route_deletion_msg)
 
 

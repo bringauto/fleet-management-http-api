@@ -81,14 +81,21 @@ class Test_Route_Removal(unittest.TestCase):
             response = c.get('/v2/management/routepoints/12')
             self.assertEqual(response.status_code, 404)
 
-    def test_route_can_be_recreated_under_the_same_id_after_removal_of_the_original_one(self):
+    def test_route_points_can_be_recreated_under_the_same_id_after_removal_of_the_original_one(self):
         old_route = Route(id=12, name='old_test_route')
         new_route = Route(id=12, name='new_test_route')
+        new_route_points = RoutePoints(id=12, route_id=12, points=[GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)])
         with self.app.test_client() as c:
             c.post('/v2/management/route', json=old_route)
             c.delete('/v2/management/route/12')
             response = c.post('/v2/management/route', json=new_route)
             self.assertEqual(response.status_code, 200)
+            response = c.get('/v2/management/routepoints/12')
+            self.assertEqual(response.status_code, 200)
+            response = c.post('/v2/management/routepoints', json=new_route_points)
+            self.assertEqual(response.status_code, 200)
+            response = c.get('/v2/management/routepoints/12')
+            self.assertEqual(response.json["points"][0]["latitude"], 49)
 
 
 if __name__ == '__main__':
