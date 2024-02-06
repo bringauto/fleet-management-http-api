@@ -61,7 +61,9 @@ def get_updated_orders(car_id: int) -> _Response:
     )
     for m in order_db_models:
         m.updated = False
-        _db_access.update(m)
+        response = _db_access.update(m)
+        if response.status_code != 200:
+            return _Response(body=f"Error when updating order (id={m.id}). {response.body}", status_code=response.status_code)
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
     return _Response(body=orders, status_code=200)
 
