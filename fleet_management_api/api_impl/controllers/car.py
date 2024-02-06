@@ -35,9 +35,6 @@ def delete_car(car_id: int) -> _Response:
 
     :param car_id: Id of the car to be deleted.
     """
-    orders_response = _orders_related_to_car(car_id)
-    if orders_response.status_code != 200:
-        return orders_response
     response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
     if response.status_code == 200:
         msg = f"Car (id={car_id}) has been deleted."
@@ -91,10 +88,3 @@ def update_car(car: Dict|_models.Car) -> _Response:
     else:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
 
-
-def _orders_related_to_car(car_id: int) -> _Response:
-    orders = _db_access.get(_db_models.OrderDBModel, criteria={'car_id': lambda x: x==car_id})
-    if len(orders) == 0:
-        return _Response(200, f"No orders related to car with id = {car_id} were found.")
-    else:
-        return _Response(400, f"Found {len(orders)} orders related to car with id = {car_id}.")

@@ -54,19 +54,19 @@ def add(
 
 
 def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
-    table = base_type.__table__
     source = check_and_return_current_connection_source()
-    with _Session(source) as session:
-        id_match = getattr(table.columns,id_name) == id_value
-        item = session.query(base_type).filter(id_match).first()
-        if item is None:
-            return _Response(body=f"Object with {id_name}={id_value} was not found in table " \
-                                     f"{base_type.__tablename__}. Nothing to delete.", status_code=404
-                                    )
-        else:
-            session.delete(item)
+    with _Session(source) as session, session.begin():
+        try:
+            inst = session.get_one(base_type, id_value)
+            session.delete(inst)
             session.commit()
             return _Response(body=f"Object with {id_name}={id_value} was deleted from table.", status_code=200)
+        except _NoResultFound as e:
+            return _Response(status_code=404, content_type="text/plain", body=f"Object with {id_name}={id_value} not found in table {base_type.__tablename__}. {e}")
+        except _sqaexc.IntegrityError as e:
+            return _Response(status_code=400, content_type="text/plain", body=f"Object with {id_name}={id_value} could not be deleted from table. {e.orig}")
+        except Exception as e:
+            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
 def delete_n(base_type: Type[_Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> _Response:
