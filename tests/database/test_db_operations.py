@@ -156,6 +156,22 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [])
 
+    def test_removing_n_filtered_records(self):
+        test_obj_1 = models.TestBase(id=1, test_str='test_string', test_int=-1)
+        test_obj_2 = models.TestBase(id=2, test_str='test_string', test_int=1)
+        test_obj_3 = models.TestBase(id=3, test_str='test_string', test_int=-1)
+        test_obj_4 = models.TestBase(id=4, test_str='test_string', test_int=1)
+        test_obj_5 = models.TestBase(id=5, test_str='test_string', test_int=-1)
+        test_obj_6 = models.TestBase(id=6, test_str='test_string', test_int=1)
+        _db_access.add(models.TestBase, test_obj_1, test_obj_2, test_obj_3, test_obj_4, test_obj_5, test_obj_6)
+
+        _db_access.delete_n(models.TestBase, n=2, id_name="id", start_from="minimum", criteria={'test_int': lambda x: x==-1})
+
+        remaining_objs_with_negative_test_int = _db_access.get(models.TestBase, criteria={'test_int': lambda x: x<0})
+        self.assertListEqual(remaining_objs_with_negative_test_int, [test_obj_5])
+        remaining_objs_with_positive_test_int = _db_access.get(models.TestBase, criteria={'test_int': lambda x: x>0})
+        self.assertListEqual(remaining_objs_with_positive_test_int, [test_obj_2, test_obj_4, test_obj_6])
+
 
 if __name__=="__main__":
     unittest.main() # pragma: no cover

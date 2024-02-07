@@ -69,16 +69,27 @@ def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
-def delete_n(base_type: Type[_Base], n: int, id_name: str, start_from: Literal["minimum", "maximum"]) -> _Response:
+def delete_n(
+    base_type: Type[_Base],
+    n: int,
+    id_name: str,
+    start_from: Literal["minimum", "maximum"],
+    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None
+    ) -> _Response:
+
     table = base_type.__table__
     if not id_name in table.columns.keys():
         return _Response(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
     source = check_and_return_current_connection_source()
     with source.begin() as conn:
+        query = _sqa.select(table.c.id)
+        if criteria is not None:
+            clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
+            query = query.where(*clauses)
         if start_from == "minimum":
-            subquery = _sqa.select(table.c.id).order_by(table.c.id).limit(n).alias()
+            subquery = query.order_by(table.c.id).limit(n).alias()
         else:
-            subquery = _sqa.select(table.c.id).order_by(table.c.id.desc()).limit(n).alias()
+            subquery = query.order_by(table.c.id.desc()).limit(n).alias()
         stmt = _sqa.delete(table).where(table.c.id.in_(subquery))
         result = conn.execute(stmt)
         n_of_deleted_items = result.rowcount

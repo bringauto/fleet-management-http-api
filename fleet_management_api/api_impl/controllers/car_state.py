@@ -72,7 +72,8 @@ def _remove_old_states(car_id: int) -> _Response:
             _db_models.CarStateDBModel,
             delta,
             id_name="timestamp",
-            start_from="minimum"
+            start_from="minimum",
+            criteria={'car_id': lambda x: x==car_id}
         )
         if response.status_code != 200:
             return _Response(response.status_code, response.body)
