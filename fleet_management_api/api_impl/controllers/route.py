@@ -25,7 +25,7 @@ def create_route(route: _models.Route) -> _Response:
         if not response.status_code == 200:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
         else:
-            return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been sent.")
+            return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been created.")
 
 
 def delete_route(route_id: int) -> _Response:
@@ -112,10 +112,10 @@ def _find_nonexistent_stops(route: _models.Route) -> _Response:
         return _Response(
             status_code=404,
             content_type="text/plain",
-            body=f"Route (iid={route.id}, name='{route.name}) has been sent, but some of its stops do not exist."
+            body=f"Route (id={route.id}, name='{route.name}) has not been created -some of the required stops do not exist."
                  f"Nonexstent stop ids: {nonexistent_stop_ids}")
     else:
-        return _Response(status_code=200, content_type="text/plain", body=f"Route (id={route.id}, name='{route.name}) has been sent.")
+        return _Response(status_code=200, content_type="text/plain", body=f"Route (id={route.id}, name='{route.name}) has been created.")
 
 
 def _find_related_orders(route_id: int) -> _Response:

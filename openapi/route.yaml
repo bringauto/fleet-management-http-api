@@ -158,7 +158,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
       tags:
         - route
-      summary: Finds route points gor given route identified by the route's ID
+      summary: Finds route points for given route identified by the route's ID
       parameters:
         - $ref: '#/components/parameters/RouteId'
       responses:
@@ -184,7 +184,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
       tags:
         - route
-      summary: Finds route points gor given route identified by the route's ID
+      summary: Finds route points for given route identified by the route's ID
       requestBody:
         description: Route points json
         x-body-name: routePoints

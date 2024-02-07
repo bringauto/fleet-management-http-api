@@ -46,9 +46,12 @@ def add(
             _wait_mg.notify(base.__tablename__, sent_objs)
             return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {len(sent_objs)}).")
         except _NoResultFound as e:
-            return _Response(status_code=404, content_type="text/plain", body=f"Reference to {ref_type.__name__} with id={ref_id} does not exist in the database.")
+            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with id={ref_id} does not exist in the database.")
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
+            if "unique" in str(e.orig).lower():
+                return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base)} with id={sent_objs[0].id} already exists in the database.") # type: ignore
+            else:
+                return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
         except Exception as e:
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
@@ -60,11 +63,11 @@ def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
             inst = session.get_one(base_type, id_value)
             session.delete(inst)
             session.commit()
-            return _Response(body=f"Object with {id_name}={id_value} was deleted from table '{base_type.__tablename__}'.", status_code=200)
+            return _Response(body=f"{_model_name(base_type)} with {id_name}={id_value} was deleted.", status_code=200)
         except _NoResultFound as e:
-            return _Response(status_code=404, content_type="text/plain", body=f"Object with {id_name}={id_value} not found in table {base_type.__tablename__}. {e}")
+            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base_type)} with {id_name}={id_value} not found in table {base_type.__tablename__}. {e}")
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="text/plain", body=f"Object with {id_name}={id_value} could not be deleted from table. {e.orig}")
+            return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base_type)} with {id_name}={id_value} could not be deleted from table. {e.orig}")
         except Exception as e:
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
@@ -121,7 +124,7 @@ def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] =
                     results.append(result)
             return results
         except _NoResultFound as e:
-            raise _NoResultFound(f"Object with id={id_value} not found in table {base.__tablename__}. {e}")
+            raise _NoResultFound(f"{_model_name(base)} with id={id_value} not found. {e}")
         except Exception as e:
             raise e
 
@@ -245,3 +248,6 @@ def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
     return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
 
+
+def _model_name(base: Type[_Base]) -> str:
+    return base.__name__.rstrip("DBModel")

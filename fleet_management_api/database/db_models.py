@@ -19,7 +19,6 @@ class Base(_DeclarativeBase):
         return self.__class__(**{col.name: getattr(self, col.name) for col in self.__table__.columns})
 
 
-@dataclasses.dataclass
 class PlatformHwIdDBModel(Base):
     __tablename__ = 'platform_hw_ids'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
