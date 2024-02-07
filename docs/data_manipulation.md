@@ -39,11 +39,10 @@ There is a maximum number $N_{car\,states}$ of Car States to be stored by the AP
 ### Post
 
 Requirements:
-- [Car](#car) must exist.
 - Unique ID.
+- [Car](#car) must exist.
 
 Result:
-- Car State ID is automatically generated/overwritten before being stored by the API.
 - Car State is created.
 - Oldest Car States might be deleted, so the number of states stored by the API for the particular [Car](#car) is not greater than $N_{car\,states}$.
 
@@ -79,10 +78,10 @@ There is a maximum number $N_{order\,states}$ of Order States to be stored by th
 ### Post
 
 Requirements:
+- Unique ID.
 - The [Order](#order) must exist.
 
 Result:
-- Order State ID is automatically generated/overwritten before being stored by the API.
 - Order State is created.
 - Oldest Order States might be deleted, so the number of states stored by the API for the particular [Order](#order) is not greater than $N_{order\,states}$.
 

@@ -55,7 +55,7 @@ def get_car_states(car_id: int, all_available: bool = False) -> _Response:
         car_state_db_models = _db_access.get_children(_db_models.CarDBModel, car_id, "states")
         if not all_available and car_state_db_models:
             car_state_db_models = [car_state_db_models[-1]]
-        car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]
+        car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models] # type: ignore
         return _Response(body=car_states, status_code=200, content_type="application/json")
     except _db_access.ParentNotFound as e:
         return _api.log_and_respond(404, f"Car with id={car_id} not found. {e}")

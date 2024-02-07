@@ -27,16 +27,6 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
             response = c.post('/v2/management/carstate', json=car_state)
             self.assertEqual(response.status_code, 200)
 
-    def test_car_state_is_automatically_rewritten_when_posting_to_api(self):
-        gnss_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
-        original_state_id = 1654615684531
-        car_state = CarState(id=original_state_id, status="idle", car_id=1, speed=7, fuel=80, position=gnss_position)
-        with self.app.app.test_client() as c:
-            c.post('/v2/management/carstate', json=car_state)
-            state = c.get(f'/v2/management/carstate/{self.car.id}?allAvailable=true').json[0]
-            self.assertNotEqual(state["id"], original_state_id)
-            print(state["id"], original_state_id)
-
     def test_adding_state_to_nonexisting_car_returns_code_404(self):
         nonexistent_car_id = 121651516
         gnss_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
