@@ -34,7 +34,7 @@ class CarDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
-    platformhwid_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False)
+    platformhwid_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False, unique=True)
 
     platformhwid: _Mapped[PlatformHwIdDBModel] = _relationship("PlatformHwIdDBModel", back_populates="cars", lazy="noload")
     states: _Mapped[List["CarStateDBModel"]] = _relationship("CarStateDBModel", cascade='save-update, merge, delete', back_populates="car")

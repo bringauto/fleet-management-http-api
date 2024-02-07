@@ -1,7 +1,7 @@
 from typing import Dict
 
 import connexion # type: ignore
-from connexion.lifecycle import ConnexionResponse as _Response# type: ignore
+from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models

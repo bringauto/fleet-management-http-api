@@ -6,17 +6,15 @@ import unittest
 from fleet_management_api.models import Car, PlatformHwId, Order
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
-from tests.utils.setup_utils import create_stops
+from tests.utils.setup_utils import create_stops, create_platform_hw_ids
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
+        create_platform_hw_ids(app, 5, 6)
 
     def test_cars_list_is_initially_available_and_empty(self):
         app = _app.get_test_app()
@@ -44,7 +42,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
-        car_2 = Car(id=2, name="Test Car 2", platform_hw_id=5)
+        car_2 = Car(id=2, name="Test Car 2", platform_hw_id=6)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -62,7 +60,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def test_creating_car_with_already_existing_id_returns_400_error_code(self):
         car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
-        car_2 = Car(id=1, name="Test Car 2", platform_hw_id=5)
+        car_2 = Car(id=1, name="Test Car 2", platform_hw_id=6)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -71,7 +69,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def test_creating_car_with_already_existing_name_returns_400_error_code(self):
         car_1 = Car(id=1, name="Test Car", platform_hw_id=5)
-        car_2 = Car(id=2, name="Test Car", platform_hw_id=5)
+        car_2 = Car(id=2, name="Test Car", platform_hw_id=6)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post('/v2/management/car', json=car_1, content_type='application/json')
@@ -248,6 +246,26 @@ class Test_Deleting_Car(unittest.TestCase):
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
+
+
+class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_connection_source_test()
+        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
+        app = _app.get_test_app()
+        with app.app.test_client() as c:
+            c.post('/v2/management/platformhwid', json=platformhwid)
+
+    def test_creating_car_using_platformhwid_already_assigned_to_other_car_yields_code_400(self):
+        car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
+        car_2 = Car(id=2, name="Test Car 2", platform_hw_id=5)
+        with _app.get_test_app().app.test_client() as c:
+            response = c.post('/v2/management/car', json=car_1, content_type='application/json')
+            self.assertEqual(response.status_code, 200)
+
+            response = c.post('/v2/management/car', json=car_2, content_type='application/json')
+            self.assertEqual(response.status_code, 400)
 
 
 if __name__=="__main__": # pragma: no cover
