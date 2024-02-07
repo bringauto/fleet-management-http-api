@@ -12,10 +12,18 @@ class Test_Creating_Route(unittest.TestCase):
         self.app = _app.get_test_app().app
 
     def test_creating_route(self):
-        route = Route(id=5, name="test_route")
+        route = Route(id=5, name="test_route", stop_ids=[1, 2, 3])
         with self.app.test_client() as c:
             response = c.post('/v2/management/route', json=route)
             self.assertEqual(response.status_code, 200)
+
+            response = c.get('/v2/management/route/5')
+            self.assertEqual(response.status_code, 200)
+            returned_route = response.json
+            self.assertEqual(returned_route["id"], 5)
+            self.assertEqual(returned_route["name"], "test_route")
+            self.assertEqual(returned_route["stopIds"], [1,2,3])
+
 
     def test_creating_route_with_already_taken_id_returns_code_400(self):
         route_1 = Route(id=1, name="test_route_1")

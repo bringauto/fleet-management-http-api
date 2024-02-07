@@ -130,14 +130,16 @@ def platform_hw_id_from_db_model(platform_hw_id_db_model: _db_models.PlatformHwI
 def route_to_db_model(route: _models.Route) -> _db_models.RouteDBModel:
     return _db_models.RouteDBModel(
         id=route.id,
-        name=route.name
+        name=route.name,
+        stop_ids=route.stop_ids
     )
 
 
 def route_from_db_model(route_db_model: _db_models.RouteDBModel) -> _models.Route:
     return _models.Route(
         id=route_db_model.id,
-        name=route_db_model.name
+        name=route_db_model.name,
+        stop_ids=route_db_model.stop_ids
     )
 
 
