@@ -51,7 +51,7 @@ def get_route(route_id):  # noqa: E501
 
 
 def get_route_points(route_id):  # noqa: E501
-    """Finds route points gor given route identified by the route&#39;s ID
+    """Finds route points for given route identified by the route&#39;s ID
 
      # noqa: E501
 

@@ -25,6 +25,5 @@ fleet_management_api/models/route_points.py
 fleet_management_api/models/stop.py
 fleet_management_api/openapi/openapi.yaml
 fleet_management_api/test/__init__.py
-fleet_management_api/test/test_security_controller.py
 fleet_management_api/typing_utils.py
 fleet_management_api/util.py

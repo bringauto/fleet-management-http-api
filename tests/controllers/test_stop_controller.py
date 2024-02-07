@@ -21,6 +21,14 @@ class Test_Creating_Stop(unittest.TestCase):
             response = c.post('/v2/management/stop', json=stop_2)
             self.assertEqual(response.status_code, 200)
 
+    def test_creating_stop_without_notification_phone(self):
+        position = GNSSPosition(latitude=49,longitude=16,altitude=50)
+        stop = Stop(id=1, name="stop_1", position=position)
+        with self.app.test_client() as c:
+            response = c.post('/v2/management/stop', json=stop)
+            self.assertEqual(response.status_code, 200)
+
+
     def test_creating_stop_with_identical_id_yields_code_400(self):
         position = GNSSPosition(latitude=49,longitude=16,altitude=50)
         stop_1 = Stop(id=1, name="stop_1", position=position, notification_phone=MobilePhone(phone="123456789"))
@@ -181,4 +189,4 @@ class Test_Updating_Stop(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no cover
+    unittest.main(buffer=True) # pragma: no cover

@@ -160,19 +160,27 @@ def route_points_from_db_model(route_points_db_model: _db_models.RoutePointsDBMo
 
 
 def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
+    if stop.notification_phone is None:
+        notification_phone = None
+    else:
+        notification_phone = stop.notification_phone.to_dict()
     return _db_models.StopDBModel(
         id=stop.id,
         name=stop.name,
         position=stop.position.to_dict(),
-        notification_phone=stop.notification_phone.to_dict()
+        notification_phone=notification_phone
     )
 
 
 def stop_from_db_model(stop_db_model: _db_models.StopDBModel) -> _models.Stop:
+    if stop_db_model.notification_phone is None:
+        notification_phone = None
+    else:
+        notification_phone = _models.MobilePhone.from_dict(stop_db_model.notification_phone)
     return _models.Stop(
         id=stop_db_model.id,
         name=stop_db_model.name,
         position=_models.GNSSPosition.from_dict(stop_db_model.position),
-        notification_phone=_models.MobilePhone.from_dict(stop_db_model.notification_phone)
+        notification_phone=notification_phone
     )
 
