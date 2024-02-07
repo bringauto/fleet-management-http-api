@@ -99,6 +99,22 @@ def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: An
     return True
 
 
+def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None) -> List[_Base]:
+    source = _get_checked_connection_source(conn_source)
+    results: List[base] = []
+    with _Session(source) as session:
+        try:
+            for id_value in ids:
+                result = session.get(base, id_value)
+                if result is not None:
+                    results.append(result)
+            return results
+        except _NoResultFound as e:
+            raise _NoResultFound(f"Object with id={id_value} not found in table {base.__tablename__}. {e}")
+        except Exception as e:
+            raise e
+
+
 def get(
     base: Type[_Base],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,

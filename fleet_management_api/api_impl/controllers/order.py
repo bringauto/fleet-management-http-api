@@ -19,7 +19,14 @@ def create_order(order) -> _Response:
         return _api.log_and_respond(404, f"Car with id={order.car_id} does not exist.")
     else:
         db_model = _api.order_to_db_model(order)
-        response = _db_access.add(_db_models.OrderDBModel, db_model)
+        response = _db_access.add(
+            _db_models.OrderDBModel,
+            db_model,
+            check_reference_existence={
+                _db_models.CarDBModel: order.car_id,
+                _db_models.StopDBModel: order.target_stop_id,
+            }
+        )
         if response.status_code == 200:
             return _api.log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
         else:

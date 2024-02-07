@@ -73,6 +73,26 @@ class Test_Updating_Records(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test()
+        models.initialize_test_tables(_connection.current_connection_source())
+
+    def test_getting_items_by_id(self):
+        test_obj_1 = models.TestBase(id=7, test_str='test_string', test_int=5)
+        test_obj_2 = models.TestBase(id=8, test_str='test_string', test_int=18)
+        _db_access.add(models.TestBase, test_obj_1, test_obj_2)
+        retrieved_objs = _db_access.get_by_id(models.TestBase, 7)
+        self.assertEqual(retrieved_objs, [test_obj_1])
+        retrieved_objs = _db_access.get_by_id(models.TestBase, 7, 8)
+        self.assertListEqual(retrieved_objs, [test_obj_1, test_obj_2])
+        self.assertEqual(retrieved_objs[0].test_int, 5)
+
+    def test_using_only_nonexistent_ids_returns_empty_list(self):
+        self.assertListEqual(_db_access.get_by_id(models.TestBase, 4, 5), [])
+
+
 class Test_Deleting_Database_Record(unittest.TestCase):
 
     def setUp(self) -> None:

@@ -108,6 +108,14 @@ class OrderStateDBModel(Base):
             cls._max_n_of_states = n
 
 
+stop_route_association_table = _sqa.Table(
+    'stop_route_association',
+    Base.metadata,
+    _sqa.Column('stop_id', _sqa.ForeignKey('stops.id'), primary_key=True),
+    _sqa.Column('route_id', _sqa.ForeignKey('routes.id'), primary_key=True)
+)
+
+
 @dataclasses.dataclass
 class StopDBModel(Base):
     __tablename__ = 'stops'
@@ -125,7 +133,11 @@ class RouteDBModel(Base):
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
+
     route_points: _Mapped[object] = _relationship("RoutePointsDBModel", cascade='save-update, merge, delete', back_populates="route")
+
+    def __repr__(self) -> str:
+        return f"Route(id={self.id}, name={self.name}, stop_ids={self.stop_ids})"
 
 
 @dataclasses.dataclass

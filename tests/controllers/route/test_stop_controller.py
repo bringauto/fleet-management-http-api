@@ -6,7 +6,7 @@ sys.path.append('.')
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hw_ids
+from tests.utils.setup_utils import create_platform_hw_ids, create_stops
 
 
 class Test_Creating_Stop(unittest.TestCase):
@@ -196,6 +196,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789")
         )
         create_platform_hw_ids(self.app, 123)
+        create_stops(self.app, 1)
         self.car = _models.Car(id=1, platform_hw_id=123, name="test_car", car_admin_phone=_models.MobilePhone(phone="123456789"))
         self.order = _models.Order(id=1, priority="normal", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1)
         with self.app.app.test_client() as c:
@@ -219,5 +220,4 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order)
     unittest.main(buffer=True) # pragma: no cover

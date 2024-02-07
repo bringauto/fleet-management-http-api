@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List
 import dataclasses
 
+import sqlalchemy as _sqa
 from sqlalchemy import Integer, String, Engine, ForeignKey
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 
@@ -29,11 +30,14 @@ class TestBase2(Base):
     test_int_2: Mapped[int] = mapped_column(Integer)
 
 
-def initialize_test_tables(connection_engine: Engine|None) -> None:
-    if connection_engine is None:
-        raise RuntimeError("Database connection not set up.")
-    for table in Base.metadata.tables.values():
-        table.create(connection_engine)
+@dataclasses.dataclass
+class FamilyRelationship(Base):
+    __tablename__ = 'family'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
+    parent_id: Mapped[int] = mapped_column(Integer, ForeignKey('parents.id'))
+    child_id: Mapped[int] = mapped_column(Integer, ForeignKey('children.id'))
+    children = relationship("ChildDBModel", backref="family")
+    parents = relationship("ParentDBModel", backref="family")
 
 
 @dataclasses.dataclass
@@ -41,7 +45,6 @@ class ParentDBModel(Base):
     __tablename__ = 'parents'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
     name: Mapped[str] = mapped_column(String)
-    children: Mapped[List["ChildDBModel"]] = relationship("ChildDBModel", cascade='save-update, merge, delete', back_populates="parent")
 
 
 @dataclasses.dataclass
@@ -49,5 +52,10 @@ class ChildDBModel(Base):
     __tablename__ = 'children'
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
     name: Mapped[str] = mapped_column(String)
-    parent_id: Mapped[int] = mapped_column(ForeignKey("parents.id"), nullable=False)
-    parent = relationship("ParentDBModel", back_populates="children", lazy="noload")
+
+
+def initialize_test_tables(connection_engine: Engine|None) -> None:
+    if connection_engine is None:
+        raise RuntimeError("Database connection not set up.")
+    for table in Base.metadata.tables.values():
+        table.create(connection_engine)
