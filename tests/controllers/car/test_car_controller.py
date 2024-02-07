@@ -6,6 +6,7 @@ import unittest
 from fleet_management_api.models import Car, PlatformHwId, Order
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
+from tests.utils.setup_utils import create_stops
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
@@ -207,6 +208,7 @@ class Test_Deleting_Car(unittest.TestCase):
         set_connection_source_test("test_db.db")
         platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
+        create_stops(app, 7)
         with app.app.test_client() as c:
             c.post('/v2/management/platformhwid', json=platformhwid)
 

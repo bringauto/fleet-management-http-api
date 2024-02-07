@@ -5,15 +5,16 @@ sys.path.append('.')
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hw_ids
+from tests.utils.setup_utils import create_platform_hw_ids, create_stops
 
 
-class Test_Sending_And_Order(unittest.TestCase):
+class Test_Sending_Order(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 5)
+        create_stops(self.app, 7)
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
@@ -40,6 +41,19 @@ class Test_Sending_And_Order(unittest.TestCase):
             user_id=789,
             car_id=nonexistent_car_id,
             target_stop_id=7,
+            stop_route_id=8,
+            notification_phone=MobilePhone(phone='1234567890')
+        )
+        with self.app.app.test_client() as c:
+            response = c.post('/v2/management/order', json=order)
+            self.assertEqual(response.status_code, 404)
+
+    def test_sending_order_to_nonexistent_stop_yields_code_404(self):
+        order = Order(
+            id=5,
+            user_id=789,
+            car_id=self.car.id,
+            target_stop_id=1635165848165816516,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
@@ -76,6 +90,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         app = _app.get_test_app()
         create_platform_hw_ids(app, 5)
+        create_stops(app, 1)
         with app.app.test_client() as c:
             example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Order"]["example"]
             car = Car(id=example["carId"], name="Test Car", platform_hw_id=5)
@@ -91,6 +106,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 5)
+        create_stops(self.app, 7)
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
@@ -124,6 +140,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 5)
+        create_stops(self.app, 7)
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
@@ -155,6 +172,7 @@ class Test_Deleting_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 5)
+        create_stops(self.app, 7)
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
@@ -188,6 +206,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 5)
+        create_stops(self.app, 7, 14)
         self.car = Car(id=12, name='test_car', platform_hw_id=5)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)

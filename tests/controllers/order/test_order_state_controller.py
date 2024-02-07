@@ -6,7 +6,7 @@ import fleet_management_api.app as _app
 from fleet_management_api.models import OrderState, Order, Car
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hw_ids
+from tests.utils.setup_utils import create_platform_hw_ids, create_stops
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
@@ -15,6 +15,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.app.test_client() as c:
@@ -53,6 +54,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         with self.app.app.test_client() as c:
             example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["OrderState"]["example"]
@@ -71,6 +73,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.app.test_client() as c:
@@ -100,6 +103,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -149,6 +153,7 @@ class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestC
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         order_2 = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -173,6 +178,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         with self.app.app.test_client() as c:
@@ -215,6 +221,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hw_ids(self.app, 1)
+        create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         other_order = Order(id=13, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})

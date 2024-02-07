@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 import connexion # type: ignore
-from connexion.lifecycle import ConnexionResponse as _Response# type: ignore
+from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 import fleet_management_api.api_impl as _api
 from fleet_management_api.models.stop import Stop as _Stop
@@ -28,11 +28,10 @@ def delete_stop(stop_id: int) -> _Response:
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    # object_using_stop_response = _get_objects_referencing_stop(stop_id)
-    # if object_using_stop_response.status_code != 200:
-    #     return object_using_stop_response
+    routes_response = _get_routes_referencing_stop(stop_id)
+    if routes_response.status_code != 200:
+        return routes_response
     response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
-    print(response.status_code, response.body)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
     else:
@@ -85,12 +84,8 @@ def _get_objects_referencing_stop(stop_id: int) -> _Response:
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _Response:
-    route_db_models = _db_access.get(_db_models.RouteDBModel)
-    referenced_route_models = []
-    for route_model in route_db_models:
-        if stop_id in route_model.stop_ids:
-            referenced_route_models.append(route_model)
-
+    route_db_models = [m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids]
+    print(route_db_models)
     if len(route_db_models) > 0:
         return _api.log_and_respond(400, f"Stop with id={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}")
     else:

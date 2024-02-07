@@ -112,4 +112,4 @@ class Test_Deleting_Stops_Referenced_By_Route(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main() # pragma: no coverages
+    unittest.main() # pragma: no coverage

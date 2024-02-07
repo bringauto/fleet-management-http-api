@@ -20,6 +20,7 @@ def create_route(route: _models.Route) -> _Response:
             return check_response
 
         route_db_model = _api.route_to_db_model(route)
+        stops: List[_db_models.StopDBModel] = _db_access.get_by_id(_db_models.StopDBModel, *route.stop_ids) # type: ignore
         response = _db_access.add(_db_models.RouteDBModel, route_db_model)
         if not response.status_code == 200:
             return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
