@@ -2070,7 +2070,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds route points gor given route identified by the route's ID
+      summary: Finds route points for given route identified by the route's ID
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
