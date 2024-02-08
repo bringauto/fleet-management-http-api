@@ -98,7 +98,7 @@ Requirements:
 - A unique ID.
 
 Result:
-- An Platform HW ID is created.
+- A Platform HW ID is created.
 
 ### Delete
 
@@ -136,14 +136,14 @@ Result:
 ### Post
 
 Requirements:
-- A unique ID.
 - Referenced [Route](#route) must exist.
 
 Result:
+- The Route Points ID is set to be equal to the [Route's](#route) ID.
 - The newly posted Route Points object replaces the already existing one.
 
 ### Delete
-The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted or when a new Route Points object referencing the same [Route](#route) is posted.
+The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted.
 
 
 ## Stop
