@@ -6,20 +6,23 @@
 - [Order State](#order-state)
 - [Platform HW Id](#platform-hw-id)
 - [Route](#route)
+- [Route Points](#route-points)
 - [Stop](#stop)
 
 
 # Manipulation of API Entities
+
 
 ## Car
 
 ### Post
 
 Requirements:
+- A unique ID.
 - [Platform HW ID](#platformhwid) must exist and must not be used by some other Car.
 
 Result:
-- Car is created.
+- A Car is created.
 
 ### Delete
 
@@ -27,8 +30,8 @@ Requirements:
 - There must be no [Order](#order) referencing the car.
 
 Result:
-- Car is deleted.
-- All [Car States](#car-state) referencing the Car are deleted.
+- The Car is deleted.
+- All the [Car States](#car-state) referencing the Car are deleted.
 
 
 
@@ -39,13 +42,12 @@ There is a maximum number $N_{car\,states}$ of Car States to be stored by the AP
 ### Post
 
 Requirements:
-- Unique ID.
-- [Car](#car) must exist.
+- A unique ID.
+- The referenced [Car](#car) must exist.
 
 Result:
-- Car State is created.
+- A Car State is created.
 - Oldest Car States might be deleted, so the number of states stored by the API for the particular [Car](#car) is not greater than $N_{car\,states}$.
-
 
 
 ## Order
@@ -53,18 +55,18 @@ Result:
 ### Post
 
 Requirements:
-- Unique ID.
+- A unique ID.
 - [Target Stop](#stop) of the Order must exist.
 - [Route](#route) referenced by the Order must exist.
 - [Car](#car) referenced by the Order must exist.
 
 Result:
-- Order is created.
+- An Order is created.
 
 ### Delete
 
 Requirements:
-- Unique ID.
+- A unique ID.
 
 Result:
 - The Order is deleted.
@@ -73,18 +75,19 @@ Result:
 
 ## Order State
 
-There is a maximum number $N_{order\,states}$ of Order States to be stored by the API.
+There is a maximum number of Order States $N_{order\,states}$ that can be stored by the API.
 
 ### Post
 
 Requirements:
-- Unique ID.
+- A unique ID.
 - The [Order](#order) must exist.
 
 Result:
-- Order State is created.
-- Oldest Order States might be deleted, so the number of states stored by the API for the particular [Order](#order) is not greater than $N_{order\,states}$.
-
+- An Order State is created.
+- The Order State's timestamp is updated to match the time it was posted.
+- Oldest Order States might be deleted, so the number of states stored by the API for a particular [Order](#order) is not greater than $N_{order\,states}$.
+- All the Clients waiting for new Order States of a particular [Order](#order) receive a response (for the order state GET method).
 
 
 ## Platform HW ID
@@ -92,10 +95,10 @@ Result:
 ### Post
 
 Requirements:
-- Unique ID.
+- A unique ID.
 
 Result:
-- Platform HW ID is created.
+- An Platform HW ID is created.
 
 ### Delete
 
@@ -111,20 +114,21 @@ Result:
 ### Post
 
 Requirements:
-- Unique ID.
+- A unique ID.
 - All [Stops](#stop) referenced by the Route must exist.
 
 Result:
-- Route is created.
-- [Route Points](#route-points) with empty list of points are created.
+- A Route is created.
+- [Route Points](#route-points) object with an empty list of points is created.
 
 ### Delete
 
 Requirements:
-- There must be no [Car](#car) referencing the Platform HW ID.
+- There must be no [Order](#order) referencing the Route.
 
 Result:
-- The Platform HW ID is deleted.
+- The Route is deleted.
+- The corresponding [Route Points](#route-points) object is deleted.
 
 
 ## Route Points
@@ -132,10 +136,14 @@ Result:
 ### Post
 
 Requirements:
+- A unique ID.
 - Referenced [Route](#route) must exist.
 
 Result:
-- The newly posted Route Points replace already existing Route Points.
+- The newly posted Route Points object replaces the already existing one.
+
+### Delete
+The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted or when a new Route Points object referencing the same [Route](#route) is posted.
 
 
 ## Stop
@@ -143,10 +151,10 @@ Result:
 ### Post
 
 Requirements:
-- Unique ID.
+- A unique ID.
 
 Result:
-- Stop is created.
+- A Stop is created.
 
 ### Delete
 
