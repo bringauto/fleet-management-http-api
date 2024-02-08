@@ -34,7 +34,7 @@ def delete_route(route_id: int) -> _Response:
     if not related_orders_response.status_code == 200:
         return related_orders_response
 
-    response = _db_access.delete(_db_models.RouteDBModel, id_name="id", id_value=route_id)
+    response = _db_access.delete(_db_models.RouteDBModel, route_id)
     if not response.status_code == 200:
         note = " (not found)" if response.status_code == 404 else ""
         return _api.log_and_respond(response.status_code, f"Could not delete route with id={route_id}{note}. {response.body}")

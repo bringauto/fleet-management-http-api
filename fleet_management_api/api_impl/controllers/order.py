@@ -35,7 +35,7 @@ def create_order(order) -> _Response:
 
 def delete_order(order_id: int) -> _Response:
     """Delete an existing order."""
-    response = _db_access.delete(_db_models.OrderDBModel, 'id', order_id)
+    response = _db_access.delete(_db_models.OrderDBModel, order_id)
     if response.status_code == 200:
         msg = f"Order (id={order_id}) has been deleted."
         _api.log_info(msg)

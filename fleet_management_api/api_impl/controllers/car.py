@@ -35,7 +35,7 @@ def delete_car(car_id: int) -> _Response:
 
     :param car_id: Id of the car to be deleted.
     """
-    response = _db_access.delete(_db_models.CarDBModel, 'id', car_id)
+    response = _db_access.delete(_db_models.CarDBModel, car_id)
     if response.status_code == 200:
         msg = f"Car (id={car_id}) has been deleted."
         return _api.log_and_respond(200, msg)

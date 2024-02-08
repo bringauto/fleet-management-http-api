@@ -31,7 +31,7 @@ def delete_stop(stop_id: int) -> _Response:
     routes_response = _get_routes_referencing_stop(stop_id)
     if routes_response.status_code != 200:
         return routes_response
-    response = _db_access.delete(_db_models.StopDBModel, "id", stop_id)
+    response = _db_access.delete(_db_models.StopDBModel, stop_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
     else:

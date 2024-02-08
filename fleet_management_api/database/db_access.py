@@ -56,33 +56,33 @@ def add(
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
-def delete(base_type: Type[_Base], id_name: str, id_value: Any) -> _Response:
+def delete(base: Type[_Base], id_: Any) -> _Response:
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
-            inst = session.get_one(base_type, id_value)
+            inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _Response(body=f"{_model_name(base_type)} with {id_name}={id_value} was deleted.", status_code=200)
+            return _Response(body=f"{_model_name(base)} with {_ID_NAME}={id_} was deleted.", status_code=200)
         except _NoResultFound as e:
-            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base_type)} with {id_name}={id_value} not found in table {base_type.__tablename__}. {e}")
+            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}")
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base_type)} with {id_name}={id_value} could not be deleted from table. {e.orig}")
+            return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base)} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}")
         except Exception as e:
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
 def delete_n(
-    base_type: Type[_Base],
+    base: Type[_Base],
     n: int,
     id_name: str,
     start_from: Literal["minimum", "maximum"],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None
     ) -> _Response:
 
-    table = base_type.__table__
+    table = base.__table__
     if not id_name in table.columns.keys():
-        return _Response(body=f"Column {id_name} not found in table {base_type.__tablename__}.", status_code=500)
+        return _Response(body=f"Column {id_name} not found in table {base.__tablename__}.", status_code=500)
     source = check_and_return_current_connection_source()
     with source.begin() as conn:
         query = _sqa.select(table.c.id)
@@ -160,7 +160,7 @@ def get(
 
 
 def get_children(
-    parent_type:Type[_Base],
+    parent_base:Type[_Base],
     parent_id: int,
     children_col_name: str,
     conn_source: Optional[_sqa.Engine] = None
@@ -170,11 +170,11 @@ def get_children(
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
-            parent = session.get_one(parent_type, parent_id)
+            parent = session.get_one(parent_base, parent_id)
             children = list(getattr(parent, children_col_name))
             return children
         except _NoResultFound as e:
-            raise ParentNotFound(f"Parent with id={parent_id} not found in table {parent_type.__tablename__}. {e}")
+            raise ParentNotFound(f"Parent with id={parent_id} not found in table {parent_base.__tablename__}. {e}")
         except Exception as e:
             raise e
 

@@ -33,7 +33,7 @@ def redefine_route_points() -> _Response:
             )
             return _api.log_and_respond(response.status_code, response.body)
         else:
-            _db_access.delete(_db_models.RoutePointsDBModel, "route_id", existing_route_points[0].id)
+            _db_access.delete(_db_models.RoutePointsDBModel, existing_route_points[0].id)
             response = _db_access.add(
                 _db_models.RoutePointsDBModel,
                 rp_db_model,

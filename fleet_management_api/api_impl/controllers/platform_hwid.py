@@ -51,7 +51,7 @@ def delete_hw_id(platformhwid_id: int) -> _Response:
     if _db_access.get(_db_models.CarDBModel, criteria={"platformhwid_id": lambda x: x==platformhwid_id}): # type: ignore
         return _api.log_and_respond(400, f"Platform HW Id with id={platformhwid_id} cannot be deleted because it is assigned to a car.")
 
-    response = _db_access.delete(_db_models.PlatformHwIdDBModel, id_name="id", id_value=platformhwid_id)
+    response = _db_access.delete(_db_models.PlatformHwIdDBModel, platformhwid_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Platform HW Id with id={platformhwid_id} has been deleted.")
     else:

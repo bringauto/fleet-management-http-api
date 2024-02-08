@@ -102,13 +102,13 @@ class Test_Deleting_Database_Record(unittest.TestCase):
     def test_deleting_an_existing_record(self):
         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
         _db_access.add(models.TestBase, test_obj)
-        _db_access.delete(base_type=models.TestBase, id_name="id", id_value=7)
+        _db_access.delete(base=models.TestBase, id_=7)
         retrieved_obj = _db_access.get(models.TestBase, criteria={'id': lambda x: x==7})
         self.assertListEqual(retrieved_obj, [])
 
     def test_deleting_non_existing_record_yields_404_code(self):
         nonexistent_obj_id = 112
-        response = _db_access.delete(base_type=models.TestBase, id_name="id", id_value=nonexistent_obj_id)
+        response = _db_access.delete(base=models.TestBase, id_=nonexistent_obj_id)
         self.assertEqual(response.status_code, 404)
 
 
