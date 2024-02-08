@@ -24,6 +24,20 @@ def redefine_route_points() -> _Response:
     else:
         rp = _RoutePoints.from_dict(_connexion.request.get_json())
         rp_db_model = _api.route_points_to_db_model(rp)
-        response = _db_access.update(rp_db_model)
-        return _api.log_and_respond(response.status_code, response.body)
+        existing_route_points = _db_access.get(_db_models.RoutePointsDBModel, criteria={"route_id": lambda x: x==rp.route_id})
+        if len(existing_route_points) == 0:
+            response = _db_access.add(
+                _db_models.RoutePointsDBModel,
+                rp_db_model,
+                check_reference_existence={_db_models.RouteDBModel: rp.route_id}
+            )
+            return _api.log_and_respond(response.status_code, response.body)
+        else:
+            _db_access.delete(_db_models.RoutePointsDBModel, "route_id", existing_route_points[0].id)
+            response = _db_access.add(
+                _db_models.RoutePointsDBModel,
+                rp_db_model,
+                check_reference_existence={_db_models.RouteDBModel: rp_db_model.route_id}
+            )
+            return _api.log_and_respond(response.status_code, response.body)
 

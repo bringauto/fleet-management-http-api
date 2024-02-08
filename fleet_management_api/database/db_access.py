@@ -179,7 +179,32 @@ def get_children(
             raise e
 
 
+# def replace(replacement_obj: _Base, criteria: Optional[Dict[str, Callable[[Any],bool]]] = None, conn_source: Optional[_sqa.Engine] = None) -> _Response:
+#     """Replaces an existing record in the database.
+
+#     If the record does not exist, returns 404.
+
+#     The ID of the new record can but does not have to be the same as the ID of the old record.
+#     """
+#     source = check_and_return_current_connection_source(conn_source)
+#     with _Session(source) as session:
+#         try:
+#             old_obj = session.get(replacement_obj.__class__, replacement_obj.id)
+#             session.delete(old_obj)
+#             session.commit()
+#             session.merge(replacement_obj.copy())
+#             return _Response(status_code=200, content_type="text/plain", body="Succesfully replaced record")
+#         except _NoResultFound as e:
+#             return _Response(status_code=404, content_type="text/plain", body=f"Object with {_ID_NAME}={replacement_obj.id} not found in table {replacement_obj.__tablename__}. {e}")
+#         except Exception as e:
+#             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
+
+
 def update(updated_obj: _Base) -> _Response:
+    """Updates the record in the database with the same ID as the updated_obj.
+
+    If the record does not exist, returns 404.
+    """
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     source = check_and_return_current_connection_source()

@@ -34,7 +34,6 @@ Result:
 - All the [Car States](#car-state) referencing the Car are deleted.
 
 
-
 ## Car State
 
 There is a maximum number $N_{car\,states}$ of Car States to be stored by the API.
@@ -136,14 +135,14 @@ Result:
 ### Post
 
 Requirements:
+- A unique ID.
 - Referenced [Route](#route) must exist.
 
 Result:
-- The Route Points ID is set to be equal to the [Route's](#route) ID.
 - The newly posted Route Points object replaces the already existing one.
 
 ### Delete
-The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted.
+The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted or when the a new Route Points object is posted with the same Route ID.
 
 
 ## Stop

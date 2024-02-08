@@ -73,6 +73,23 @@ class Test_Updating_Records(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+# class Test_Replacing_Records(unittest.TestCase):
+
+#     def setUp(self) -> None:
+#         _connection.set_connection_source_test()
+#         models.initialize_test_tables(_connection.current_connection_source())
+
+#     def test_replacing_existing_record_with(self):
+#         test_obj = models.TestBase(id=7, test_str='test_string', test_int=5)
+#         _db_access.add(models.TestBase, test_obj)
+#         replacement_obj = models.TestBase(id=9, test_str='updated_test_string', test_int=6)
+#         _db_access.replace(test_obj.id, replacement_obj)
+#         retrieved_obj = _db_access.get(models.TestBase, criteria={'id': lambda x: x==9})[0]
+#         self.assertEqual(replacement_obj, retrieved_obj)
+#         retrieved_obj = _db_access.get(models.TestBase, criteria={'id': lambda x: x==7})
+#         self.assertListEqual(retrieved_obj, [])
+
+
 class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
 
     def setUp(self) -> None:
