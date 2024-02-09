@@ -55,7 +55,7 @@ def get_car(car_id: int) -> _Response:
         return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
     else:
         _api.log_info(f"Car with id={car_id} was found.")
-        return _Response(body=cars[0], status_code=200)
+        return _Response(body=_api.car_from_db_model(cars[0]), status_code=200)
 
 
 def get_cars() -> _Response:  # noqa: E501
@@ -68,7 +68,7 @@ def get_cars() -> _Response:  # noqa: E501
         _api.log_info("Listing all cars: no cars found.")
     else:
         _api.log_info(f"Listing all cars: {len(cars)} cars found.")
-    return _Response(body=cars, status_code=200)
+    return _Response(body=[_api.car_from_db_model(c) for c in cars], status_code=200)
 
 
 def update_car(car: Dict|_models.Car) -> _Response:

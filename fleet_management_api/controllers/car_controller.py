@@ -60,19 +60,6 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def startstop_car(car_id):  # noqa: E501
-    """Start/stop car by ID (intended for phonecalls)
-
-     # noqa: E501
-
-    :param car_id: ID of car to start/stop
-    :type car_id: int
-
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
-    """
-    return 'do some magic!'
-
-
 def update_car(car):  # noqa: E501
     """Update an existing car by ID
 

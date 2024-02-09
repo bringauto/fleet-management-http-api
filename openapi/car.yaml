@@ -157,35 +157,6 @@ paths:
           $ref: './errors.yaml#/components/responses/MethodNotAllowed'
         default:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
-  /car/startstop/{carId}:
-    get:
-      operationId: startstopCar
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
-      tags:
-        - car
-      summary: Start/stop car by ID (intended for phonecalls)
-      parameters:
-        - name: carId
-          in: path
-          description: ID of car to start/stop
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: Successful car start/stop
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
-        default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
       operationId: addCarState

@@ -41,8 +41,6 @@ paths:
     $ref: 'car.yaml#/paths/~1car'
   /car/{carId}:
     $ref: 'car.yaml#/paths/~1car~1{carId}'
-  /car/startstop/{carId}:
-    $ref: 'car.yaml#/paths/~1car~1startstop~1{carId}'
   /carstate:
     $ref: 'car.yaml#/paths/~1carstate'
   /carstate/{carId}:

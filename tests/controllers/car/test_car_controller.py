@@ -40,7 +40,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]['name'], car.name)
-            self.assertEqual(response.json[0]['under_test'], car.under_test)
+            self.assertEqual(response.json[0]['platformHwId'], car.platform_hw_id)
+            self.assertEqual(response.json[0]['underTest'], car.under_test)
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
