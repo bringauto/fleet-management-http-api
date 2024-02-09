@@ -3,23 +3,26 @@ import unittest
 import subprocess
 
 
-class Test_Running_New_Admin_Script(unittest.TestCase):
+class Test_Running_New_API_Key_Script(unittest.TestCase):
 
-    def test_adding_new_admin_yields_code_0(self):
+    def test_adding_new_api_key_yields_code_0(self):
         process = subprocess.run(
             [
                 "python",
                 "scripts/add_api_key.py",
-                "test_admin",
-                "config/config.json",
+                "test_key",
+                "tests/script_args/test_config.json",
                 "-t",
                 "db_file.db"
             ],
             capture_output=True,
         )
+        if process.returncode != 0:
+            print(process.stdout.decode())
+            # print(process.stderr.decode())
         self.assertEqual(process.returncode, 0)
 
-    def test_adding_new_admin_with_already_existing_name_yields_return_code_1(self):
+    def test_adding_new_api_key_with_already_existing_name_yields_return_code_1(self):
         process = subprocess.run(
             [
                 "python",

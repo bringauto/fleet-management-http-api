@@ -1,3 +1,4 @@
+import sys
 from sqlalchemy.engine import Engine
 
 from fleet_management_api.api_impl.api_keys import create_key as _create_key
@@ -25,8 +26,8 @@ if __name__=="__main__":
     arguments = args.argvals
     config = args.config
 
-    if "test" in arguments.keys() and arguments["test"].strip()!= "":
-        source = _connection.get_connection_source_test(db_file_path=arguments["test"])
+    if config.database.test.strip()!= "":
+        source = _connection.get_connection_source_test(db_file_path=config.database.test)
     else: # pragma: no cover
         source = _connection.get_connection_source(
             db_location=config.database.connection.location,

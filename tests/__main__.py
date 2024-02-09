@@ -20,8 +20,8 @@ OMITTED_FILES = [
 HTML_REPORT_FLAG = "-h"
 
 
-def _report_coverage(cov: coverage.Coverage) -> None:
-    if HTML_REPORT_FLAG in sys.argv:
+def _report_coverage(cov: coverage.Coverage, html) -> None:
+    if html:
         cov.html_report()
         subprocess.run(["open", "htmlcov/index.html"])
     else:
@@ -58,11 +58,15 @@ def _run_tests(show_test_names: bool = True) -> None:
 
 
 if __name__ == "__main__":
+    html = False
+    if "-h" in sys.argv:
+        html = True
+        sys.argv.remove("-h")
     cov = coverage.Coverage(branch=True, omit=OMITTED_FILES)
     cov.start()
     _run_tests()
     cov.stop()
     cov.save()
-    _report_coverage(cov)
+    _report_coverage(cov, html)
 
 

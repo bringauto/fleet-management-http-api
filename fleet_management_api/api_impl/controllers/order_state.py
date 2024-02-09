@@ -50,17 +50,9 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _Resp
         return _get_order_states(criteria, wait, since)
 
 
-def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool = False, since: Optional[int] = None) -> _Response:
-    if since is None:
-        if wait:
-            order_state_db_models = _db_access.wait_for_new(_db_models.OrderStateDBModel, criteria=criteria)
-        else:
-            order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, criteria=criteria)
-            if order_state_db_models:
-                order_state_db_models = [max(order_state_db_models, key=lambda x: x.timestamp)]
-    else:
-        criteria['timestamp'] = lambda x: x>=since
-        order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, wait=wait, criteria=criteria)
+def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool, since: int) -> _Response:
+    criteria['timestamp'] = lambda x: x>=since
+    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, wait=wait, criteria=criteria)
     order_states = [_api.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
     return _Response(body=order_states, status_code=200, content_type="application/json")
 
@@ -70,10 +62,7 @@ def _remove_old_states() -> _Response:
     extras = max(len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states(), 0)
     if extras>0:
         response = _db_access.delete_n(_db_models.OrderStateDBModel, n=extras, column_name='timestamp', start_from="minimum")
-        if response.status_code != 200:
-            return _api.log_and_respond(response.status_code, response.body)
-        else:
-            return _api.log_and_respond(200, "Removing oldest order state.")
+        return _api.log_and_respond(response.status_code, response.body)
     else:
         return _Response(status_code=200, content_type="text/plain", body="")
 
