@@ -30,7 +30,7 @@ def delete_stop(stop_id: int) -> _Response:
     """
     routes_response = _get_routes_referencing_stop(stop_id)
     if routes_response.status_code != 200:
-        return routes_response
+        return _api.log_and_respond(routes_response.status_code, routes_response.body)
     response = _db_access.delete(_db_models.StopDBModel, stop_id)
     if response.status_code == 200:
         return _api.log_and_respond(200, f"Stop with id={stop_id} has been deleted.")
@@ -54,6 +54,7 @@ def get_stops() -> _Response:
     """Get all existing stops."""
     stop_db_models = _db_access.get(_db_models.StopDBModel)
     stops: List[_Stop] = [_api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
+    _api.log_info(f"Found {len(stops)} stops.")
     return _Response(body=stops, status_code=200, content_type="application/json")
 
 
@@ -65,7 +66,7 @@ def update_stop(stop: Dict|_Stop) -> _Response:
         stop = _Stop.from_dict(connexion.request.get_json())
         stop_db_model = _api.stop_to_db_model(stop)
         response = _db_access.update(stop_db_model)
-        if 200 <= response.status_code < 300:
+        if response.status_code == 200:
             _api.log_info(f"Stop (id={stop.id} has been succesfully updated.")
             return _Response(status_code=response.status_code, content_type="application/json", body=stop)
         else:

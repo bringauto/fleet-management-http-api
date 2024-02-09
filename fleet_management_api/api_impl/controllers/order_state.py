@@ -1,6 +1,6 @@
-from typing import Optional, Dict, Callable, Any
+from typing import Dict, Callable, Any
 
-import connexion # type: ignore
+import connexion as _connexion # type: ignore
 from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
 
 import fleet_management_api.api_impl as _api
@@ -11,9 +11,9 @@ import fleet_management_api.database.db_models as _db_models
 
 def create_order_state(order_state) -> _Response:
     """Post a new state of an existing order."""
-    if not connexion.request.is_json:
-        return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
-    order_state = _models.OrderState.from_dict(connexion.request.get_json())
+    if not _connexion.request.is_json:
+        return _api.log_and_respond(400, f"Invalid request format: {_connexion.request.data}. JSON is required")
+    order_state = _models.OrderState.from_dict(_connexion.request.get_json())
     if not _order_exists(order_state.order_id):
         return _api.log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")
     order_state_db_model = _api.order_state_to_db_model(order_state)
@@ -28,6 +28,7 @@ def create_order_state(order_state) -> _Response:
 
 def get_all_order_states(wait: bool = False, since: int = 0) -> _Response:
     """Get all order states for all the existing orders."""
+    _api.log_info("Getting all order states for all orders.")
     return _get_order_states({}, wait, since)
 
 

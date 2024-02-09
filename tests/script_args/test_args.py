@@ -17,9 +17,6 @@ class Test_Running_New_API_Key_Script(unittest.TestCase):
             ],
             capture_output=True,
         )
-        if process.returncode != 0:
-            print(process.stdout.decode())
-            # print(process.stderr.decode())
         self.assertEqual(process.returncode, 0)
 
     def test_adding_new_api_key_with_already_existing_name_yields_return_code_1(self):

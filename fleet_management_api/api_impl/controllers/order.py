@@ -49,8 +49,12 @@ def get_order(order_id: int) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(_db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})
     if len(order_db_models) == 0:
-        return _Response(body=f"Order with id={order_id} was not found.", status_code=404)
+        msg = f"Order with id={order_id} was not found."
+        _api.log_error(msg)
+        return _Response(body=msg, status_code=404)
     else:
+        msg = f"Found order with id={order_id}"
+        _api.log_info(msg)
         return _Response(body=_api.order_from_db_model(order_db_models[0]), status_code=200)
 
 
@@ -60,7 +64,7 @@ def get_updated_orders(car_id: int) -> _Response:
     After the order have been returned from the API, they are not longer considered updated.
     """
     if not _car_exist(car_id):
-        return _Response(body=f"Car with id={car_id} was not found.", status_code=404)
+        return _api.log_and_respond(404, f"Car with id={car_id} does not exist.")
     order_db_models: List[_db_models.OrderDBModel] = _db_access.get(
         _db_models.OrderDBModel, criteria={'car_id': lambda x: x==car_id, 'updated': lambda x: x==True},
     )
@@ -68,8 +72,9 @@ def get_updated_orders(car_id: int) -> _Response:
         m.updated = False
         response = _db_access.update(m)
         if response.status_code != 200:
-            return _Response(body=f"Error when updating order (id={m.id}). {response.body}", status_code=response.status_code)
+            return _api.log_and_respond(response.status_code, f"Error when updating order (id={m.id}). {response.body}")
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
+    _api.log_info(f"Returning {len(orders)} updated orders for car with id={car_id}")
     return _Response(body=orders, status_code=200)
 
 

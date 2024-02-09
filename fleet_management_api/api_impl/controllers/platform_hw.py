@@ -32,6 +32,7 @@ def get_hws() -> _Response:
     """Get all existing platform HWs."""
     hw_id_moodels = _db_access.get(_db_models.PlatformHWDBModel)
     platform_hw_ids: List[_PlatformHW] = [_api.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels]
+    _api.log_info(f"Found {len(platform_hw_ids)} platform HWs.")
     return _Response(body=platform_hw_ids, status_code=200, content_type="application/json")
 
 

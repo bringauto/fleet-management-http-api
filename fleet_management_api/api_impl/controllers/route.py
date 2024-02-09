@@ -17,7 +17,7 @@ def create_route(route: _models.Route) -> _Response:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_response = _check_route_model(route)
         if not check_response.status_code == 200:
-            return check_response
+            return _api.log_and_respond(check_response.status_code, check_response.body)
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(_db_models.RouteDBModel, route_db_model)
         if not response.status_code == 200:
@@ -33,7 +33,7 @@ def delete_route(route_id: int) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(route_id)
     if not related_orders_response.status_code == 200:
-        return related_orders_response
+        return _api.log_and_respond(related_orders_response.status_code, related_orders_response.body)
     response = _db_access.delete(_db_models.RouteDBModel, route_id)
     if not response.status_code == 200:
         note = " (not found)" if response.status_code == 404 else ""
@@ -61,6 +61,7 @@ def get_routes() -> List[_models.Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(_db_models.RouteDBModel)
     route: List[_models.Route] = [_api.route_from_db_model(route_db_model) for route_db_model in route_db_models]
+    _api.log_info(f"Found {len(route)} routes.")
     return _Response(body=route, status_code=200, content_type="application/json")
 
 
@@ -72,7 +73,7 @@ def update_route(route: _models.Route) -> _Response:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_stops_response = _find_nonexistent_stops(route)
         if not check_stops_response.status_code == 200:
-            return check_stops_response
+            return _api.log_and_respond(check_stops_response.status_code, check_stops_response.body)
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.update(updated_obj=route_db_model)
         if response.status_code == 200:
