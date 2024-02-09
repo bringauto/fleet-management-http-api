@@ -13,11 +13,9 @@ def create_order_state(order_state) -> _Response:
     """Post a new state of an existing order."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
-
     order_state = _models.OrderState.from_dict(connexion.request.get_json())
     if not _order_exists(order_state.order_id):
         return _api.log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")
-
     order_state_db_model = _api.order_state_to_db_model(order_state)
     response = _db_access.add(_db_models.OrderStateDBModel, order_state_db_model)
     if response.status_code == 200:
@@ -86,6 +84,6 @@ def _order_exists(order_id: int) -> bool:
 
 
 def _mark_order_as_updated(order_id: int) -> None:
-    order_db_model:_db_models.OrderDBModel = _db_access.get(_db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})[0]
+    order_db_model = _db_access.get(_db_models.OrderDBModel, criteria={'id': lambda x: x==order_id})[0]
     order_db_model.updated = True
     _db_access.update(order_db_model)

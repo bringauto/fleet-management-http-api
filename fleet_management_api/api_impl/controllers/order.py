@@ -13,7 +13,6 @@ def create_order(order) -> _Response:
     """Post a new order. The order must have a unique id and the car must exist."""
     if not connexion.request.is_json:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required")
-
     order = _models.Order.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
         return _api.log_and_respond(404, f"Car with id={order.car_id} does not exist.")
@@ -62,7 +61,6 @@ def get_updated_orders(car_id: int) -> _Response:
     """
     if not _car_exist(car_id):
         return _Response(body=f"Car with id={car_id} was not found.", status_code=404)
-
     order_db_models: List[_db_models.OrderDBModel] = _db_access.get(
         _db_models.OrderDBModel, criteria={'car_id': lambda x: x==car_id, 'updated': lambda x: x==True},
     )

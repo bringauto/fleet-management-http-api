@@ -18,7 +18,10 @@ def create_hw_id(platform_hw_id) -> _Response:
         platform_hwid_db_model = _api.platform_hw_id_to_db_model(platform_hw_id)
         response = _db_access.add(_db_models.PlatformHwIdDBModel, platform_hwid_db_model)
         if response.status_code == 200:
-            return _api.log_and_respond(200, f"Platform HW Id (id={platform_hw_id.id}, name='{platform_hw_id.name}) has been created.")
+            return _api.log_and_respond(
+                200,
+                f"Platform HW Id (id={platform_hw_id.id}, name='{platform_hw_id.name}) has been created."
+            )
         else:
             return _api.log_and_respond(
                 response.status_code,
@@ -49,12 +52,20 @@ def delete_hw_id(platformhwid_id: int) -> _Response:
     The platform HW Id cannot be deleted if assigned to a Car.
     """
     if _db_access.get(_db_models.CarDBModel, criteria={"platformhwid_id": lambda x: x==platformhwid_id}): # type: ignore
-        return _api.log_and_respond(400, f"Platform HW Id with id={platformhwid_id} cannot be deleted because it is assigned to a car.")
-
+        return _api.log_and_respond(
+            400,
+            f"Platform HW Id with id={platformhwid_id} cannot be deleted because it is assigned to a car."
+        )
     response = _db_access.delete(_db_models.PlatformHwIdDBModel, platformhwid_id)
     if response.status_code == 200:
-        return _api.log_and_respond(200, f"Platform HW Id with id={platformhwid_id} has been deleted.")
+        return _api.log_and_respond(
+            200,
+            f"Platform HW Id with id={platformhwid_id} has been deleted."
+        )
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _api.log_and_respond(response.status_code, f"Could not delete platform HW id with id={platformhwid_id}{note}. {response.body}")
+        return _api.log_and_respond(
+            response.status_code,
+            f"Could not delete platform HW id with id={platformhwid_id}{note}. {response.body}"
+        )
 

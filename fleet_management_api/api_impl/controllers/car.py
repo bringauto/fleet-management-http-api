@@ -27,7 +27,9 @@ def create_car(car) -> _Response:  # noqa: E501
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been created.")
         else:
-            return _api.log_and_respond(response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}")
+            return _api.log_and_respond(
+                response.status_code, f"Car (id={car.id}, name='{car.name}) could not be sent. {response.body}"
+            )
 
 
 def delete_car(car_id: int) -> _Response:

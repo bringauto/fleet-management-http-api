@@ -18,12 +18,13 @@ def create_route(route: _models.Route) -> _Response:
         check_response = _check_route_model(route)
         if not check_response.status_code == 200:
             return check_response
-
         route_db_model = _api.route_to_db_model(route)
-        stops: List[_db_models.StopDBModel] = _db_access.get_by_id(_db_models.StopDBModel, *route.stop_ids) # type: ignore
         response = _db_access.add(_db_models.RouteDBModel, route_db_model)
         if not response.status_code == 200:
-            return _api.log_and_respond(response.status_code, f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}")
+            return _api.log_and_respond(
+                response.status_code,
+                f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}"
+            )
         else:
             return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been created.")
 
@@ -33,11 +34,13 @@ def delete_route(route_id: int) -> _Response:
     related_orders_response = _find_related_orders(route_id)
     if not related_orders_response.status_code == 200:
         return related_orders_response
-
     response = _db_access.delete(_db_models.RouteDBModel, route_id)
     if not response.status_code == 200:
         note = " (not found)" if response.status_code == 404 else ""
-        return _api.log_and_respond(response.status_code, f"Could not delete route with id={route_id}{note}. {response.body}")
+        return _api.log_and_respond(
+            response.status_code,
+            f"Could not delete route with id={route_id}{note}. {response.body}"
+        )
     else:
         route_deletion_msg = f"Route with id={route_id} has been deleted."
         return _api.log_and_respond(200, route_deletion_msg)
@@ -67,11 +70,9 @@ def update_route(route: _models.Route) -> _Response:
         return _api.log_and_respond(400, f"Invalid request format: {connexion.request.data}. JSON is required.")
     else:
         route = _models.Route.from_dict(connexion.request.get_json())
-
         check_stops_response = _find_nonexistent_stops(route)
         if not check_stops_response.status_code == 200:
             return check_stops_response
-
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.update(updated_obj=route_db_model)
         if response.status_code == 200:
@@ -79,7 +80,10 @@ def update_route(route: _models.Route) -> _Response:
             return _Response(status_code=response.status_code, content_type="application/json", body=route)
         else:
             note = " (not found)" if response.status_code == 404 else ""
-            return _api.log_and_respond(404, f"Route (id={route.id}) was not found and could not be updated{note}. {response.body}")
+            return _api.log_and_respond(
+                404,
+                f"Route (id={route.id}) was not found and could not be updated{note}. {response.body}"
+            )
 
 
 def _check_route_model(route: _models.Route) -> _Response:
@@ -89,19 +93,29 @@ def _check_route_model(route: _models.Route) -> _Response:
     check_stops_response = _find_nonexistent_stops(route)
     if not check_stops_response.status_code == 200:
         return check_stops_response
-    return _Response(status_code=200, content_type="text/plain", body=f"Route (id={route.id}, name='{route.name}) has been checked.")
+    return _Response(
+        status_code=200,
+        content_type="text/plain",
+        body=f"Route (id={route.id}, name='{route.name}) has been checked."
+    )
 
 
 def _create_empty_route_points_list(route: _models.Route) -> _Response:
-    response = _db_access.add(_db_models.RoutePointsDBModel, _db_models.RoutePointsDBModel(id=route.id, route_id=route.id, points=[]))
+    response = _db_access.add(
+        _db_models.RoutePointsDBModel,
+        _db_models.RoutePointsDBModel(id=route.id, route_id=route.id, points=[])
+    )
     if not response.status_code == 200:
         return _Response(
             response.status_code,
             content_type="text/plain",
-            body=f"Could not create route point for route with id={route.id}, name='{route.name}'."
-                 f"{response.body}")
+            body=f"Could not create route point for route with id={route.id}, name='{route.name}'. {response.body}")
     else:
-        return _Response(status_code=200, content_type="text/plain", body=f"Empty list of route points for route with id={route.id}, name='{route.name}' has been created.")
+        return _Response(
+            status_code=200,
+            content_type="text/plain",
+            body=f"Empty list of route points for route with id={route.id}, name='{route.name}' has been created."
+        )
 
 
 def _find_nonexistent_stops(route: _models.Route) -> _Response:
@@ -112,10 +126,14 @@ def _find_nonexistent_stops(route: _models.Route) -> _Response:
         return _Response(
             status_code=404,
             content_type="text/plain",
-            body=f"Route (id={route.id}, name='{route.name}) has not been created -some of the required stops do not exist."
+            body=f"Route (id={route.id}, name='{route.name}) has not been created - some of the required stops do not exist."
                  f"Nonexstent stop ids: {nonexistent_stop_ids}")
     else:
-        return _Response(status_code=200, content_type="text/plain", body=f"Route (id={route.id}, name='{route.name}) has been created.")
+        return _Response(
+            status_code=200,
+            content_type="text/plain",
+            body=f"Route (id={route.id}, name='{route.name}) has been created."
+        )
 
 
 def _find_related_orders(route_id: int) -> _Response:
