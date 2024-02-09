@@ -1,4 +1,3 @@
-import sys
 from sqlalchemy.engine import Engine
 
 from fleet_management_api.api_impl.api_keys import create_key as _create_key
