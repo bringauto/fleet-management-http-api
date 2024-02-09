@@ -4,7 +4,7 @@
 - [Car State](#car-state)
 - [Order](#order)
 - [Order State](#order-state)
-- [Platform HW Id](#platform-hw-id)
+- [Platform HW](#platform-hw)
 - [Route](#route)
 - [Route Points](#route-points)
 - [Stop](#stop)
@@ -19,7 +19,7 @@
 
 Requirements:
 - A unique ID.
-- [Platform HW ID](#platformhwid) must exist and must not be used by some other Car.
+- [Platform HW](#platformhw) must exist and must not be used by some other Car.
 
 Result:
 - A Car is created.
@@ -89,7 +89,7 @@ Result:
 - All the Clients waiting for new Order States of a particular [Order](#order) receive a response (for the order state GET method).
 
 
-## Platform HW ID
+## Platform HW
 
 ### Post
 
@@ -97,15 +97,15 @@ Requirements:
 - A unique ID.
 
 Result:
-- A Platform HW ID is created.
+- A Platform HW is created.
 
 ### Delete
 
 Requirements:
-- There must be no [Car](#car) referencing the Platform HW ID.
+- There must be no [Car](#car) referencing the Platform HW.
 
 Result:
-- The Platform HW ID is deleted.
+- The Platform HW is deleted.
 
 
 ## Route
@@ -142,7 +142,7 @@ Result:
 - The newly posted Route Points object replaces the already existing one.
 
 ### Delete
-The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted or when the a new Route Points object is posted with the same Route ID.
+The Route Points object is always deleted if and only if the referenced [Route](#route) is deleted or when a new Route Points object is posted with the same Route ID.
 
 
 ## Stop

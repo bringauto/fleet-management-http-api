@@ -1,10 +1,8 @@
 from __future__ import annotations
-from typing import List
 import dataclasses
 
-import sqlalchemy as _sqa
-from sqlalchemy import Integer, String, Engine, ForeignKey
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
+from sqlalchemy import Integer, String, Engine
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
 
 
 class Base(DeclarativeBase):
@@ -28,30 +26,6 @@ class TestBase2(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     test_str_2: Mapped[str] = mapped_column(String)
     test_int_2: Mapped[int] = mapped_column(Integer)
-
-
-@dataclasses.dataclass
-class FamilyRelationship(Base):
-    __tablename__ = 'family'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    parent_id: Mapped[int] = mapped_column(Integer, ForeignKey('parents.id'))
-    child_id: Mapped[int] = mapped_column(Integer, ForeignKey('children.id'))
-    children = relationship("ChildDBModel", backref="family")
-    parents = relationship("ParentDBModel", backref="family")
-
-
-@dataclasses.dataclass
-class ParentDBModel(Base):
-    __tablename__ = 'parents'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String)
-
-
-@dataclasses.dataclass
-class ChildDBModel(Base):
-    __tablename__ = 'children'
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
-    name: Mapped[str] = mapped_column(String)
 
 
 def initialize_test_tables(connection_engine: Engine|None) -> None:

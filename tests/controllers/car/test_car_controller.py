@@ -3,10 +3,10 @@ import sys
 sys.path.append('.')
 import unittest
 
-from fleet_management_api.models import Car, PlatformHwId, Order
+from fleet_management_api.models import Car, PlatformHW, Order
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
-from tests.utils.setup_utils import create_stops, create_platform_hw_ids
+from tests.utils.setup_utils import create_stops, create_platform_hws
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
@@ -14,7 +14,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
         app = _app.get_test_app()
-        create_platform_hw_ids(app, 5, 6)
+        create_platform_hws(app, 5, 6)
 
     def test_cars_list_is_initially_available_and_empty(self):
         app = _app.get_test_app()
@@ -23,7 +23,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
-    def test_creating_car_without_existing_platform_hw_id_yields_404_error_code(self):
+    def test_creating_car_without_existing_platform_hw_yields_404_error_code(self):
         car = Car(id=1, name="Test Car", platform_hw_id=616465168, under_test=False)
         app = _app.get_test_app()
         with app.app.test_client() as c:
@@ -90,10 +90,10 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
+        platformhw = PlatformHW(id=5, name="Test Platform HW")
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
+            c.post('/v2/management/platformhw', json=platformhw)
 
     def test_retrieving_single_existing_car(self):
         car_id = 17
@@ -120,14 +120,11 @@ class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
-        app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 5)
 
     def test_posting_and_getting_car_from_example_in_specification(self):
-        app = _app.get_test_app()
-        with app.app.test_client() as c:
+        with self.app.app.test_client() as c:
             example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Car"]["example"]
             example['platformHwId'] = 5
             c.post('/v2/management/car', json=example, content_type='application/json')
@@ -140,11 +137,8 @@ class Test_Logging_Car_Creation(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
-
+        create_platform_hws(app, 5)
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs('werkzeug', level='INFO') as logs:
@@ -169,10 +163,8 @@ class Test_Updating_Car(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
+        create_platform_hws(app, 5)
 
     def test_add_and_succesfully_update_car(self) -> None:
         car = Car(id=1, name="Test Car", platform_hw_id=5)
@@ -207,11 +199,9 @@ class Test_Deleting_Car(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test("test_db.db")
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
+        create_platform_hws(app, 5)
         create_stops(app, 7)
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
 
     def test_add_and_delete_car(self) -> None:
         app = _app.get_test_app()
@@ -255,12 +245,10 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        platformhwid = PlatformHwId(id=5, name="Test Platform Hw Id")
         app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post('/v2/management/platformhwid', json=platformhwid)
+        create_platform_hws(app, 5)
 
-    def test_creating_car_using_platformhwid_already_assigned_to_other_car_yields_code_400(self):
+    def test_creating_car_using_platformhw_already_assigned_to_other_car_yields_code_400(self):
         car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)
         car_2 = Car(id=2, name="Test Car 2", platform_hw_id=5)
         with _app.get_test_app().app.test_client() as c:

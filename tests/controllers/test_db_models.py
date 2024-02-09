@@ -9,7 +9,7 @@ from fleet_management_api.models import (
     GNSSPosition,
     Order,
     OrderState,
-    PlatformHwId,
+    PlatformHW,
     Route,
     Stop,
     RoutePoints
@@ -30,7 +30,7 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
         self.assertEqual(car_db_model.name, car.name)
-        self.assertEqual(car_db_model.platformhwid_id, car.platform_hw_id)
+        self.assertEqual(car_db_model.platform_hw_id, car.platform_hw_id)
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
         self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone.to_dict())
         self.assertEqual(car_db_model.under_test, car.under_test)
@@ -42,7 +42,7 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
         self.assertEqual(car_db_model.name, car.name)
-        self.assertEqual(car_db_model.platformhwid_id, car.platform_hw_id)
+        self.assertEqual(car_db_model.platform_hw_id, car.platform_hw_id)
         self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone)
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
 
@@ -151,15 +151,15 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
 class Test_Creating_Platform_HW_Id_DB_Model(unittest.TestCase):
 
     def test_creating_db_model_from_paltform_hw_id_preserves_attribute_values(self):
-        platform_hwid = PlatformHwId(id=1, name="test_platform")
-        platform_db_model = _obj_to_db.platform_hw_id_to_db_model(platform_hwid)
+        platform_hwid = PlatformHW(id=1, name="test_platform")
+        platform_db_model = _obj_to_db.platform_hw_to_db_model(platform_hwid)
         self.assertEqual(platform_db_model.id, platform_hwid.id)
         self.assertEqual(platform_db_model.name, platform_hwid.name)
 
     def test_platform_hwid_converted_to_db_model_and_back_preserves_its_attributes(self):
-        platform_hwid_in = PlatformHwId(id=1, name="test_platform")
-        platform_hwid_out = _obj_to_db.platform_hw_id_from_db_model(
-            _obj_to_db.platform_hw_id_to_db_model(platform_hwid_in)
+        platform_hwid_in = PlatformHW(id=1, name="test_platform")
+        platform_hwid_out = _obj_to_db.platform_hw_from_db_model(
+            _obj_to_db.platform_hw_to_db_model(platform_hwid_in)
         )
         self.assertEqual(platform_hwid_out, platform_hwid_in)
 

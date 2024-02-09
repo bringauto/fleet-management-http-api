@@ -11,7 +11,7 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState
 import fleet_management_api.database as database
-from tests.utils.setup_utils import create_platform_hw_ids, create_stops
+from tests.utils.setup_utils import create_platform_hws, create_stops
 
 
 class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
@@ -19,7 +19,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hw_ids(self.app, 1)
+        create_platform_hws(self.app, 1)
         create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -68,7 +68,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         database.set_content_timeout_ms(1000)
         self.app = _app.get_test_app()
-        create_platform_hw_ids(self.app, 1)
+        create_platform_hws(self.app, 1)
         create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -105,7 +105,7 @@ class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hw_ids(self.app, 1)
+        create_platform_hws(self.app, 1)
         create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
@@ -114,7 +114,7 @@ class Test_Timeouts(unittest.TestCase):
             c.post('/v2/management/order', json=order)
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        database.set_content_timeout_ms(100)
+        database.set_content_timeout_ms(120)
         order_state = OrderState(id=1, order_id=12, status="in_progress")
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
@@ -141,7 +141,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hw_ids(self.app, 1)
+        create_platform_hws(self.app, 1)
         create_stops(self.app, 1)
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(id=12, priority="high", user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})

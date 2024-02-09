@@ -27,8 +27,8 @@ tags:
     description: Order related functions
   - name: orderState
     description: Order state related functions
-  - name: platformHwId
-    description: Platform hardware ID related functions
+  - name: platformHW
+    description: Platform hardware related functions
   - name: route
     description: Route state related functions
   - name: stop
@@ -57,10 +57,10 @@ paths:
   /orderstate/{orderId}:
     $ref: 'order.yaml#/paths/~1orderstate~1{orderId}'
 
-  /platformhwid:
-    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid'
-  /platformhwid/{platformhwidId}:
-    $ref: 'platform_hw_id.yaml#/paths/~1platformhwid~1{platformhwidId}'
+  /platformhw:
+    $ref: 'platform_hw.yaml#/paths/~1platformhw'
+  /platformhw/{platformHwId}:
+    $ref: 'platform_hw.yaml#/paths/~1platformhw~1{platformHwId}'
 
   /route:
     $ref: 'route.yaml#/paths/~1route'

@@ -22,7 +22,7 @@ def create_car(car) -> _Response:  # noqa: E501
         response = _db_access.add(
             _db_models.CarDBModel,
             car_db_model,
-            check_reference_existence={_db_models.PlatformHwIdDBModel: car.platform_hw_id}
+            check_reference_existence={_db_models.PlatformHWDBModel: car.platform_hw_id}
         )
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Car (id={car.id}, name='{car.name}) has been created.")

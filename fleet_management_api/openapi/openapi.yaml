@@ -24,8 +24,8 @@ tags:
   name: order
 - description: Order state related functions
   name: orderState
-- description: Platform hardware ID related functions
-  name: platformHwId
+- description: Platform hardware related functions
+  name: platformHW
 - description: Route state related functions
   name: route
 - description: Stop state related functions
@@ -1195,9 +1195,9 @@ paths:
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
-  /platformhwid:
+  /platformhw:
     get:
-      operationId: get_hw_ids
+      operationId: get_hws
       responses:
         "200":
           content:
@@ -1207,9 +1207,9 @@ paths:
                 name: ABCD1234EF56
               schema:
                 items:
-                  $ref: '#/components/schemas/PlatformHwId'
+                  $ref: '#/components/schemas/PlatformHW'
                 type: array
-          description: Successfuly found all platform hardware IDs
+          description: Successfuly found all platform hardware
         "401":
           content:
             application/json:
@@ -1243,25 +1243,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all platform hwIds
+      summary: Finds all platform HW
       tags:
-      - platformHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      - platformHw
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     post:
       operationId: create_hw_id
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlatformHwId'
-        description: Platform hardware ID json
+              $ref: '#/components/schemas/PlatformHW'
+        description: Platform hardware json
         required: true
-        x-body-name: platformHwId
+        x-body-name: platformHW
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful platform hardware ID creation
+          description: Successful platform hardware creation
         "400":
           content:
             application/json:
@@ -1306,18 +1306,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new platform hwId
+      summary: Create a new platform HW
       tags:
-      - platformHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
-  /platformhwid/{platformhwidId}:
+      - platformHW
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
+  /platformhw/{platformHwId}:
     delete:
-      operationId: delete_hw_id
+      operationId: delete_hw
       parameters:
-      - description: ID of platform hwId to delete
+      - description: ID of platform HW to delete
         example: 1
         in: path
-        name: platformhwidId
+        name: platformHwId
         required: true
         schema:
           format: int32
@@ -1326,7 +1326,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successful platform hardware ID removal
+          description: Successful platform HW removal
         "400":
           content:
             application/json:
@@ -1393,17 +1393,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete a platform hwId
+      summary: Delete a platform HW
       tags:
-      - platformHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      - platformHw
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     get:
-      operationId: get_hw_id
+      operationId: get_hw
       parameters:
-      - description: ID of platform hwId to return
+      - description: ID of platform HW to return
         example: 1
         in: path
-        name: platformhwidId
+        name: platformHwId
         required: true
         schema:
           format: int32
@@ -1413,8 +1413,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformHwId'
-          description: Successfuly found platform hardware ID
+                $ref: '#/components/schemas/PlatformHW'
+          description: Successfuly found platform HW
         "400":
           content:
             application/json:
@@ -1470,10 +1470,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds platform hwId by ID
+      summary: Find platform HW by ID
       tags:
-      - platformHwId
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hwid
+      - platformHw
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
   /route:
     get:
       operationId: get_routes
@@ -2751,8 +2751,8 @@ components:
       example: to_accept
       title: OrderStatus
       type: string
-    PlatformHwId:
-      description: PlatformHwId object structure
+    PlatformHW:
+      description: PlatformHW object structure
       example:
         name: ABCD1234EF56
         id: 1
@@ -2769,7 +2769,7 @@ components:
       required:
       - id
       - name
-      title: PlatformHwId
+      title: PlatformHW
       type: object
     Route:
       description: Route object structure

@@ -4,7 +4,8 @@ fleet_management_api/controllers/car_controller.py
 fleet_management_api/controllers/car_state_controller.py
 fleet_management_api/controllers/order_controller.py
 fleet_management_api/controllers/order_state_controller.py
-fleet_management_api/controllers/platform_hw_id_controller.py
+fleet_management_api/controllers/platform_hw_controller.py
+fleet_management_api/controllers/platform_hw_controller.py
 fleet_management_api/controllers/route_controller.py
 fleet_management_api/controllers/stop_controller.py
 fleet_management_api/encoder.py
@@ -19,7 +20,7 @@ fleet_management_api/models/mobile_phone.py
 fleet_management_api/models/order.py
 fleet_management_api/models/order_state.py
 fleet_management_api/models/order_status.py
-fleet_management_api/models/platform_hw_id.py
+fleet_management_api/models/platform_hw.py
 fleet_management_api/models/route.py
 fleet_management_api/models/route_points.py
 fleet_management_api/models/stop.py

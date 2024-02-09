@@ -11,7 +11,7 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
     return _db_models.CarDBModel(
         id=car.id,
         name=car.name,
-        platformhwid_id=car.platform_hw_id,
+        platform_hw_id=car.platform_hw_id,
         car_admin_phone=car_mobile_phone,
         default_route_id=car.default_route_id,
         under_test=car.under_test
@@ -26,7 +26,7 @@ def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
         name=car_db_model.name,
-        platform_hw_id=car_db_model.platformhwid_id,
+        platform_hw_id=car_db_model.platform_hw_id,
         car_admin_phone=car_mobile_phone,
         default_route_id=car_db_model.default_route_id,
         under_test=car_db_model.under_test
@@ -115,17 +115,17 @@ def order_state_from_db_model(order_state_db_model: _db_models.OrderStateDBModel
     )
 
 
-def platform_hw_id_to_db_model(platform_hw_id: _models.PlatformHwId) -> _db_models.PlatformHwIdDBModel:
-    return _db_models.PlatformHwIdDBModel(
-        id=platform_hw_id.id,
-        name=platform_hw_id.name
+def platform_hw_to_db_model(platform_hw: _models.PlatformHW) -> _db_models.PlatformHWDBModel:
+    return _db_models.PlatformHWDBModel(
+        id=platform_hw.id,
+        name=platform_hw.name
     )
 
 
-def platform_hw_id_from_db_model(platform_hw_id_db_model: _db_models.PlatformHwIdDBModel) -> _models.PlatformHwId:
-    return _models.PlatformHwId(
-        id = platform_hw_id_db_model.id,
-        name = platform_hw_id_db_model.name
+def platform_hw_from_db_model(platform_hw_db_model: _db_models.PlatformHWDBModel) -> _models.PlatformHW:
+    return _models.PlatformHW(
+        id = platform_hw_db_model.id,
+        name = platform_hw_db_model.name
     )
 
 

@@ -20,7 +20,7 @@ class Base(_DeclarativeBase):
 
 
 @dataclasses.dataclass
-class PlatformHwIdDBModel(Base):
+class PlatformHWDBModel(Base):
     __tablename__ = 'platform_hw_ids'
     id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
@@ -34,15 +34,15 @@ class CarDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
-    platformhwid_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False, unique=True)
+    platform_hw_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False, unique=True)
     under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, nullable=False)
 
-    platformhwid: _Mapped[PlatformHwIdDBModel] = _relationship("PlatformHwIdDBModel", back_populates="cars", lazy="noload")
+    platformhw: _Mapped["PlatformHWDBModel"] = _relationship("PlatformHWDBModel", back_populates="cars", lazy="noload")
     states: _Mapped[List["CarStateDBModel"]] = _relationship("CarStateDBModel", cascade='save-update, merge, delete', back_populates="car")
     orders: _Mapped[List["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
 
     def __repr__(self) -> str:
-        return f"Car(id={self.id}, name={self.name}, platform_hw_id={self.platformhwid_id})"
+        return f"Car(id={self.id}, name={self.name}, platform_hw_id={self.platform_hw_id})"
 
 
 @dataclasses.dataclass

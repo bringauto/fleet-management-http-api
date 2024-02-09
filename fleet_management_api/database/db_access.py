@@ -130,7 +130,7 @@ def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] =
             for id_value in ids:
                 result = session.get(base, id_value)
                 if result is not None:
-                    results.append(result)
+                    results.append(result.copy())
             return results
         except _NoResultFound as e:
             raise _NoResultFound(f"{_model_name(base)} with id={id_value} not found. {e}")

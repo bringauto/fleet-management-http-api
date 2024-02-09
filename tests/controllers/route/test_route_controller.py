@@ -4,7 +4,7 @@ sys.path.append('.')
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
-from fleet_management_api.models import Route, Order, Car, PlatformHwId, Stop, GNSSPosition
+from fleet_management_api.models import Route, Order, Car, PlatformHW, Stop, GNSSPosition
 from tests.utils.setup_utils import create_stops
 
 
@@ -160,11 +160,11 @@ class Test_Deleting_Route(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_route_cannot_be_deleted_if_some_order_references_it(self):
-        platform_hw_id = PlatformHwId(id=1, name="test_platform_hw_id_1")
+        platform_hw = PlatformHW(id=1, name="test_platform_hw_1")
         car = Car(id=1, name="test_car_1", platform_hw_id=1)
         order = Order(id=1, stop_route_id=78, target_stop_id=1, user_id=1, car_id=1)
         with self.app.app.test_client() as c:
-            response = c.post('/v2/management/platformhwid', json=platform_hw_id)
+            response = c.post('/v2/management/platformhw', json=platform_hw)
             c.post('/v2/management/car', json=car)
             c.post('/v2/management/order', json=order)
             response = c.delete('/v2/management/route/78')
