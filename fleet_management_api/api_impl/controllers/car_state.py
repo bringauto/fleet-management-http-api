@@ -59,7 +59,7 @@ def get_car_states(car_id: int, all_available: bool = False) -> _Response:
         return _Response(body=car_states, status_code=200, content_type="application/json")
     except _db_access.ParentNotFound as e:
         return _api.log_and_respond(404, f"Car with id={car_id} not found. {e}")
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         return _api.log_and_respond(500, f"Error: {e}")
 
 
@@ -75,10 +75,7 @@ def _remove_old_states(car_id: int) -> _Response:
             start_from="minimum",
             criteria={'car_id': lambda x: x==car_id}
         )
-        if response.status_code != 200:
-            return _Response(response.status_code, response.body)
-        else:
-            return _Response(200, f"Removing oldest state from database (car id = {car_id}).")
+        return _Response(response.status_code, response.body)
     else:
         return _Response(status_code=200, content_type="text/plain", body="")
 
