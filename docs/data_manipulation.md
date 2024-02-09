@@ -24,7 +24,6 @@ Requirements:
 Result:
 - A Car is created.
 
-
 ### Delete
 
 Requirements:
@@ -44,18 +43,6 @@ There is a maximum number $N_{car\,states}$ of Car States to be stored by the AP
 Requirements:
 - A unique ID.
 - The referenced [Car](#car) must exist.
-
-Result:
-- A Car State is created.
-- Oldest Car States might be deleted, so the number of states stored by the API for the particular [Car](#car) is not greater than $N_{car\,states}$.
-
-### Start/stop Car
-
-The car can be stopped/started by phone call, which posts a new car state with status "stopped_by_phone" (stops the car) or "idle" (starts the car).
-
-Requirements:
-- The [Car](#car) must exist.
-- The last [Car State](#car-state) must be either `stopped_by_phone` or `idle`.
 
 Result:
 - A Car State is created.
