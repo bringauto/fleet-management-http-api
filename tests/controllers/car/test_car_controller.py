@@ -24,14 +24,14 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.json, [])
 
     def test_creating_car_without_existing_platform_hw_id_yields_404_error_code(self):
-        car = Car(id=1, name="Test Car", platform_hw_id=616465168)
+        car = Car(id=1, name="Test Car", platform_hw_id=616465168, under_test=False)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post('/v2/management/car', json=car, content_type='application/json')
             self.assertEqual(response.status_code, 404)
 
     def test_creating_and_retrieving_a_car(self):
-        car = Car(id=1, name="Test Car", platform_hw_id=5)
+        car = Car(id=1, name="Test Car", platform_hw_id=5, under_test=False)
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post('/v2/management/car', json=car, content_type='application/json')
@@ -39,6 +39,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             response = c.get('/v2/management/car')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]['name'], car.name)
+            self.assertEqual(response.json[0]['under_test'], car.under_test)
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(id=1, name="Test Car 1", platform_hw_id=5)

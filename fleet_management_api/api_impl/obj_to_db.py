@@ -13,7 +13,8 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
         name=car.name,
         platformhwid_id=car.platform_hw_id,
         car_admin_phone=car_mobile_phone,
-        default_route_id=car.default_route_id
+        default_route_id=car.default_route_id,
+        under_test=car.under_test
     )
 
 
@@ -27,7 +28,8 @@ def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
         name=car_db_model.name,
         platform_hw_id=car_db_model.platformhwid_id,
         car_admin_phone=car_mobile_phone,
-        default_route_id=car_db_model.default_route_id
+        default_route_id=car_db_model.default_route_id,
+        under_test=car_db_model.under_test
     )
 
 

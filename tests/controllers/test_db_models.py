@@ -24,13 +24,16 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             name='test_car',
             platform_hw_id=5,
             car_admin_phone=MobilePhone(phone='1234567890'),
-            default_route_id=1
+            default_route_id=1,
+            under_test=True
         )
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.id, car.id)
         self.assertEqual(car_db_model.name, car.name)
         self.assertEqual(car_db_model.platformhwid_id, car.platform_hw_id)
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
+        self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone.to_dict())
+        self.assertEqual(car_db_model.under_test, car.under_test)
         phone_in_db_model = MobilePhone.from_dict(car_db_model.car_admin_phone)
         self.assertEqual(phone_in_db_model, car.car_admin_phone)
 
