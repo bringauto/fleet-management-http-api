@@ -8,7 +8,7 @@ paths:
       summary: Create a new car
       requestBody:
         x-body-name: car
-        description: New car json
+        description: A Car model in JSON format.
         content:
           application/json:
             schema:
@@ -16,11 +16,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful car creation
+          description: Successful created a new car.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -37,7 +36,7 @@ paths:
       summary: Finds all cars
       responses:
         '200':
-          description: Successfuly found all cars
+          description: Returning all existing cars.
           content:
             application/json:
               schema:
@@ -79,9 +78,8 @@ paths:
         '200':
           description: Successful car update
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -143,6 +141,10 @@ paths:
       responses:
         '200':
           description: Successful car removal
+          content:
+            text/plain:
+              type: string
+              example: 2 cars were succesfully removed.
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -203,9 +205,8 @@ paths:
         '200':
           description: Successfuly added car state
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CarState'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':

@@ -17,7 +17,7 @@ def create_route(route):  # noqa: E501
     :param route: New route json
     :type route: dict | bytes
 
-    :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route = Route.from_dict(connexion.request.get_json())  # noqa: E501
@@ -51,7 +51,7 @@ def get_route(route_id):  # noqa: E501
 
 
 def get_route_points(route_id):  # noqa: E501
-    """Finds route points gor given route identified by the route&#39;s ID
+    """Finds route points for given route identified by the route&#39;s ID
 
      # noqa: E501
 
@@ -75,14 +75,14 @@ def get_routes():  # noqa: E501
 
 
 def redefine_route_points(route_points):  # noqa: E501
-    """Finds route points gor given route identified by the route&#39;s ID
+    """Finds route points for given route identified by the route&#39;s ID
 
      # noqa: E501
 
     :param route_points: Route points json
     :type route_points: dict | bytes
 
-    :rtype: Union[str, Tuple[str, int], Tuple[str, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route_points = RoutePoints.from_dict(connexion.request.get_json())  # noqa: E501
@@ -97,7 +97,7 @@ def update_route(route):  # noqa: E501
     :param route: Route update json
     :type route: dict | bytes
 
-    :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route = Route.from_dict(connexion.request.get_json())  # noqa: E501

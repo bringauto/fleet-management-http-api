@@ -13,10 +13,10 @@ def create_car(car):  # noqa: E501
 
      # noqa: E501
 
-    :param car: New car json
+    :param car: A Car model in JSON format.
     :type car: dict | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
@@ -81,7 +81,7 @@ def update_car(car):  # noqa: E501
     :param car: Car update json
     :type car: dict | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501

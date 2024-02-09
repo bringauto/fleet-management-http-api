@@ -16,7 +16,7 @@ def create_hw_id(platform_hw_id):  # noqa: E501
     :param platform_hw_id: Platform hardware ID json
     :type platform_hw_id: dict | bytes
 
-    :rtype: Union[PlatformHwId, Tuple[PlatformHwId, int], Tuple[PlatformHwId, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         platform_hw_id = PlatformHwId.from_dict(connexion.request.get_json())  # noqa: E501

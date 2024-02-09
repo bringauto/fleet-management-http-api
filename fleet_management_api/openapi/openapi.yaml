@@ -52,7 +52,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Car'
                 type: array
-          description: Successfuly found all cars
+          description: Returning all existing cars.
         "401":
           content:
             application/json:
@@ -97,16 +97,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Car'
-        description: New car json
+        description: A Car model in JSON format.
         required: true
         x-body-name: car
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
-          description: Successful car creation
+            text/plain: {}
+          description: Successful created a new car.
         "400":
           content:
             application/json:
@@ -168,9 +166,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
+            text/plain: {}
           description: Successful car update
         "400":
           content:
@@ -319,6 +315,9 @@ paths:
           type: integer
       responses:
         "200":
+          content:
+            text/plain:
+              example: 2 cars were succesfully removed.
           description: Successful car removal
         "400":
           content:
@@ -529,9 +528,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CarState'
+            text/plain: {}
           description: Successfuly added car state
         "400":
           content:
@@ -680,6 +677,7 @@ paths:
               - id: 1
                 priority: normal
                 userId: 1
+                status: to_accept
                 carId: 1
                 targetStopId: 1
                 stopRouteId: 1
@@ -740,9 +738,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
+            text/plain: {}
           description: Successful order creation
         "400":
           content:
@@ -895,6 +891,8 @@ paths:
           type: integer
       responses:
         "200":
+          content:
+            text/plain: {}
           description: Successful order removal
         "400":
           content:
@@ -1128,9 +1126,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain: {}
           description: Succesfully added new order state
         "400":
           content:
@@ -1223,9 +1219,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain: {}
           description: Successfuly found order state
         "400":
           content:
@@ -1340,9 +1334,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformHwId'
+            text/plain: {}
           description: Successful platform hardware ID creation
         "400":
           content:
@@ -1406,6 +1398,8 @@ paths:
           type: integer
       responses:
         "200":
+          content:
+            text/plain: {}
           description: Successful platform hardware ID removal
         "400":
           content:
@@ -1628,9 +1622,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain: {}
           description: Successful route creation
         "400":
           content:
@@ -1693,9 +1685,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain: {}
           description: Successful route update
         "400":
           content:
@@ -1770,6 +1760,8 @@ paths:
           type: integer
       responses:
         "200":
+          content:
+            text/plain: {}
           description: Successful route removal
         "400":
           content:
@@ -1932,9 +1924,7 @@ paths:
       responses:
         "200":
           content:
-            text/plain:
-              schema:
-                type: string
+            text/plain: {}
           description: Successfuly found route points
         "400":
           content:
@@ -2144,9 +2134,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stop'
+            text/plain: {}
           description: Successful stop creation
         "400":
           content:
@@ -2209,9 +2197,7 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stop'
+            text/plain: {}
           description: Successful stop update
         "400":
           content:
@@ -2286,6 +2272,8 @@ paths:
           type: integer
       responses:
         "200":
+          content:
+            text/plain: {}
           description: Successful stop removal
         "400":
           content:

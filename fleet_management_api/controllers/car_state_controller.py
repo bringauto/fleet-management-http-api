@@ -16,7 +16,7 @@ def add_car_state(car_state):  # noqa: E501
     :param car_state: Car state json
     :type car_state: dict | bytes
 
-    :rtype: Union[CarState, Tuple[CarState, int], Tuple[CarState, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         car_state = CarState.from_dict(connexion.request.get_json())  # noqa: E501

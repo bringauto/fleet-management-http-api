@@ -18,9 +18,8 @@ paths:
         '200':
           description: Successful route creation
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -83,9 +82,8 @@ paths:
         '200':
           description: Successful route update
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -140,6 +138,9 @@ paths:
       responses:
         '200':
           description: Successful route removal
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -198,8 +199,7 @@ paths:
           description: Successfuly found route points
           content:
             text/plain:
-              schema:
-                type: string
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

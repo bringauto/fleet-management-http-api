@@ -18,9 +18,8 @@ paths:
         '200':
           description: Successful stop creation
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stop'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -81,9 +80,8 @@ paths:
         '200':
           description: Successful stop update
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stop'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -145,6 +143,9 @@ paths:
       responses:
         '200':
           description: Successful stop removal
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

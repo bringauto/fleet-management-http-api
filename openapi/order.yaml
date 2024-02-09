@@ -18,9 +18,8 @@ paths:
         '200':
           description: Successful order creation
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -114,6 +113,9 @@ paths:
       responses:
         '200':
           description: Successful order removal
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -180,9 +182,8 @@ paths:
         '200':
           description: Succesfully added new order state
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -248,9 +249,8 @@ paths:
         '200':
           description: Successfuly found order state
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

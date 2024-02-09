@@ -18,9 +18,8 @@ paths:
         '200':
           description: Successful platform hardware ID creation
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformHwId'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -108,6 +107,9 @@ paths:
       responses:
         '200':
           description: Successful platform hardware ID removal
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
