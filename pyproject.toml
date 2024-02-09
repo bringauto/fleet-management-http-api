@@ -1,3 +1,8 @@
 [project]
 name = "fleet_management_api"
-version = "1.0.0"
+version = "1.1.0"
+
+
+[tool.setuptools.packages.find]
+include = ["fleet_management_api", "openapi", "config"]
+exclude = ["tests"]
