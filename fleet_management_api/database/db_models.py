@@ -26,6 +26,9 @@ class PlatformHWDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     cars: _Mapped[List["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
 
+    def __repr__(self) -> str:
+        return f"PlatformHW(id={self.id}, name={self.name})"
+
 
 @dataclasses.dataclass
 class CarDBModel(Base):
@@ -55,7 +58,7 @@ class CarStateDBModel(Base):
     speed: _Mapped[float] = _mapped_column(_sqa.Float)
     fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger) # this attribute serves for auto-removal of car old states
 
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="noload")
 
@@ -67,6 +70,10 @@ class CarStateDBModel(Base):
     def set_max_n_of_stored_states(cls, n: int) -> None:
         if n>0:
             cls._max_n_of_states = n
+
+    def __repr__(self) -> str:
+        return f"CarState(id={self.id}, car_id={self.car_id}, status={self.status}, speed={self.speed}, " \
+            f"fuel={self.fuel}, position={self.position}, timestamp={self.timestamp})"
 
 
 @dataclasses.dataclass
@@ -108,13 +115,8 @@ class OrderStateDBModel(Base):
         if n>0:
             cls._max_n_of_states = n
 
-
-stop_route_association_table = _sqa.Table(
-    'stop_route_association',
-    Base.metadata,
-    _sqa.Column('stop_id', _sqa.ForeignKey('stops.id'), primary_key=True),
-    _sqa.Column('route_id', _sqa.ForeignKey('routes.id'), primary_key=True)
-)
+    def __repr__(self) -> str:
+        return f"OrderState(id={self.id}, order_id={self.order_id}, status={self.status}, timestamp={self.timestamp})"
 
 
 @dataclasses.dataclass
@@ -126,6 +128,9 @@ class StopDBModel(Base):
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
 
     orders: _Mapped[List["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="target_stop")
+
+    def __repr__(self) -> str:
+        return f"Stop(id={self.id}, name={self.name}, position={self.position}, notification_phone={self.notification_phone})"
 
 
 @dataclasses.dataclass
@@ -149,6 +154,9 @@ class RoutePointsDBModel(Base):
     route: _Mapped[RouteDBModel] = _relationship("RouteDBModel", back_populates="route_points", lazy="noload")
     route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
 
+    def __repr__(self) -> str:
+        return f"RoutePoints(id={self.id}, route_id={self.route_id}, points={self.points})"
+
 
 @dataclasses.dataclass
 class ApiKeyDBModel(Base):
@@ -157,3 +165,6 @@ class ApiKeyDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     key: _Mapped[str] = _mapped_column(_sqa.String, unique=True, nullable=True)
     creation_timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+
+    def __repr__(self) -> str:
+        return f"ApiKey(id={self.id}, name={self.name}, creation_timestamp={self.creation_timestamp})"
