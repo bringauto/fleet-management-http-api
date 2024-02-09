@@ -124,7 +124,7 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_3 = models.TestBase(id=4, test_str='test_string', test_int=5)
         _db_access.add(models.TestBase, test_obj_1, test_obj_2, test_obj_3)
 
-        _db_access.delete_n(models.TestBase, n=2, id_name="id", start_from="minimum")
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [test_obj_2])
 
@@ -134,12 +134,12 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_3 = models.TestBase(id=4, test_str='test_string', test_int=5)
         _db_access.add(models.TestBase, test_obj_1, test_obj_2, test_obj_3)
 
-        _db_access.delete_n(models.TestBase, n=2, id_name="id", start_from="maximum")
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="maximum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [test_obj_3])
 
     def test_if_attribute_chosen_as_id_for_sorting_does_not_exist_yields_code_500(self):
-        response = _db_access.delete_n(models.TestBase, n=2, id_name="nonexistent_id", start_from="maximum")
+        response = _db_access.delete_n(models.TestBase, n=2, column_name="nonexistent_id", start_from="maximum")
         self.assertEqual(response.status_code, 500)
 
     def test_setting_n_equal_to_or_greater_than_number_of_existing_records_deletes_all_records(self):
@@ -147,12 +147,12 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_2 = models.TestBase(id=8, test_str='test_string', test_int=5)
         _db_access.add(models.TestBase, test_obj_1, test_obj_2)
 
-        _db_access.delete_n(models.TestBase, n=3, id_name="id", start_from="minimum")
+        _db_access.delete_n(models.TestBase, n=3, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [])
 
     def test_removing_n_records_from_empty_table_has_no_effect(self):
-        _db_access.delete_n(models.TestBase, n=2, id_name="id", start_from="minimum")
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [])
 
@@ -165,7 +165,7 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_6 = models.TestBase(id=6, test_str='test_string', test_int=1)
         _db_access.add(models.TestBase, test_obj_1, test_obj_2, test_obj_3, test_obj_4, test_obj_5, test_obj_6)
 
-        _db_access.delete_n(models.TestBase, n=2, id_name="id", start_from="minimum", criteria={'test_int': lambda x: x==-1})
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="minimum", criteria={'test_int': lambda x: x==-1})
 
         remaining_objs_with_negative_test_int = _db_access.get(models.TestBase, criteria={'test_int': lambda x: x<0})
         self.assertListEqual(remaining_objs_with_negative_test_int, [test_obj_5])

@@ -71,7 +71,7 @@ def _remove_old_states(car_id: int) -> _Response:
         response = _db_access.delete_n(
             _db_models.CarStateDBModel,
             delta,
-            id_name="timestamp",
+            column_name="timestamp",
             start_from="minimum",
             criteria={'car_id': lambda x: x==car_id}
         )

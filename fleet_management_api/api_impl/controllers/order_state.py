@@ -71,7 +71,7 @@ def _remove_old_states() -> _Response:
     order_state_db_models = _db_access.get(_db_models.OrderStateDBModel)
     extras = max(len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states(), 0)
     if extras>0:
-        response = _db_access.delete_n(_db_models.OrderStateDBModel, n=extras, id_name='timestamp', start_from="minimum")
+        response = _db_access.delete_n(_db_models.OrderStateDBModel, n=extras, column_name='timestamp', start_from="minimum")
         if response.status_code != 200:
             return _api.log_and_respond(response.status_code, response.body)
         else:

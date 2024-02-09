@@ -27,9 +27,19 @@ class ParentNotFound(Exception):
 def add(
     base: Type[_Base],
     *sent_objs: _Base,
-    conn_source: Optional[_sqa.Engine] = None,
-    check_reference_existence: Optional[Dict[Type[_Base], int]] = None
+    check_reference_existence: Optional[Dict[Type[_Base], int]] = None,
+    conn_source: Optional[_sqa.Engine] = None
     ) -> _Response:
+    """Adds a objects to the database.
+
+    All the `sent_objs` must be instances of the `base`.
+
+    `check_reference_existence` can be used to check that given ID are present in other tables
+    correspoding to the key values in the `check_reference_existence` dictionary.
+
+    The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
+    the globally defined Engine is used.
+    """
 
     global _wait_mg
     if not sent_objs:
@@ -57,6 +67,7 @@ def add(
 
 
 def delete(base: Type[_Base], id_: Any) -> _Response:
+    """Delete a single object with ID=`id_` from the database table correspoding to the `base`."""
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
@@ -75,49 +86,47 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
 def delete_n(
     base: Type[_Base],
     n: int,
-    id_name: str,
+    column_name: str,
     start_from: Literal["minimum", "maximum"],
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None
     ) -> _Response:
+    """Delete multiple instances of the `base`.
 
+    The `base` instances are first filtered by the `criteria` and sorted by values in a column with the `column_name`.
+    `n` objects with either `maximum` or `minimum` (defined by the `start_from`) value in the column are deleted.
+    """
+
+    if not column_name in base.__table__.columns.keys():
+        return _Response(body=f"Column {column_name} not found in table {base.__tablename__}.", status_code=500)
+    if criteria is None:
+        criteria = {}
     table = base.__table__
-    if not id_name in table.columns.keys():
-        return _Response(body=f"Column {id_name} not found in table {base.__tablename__}.", status_code=500)
     source = check_and_return_current_connection_source()
-    with source.begin() as conn:
-        query = _sqa.select(table.c.id)
-        if criteria is not None:
-            clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
-            query = query.where(*clauses)
+    with _Session(source) as session, session.begin():
+        clauses = [criteria[attr_label](getattr(table.columns, attr_label)) for attr_label in criteria.keys()]
+        query = _sqa.select(table.c.id).where(*clauses)
         if start_from == "minimum":
-            subquery = query.order_by(table.c.id).limit(n).alias()
+            query = query.order_by(table.c.id)
         else:
-            subquery = query.order_by(table.c.id.desc()).limit(n).alias()
-        stmt = _sqa.delete(table).where(table.c.id.in_(subquery))
-        result = conn.execute(stmt)
-        n_of_deleted_items = result.rowcount
-        if n_of_deleted_items == 0:
-            return _Response(content_type="text/plain", body="Nothing deleted from the database.", status_code=200)
-        else:
-            return _Response(
-                content_type="text/plain", body=f"{n_of_deleted_items} objects deleted from the database.", status_code=200
-            )
-
-
-def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
-    for attr_label, attr_criterion in attribute_criteria.items():
-        if not hasattr(item, attr_label):
-            return False
-        if not attr_criterion(item.__dict__[attr_label]):
-            return False
-    return True
+            query = query.order_by(table.c.id.desc())
+        query = query.limit(n)
+        stmt = _sqa.delete(base).where(table.c.id.in_(query))
+        n_of_deleted_items = session.execute(stmt).rowcount
+        return _Response(
+            content_type="text/plain", body=f"{n_of_deleted_items} objects deleted from the database.", status_code=200
+        )
 
 
 def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None) -> List[_Base]:
+    """ Returns instances of the `base` with ids from the `ids` tuple.
+
+    The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
+    the globally defined Engine is used.
+    """
     source = _get_checked_connection_source(conn_source)
-    results: List[base] = []
-    with _Session(source) as session:
+    with _Session(source) as session, session.begin():
         try:
+            results = []
             for id_value in ids:
                 result = session.get(base, id_value)
                 if result is not None:
@@ -134,9 +143,24 @@ def get(
     criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
-    conn_source: Optional[_sqa.Engine] = None,
-    omitted_relationships: Optional[List[_InstrumentedAttribute]] = None
+    omitted_relationships: Optional[List[_InstrumentedAttribute]] = None,
+    conn_source: Optional[_sqa.Engine] = None
     ) -> List[Any]:
+
+    """Get instances of the `base`.
+
+    The objects can be filtered by the `criteria`.
+
+    If `wait`=True and no instances were retrieved from the database after filtering by criteria, the program waits
+    until some data that would satisfy the criteria are sent to the database.
+
+    `timeout_ms` is the timeout for the waiting for data in milliseconds.
+
+    `omitted_relationships` contain list of the instance relationship to instances of other bases, that should not be loaded.
+
+    The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
+    the globally defined Engine is used.
+    """
 
     global _wait_mg
     if criteria is None:
@@ -165,6 +189,7 @@ def get_children(
     children_col_name: str,
     conn_source: Optional[_sqa.Engine] = None
     ) -> List[_Base]:
+    """Get children of an instance of `parent_base` with `parent_id` from its `children_col_name`."""
 
     global _wait_mg
     source = _get_checked_connection_source(conn_source)
@@ -180,10 +205,7 @@ def get_children(
 
 
 def update(updated_obj: _Base) -> _Response:
-    """Updates the record in the database with the same ID as the updated_obj.
-
-    If the record does not exist, returns 404.
-    """
+    """Updates an existing record in the database with the same ID as the updated_obj."""
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     source = check_and_return_current_connection_source()
@@ -214,7 +236,6 @@ def wait_for_new(
     global _wait_mg
     if criteria is None:
         criteria = {}
-
     result = _wait_mg.wait_and_get_response(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
@@ -255,3 +276,12 @@ def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
 
 def _model_name(base: Type[_Base]) -> str:
     return base.__name__.rstrip("DBModel")
+
+
+def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
+    for attr_label, attr_criterion in attribute_criteria.items():
+        if not hasattr(item, attr_label):
+            return False
+        if not attr_criterion(item.__dict__[attr_label]):
+            return False
+    return True
