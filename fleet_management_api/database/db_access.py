@@ -53,10 +53,11 @@ def add(
                     session.get_one(ref_type, ref_id)
             for obj in sent_objs:
                 obj.id = None # type: ignore
-            session.add_all([obj.copy() for obj in sent_objs])
+            session.add_all(sent_objs)
             session.commit()
-            _wait_mg.notify(base.__tablename__, sent_objs)
-            return _Response(status_code=200, content_type="text/plain", body=f"Succesfully sent to database (number of sent objects: {len(sent_objs)}).")
+            inserted_objs = [obj.copy() for obj in sent_objs]
+            _wait_mg.notify(base.__tablename__, inserted_objs)
+            return _Response(status_code=200, content_type="application/json", body=inserted_objs[0])
         except _NoResultFound as e:
             return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with id={ref_id} does not exist in the database.")
         except _sqaexc.IntegrityError as e:

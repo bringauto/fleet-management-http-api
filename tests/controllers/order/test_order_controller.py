@@ -30,6 +30,8 @@ class Test_Sending_Order(unittest.TestCase):
         with self.app.app.test_client() as c:
             response = c.post('/v2/management/order', json=order)
             self.assertEqual(response.status_code, 200)
+            order.id = 1
+            self.assertEqual(Order.from_dict(response.json), order)
 
     def test_sending_order_to_non_exising_car_yields_code_404(self):
         nonexistent_car_id = 6546515

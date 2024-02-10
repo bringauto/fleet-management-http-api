@@ -20,18 +20,18 @@ def create_route(route: _models.Route) -> _Response:
             return _api.log_and_respond(check_response.status_code, check_response.body)
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(_db_models.RouteDBModel, route_db_model)
-        if not response.status_code == 200:
+        if response.status_code == 200:
+            inserted_db_model = response.body
+            route_points_response = _create_empty_route_points_list(inserted_db_model.id)
+            if not route_points_response.status_code == 200:
+                return route_points_response
+            _api.log_info(f"Route (name='{route.name}) has been created.")
+            return _Response(body=_api.route_from_db_model(inserted_db_model), status_code=200, content_type="application/json")
+        else:
             return _api.log_and_respond(
                 response.status_code,
                 f"Route (name='{route.name}) could not be sent. {response.body}"
             )
-        else:
-            route_db_model =_db_access.get(_db_models.RouteDBModel, criteria={"name": lambda x: x==route.name})[0]
-            route_points_response = _create_empty_route_points_list(route_db_model.id)
-            if not route_points_response.status_code == 200:
-                return route_points_response
-
-            return _api.log_and_respond(200, f"Route (name='{route.name}) has been created.")
 
 
 def delete_route(route_id: int) -> _Response:

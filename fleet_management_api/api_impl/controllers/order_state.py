@@ -19,9 +19,11 @@ def create_order_state(order_state) -> _Response:
     order_state_db_model = _api.order_state_to_db_model(order_state)
     response = _db_access.add(_db_models.OrderStateDBModel, order_state_db_model)
     if response.status_code == 200:
+        inserted_model = _api.order_state_from_db_model(response.body)
         _mark_order_as_updated(order_state.order_id)
         _remove_old_states()
-        return _api.log_and_respond(200, f"Order state has been sent.")
+        _api.log_info(f"Order state (id={inserted_model.id}) has been sent.")
+        return _Response(body=inserted_model, status_code=200, content_type="application/json")
     else:
         return _api.log_and_respond(response.status_code, f"Order state could not be sent. {response.body}")
 

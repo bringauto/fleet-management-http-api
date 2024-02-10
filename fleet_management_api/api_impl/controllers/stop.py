@@ -18,7 +18,8 @@ def create_stop(stop: Dict|_Stop) -> _Response:
         stop_db_model = _api.stop_to_db_model(stop)
         response = _db_access.add(_db_models.StopDBModel, stop_db_model)
         if response.status_code == 200:
-            return _api.log_and_respond(200, f"Stop (id={stop.id}, name='{stop.name}) has been created.")
+            _api.log_info(f"Stop (id={response.body}, name='{stop.name}) has been created.")
+            return _Response(body=_api.stop_from_db_model(response.body), status_code=200, content_type="application/json")
         else:
             return _api.log_and_respond(response.status_code, f"Stop (name='{stop.name}) could not be sent. {response.body}")
 

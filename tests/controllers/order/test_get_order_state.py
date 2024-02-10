@@ -31,7 +31,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         with self.app.app.test_client() as c:
             response = c.get('/v2/management/orderstate?since=0')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 0)
+            self.assertEqual(response.json, [])
 
     def test_waiting_for_order_state_when_no_state_was_sent_yet(self):
         order_state = OrderState(order_id=1, status="in_progress")

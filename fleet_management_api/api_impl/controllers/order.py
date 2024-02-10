@@ -27,7 +27,13 @@ def create_order(order) -> _Response:
             }
         )
         if response.status_code == 200:
-            return _api.log_and_respond(response.status_code, f"Order has been created and sent.")
+            inserted_model = _api.order_from_db_model(response.body)
+            _api.log_info(f"Order (id={inserted_model.id}) has been created and sent.")
+            return _Response(
+                body=inserted_model,
+                status_code=200,
+                content_type="application/json"
+            )
         else:
             return _api.log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 

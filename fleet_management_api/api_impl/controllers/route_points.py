@@ -14,7 +14,7 @@ def get_route_points(route_id: int) -> _Response:
         return _Response(
             content_type="text/plain",
             status_code=404,
-            body=f"Route points for EXISTING route with id={route_id} not found"
+            body=f"Route points for EXISTING route with id={route_id} not found."
         )
     else:
         rp = _api.route_points_from_db_model(rp_db_models[0])
@@ -44,5 +44,13 @@ def redefine_route_points() -> _Response:
                 rp_db_model,
                 check_reference_existence={_db_models.RouteDBModel: rp_db_model.route_id}
             )
-            return _api.log_and_respond(response.status_code, response.body)
+            if response.status_code == 200:
+                _api.log_info(f"Route points for route with id={rp.route_id} have been redefined.")
+                return _Response(
+                    content_type="application/json",
+                    status_code=200,
+                    body=_api.route_points_from_db_model(response.body)
+                )
+            else:
+                return _api.log_and_respond(response.status_code, response.body)
 

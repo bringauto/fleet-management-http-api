@@ -25,11 +25,11 @@ def create_car(car) -> _Response:  # noqa: E501
             check_reference_existence={_db_models.PlatformHWDBModel: car.platform_hw_id}
         )
         if response.status_code == 200:
-            return _api.log_and_respond(200, f"Car (name='{car.name}) has been created.")
+            inserted_model = _api.car_from_db_model(response.body)
+            _api.log_info(f"Car (id={inserted_model.id}, name='{car.name}) has been created.")
+            return _Response(body=inserted_model, status_code=200, content_type="application/json")
         else:
-            return _api.log_and_respond(
-                response.status_code, f"Car (name='{car.name}) could not be sent. {response.body}"
-            )
+            return _api.log_and_respond(response.status_code, f"Car (name='{car.name}) could not be sent. {response.body}")
 
 
 def delete_car(car_id: int) -> _Response:
