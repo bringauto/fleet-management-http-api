@@ -29,7 +29,7 @@ def add_car_state(car_state) -> _Response:
             check_reference_existence={_db_models.CarDBModel: car_state.car_id}
         )
         if response.status_code == 200:
-            code, msg = 200, f"Car state with id='{car_state.id}' was succesfully created."
+            code, msg = 200, f"Car state was succesfully created."
             _api.log_info(msg)
             cleanup_response = _remove_old_states(car_state.car_id)
             if cleanup_response.status_code != 200:
@@ -37,7 +37,7 @@ def add_car_state(car_state) -> _Response:
                 _api.log_error(cleanup_error_msg)
                 msg = msg + "\n" + cleanup_error_msg
         else:
-            code, msg = response.status_code, f"Car state with id='{car_state.id}' could not be sent. {response.body}",
+            code, msg = response.status_code, f"Car state could not be sent. {response.body}",
             _api.log_error(msg)
     return _Response(body=msg, status_code=code)
 

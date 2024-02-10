@@ -13,16 +13,14 @@ DATABASE_URL = "sqlite:///:memory:"
 
 
 class Base(_DeclarativeBase):
-    pass
-
     def copy(self) -> Base:
         return self.__class__(**{col.name: getattr(self, col.name) for col in self.__table__.columns})
 
 
 @dataclasses.dataclass
 class PlatformHWDBModel(Base):
-    __tablename__ = 'platform_hw_ids'
-    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    __tablename__ = 'platform_hw'
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True, nullable=False)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     cars: _Mapped[List["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
 
@@ -37,7 +35,7 @@ class CarDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
-    platform_hw_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw_ids.id"), nullable=False, unique=True)
+    platform_hw_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw.id"), nullable=False, unique=True)
     under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, nullable=False)
 
     platformhw: _Mapped["PlatformHWDBModel"] = _relationship("PlatformHWDBModel", back_populates="cars", lazy="noload")
@@ -122,7 +120,7 @@ class OrderStateDBModel(Base):
 @dataclasses.dataclass
 class StopDBModel(Base):
     __tablename__ = 'stops'
-    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, unique=True, autoincrement=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)

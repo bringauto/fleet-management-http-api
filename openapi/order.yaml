@@ -46,7 +46,6 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "priority": "normal",
                     "userId": 1,
                     "status": "to_accept",
@@ -215,7 +214,6 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "orderId": 1,
                     "status": "to_accept",
                     "carId": 1
@@ -266,7 +264,6 @@ components:
       type: object
       description: Order object structure
       required:
-        - id
         - userId
         - carId
         - targetStopId
@@ -293,7 +290,6 @@ components:
       type: object
       description: Order state object structure
       required:
-        - id
         - status
         - orderId
       properties:

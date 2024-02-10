@@ -27,9 +27,9 @@ def create_order(order) -> _Response:
             }
         )
         if response.status_code == 200:
-            return _api.log_and_respond(response.status_code, f"Order (id={order.id}) has been created and sent.")
+            return _api.log_and_respond(response.status_code, f"Order has been created and sent.")
         else:
-            return _api.log_and_respond(response.status_code, f"Error when sending order (id={order.id}). {response.body}.")
+            return _api.log_and_respond(response.status_code, f"Error when sending order. {response.body}.")
 
 
 def delete_order(order_id: int) -> _Response:

@@ -23,10 +23,15 @@ def create_route(route: _models.Route) -> _Response:
         if not response.status_code == 200:
             return _api.log_and_respond(
                 response.status_code,
-                f"Route (id={route.id}, name='{route.name}) could not be sent. {response.body}"
+                f"Route (name='{route.name}) could not be sent. {response.body}"
             )
         else:
-            return _api.log_and_respond(200, f"Route (id={route.id}, name='{route.name}) has been created.")
+            route_db_model =_db_access.get(_db_models.RouteDBModel, criteria={"name": lambda x: x==route.name})[0]
+            route_points_response = _create_empty_route_points_list(route_db_model.id)
+            if not route_points_response.status_code == 200:
+                return route_points_response
+
+            return _api.log_and_respond(200, f"Route (name='{route.name}) has been created.")
 
 
 def delete_route(route_id: int) -> _Response:
@@ -88,9 +93,6 @@ def update_route(route: _models.Route) -> _Response:
 
 
 def _check_route_model(route: _models.Route) -> _Response:
-    route_points_response = _create_empty_route_points_list(route)
-    if not route_points_response.status_code == 200:
-        return route_points_response
     check_stops_response = _find_nonexistent_stops(route)
     if not check_stops_response.status_code == 200:
         return check_stops_response
@@ -101,21 +103,21 @@ def _check_route_model(route: _models.Route) -> _Response:
     )
 
 
-def _create_empty_route_points_list(route: _models.Route) -> _Response:
+def _create_empty_route_points_list(route_id: int) -> _Response:
     response = _db_access.add(
         _db_models.RoutePointsDBModel,
-        _db_models.RoutePointsDBModel(id=route.id, route_id=route.id, points=[])
+        _db_models.RoutePointsDBModel(id=route_id, route_id=route_id, points=[])
     )
     if not response.status_code == 200:
         return _Response(
             response.status_code,
             content_type="text/plain",
-            body=f"Could not create route point for route with id={route.id}, name='{route.name}'. {response.body}")
+            body=f"Could not create route point for route with id={route_id}. {response.body}")
     else:
         return _Response(
             status_code=200,
             content_type="text/plain",
-            body=f"Empty list of route points for route with id={route.id}, name='{route.name}' has been created."
+            body=f"Empty list of route points for route with id={route_id} has been created."
         )
 
 

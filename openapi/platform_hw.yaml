@@ -129,7 +129,6 @@ components:
       type: object
       description: PlatformHW object structure
       required:
-        - id
         - name
       properties:
         id:

@@ -253,7 +253,6 @@ components:
       type: object
       description: Car object structure
       required:
-        - id
         - platformHwId
         - name
       properties:
@@ -277,7 +276,6 @@ components:
       type: object
       description: Car state object structure
       required:
-        - id
         - status
         - carId
       properties:

@@ -164,7 +164,6 @@ components:
       type: object
       description: Stop object structure
       required:
-        - id
         - name
         - position
       properties:

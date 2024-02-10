@@ -20,12 +20,12 @@ def create_hw_id(platform_hw) -> _Response:
         if response.status_code == 200:
             return _api.log_and_respond(
                 200,
-                f"Platform HW (id={platform_hw.id}, name='{platform_hw.name}) has been created."
+                f"Platform HW (name='{platform_hw.name}) has been created."
             )
         else:
             return _api.log_and_respond(
                 response.status_code,
-                f"Platform HW (id={platform_hw.id}, name='{platform_hw.name}) could not be created. {response.body}")
+                f"Platform HW (name='{platform_hw.name}) could not be created. {response.body}")
 
 
 def get_hws() -> _Response:

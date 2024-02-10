@@ -51,6 +51,8 @@ def add(
             if check_reference_existence is not None:
                 for ref_type, ref_id in check_reference_existence.items():
                     session.get_one(ref_type, ref_id)
+            for obj in sent_objs:
+                obj.id = None # type: ignore
             session.add_all([obj.copy() for obj in sent_objs])
             session.commit()
             _wait_mg.notify(base.__tablename__, sent_objs)
@@ -58,12 +60,9 @@ def add(
         except _NoResultFound as e:
             return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with id={ref_id} does not exist in the database.")
         except _sqaexc.IntegrityError as e:
-            if "unique" in str(e.orig).lower():
-                return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base)} with id={sent_objs[0].id} already exists in the database.") # type: ignore
-            else:
-                return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
+            return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
         except Exception as e:
-            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
+            return _Response(status_code=500, content_type="text/plain", body=f"Nothing added to the database. {e}")
 
 
 def delete(base: Type[_Base], id_: Any) -> _Response:
@@ -206,6 +205,9 @@ def get_children(
 
 def update(updated_obj: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj."""
+    if updated_obj.id is None:
+        return _Response(status_code=400, content_type="text/plain", body=f"Missing {_model_name(updated_obj.__class__)} ID. ID must be specified when updating object.")
+
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
     source = check_and_return_current_connection_source()

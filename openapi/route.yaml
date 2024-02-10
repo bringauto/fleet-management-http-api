@@ -46,7 +46,6 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "name": 'Lužánky',
                     "points": [
                       {
@@ -227,7 +226,6 @@ components:
       type: object
       description: Route object structure
       required:
-        - id
         - name
       properties:
         id:
@@ -245,7 +243,6 @@ components:
       type: object
       description: Route points object structure
       required:
-        - id
         - routeId
         - points
       properties:

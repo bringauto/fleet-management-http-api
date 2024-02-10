@@ -20,7 +20,7 @@ def create_stop(stop: Dict|_Stop) -> _Response:
         if response.status_code == 200:
             return _api.log_and_respond(200, f"Stop (id={stop.id}, name='{stop.name}) has been created.")
         else:
-            return _api.log_and_respond(response.status_code, f"Stop (id={stop.id}, name='{stop.name}) could not be sent. {response.body}")
+            return _api.log_and_respond(response.status_code, f"Stop (name='{stop.name}) could not be sent. {response.body}")
 
 
 def delete_stop(stop_id: int) -> _Response:

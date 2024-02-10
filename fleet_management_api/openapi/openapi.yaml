@@ -600,8 +600,7 @@ paths:
           content:
             application/json:
               example:
-              - id: 1
-                priority: normal
+              - priority: normal
                 userId: 1
                 status: to_accept
                 carId: 1
@@ -993,8 +992,7 @@ paths:
           content:
             application/json:
               example:
-              - id: 1
-                orderId: 1
+              - orderId: 1
                 status: to_accept
                 carId: 1
               schema:
@@ -1482,8 +1480,7 @@ paths:
           content:
             application/json:
               example:
-              - id: 1
-                name: Lužánky
+              - name: Lužánky
                 points:
                 - latitude: 49.204117
                   longitude: 16.606525
@@ -2568,7 +2565,6 @@ components:
           title: underTest
           type: boolean
       required:
-      - id
       - name
       - platformHwId
       title: Car
@@ -2630,7 +2626,6 @@ components:
           $ref: '#/components/schemas/GNSSPosition'
       required:
       - carId
-      - id
       - status
       title: CarState
       type: object
@@ -2696,7 +2691,6 @@ components:
           $ref: '#/components/schemas/MobilePhone'
       required:
       - carId
-      - id
       - stopRouteId
       - targetStopId
       - userId
@@ -2735,7 +2729,6 @@ components:
           title: timestamp
           type: integer
       required:
-      - id
       - orderId
       - status
       title: OrderState
@@ -2767,7 +2760,6 @@ components:
           title: name
           type: string
       required:
-      - id
       - name
       title: PlatformHW
       type: object
@@ -2803,7 +2795,6 @@ components:
           title: stopIds
           type: array
       required:
-      - id
       - name
       title: Route
       type: object
@@ -2844,7 +2835,6 @@ components:
           title: points
           type: array
       required:
-      - id
       - points
       - routeId
       title: RoutePoints
@@ -2875,7 +2865,6 @@ components:
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
       required:
-      - id
       - name
       - position
       title: Stop

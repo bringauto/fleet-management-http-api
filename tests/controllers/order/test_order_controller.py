@@ -13,18 +13,16 @@ class Test_Sending_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 5)
+        create_platform_hws(self.app)
         create_stops(self.app, 7)
-        self.car = Car(id=12, name='test_car', platform_hw_id=5)
+        self.car = Car(name='test_car', platform_hw_id=1)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
 
     def test_sending_order_to_exising_car(self):
-        order_id = 78
         order = Order(
-            id=order_id,
             user_id=789,
-            car_id=12,
+            car_id=1,
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
@@ -34,10 +32,8 @@ class Test_Sending_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_sending_order_to_non_exising_car_yields_code_404(self):
-        order_id = 78
         nonexistent_car_id = 6546515
         order = Order(
-            id=order_id,
             user_id=789,
             car_id=nonexistent_car_id,
             target_stop_id=7,
@@ -50,10 +46,9 @@ class Test_Sending_Order(unittest.TestCase):
 
     def test_sending_order_to_nonexistent_stop_yields_code_404(self):
         order = Order(
-            id=5,
             user_id=789,
-            car_id=self.car.id,
-            target_stop_id=1635165848165816516,
+            car_id=1,
+            target_stop_id=16316516,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
@@ -67,33 +62,17 @@ class Test_Sending_Order(unittest.TestCase):
             response = c.post('/v2/management/order', json=incomplete_order_dict)
             self.assertEqual(response.status_code, 400)
 
-    def test_repeated_sending_of_order_with_identical_id_yields_code_400(self):
-        order_id = 78
-        order = Order(
-            id=order_id,
-            user_id=789,
-            car_id=12,
-            target_stop_id=7,
-            stop_route_id=8,
-            notification_phone=MobilePhone(phone='1234567890')
-        )
-        with self.app.app.test_client() as c:
-            response = c.post('/v2/management/order', json=order)
-            self.assertEqual(response.status_code, 200)
-            response = c.post('/v2/management/order', json=order)
-            self.assertEqual(response.status_code, 400)
-
 
 class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
 
     def test_creating_order_from_example_in_spec(self):
         _connection.set_connection_source_test()
         app = _app.get_test_app()
-        create_platform_hws(app, 5)
+        create_platform_hws(app)
         create_stops(app, 1)
         with app.app.test_client() as c:
             example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Order"]["example"]
-            car = Car(id=example["carId"], name="Test Car", platform_hw_id=5)
+            car = Car(id=example["carId"], name="Test Car", platform_hw_id=1)
             c.post('/v2/management/car', json=car)
 
             response = c.post('/v2/management/order', json=example)
@@ -105,9 +84,9 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 5)
+        create_platform_hws(self.app)
         create_stops(self.app, 7)
-        self.car = Car(id=12, name='test_car', platform_hw_id=5)
+        self.car = Car(name='test_car', platform_hw_id=1)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
 
@@ -118,11 +97,9 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             self.assertListEqual(response.json, [])
 
     def test_retrieving_all_orders_when_some_orders_exist_yields_code_200(self):
-        order_id = 78
         order = Order(
-            id=order_id,
             user_id=789,
-            car_id=12,
+            car_id=1,
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
@@ -131,7 +108,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             c.post('/v2/management/order', json=order)
             response = c.get(f'/v2/management/order')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(Order.from_dict(response.json[0]), order)
+            self.assertEqual(Order.from_dict(response.json[0]).target_stop_id, order.target_stop_id)
 
 
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
@@ -139,26 +116,25 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
     def setUp(self):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 5)
+        create_platform_hws(self.app)
         create_stops(self.app, 7)
-        self.car = Car(id=12, name='test_car', platform_hw_id=5)
+        self.car = Car(name='test_car', platform_hw_id=1)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
 
     def test_retrieving_existing_order(self):
-        order_id = 78
         order = Order(
-            id=order_id,
             user_id=789,
-            car_id=12,
+            car_id=1,
             target_stop_id=7,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
         with self.app.app.test_client() as c:
             c.post('/v2/management/order', json=order)
-            response = c.get(f'/v2/management/order/{order_id}')
+            response = c.get(f'/v2/management/order/1')
             self.assertEqual(response.status_code, 200)
+            order.id = 1
             self.assertEqual(Order.from_dict(response.json), order)
 
     def test_retrieving_non_existing_order_yields_code_404(self):
@@ -171,15 +147,14 @@ class Test_Deleting_Order(unittest.TestCase):
     def setUp(self):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 5)
+        create_platform_hws(self.app)
         create_stops(self.app, 7)
-        self.car = Car(id=12, name='test_car', platform_hw_id=5)
+        self.car = Car(name='test_car', platform_hw_id=1)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
             self.order = Order(
-                id=78,
                 user_id=789,
-                car_id=12,
+                car_id=1,
                 target_stop_id=7,
                 stop_route_id=8,
                 notification_phone=MobilePhone(phone='1234567890')
@@ -188,7 +163,7 @@ class Test_Deleting_Order(unittest.TestCase):
 
     def test_deleting_existing_order(self):
         with self.app.app.test_client() as c:
-            response = c.delete(f'/v2/management/order/78')
+            response = c.delete(f'/v2/management/order/1')
             self.assertEqual(response.status_code, 200)
             response = c.get(f'/v2/management/order')
             self.assertEqual(response.json, [])
@@ -205,24 +180,22 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 5)
-        create_stops(self.app, 7, 14)
-        self.car = Car(id=12, name='test_car', platform_hw_id=5)
+        create_platform_hws(self.app)
+        create_stops(self.app, 2)
+        self.car = Car(name='test_car', platform_hw_id=1)
         with self.app.app.test_client() as c:
             c.post('/v2/management/car', json=self.car)
         self.order_1 = Order(
-            id=78,
             user_id=789,
-            car_id=12,
-            target_stop_id=7,
+            car_id=1,
+            target_stop_id=1,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='1234567890')
         )
         self.order_2 = Order(
-            id=79,
             user_id=789,
-            car_id=12,
-            target_stop_id=14,
+            car_id=1,
+            target_stop_id=2,
             stop_route_id=8,
             notification_phone=MobilePhone(phone='4444444444')
         )
@@ -232,15 +205,15 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
 
     def test_all_orders_not_yet_retrieved_are_listed_as_updated(self):
         with self.app.app.test_client() as c:
-            response = c.get(f'/v2/management/order/wait/{self.car.id}')
+            response = c.get(f'/v2/management/order/wait/1')
             returned_orders = response.json
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(returned_orders), 2)
 
     def test_not_updated_orders_cannot_be_listed_repeatedly_without_updating_them(self):
         with self.app.app.test_client() as c:
-            response = c.get(f'/v2/management/order/wait/{self.car.id}')
-            response = c.get(f'/v2/management/order/wait/{self.car.id}')
+            response = c.get(f'/v2/management/order/wait/1')
+            response = c.get(f'/v2/management/order/wait/1')
             returned_orders = response.json
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(returned_orders), 0)

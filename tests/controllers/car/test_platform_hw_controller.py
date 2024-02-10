@@ -17,29 +17,13 @@ class Test_Creating_Platform_HW(unittest.TestCase):
             response = c.post('/v2/management/platformhw', json=platform_hw)
             self.assertEqual(response.status_code, 200)
 
-    def test_creating_platform_hw_with_already_taken_id_returns_code_400(self):
-        platform_hw_1 = PlatformHW(id=1, name="test_platform_1")
-        platform_hw_2 = PlatformHW(id=1, name="test_platform_2")
-        with self.app.test_client() as c:
-            response = c.post('/v2/management/platformhw', json=platform_hw_1)
-            self.assertEqual(response.status_code, 200)
-            response = c.post('/v2/management/platformhw', json=platform_hw_2)
-            self.assertEqual(response.status_code, 400)
-
     def test_creating_platform_hw_with_already_taken_name_returns_code_400(self):
-        platform_hw_1 = PlatformHW(id=1, name="test_platform")
-        platform_hw_2 = PlatformHW(id=516515, name="test_platform")
+        platform_hw_1 = PlatformHW(name="test_platform")
+        platform_hw_2 = PlatformHW(name="test_platform")
         with self.app.test_client() as c:
             response = c.post('/v2/management/platformhw', json=platform_hw_1)
             self.assertEqual(response.status_code, 200)
             response = c.post('/v2/management/platformhw', json=platform_hw_2)
-            self.assertEqual(response.status_code, 400)
-
-    def test_creating_platform_hw_with_missing_id_or_name_returns_code_400(self):
-        with self.app.test_client() as c:
-            response = c.post('/v2/management/platformhw', json={"name": "test_platform"})
-            self.assertEqual(response.status_code, 400)
-            response = c.post('/v2/management/platformhw', json={"id": 1})
             self.assertEqual(response.status_code, 400)
 
 
@@ -61,8 +45,8 @@ class Test_Retrieving_Platform_HW(unittest.TestCase):
         self.app = _app.get_test_app().app
 
     def test_retrieving_existing_platform_hws(self):
-        platform_hw_1 = PlatformHW(id=1, name="test_platform_1")
-        platform_hw_2 = PlatformHW(id=2, name="test_platform_2")
+        platform_hw_1 = PlatformHW(name="test_platform_1")
+        platform_hw_2 = PlatformHW(name="test_platform_2")
         with self.app.test_client() as c:
             response = c.post('/v2/management/platformhw', json=platform_hw_1)
             response = c.post('/v2/management/platformhw', json=platform_hw_2)
@@ -85,19 +69,19 @@ class Test_Getting_Single_Platform_HW(unittest.TestCase):
         self.app = _app.get_test_app().app
 
     def test_getting_single_existing_platform_hw(self):
-        platform_hw_1 = PlatformHW(id=15, name="test_platform_y")
-        platform_hw_2 = PlatformHW(id=24, name="test_platform_z")
+        platform_hw_1 = PlatformHW(name="test_platform_y")
+        platform_hw_2 = PlatformHW(name="test_platform_z")
         with self.app.test_client() as c:
             c.post('/v2/management/platformhw', json=platform_hw_1)
             c.post('/v2/management/platformhw', json=platform_hw_2)
 
-            response = c.get('/v2/management/platformhw/15')
+            response = c.get('/v2/management/platformhw/1')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json["id"], 15)
+            self.assertEqual(response.json["id"], 1)
 
-            response = c.get('/v2/management/platformhw/24')
+            response = c.get('/v2/management/platformhw/2')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json["id"], 24)
+            self.assertEqual(response.json["id"], 2)
 
     def test_retrieving_nonexistent_platform_hw_yields_code_404(self):
         nonexistent_platform_hw = 156155
@@ -113,10 +97,10 @@ class Test_Deleting_Platform_HW(unittest.TestCase):
         self.app = _app.get_test_app().app
 
     def test_deleting_an_existing_platform_hw(self):
-        platform_hw = PlatformHW(id=123, name="test_platform")
+        platform_hw = PlatformHW(name="test_platform")
         with self.app.test_client() as c:
             c.post('/v2/management/platformhw', json=platform_hw)
-            response = c.delete('/v2/management/platformhw/123')
+            response = c.delete('/v2/management/platformhw/1')
             self.assertEqual(response.status_code, 200)
 
             response = c.get('/v2/management/platformhw')
@@ -129,20 +113,20 @@ class Test_Deleting_Platform_HW(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_platform_hw_cannot_be_deleted_if_it_is_used_by_some_car(self):
-        platform_hw = PlatformHW(id=123, name="test_platform")
-        car = Car(id=1, platform_hw_id=123, name="test_car", car_admin_phone=MobilePhone(phone="123456789"))
+        platform_hw = PlatformHW(name="test_platform")
+        car = Car(platform_hw_id=1, name="test_car", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.test_client() as c:
             c.post('/v2/management/platformhw', json=platform_hw)
             response = c.post('/v2/management/car', json=car)
             self.assertEqual(response.status_code, 200)
 
-            response = c.delete('/v2/management/platformhw/123')
+            response = c.delete('/v2/management/platformhw/1')
             self.assertEqual(response.status_code, 400)
             response = c.get('/v2/management/platformhw')
             self.assertEqual(len(response.json), 1)
 
             c.delete('/v2/management/car/1')
-            response = c.delete('/v2/management/platformhw/123')
+            response = c.delete('/v2/management/platformhw/1')
             self.assertEqual(response.status_code, 200)
             response = c.get('/v2/management/platformhw')
             self.assertEqual(len(response.json), 0)

@@ -21,9 +21,9 @@ def create_order_state(order_state) -> _Response:
     if response.status_code == 200:
         _mark_order_as_updated(order_state.order_id)
         _remove_old_states()
-        return _api.log_and_respond(200, f"Order state (id={order_state.id}) has been sent.")
+        return _api.log_and_respond(200, f"Order state has been sent.")
     else:
-        return _api.log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
+        return _api.log_and_respond(response.status_code, f"Order state could not be sent. {response.body}")
 
 
 def get_all_order_states(wait: bool = False, since: int = 0) -> _Response:
