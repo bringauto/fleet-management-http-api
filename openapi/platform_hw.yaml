@@ -1,7 +1,7 @@
 paths:
   /platformhw:
     post:
-      operationId: createHwId
+      operationId: createHw
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
@@ -32,7 +32,7 @@ paths:
       operationId: getHws
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
-        - platformHw
+        - platformHW
       summary: Finds all platform HW
       responses:
         '200':
@@ -61,7 +61,7 @@ paths:
       operationId: getHw
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
-        - platformHw
+        - platformHW
       summary: Find platform HW by ID
       parameters:
         - name: platformHwId
@@ -93,7 +93,7 @@ paths:
       operationId: deleteHw
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
-        - platformHw
+        - platformHW
       summary: Delete a platform HW
       parameters:
         - name: platformHwId

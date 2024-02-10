@@ -1243,10 +1243,10 @@ paths:
           description: Unexpected error
       summary: Finds all platform HW
       tags:
-      - platformHw
+      - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     post:
-      operationId: create_hw_id
+      operationId: create_hw
       requestBody:
         content:
           application/json:
@@ -1393,7 +1393,7 @@ paths:
           description: Unexpected error
       summary: Delete a platform HW
       tags:
-      - platformHw
+      - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     get:
       operationId: get_hw
@@ -1470,7 +1470,7 @@ paths:
           description: Unexpected error
       summary: Find platform HW by ID
       tags:
-      - platformHw
+      - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
   /route:
     get:

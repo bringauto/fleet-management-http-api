@@ -8,6 +8,21 @@ from fleet_management_api.models.platform_hw import PlatformHW  # noqa: E501
 from fleet_management_api import util
 
 
+def create_hw(platform_hw):  # noqa: E501
+    """Create a new platform HW
+
+     # noqa: E501
+
+    :param platform_hw: Platform hardware json
+    :type platform_hw: dict | bytes
+
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    """
+    if connexion.request.is_json:
+        platform_hw = PlatformHW.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
 def delete_hw(platform_hw_id):  # noqa: E501
     """Delete a platform HW
 
