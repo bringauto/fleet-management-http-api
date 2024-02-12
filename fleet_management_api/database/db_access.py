@@ -33,7 +33,7 @@ def add(
 ) -> _Response:
     """Adds a objects to the database.
 
-    All the `sent_objs` must be instances of the `base`.
+    All the `sent_objs` must be instances of the same base.
 
     `check_reference_existence` can be used to check that given ID are present in other tables
     correspoding to the key values in the `check_reference_existence` dictionary.
