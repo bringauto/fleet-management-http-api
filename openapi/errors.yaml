@@ -80,7 +80,7 @@ components:
   schemas:
     Error:
       type: object
-      description: Error object structure
+      description: Error object structure.
       properties:
         code:
           type: integer
