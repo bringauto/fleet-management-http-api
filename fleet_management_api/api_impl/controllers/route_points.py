@@ -16,12 +16,12 @@ def get_route_points(route_id: int) -> _Response:
         return _Response(
             content_type="text/plain",
             status_code=404,
-            body=f"Route points for EXISTING route with id={route_id} not found.",
+            body=f"Route points for EXISTING route with ID={route_id} not found.",
         )
     else:
         rp = _api.route_points_from_db_model(rp_db_models[0])
         _api.log_info(
-            f"Found route points for route with id={route_id} containing {len(rp.points)} points."
+            f"Found route points for route with ID={route_id} containing {len(rp.points)} points."
         )
         return _Response(content_type="application/json", status_code=200, body=rp)
 
@@ -29,9 +29,7 @@ def get_route_points(route_id: int) -> _Response:
 def redefine_route_points() -> _Response:
     """Redefine route points for an existing route."""
     if not _connexion.request.is_json:
-        return _api.log_and_respond(
-            400, f"Invalid request format: {_connexion.request.data}. JSON is required"
-        )
+        _api.log_invalid_request_body_format()
     else:
         rp = _RoutePoints.from_dict(_connexion.request.get_json())
         rp_db_model = _api.route_points_to_db_model(rp)
@@ -51,7 +49,7 @@ def redefine_route_points() -> _Response:
                 check_reference_existence={_db_models.RouteDBModel: rp_db_model.route_id},
             )
             if response.status_code == 200:
-                _api.log_info(f"Route points for route with id={rp.route_id} have been redefined.")
+                _api.log_info(f"Route points for route with ID={rp.route_id} have been redefined.")
                 return _Response(
                     content_type="application/json",
                     status_code=200,

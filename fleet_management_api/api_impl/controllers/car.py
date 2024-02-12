@@ -12,12 +12,10 @@ import fleet_management_api.database.db_access as _db_access
 def create_car() -> _Response:  # noqa: E501
     """Create a new car.
 
-    The car must have a unique id and name.
+    The car must have a unique ID and name.
     """
     if not connexion.request.is_json:
-        return _api.log_and_respond(
-            400, f"Invalid request format: {connexion.request.data}. JSON is required"
-        )
+        _api.log_invalid_request_body_format()
     else:
         car = _models.Car.from_dict(connexion.request.get_json())
         car_db_model = _api.car_to_db_model(car)
@@ -27,7 +25,7 @@ def create_car() -> _Response:  # noqa: E501
         )
         if response.status_code == 200:
             inserted_model = _api.car_from_db_model(response.body)
-            _api.log_info(f"Car (id={inserted_model.id}, name='{car.name}) has been created.")
+            _api.log_info(f"Car (ID={inserted_model.id}, name='{car.name}) has been created.")
             return _Response(body=inserted_model, status_code=200, content_type="application/json")
         else:
             return _api.log_and_respond(
@@ -38,14 +36,14 @@ def create_car() -> _Response:  # noqa: E501
 def delete_car(car_id: int) -> _Response:
     """Deletes an existing car identified by 'car_id'.
 
-    :param car_id: Id of the car to be deleted.
+    :param car_id: ID of the car to be deleted.
     """
     response = _db_access.delete(_db_models.CarDBModel, car_id)
     if response.status_code == 200:
-        msg = f"Car (id={car_id}) has been deleted."
+        msg = f"Car (ID={car_id}) has been deleted."
         return _api.log_and_respond(200, msg)
     else:
-        msg = f"Car (id={car_id}) could not be deleted. {response.body}"
+        msg = f"Car (ID={car_id}) could not be deleted. {response.body}"
         return _api.log_and_respond(response.status_code, msg)
 
 
@@ -57,9 +55,9 @@ def get_car(car_id: int) -> _Response:
         omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders],
     )
     if len(cars) == 0:
-        return _api.log_and_respond(404, f"Car with id={car_id} was not found.")
+        return _api.log_and_respond(404, f"Car with ID={car_id} was not found.")
     else:
-        _api.log_info(f"Car with id={car_id} was found.")
+        _api.log_info(f"Car with ID={car_id} was found.")
         return _Response(body=_api.car_from_db_model(cars[0]), status_code=200)
 
 
@@ -87,12 +85,10 @@ def update_car(car: Dict | _models.Car) -> _Response:
         response = _db_access.update(updated_obj=car_db_model)
         if 200 <= response.status_code < 300:
             return _api.log_and_respond(
-                response.status_code, f"Car (id={car.id}) has been succesfully updated"
+                response.status_code, f"Car (ID={car.id}) has been succesfully updated."
             )
         else:
-            msg = f"Car (id={car.id}) could not be updated. {response.body}"
+            msg = f"Car (ID={car.id}) could not be updated. {response.body}"
             return _api.log_and_respond(response.status_code, msg)
     else:
-        return _api.log_and_respond(
-            400, f"Invalid request format: {connexion.request.data}. JSON is required"
-        )
+        _api.log_invalid_request_body_format()

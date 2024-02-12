@@ -14,12 +14,11 @@ def add_car_state() -> _Response:
 
     :rtype: CarState
 
-    The state must have a unique id.
+    The state must have a unique Id.
     The car defined by 'car_id' must exist.
     """
     if not connexion.request.is_json:
-        code, msg = 400, f"Invalid request format: {connexion.request.data}. JSON is required"
-        _api.log_error(msg)
+        _api.log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
         state_db_model = _api.car_state_to_db_model(car_state)
@@ -29,7 +28,7 @@ def add_car_state() -> _Response:
         )
         if response.status_code == 200:
             inserted_model = _api.car_state_from_db_model(response.body)
-            code, msg = 200, f"Car state (id={inserted_model.id}) was succesfully created."
+            code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
             _api.log_info(msg)
             cleanup_response = _remove_old_states(car_state.car_id)
             if cleanup_response.status_code != 200:
@@ -68,7 +67,7 @@ def get_car_states(car_id: int, all_available: bool = False) -> _Response:
         car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
         return _Response(body=car_states, status_code=200, content_type="application/json")
     except _db_access.ParentNotFound as e:
-        return _api.log_and_respond(404, f"Car with id={car_id} not found. {e}")
+        return _api.log_and_respond(404, f"Car with ID={car_id} not found. {e}")
     except Exception as e:  # pragma: no cover
         return _api.log_and_respond(500, f"Error: {e}")
 

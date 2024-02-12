@@ -12,9 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 def create_hw() -> _Response:
     """Post a new platform HW. The platform HW must have a unique id."""
     if not connexion.request.is_json:
-        return _api.log_and_respond(
-            400, f"Invalid request format: {connexion.request.data}. JSON is required"
-        )
+        _api.log_invalid_request_body_format()
     else:
         platform_hw = _PlatformHW.from_dict(connexion.request.get_json())
         platform_hw_db_model = _api.platform_hw_to_db_model(platform_hw)
@@ -47,9 +45,9 @@ def get_hw(platform_hw_id: int) -> _Response:
     )
     platform_hws = [_api.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(platform_hws) == 0:
-        return _api.log_and_respond(404, f"Platform HW  with id={platform_hw_id} was not found.")
+        return _api.log_and_respond(404, f"Platform HW  with ID={platform_hw_id} was not found.")
     else:
-        _api.log_info(f"Found {len(platform_hws)} platform HWs with id={platform_hw_id}")
+        _api.log_info(f"Found {len(platform_hws)} platform HWs with ID={platform_hw_id}")
         return _Response(body=platform_hws[0], status_code=200, content_type="application/json")
 
 
@@ -61,14 +59,14 @@ def delete_hw(platform_hw_id: int) -> _Response:
     if _db_access.get(_db_models.CarDBModel, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
         return _api.log_and_respond(
             400,
-            f"Platform HW with id={platform_hw_id} cannot be deleted because it is assigned to a car.",
+            f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",
         )
     response = _db_access.delete(_db_models.PlatformHWDBModel, platform_hw_id)
     if response.status_code == 200:
-        return _api.log_and_respond(200, f"Platform HW with id={platform_hw_id} has been deleted.")
+        return _api.log_and_respond(200, f"Platform HW with ID={platform_hw_id} has been deleted.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
         return _api.log_and_respond(
             response.status_code,
-            f"Could not delete platform HW with id={platform_hw_id}{note}. {response.body}",
+            f"Could not delete platform HW with ID={platform_hw_id}{note}. {response.body}",
         )

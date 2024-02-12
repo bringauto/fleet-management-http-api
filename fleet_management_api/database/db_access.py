@@ -68,7 +68,7 @@ def add(
             return _Response(
                 status_code=404,
                 content_type="text/plain",
-                body=f"{_model_name(sent_objs[0].__class__)} with id={ref_id} does not exist in the database.",
+                body=f"{_model_name(sent_objs[0].__class__)} with ID={ref_id} does not exist in the database.",
             )
         except _sqaexc.IntegrityError as e:
             return _Response(
@@ -109,9 +109,7 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
                 body=f"{_model_name(base)} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}",
             )
         except Exception as e:
-            return _Response(
-                status_code=500, content_type="text/plain", body=f"Error: {e}"
-            )
+            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
 
 
 def delete_n(
@@ -174,9 +172,7 @@ def get_by_id(
                     results.append(result.copy())
             return results
         except _NoResultFound as e:
-            raise _NoResultFound(
-                f"{_model_name(base)} with id={id_value} not found. {e}"
-            )
+            raise _NoResultFound(f"{_model_name(base)} with ID={id_value} not found. {e}")
         except Exception as e:
             raise e
 
@@ -204,7 +200,6 @@ def get(
     The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
     the globally defined Engine is used.
     """
-
     global _wait_mg
     if criteria is None:
         criteria = {}
@@ -236,8 +231,6 @@ def get_children(
     conn_source: Optional[_sqa.Engine] = None,
 ) -> List[_Base]:
     """Get children of an instance of `parent_base` with `parent_id` from its `children_col_name`."""
-
-    global _wait_mg
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
@@ -245,7 +238,7 @@ def get_children(
             return children
         except _NoResultFound as e:
             raise ParentNotFound(
-                f"Parent with id={parent_id} not found in table {parent_base.__tablename__}. {e}"
+                f"Parent with ID={parent_id} not found in table {parent_base.__tablename__}. {e}"
             )
         except Exception as e:
             raise e
@@ -262,7 +255,10 @@ def update(updated_obj: _Base) -> _Response:
         except _sqaexc.IntegrityError as e:
             code, msg = 400, str(e.orig)
         except _sqaexc.NoResultFound as e:
-            code, msg = 404, f"{_model_name(updated_obj.__class__)} with id={updated_obj.id} was not found. Nothing to update."
+            code, msg = (
+                404,
+                f"{_model_name(updated_obj.__class__)} with ID={updated_obj.id} was not found. Nothing to update.",
+            )
         except Exception as e:
             code, msg = 500, str(e)
     return _Response(status_code=code, content_type="text/plain", body=msg)
@@ -298,14 +294,12 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def _check_common_base_for_all_objs(
-    *objs: _Base
-) -> None:
+def _check_common_base_for_all_objs(*objs: _Base) -> None:
     if not objs:
         return
     tablename = objs[0].__tablename__
     for obj in objs[1:]:
-        if not obj.__tablename__==tablename:
+        if not obj.__tablename__ == tablename:
             raise TypeError(f"Object being added to database must belong to the same table.")
 
 
@@ -337,4 +331,4 @@ def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: An
 
 def _set_all_obj_ids_to_none(*sent_objs: _Base) -> None:
     for obj in sent_objs:
-        obj.id = None # type: ignore
+        obj.id = None  # type: ignore

@@ -22,7 +22,7 @@ class PlatformHWDBModel(Base):
     cars: _Mapped[List["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
 
     def __repr__(self) -> str:
-        return f"PlatformHW(id={self.id}, name={self.name})"
+        return f"PlatformHW(ID={self.id}, name={self.name})"
 
 
 class CarDBModel(Base):
@@ -45,7 +45,7 @@ class CarDBModel(Base):
 
     def __repr__(self) -> str:
         return (
-            f"Car(id={self.id}, name={self.name}, platform_hw_id={self.platform_hw_id})"
+            f"Car(ID={self.id}, name={self.name}, platform_hw_ID={self.platform_hw_id})"
         )
 
 
@@ -76,7 +76,7 @@ class CarStateDBModel(Base):
 
     def __repr__(self) -> str:
         return (
-            f"CarState(id={self.id}, car_id={self.car_id}, status={self.status}, speed={self.speed}, "
+            f"CarState(ID={self.id}, car_ID={self.car_id}, status={self.status}, speed={self.speed}, "
             f"fuel={self.fuel}, position={self.position}, timestamp={self.timestamp})"
         )
 
@@ -106,7 +106,7 @@ class OrderDBModel(Base):
     )
 
     def __repr__(self) -> str:
-        return f"Order(id={self.id}, priority={self.priority}, user_id={self.user_id}, car_id={self.car_id}, target_stop_id={self.target_stop_id}, stop_route_id={self.stop_route_id}, notification_phone={self.notification_phone})"
+        return f"Order(ID={self.id}, priority={self.priority}, user_ID={self.user_id}, car_ID={self.car_id}, target_stop_ID={self.target_stop_id}, stop_route_ID={self.stop_route_id}, notification_phone={self.notification_phone})"
 
 
 class OrderStateDBModel(Base):
@@ -131,7 +131,7 @@ class OrderStateDBModel(Base):
             cls._max_n_of_states = n
 
     def __repr__(self) -> str:
-        return f"OrderState(id={self.id}, order_id={self.order_id}, status={self.status}, timestamp={self.timestamp})"
+        return f"OrderState(ID={self.id}, order_ID={self.order_id}, status={self.status}, timestamp={self.timestamp})"
 
 
 class StopDBModel(Base):
@@ -145,7 +145,7 @@ class StopDBModel(Base):
     )
 
     def __repr__(self) -> str:
-        return f"Stop(id={self.id}, name={self.name}, position={self.position}, notification_phone={self.notification_phone})"
+        return f"Stop(ID={self.id}, name={self.name}, position={self.position}, notification_phone={self.notification_phone})"
 
 
 class RouteDBModel(Base):
@@ -160,7 +160,7 @@ class RouteDBModel(Base):
     )
 
     def __repr__(self) -> str:
-        return f"Route(id={self.id}, name={self.name}, stop_ids={self.stop_ids})"
+        return f"Route(ID={self.id}, name={self.name}, stop_ids={self.stop_ids})"
 
 
 class RoutePointsDBModel(Base):
@@ -175,7 +175,7 @@ class RoutePointsDBModel(Base):
 
     def __repr__(self) -> str:
         return (
-            f"RoutePoints(id={self.id}, route_id={self.route_id}, points={self.points})"
+            f"RoutePoints(ID={self.id}, route_ID={self.route_id}, points={self.points})"
         )
 
 
@@ -186,4 +186,4 @@ class ApiKeyDBModel(Base):
     creation_timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     def __repr__(self) -> str:
-        return f"ApiKey(id={self.id}, name={self.name}, creation_timestamp={self.creation_timestamp})"
+        return f"ApiKey(ID={self.id}, name={self.name}, creation_timestamp={self.creation_timestamp})"
