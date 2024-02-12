@@ -12,7 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 def create_stop() -> _Response:
     """Post a new stop. The stop must have a unique id."""
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         stop = _Stop.from_dict(connexion.request.get_json())
         stop_db_model = _api.stop_to_db_model(stop)
@@ -74,7 +74,7 @@ def get_stops() -> _Response:
 def update_stop(stop: Dict | _Stop) -> _Response:
     """Update an existing stop."""
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         stop = _Stop.from_dict(connexion.request.get_json())
         stop_db_model = _api.stop_to_db_model(stop)
@@ -97,7 +97,7 @@ def _get_routes_referencing_stop(stop_id: int) -> _Response:
     if len(route_db_models) > 0:
         return _api.log_and_respond(
             400,
-            f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}",
+            f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",
         )
     else:
         return _api.log_and_respond(200, f"Stop with ID={stop_id} is not referenced by any route.")

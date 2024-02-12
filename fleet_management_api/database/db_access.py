@@ -157,7 +157,7 @@ def delete_n(
 def get_by_id(
     base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None
 ) -> List[_Base]:
-    """Returns instances of the `base` with ids from the `ids` tuple.
+    """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
     the globally defined Engine is used.

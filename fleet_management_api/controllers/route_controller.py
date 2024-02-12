@@ -10,11 +10,11 @@ from fleet_management_api import util
 
 
 def create_route(route):  # noqa: E501
-    """Create a new route
+    """Create a new route.
 
      # noqa: E501
 
-    :param route: New route json
+    :param route: New route json.
     :type route: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -29,7 +29,7 @@ def delete_route(route_id):  # noqa: E501
 
      # noqa: E501
 
-    :param route_id: ID of route to delete
+    :param route_id: ID of the route to delete.
     :type route_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -38,11 +38,11 @@ def delete_route(route_id):  # noqa: E501
 
 
 def get_route(route_id):  # noqa: E501
-    """Finds route by ID
+    """Finds route by ID.
 
      # noqa: E501
 
-    :param route_id: ID of route to return
+    :param route_id: ID of the route to return.
     :type route_id: int
 
     :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
@@ -51,11 +51,11 @@ def get_route(route_id):  # noqa: E501
 
 
 def get_route_points(route_id):  # noqa: E501
-    """Finds route points for given route identified by the route&#39;s ID
+    """Finds route points for the given route identified by the route&#39;s ID.
 
      # noqa: E501
 
-    :param route_id: ID of route to delete
+    :param route_id: ID of the route to delete.
     :type route_id: int
 
     :rtype: Union[RoutePoints, Tuple[RoutePoints, int], Tuple[RoutePoints, int, Dict[str, str]]
@@ -75,11 +75,11 @@ def get_routes():  # noqa: E501
 
 
 def redefine_route_points(route_points):  # noqa: E501
-    """Finds route points for given route identified by the route&#39;s ID
+    """Finds route points for the given route identified by the route&#39;s ID.
 
      # noqa: E501
 
-    :param route_points: Route points json
+    :param route_points: Route points JSON.
     :type route_points: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -90,11 +90,11 @@ def redefine_route_points(route_points):  # noqa: E501
 
 
 def update_route(route):  # noqa: E501
-    """Update an existing route by ID
+    """Update an existing route by ID.
 
      # noqa: E501
 
-    :param route: Route update json
+    :param route: Route update JSON.
     :type route: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]

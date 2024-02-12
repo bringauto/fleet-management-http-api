@@ -12,7 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 def create_order_state() -> _Response:
     """Post a new state of an existing order."""
     if not _connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     order_state = _models.OrderState.from_dict(_connexion.request.get_json())
     if not _order_exists(order_state.order_id):
         return _api.log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")

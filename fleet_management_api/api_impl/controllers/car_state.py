@@ -18,7 +18,7 @@ def add_car_state() -> _Response:
     The car defined by 'car_id' must exist.
     """
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
         state_db_model = _api.car_state_to_db_model(car_state)

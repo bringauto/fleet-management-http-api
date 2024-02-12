@@ -12,7 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 def create_hw() -> _Response:
     """Post a new platform HW. The platform HW must have a unique id."""
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         platform_hw = _PlatformHW.from_dict(connexion.request.get_json())
         platform_hw_db_model = _api.platform_hw_to_db_model(platform_hw)

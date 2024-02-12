@@ -29,7 +29,7 @@ def get_route_points(route_id: int) -> _Response:
 def redefine_route_points() -> _Response:
     """Redefine route points for an existing route."""
     if not _connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         rp = _RoutePoints.from_dict(_connexion.request.get_json())
         rp_db_model = _api.route_points_to_db_model(rp)

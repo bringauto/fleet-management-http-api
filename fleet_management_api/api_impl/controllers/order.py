@@ -12,7 +12,7 @@ import fleet_management_api.database.db_access as _db_access
 def create_order() -> _Response:
     """Post a new order. The order must have a unique id and the car must exist."""
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     order = _models.Order.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
         return _api.log_and_respond(404, f"Car with ID={order.car_id} does not exist.")
@@ -41,7 +41,7 @@ def delete_order(order_id: int) -> _Response:
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _api.log_info(msg)
-        return _Response(body=f"Order (ID={order_id})has been succesfully deleted", status_code=200)
+        return _Response(body=f"Order (ID={order_id})has been succesfully deleted.", status_code=200)
     else:
         msg = f"Order (ID={order_id}) could not be deleted. {response.body}"
         _api.log_error(msg)
@@ -82,13 +82,13 @@ def get_updated_orders(car_id: int) -> _Response:
                 response.status_code, f"Error when updating order (ID={m.id}). {response.body}"
             )
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
-    _api.log_info(f"Returning {len(orders)} updated orders for car with ID={car_id}")
+    _api.log_info(f"Returning {len(orders)} updated orders for car with ID={car_id}.")
     return _Response(body=orders, status_code=200)
 
 
 def get_orders() -> _Response:
     """Get all existing orders."""
-    _api.log_info("Listing all existing orders")
+    _api.log_info("Listing all existing orders.")
     return _Response(
         content_type="application/json",
         body=[

@@ -16,7 +16,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful created a new car.
+          description: Successfully created a new car.
           content:
             text/plain:
               type: string
@@ -108,7 +108,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly found car
+          description: Successfully found a car with the given ID.
           content:
             application/json:
               schema:
@@ -144,7 +144,7 @@ paths:
           content:
             text/plain:
               type: string
-              example: 2 cars were succesfully removed.
+              example: 2 cars were successfully removed.
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -174,7 +174,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfuly added car state
+          description: Successfully added new car state.
           content:
             text/plain:
               type: string
@@ -194,7 +194,7 @@ paths:
       summary: Finds all car states
       responses:
         '200':
-          description: Successfuly found all car states
+          description: Successfully found all car states.
           content:
             application/json:
               schema:
@@ -233,7 +233,7 @@ paths:
             type: boolean
       responses:
         '200':
-          description: Successfuly found car state
+          description: Successfully found a car state.
           content:
             application/json:
               schema:

@@ -91,4 +91,4 @@ def update_car(car: Dict | _models.Car) -> _Response:
             msg = f"Car (ID={car.id}) could not be updated. {response.body}"
             return _api.log_and_respond(response.status_code, msg)
     else:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()

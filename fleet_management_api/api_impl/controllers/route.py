@@ -12,7 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 def create_route() -> _Response:
     """Post a new route. The route must have a unique id and all the stops identified by stop ids must exist."""
     if not connexion.request.is_json:
-        _api.log_invalid_request_body_format()
+        return _api.log_invalid_request_body_format()
     else:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_response = _check_route_model(route)
@@ -83,9 +83,7 @@ def get_routes() -> List[_models.Route]:
 def update_route(route: Dict | _models.Route) -> _Response:
     """Update an existing route identified by 'route_id'."""
     if not connexion.request.is_json:
-        return _api.log_and_respond(
-            400, f"Invalid request format: {connexion.request.data}. JSON is required."
-        )
+        return _api.log_invalid_request_body_format()
     else:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_stops_response = _find_nonexistent_stops(route)

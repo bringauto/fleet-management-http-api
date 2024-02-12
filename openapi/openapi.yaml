@@ -22,19 +22,19 @@ tags:
   - name: car
     description: Car related functions
   - name: carState
-    description: Car state related functions
+    description: Car state-related functions
   - name: order
     description: Order related functions
   - name: orderState
-    description: Order state related functions
+    description: Order state-related functions
   - name: platformHW
-    description: Platform hardware related functions
+    description: Platform hardware-related functions
   - name: route
-    description: Route state related functions
+    description: Route state-related functions
   - name: stop
-    description: Stop state related functions
+    description: Stop state-related functions
   - name: security
-    description: Authentication related functions
+    description: Authentication-related functions
 
 paths:
   /car:

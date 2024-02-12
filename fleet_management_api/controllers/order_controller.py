@@ -13,7 +13,7 @@ def create_order(order):  # noqa: E501
 
      # noqa: E501
 
-    :param order: New order json
+    :param order: New order JSON.
     :type order: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -28,7 +28,7 @@ def delete_order(order_id):  # noqa: E501
 
      # noqa: E501
 
-    :param order_id: ID of order to delete
+    :param order_id: ID of order to delete.
     :type order_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -41,7 +41,7 @@ def get_order(order_id):  # noqa: E501
 
      # noqa: E501
 
-    :param order_id: ID of order to return
+    :param order_id: ID of order to return.
     :type order_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
@@ -61,11 +61,11 @@ def get_orders():  # noqa: E501
 
 
 def get_updated_orders(car_id):  # noqa: E501
-    """Get order by car ID only if it changed
+    """Get order by car ID only if it changed.
 
      # noqa: E501
 
-    :param car_id: ID of car with order to return
+    :param car_id: ID of a car with order to return.
     :type car_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]

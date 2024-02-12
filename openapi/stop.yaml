@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Create a new stop
+      summary: Create a new stop.
       requestBody:
-        description: New stop json
+        description: New stop JSON.
         x-body-name: stop
         content:
           application/json:
@@ -16,7 +16,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful stop creation
+          description: Successful stop creation.
           content:
             text/plain:
               type: string
@@ -36,7 +36,7 @@ paths:
       summary: Finds all stops
       responses:
         '200':
-          description: Successfuly found all stops
+          description: Successfully found all stops.
           content:
             application/json:
               schema:
@@ -67,9 +67,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Update an existing stop by ID
+      summary: Update an existing stop by ID.
       requestBody:
-        description: Stop update json
+        description: Stop update JSON.
         x-body-name: stop
         content:
           application/json:
@@ -78,7 +78,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful stop update
+          description: Successful stop update.
           content:
             text/plain:
               type: string
@@ -102,7 +102,7 @@ paths:
       parameters:
         - name: stopId
           in: path
-          description: ID of stop to return
+          description: ID of the stop to return.
           required: true
           example: 1
           schema:
@@ -110,7 +110,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly found stop
+          description: Successfully found a stop.
           content:
             application/json:
               schema:
@@ -130,11 +130,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Delete a stop
+      summary: Delete a stop.
       parameters:
         - name: stopId
           in: path
-          description: ID of stop to delete
+          description: ID of stop to delete.
           required: true
           example: 1
           schema:
@@ -142,7 +142,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successful stop removal
+          description: Successful stop removal.
           content:
             text/plain:
               type: string
@@ -162,7 +162,7 @@ components:
   schemas:
     Stop:
       type: object
-      description: Stop object structure
+      description: Stop object structure.
       required:
         - name
         - position

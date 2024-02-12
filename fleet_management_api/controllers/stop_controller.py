@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_stop(stop):  # noqa: E501
-    """Create a new stop
+    """Create a new stop.
 
      # noqa: E501
 
-    :param stop: New stop json
+    :param stop: New stop JSON.
     :type stop: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -24,11 +24,11 @@ def create_stop(stop):  # noqa: E501
 
 
 def delete_stop(stop_id):  # noqa: E501
-    """Delete a stop
+    """Delete a stop.
 
      # noqa: E501
 
-    :param stop_id: ID of stop to delete
+    :param stop_id: ID of stop to delete.
     :type stop_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -41,7 +41,7 @@ def get_stop(stop_id):  # noqa: E501
 
      # noqa: E501
 
-    :param stop_id: ID of stop to return
+    :param stop_id: ID of the stop to return.
     :type stop_id: int
 
     :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
@@ -61,11 +61,11 @@ def get_stops():  # noqa: E501
 
 
 def update_stop(stop):  # noqa: E501
-    """Update an existing stop by ID
+    """Update an existing stop by ID.
 
      # noqa: E501
 
-    :param stop: Stop update json
+    :param stop: Stop update JSON.
     :type stop: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]

@@ -127,7 +127,7 @@ class OrderState(Model):
     def timestamp(self) -> int:
         """Gets the timestamp of this OrderState.
 
-        Unix timestamp in milliseconds  # noqa: E501
+        A Unix timestamp in milliseconds.  # noqa: E501
 
         :return: The timestamp of this OrderState.
         :rtype: int
@@ -138,7 +138,7 @@ class OrderState(Model):
     def timestamp(self, timestamp: int):
         """Sets the timestamp of this OrderState.
 
-        Unix timestamp in milliseconds  # noqa: E501
+        A Unix timestamp in milliseconds.  # noqa: E501
 
         :param timestamp: The timestamp of this OrderState.
         :type timestamp: int

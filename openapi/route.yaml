@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Create a new route
+      summary: Create a new route.
       requestBody:
-        description: New route json
+        description: New route json.
         x-body-name: route
         content:
           application/json:
@@ -16,7 +16,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful route creation
+          description: Successful route creation.
           content:
             text/plain:
               type: string
@@ -36,7 +36,7 @@ paths:
       summary: Finds all routes
       responses:
         '200':
-          description: Successfuly found all routes
+          description: Successfully found all routes.
           content:
             application/json:
               schema:
@@ -68,9 +68,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Update an existing route by ID
+      summary: Update an existing route by ID.
       requestBody:
-        description: Route update json
+        description: Route update JSON.
         x-body-name: route
         content:
           application/json:
@@ -79,7 +79,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful route update
+          description: Successful route update.
           content:
             text/plain:
               type: string
@@ -99,11 +99,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Finds route by ID
+      summary: Finds route by ID.
       parameters:
         - name: routeId
           in: path
-          description: ID of route to return
+          description: ID of the route to return.
           required: true
           example: 1
           schema:
@@ -111,7 +111,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly found route
+          description: Successfully found route.
           content:
             application/json:
               schema:
@@ -136,7 +136,7 @@ paths:
       - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
-          description: Successful route removal
+          description: Successful route removal.
           content:
             text/plain:
               type: string
@@ -158,12 +158,12 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
       tags:
         - route
-      summary: Finds route points for given route identified by the route's ID
+      summary: Finds route points for the given route identified by the route's ID.
       parameters:
         - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
-          description: Successfuly found route points
+          description: Successfully found route points
           content:
             application/json:
               schema:
@@ -184,9 +184,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
       tags:
         - route
-      summary: Finds route points for given route identified by the route's ID
+      summary: Finds route points for the given route identified by the route's ID.
       requestBody:
-        description: Route points json
+        description: Route points JSON.
         x-body-name: routePoints
         content:
           application/json:
@@ -195,7 +195,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfuly found route points
+          description: Successfully found route points.
           content:
             text/plain:
               type: string
@@ -215,7 +215,7 @@ components:
     RouteId:
       name: routeId
       in: path
-      description: ID of route to delete
+      description: ID of the route to delete.
       required: true
       example: 1
       schema:
@@ -224,7 +224,7 @@ components:
   schemas:
     Route:
       type: object
-      description: Route object structure
+      description: Route object structure.
       required:
         - name
       properties:
@@ -241,7 +241,7 @@ components:
           example: [1, 2, 3, 4]
     RoutePoints:
       type: object
-      description: Route points object structure
+      description: Route points object structure.
       required:
         - routeId
         - points
