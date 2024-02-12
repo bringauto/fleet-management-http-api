@@ -18,7 +18,7 @@ def create_stop() -> _Response:
     else:
         stop = _Stop.from_dict(connexion.request.get_json())
         stop_db_model = _api.stop_to_db_model(stop)
-        response = _db_access.add(_db_models.StopDBModel, stop_db_model)
+        response = _db_access.add(stop_db_model)
         if response.status_code == 200:
             _api.log_info(f"Stop (id={response.body}, name='{stop.name}) has been created.")
             return _Response(

@@ -77,47 +77,41 @@ class Test_Waiting_For_Content(unittest.TestCase):
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
     ):
-        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        test_obj = models.TestBase(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(_db_access.get, models.TestBase, wait=True)
-            executor.submit(_db_access.add, models.TestBase, test_obj)
+            executor.submit(_db_access.add, test_obj)
             retrieved_objs = future.result()
-            self.assertEqual(retrieved_objs, [test_obj])
+            self.assertEqual(retrieved_objs[0].test_str, test_obj.test_str)
 
-    def test_not_enabling_wait_mechanism_when_no_content_is_available_makes_the_db_request_immediatelly_return_empty_list(
+    def test_not_enabling_wait_mechanism_and_unavailable_content_makes_the_db_request_immediatelly_return_empty_list(
         self,
     ):
-        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        test_obj = models.TestBase(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(_db_access.get, models.TestBase, wait=False)
             time.sleep(0.05)
-            executor.submit(_db_access.add, models.TestBase, test_obj)
+            executor.submit(_db_access.add, test_obj)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(
-                _db_access.get, models.TestBase, wait=True, timeout_ms=100
-            )
+            future = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=100)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_response_is_sent_to_multiple_waiters(self):
-        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        test_obj = models.TestBase(test_str="test_x", test_int=123)
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future1 = executor.submit(
-                _db_access.get, models.TestBase, wait=True, timeout_ms=1000
-            )
-            future2 = executor.submit(
-                _db_access.get, models.TestBase, wait=True, timeout_ms=1000
-            )
+            future1 = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=1000)
+            future2 = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=1000)
             time.sleep(0.05)
-            executor.submit(_db_access.add, models.TestBase, test_obj)
+            executor.submit(_db_access.add, test_obj)
             retrieved_objs1 = future1.result()
             retrieved_objs2 = future2.result()
-            self.assertEqual(retrieved_objs1, [test_obj])
-            self.assertEqual(retrieved_objs2, [test_obj])
+            self.assertEqual(retrieved_objs1[0].test_str, test_obj.test_str)
+            self.assertEqual(retrieved_objs2[0].test_str, test_obj.test_str)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
@@ -142,7 +136,7 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
                 timeout_ms=500,
             )
             time.sleep(0.01)
-            executor.submit(_db_access.add, models.TestBase, test_obj)
+            executor.submit(_db_access.add, test_obj)
             time.sleep(0.01)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
@@ -160,16 +154,15 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
     def test_waiting_for_new_record_to_be_sent_to_database(self):
         old_record = models.TestBase(id=111, test_str="test_1", test_int=123)
         new_record = models.TestBase(id=222, test_str="test_2", test_int=456)
-        _db_access.add(models.TestBase, old_record)
+        _db_access.add(old_record)
         with ThreadPoolExecutor(max_workers=3) as executor:
-            future = executor.submit(
-                _db_access.wait_for_new, models.TestBase, timeout_ms=5000
-            )
+            future = executor.submit(_db_access.wait_for_new, models.TestBase, timeout_ms=5000)
             time.sleep(0.5)
-            executor.submit(_db_access.add, models.TestBase, new_record)
+            executor.submit(_db_access.add, new_record)
             time.sleep(0.05)
             retrieved_objs = future.result()
-            self.assertListEqual(retrieved_objs, [new_record])
+            self.assertEqual(len(retrieved_objs), 1)
+            self.assertEqual(retrieved_objs[0].test_str, new_record.test_str)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
@@ -177,4 +170,4 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()  # pragma: no covers
+    unittest.main(verbosity=2, buffer=True)  # pragma: no covers

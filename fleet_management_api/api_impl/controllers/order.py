@@ -21,7 +21,6 @@ def create_order() -> _Response:
     else:
         db_model = _api.order_to_db_model(order)
         response = _db_access.add(
-            _db_models.OrderDBModel,
             db_model,
             check_reference_existence={
                 _db_models.CarDBModel: order.car_id,

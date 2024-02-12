@@ -75,7 +75,6 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
     The api_key can be set to any value, that can be used as a value for 'api_key' query parameter in the API calls.
     """
     _db_access.add(
-        _ApiKeyDBModel,
         _ApiKeyDBModel(
             key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()
         ),

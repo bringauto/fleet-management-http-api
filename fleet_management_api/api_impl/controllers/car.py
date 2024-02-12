@@ -22,7 +22,6 @@ def create_car() -> _Response:  # noqa: E501
         car = _models.Car.from_dict(connexion.request.get_json())
         car_db_model = _api.car_to_db_model(car)
         response = _db_access.add(
-            _db_models.CarDBModel,
             car_db_model,
             check_reference_existence={_db_models.PlatformHWDBModel: car.platform_hw_id},
         )

@@ -40,7 +40,6 @@ def redefine_route_points() -> _Response:
         )
         if len(existing_route_points) == 0:
             response = _db_access.add(
-                _db_models.RoutePointsDBModel,
                 rp_db_model,
                 check_reference_existence={_db_models.RouteDBModel: rp.route_id},
             )
@@ -48,7 +47,6 @@ def redefine_route_points() -> _Response:
         else:
             _db_access.delete(_db_models.RoutePointsDBModel, existing_route_points[0].id)
             response = _db_access.add(
-                _db_models.RoutePointsDBModel,
                 rp_db_model,
                 check_reference_existence={_db_models.RouteDBModel: rp_db_model.route_id},
             )

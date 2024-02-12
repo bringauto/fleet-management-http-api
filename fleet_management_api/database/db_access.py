@@ -27,7 +27,6 @@ class ParentNotFound(Exception):
 
 
 def add(
-    base: Type[_Base],
     *sent_objs: _Base,
     check_reference_existence: Optional[Dict[Type[_Base], int]] = None,
     conn_source: Optional[_sqa.Engine] = None,
@@ -50,7 +49,7 @@ def add(
             content_type="text/plain",
             body="Nothing to add to database",
         )
-    _check_obj_bases_matches_specifed_base(base, *sent_objs)
+    _check_common_base_for_all_objs(*sent_objs)
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
@@ -62,7 +61,7 @@ def add(
             session.add_all(sent_objs)
             session.commit()
             inserted_objs = [obj.copy() for obj in sent_objs]
-            _wait_mg.notify(base.__tablename__, inserted_objs)
+            _wait_mg.notify(sent_objs[0].__tablename__, inserted_objs)
             return _Response(
                 status_code=200, content_type="application/json", body=inserted_objs[0]
             )
@@ -70,7 +69,7 @@ def add(
             return _Response(
                 status_code=404,
                 content_type="text/plain",
-                body=f"{_model_name(base)} with id={ref_id} does not exist in the database.",
+                body=f"{_model_name(sent_objs[0].__class__)} with id={ref_id} does not exist in the database.",
             )
         except _sqaexc.IntegrityError as e:
             return _Response(
@@ -316,12 +315,15 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def _check_obj_bases_matches_specifed_base(
-    specified_base: Type[_Base], *objs: _Base
+def _check_common_base_for_all_objs(
+    *objs: _Base
 ) -> None:
-    for obj in objs:
-        if not isinstance(obj, specified_base):
-            raise TypeError(f"Object {obj} is not of type {specified_base}")
+    if not objs:
+        return
+    tablename = objs[0].__tablename__
+    for obj in objs[1:]:
+        if not obj.__tablename__==tablename:
+            raise TypeError(f"Object being added to database must belong to the same table.")
 
 
 def _get_checked_connection_source(

@@ -27,7 +27,6 @@ def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
         return 400, _key_already_exists_msg(key_name)
     else:
         response = _db_access.add(
-            _ApiKeyDBModel,
             _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now),
             conn_source=connection_source,
         )

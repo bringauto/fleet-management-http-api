@@ -24,7 +24,6 @@ def add_car_state() -> _Response:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
         state_db_model = _api.car_state_to_db_model(car_state)
         response = _db_access.add(
-            _db_models.CarStateDBModel,
             state_db_model,
             check_reference_existence={_db_models.CarDBModel: car_state.car_id},
         )

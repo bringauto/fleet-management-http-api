@@ -18,7 +18,7 @@ def create_hw() -> _Response:
     else:
         platform_hw = _PlatformHW.from_dict(connexion.request.get_json())
         platform_hw_db_model = _api.platform_hw_to_db_model(platform_hw)
-        response = _db_access.add(_db_models.PlatformHWDBModel, platform_hw_db_model)
+        response = _db_access.add(platform_hw_db_model)
         if response.status_code == 200:
             _api.log_info(f"Platform HW (name='{platform_hw.name}) has been created.")
             inserted_model = _api.platform_hw_from_db_model(response.body)

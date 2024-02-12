@@ -13,6 +13,9 @@ DATABASE_URL = "sqlite:///:memory:"
 
 
 class Base(_DeclarativeBase):
+    id: _Mapped[int] = _mapped_column(
+        _sqa.Integer, primary_key=True, unique=True, nullable=False
+    )
     def copy(self) -> Base:
         return self.__class__(
             **{col.name: getattr(self, col.name) for col in self.__table__.columns}

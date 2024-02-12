@@ -74,7 +74,7 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
-        response = _db_access.add(_TestBase, test_obj)
+        response = _db_access.add(test_obj)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(_db_access.get(_TestBase)), 1)
 
@@ -149,7 +149,7 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
         self.assertTrue(_connection.current_connection_source() is None)
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
-            _db_access.add(_TestBase, test_obj)
+            _db_access.add(test_obj)
 
 
 class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):
