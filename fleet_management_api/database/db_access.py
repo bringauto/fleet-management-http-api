@@ -50,14 +50,13 @@ def add(
             body="Nothing to add to database",
         )
     _check_common_base_for_all_objs(*sent_objs)
+    _set_all_obj_ids_to_none(*sent_objs)
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
             if check_reference_existence is not None:
                 for ref_type, ref_id in check_reference_existence.items():
                     session.get_one(ref_type, ref_id)
-            for obj in sent_objs:
-                obj.id = None  # type: ignore
             session.add_all(sent_objs)
             session.commit()
             inserted_objs = [obj.copy() for obj in sent_objs]
@@ -343,12 +342,15 @@ def _model_name(base: Type[_Base]) -> str:
     return base.__name__.rstrip("DBModel")
 
 
-def _result_is_ok(
-    attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any
-) -> bool:
+def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
     for attr_label, attr_criterion in attribute_criteria.items():
         if not hasattr(item, attr_label):
             return False
         if not attr_criterion(item.__dict__[attr_label]):
             return False
     return True
+
+
+def _set_all_obj_ids_to_none(*sent_objs: _Base) -> None:
+    for obj in sent_objs:
+        obj.id = None # type: ignore
