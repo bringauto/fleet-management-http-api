@@ -10,21 +10,23 @@ import fleet_management_api.script_args.configs as _configs
 import fleet_management_api.api_impl as _api
 
 
-_db_connection: None|_Engine = None
+_db_connection: None | _Engine = None
 
 
-def current_connection_source() -> _Engine|None:
+def current_connection_source() -> _Engine | None:
     """Return the current connection source (sqlalchemy Engine object) stored in the module variable."""
     global _db_connection
     return _db_connection
 
 
-def check_and_return_current_connection_source(conn_source: Optional[_Engine] = None) -> _sqa.engine.base.Engine:
+def check_and_return_current_connection_source(
+    conn_source: Optional[_Engine] = None,
+) -> _sqa.engine.base.Engine:
     """Check whether currently set module variable storing connection source (sqlalchemy Engine object) is not None.
 
     If it is None, raise RuntimeError. Otherwise return its value.
     """
-    source: _Engine|None = None
+    source: _Engine | None = None
     if conn_source is not None:
         source = conn_source
     else:
@@ -34,7 +36,13 @@ def check_and_return_current_connection_source(conn_source: Optional[_Engine] = 
     return source
 
 
-def db_url(username: str = "", password: str = "", location: str = "", port: Optional[int] = None, db_name: str = "") -> str:
+def db_url(
+    username: str = "",
+    password: str = "",
+    location: str = "",
+    port: Optional[int] = None,
+    db_name: str = "",
+) -> str:
     """Compose and return a url used to connect API to the database."""
     if port is not None:
         location = f"{location}:{port}"
@@ -57,19 +65,31 @@ def db_url_test(db_file_location: str = "") -> str:
         return f"sqlite:///{db_file_location}"
 
 
-def set_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> None: # pragma: no cover
+def set_connection_source(
+    db_location: str,
+    port: Optional[int] = None,
+    db_name: str = "",
+    username: str = "",
+    password: str = "",
+) -> None:  # pragma: no cover
     """Set the module variable storing the connection source (sqlalchemy Engine object)."""
     url = db_url(username, password, db_location, port, db_name)
     _set_connection(url)
 
 
-def get_connection_source(db_location: str, port: Optional[int] = None, db_name: str = "", username: str = "", password: str = "") -> _Engine: # pragma: no cover
+def get_connection_source(
+    db_location: str,
+    port: Optional[int] = None,
+    db_name: str = "",
+    username: str = "",
+    password: str = "",
+) -> _Engine:  # pragma: no cover
     """Return a new connection source (sqlalchemy Engine object) (distinct from the one stored in the module variable)."""
     url = db_url(username, password, db_location, port, db_name)
     return _get_connection(url)
 
 
-def replace_connection_source(source: _Engine|None) -> None:
+def replace_connection_source(source: _Engine | None) -> None:
     """Replace the module variable storing the connection source (sqlalchemy Engine object)."""
     global _db_connection
     _db_connection = source
@@ -97,7 +117,7 @@ def set_up_database(config: _configs.Database) -> None:
     Set class attributes of the DB models.
     """
     conn_config = config.connection
-    if config.test.strip()!="":
+    if config.test.strip() != "":
         set_connection_source_test(config.test)
     else:
         set_connection_source(
@@ -105,12 +125,16 @@ def set_up_database(config: _configs.Database) -> None:
             port=conn_config.port,
             db_name=conn_config.database_name,
             username=conn_config.username,
-            password=conn_config.password
+            password=conn_config.password,
         )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _db_models.CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
-    _db_models.OrderStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["order_states"])
+    _db_models.CarStateDBModel.set_max_n_of_stored_states(
+        config.maximum_number_of_table_rows["car_states"]
+    )
+    _db_models.OrderStateDBModel.set_max_n_of_stored_states(
+        config.maximum_number_of_table_rows["order_states"]
+    )
     src = current_connection_source()
     if src is None:
         msg = "Database connection not set up."
@@ -145,9 +169,13 @@ def _new_connection(url: str) -> _Engine:
     try:
         engine = _create_engine(url)
         if engine is None:
-            raise InvalidConnectionArguments(f"Could not create new connection source (url='{url}').")
+            raise InvalidConnectionArguments(
+                f"Could not create new connection source (url='{url}')."
+            )
     except Exception as e:
-        raise InvalidConnectionArguments(f"Could not create new connection source (url='{url}'). {e}")
+        raise InvalidConnectionArguments(
+            f"Could not create new connection source (url='{url}'). {e}"
+        )
 
     try:
         with engine.connect():
@@ -162,5 +190,9 @@ def _new_connection(url: str) -> _Engine:
     return engine
 
 
-class CannotConnectToDatabase(Exception): pass
-class InvalidConnectionArguments(Exception): pass
+class CannotConnectToDatabase(Exception):
+    pass
+
+
+class InvalidConnectionArguments(Exception):
+    pass

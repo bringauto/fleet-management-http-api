@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import Any
 
-from flask.testing import FlaskClient as _FlaskClient # type: ignore
-import connexion # type: ignore
+from flask.testing import FlaskClient as _FlaskClient  # type: ignore
+import connexion  # type: ignore
 
 from .encoder import JSONEncoder
 import fleet_management_api.database.db_access as _db_access
@@ -11,14 +11,13 @@ from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_m
 
 
 def get_app() -> connexion.FlaskApp:
-    app = connexion.App(__name__, specification_dir='./openapi/')
+    app = connexion.App(__name__, specification_dir="./openapi/")
     app.app.json_encoder = JSONEncoder
-    app.add_api('openapi.yaml', pythonic_params=True)
+    app.add_api("openapi.yaml", pythonic_params=True)
     return app
 
 
 class _TestApp:
-
     def __init__(self, api_key: str = "") -> None:
         self._app = get_app()
         self._flask_app = self._TestFlaskApp(api_key, self._app.app)
@@ -77,6 +76,8 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
     """
     _db_access.add(
         _ApiKeyDBModel,
-        _ApiKeyDBModel(key=predef_api_key, name = "test_key", creation_timestamp = _timestamp_ms())
+        _ApiKeyDBModel(
+            key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()
+        ),
     )
     return _TestApp(predef_api_key)

@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.append('.')
+
+sys.path.append(".")
 import unittest
 
 from fleet_management_api.models import Car, PlatformHW, Order
@@ -10,7 +11,6 @@ from tests.utils.setup_utils import create_stops, create_platform_hws
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         app = _app.get_test_app()
@@ -19,7 +19,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
     def test_cars_list_is_initially_available_and_empty(self):
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.get('/v2/management/car')
+            response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
@@ -27,39 +27,47 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         car = Car(name="Test Car", platform_hw_id=216465168, under_test=False)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post('/v2/management/car', json=car, content_type='application/json')
+            response = c.post(
+                "/v2/management/car", json=car, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 404)
 
     def test_creating_and_retrieving_a_car(self):
         car = Car(name="Test Car", platform_hw_id=1, under_test=False)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post('/v2/management/car', json=car, content_type='application/json')
+            response = c.post(
+                "/v2/management/car", json=car, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 200)
-            response = c.get('/v2/management/car')
+            response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
-            self.assertEqual(response.json[0]['id'], 1)
-            self.assertEqual(response.json[0]['name'], car.name)
-            self.assertEqual(response.json[0]['platformHwId'], car.platform_hw_id)
-            self.assertEqual(response.json[0]['underTest'], car.under_test)
+            self.assertEqual(response.json[0]["id"], 1)
+            self.assertEqual(response.json[0]["name"], car.name)
+            self.assertEqual(response.json[0]["platformHwId"], car.platform_hw_id)
+            self.assertEqual(response.json[0]["underTest"], car.under_test)
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(name="Test Car 1", platform_hw_id=1)
         car_2 = Car(name="Test Car 2", platform_hw_id=2)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car_1, content_type='application/json')
-            c.post('/v2/management/car', json=car_2, content_type='application/json')
-            response = c.get('/v2/management/car')
+            c.post("/v2/management/car", json=car_1, content_type="application/json")
+            c.post("/v2/management/car", json=car_2, content_type="application/json")
+            response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 
     def test_creating_car_from_invalid_data_returns_400_error_code(self):
-        car_dict_missing_an_id = {'name': 'Test Car', 'platformId': 1}
+        car_dict_missing_an_id = {"name": "Test Car", "platformId": 1}
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post('/v2/management/car', json=car_dict_missing_an_id, content_type='application/json')
+            response = c.post(
+                "/v2/management/car",
+                json=car_dict_missing_an_id,
+                content_type="application/json",
+            )
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_with_already_existing_name_returns_400_error_code(self):
@@ -67,48 +75,48 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         car_2 = Car(name="Test Car", platform_hw_id=2)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car_1, content_type='application/json')
-            response = c.post('/v2/management/car', json=car_2, content_type='application/json')
+            c.post("/v2/management/car", json=car_1, content_type="application/json")
+            response = c.post(
+                "/v2/management/car", json=car_2, content_type="application/json"
+            )
             print(response)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_using_invalid_json_returns_400_error_code(self):
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post('/v2/management/car', json=7)
+            response = c.post("/v2/management/car", json=7)
             self.assertEqual(response.status_code, 400)
 
 
 class Test_Retrieving_Single_Car(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         platformhw = PlatformHW(name="Test Platform HW")
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/platformhw', json=platformhw)
+            c.post("/v2/management/platformhw", json=platformhw)
 
     def test_retrieving_single_existing_car(self):
         car = Car(name="Test Car", platform_hw_id=1)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car, content_type='application/json')
+            c.post("/v2/management/car", json=car, content_type="application/json")
             response = c.get(f"/v2/management/car/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json['name'], car.name)
+            self.assertEqual(response.json["name"], car.name)
 
     def test_retrieving_nonexistent_car_returns_code_404(self):
         nonexistent_car_id = 25
         car = Car(name="Test Car", platform_hw_id=1)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car, content_type='application/json')
+            c.post("/v2/management/car", json=car, content_type="application/json")
             response = c.get(f"/v2/management/car/{nonexistent_car_id}")
             self.assertEqual(response.status_code, 404)
 
 
 class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         self.app = _app.get_test_app()
@@ -116,41 +124,43 @@ class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
 
     def test_posting_and_getting_car_from_example_in_specification(self):
         with self.app.app.test_client() as c:
-            example = c.get('/v2/management/openapi.json').json["components"]["schemas"]["Car"]["example"]
-            c.post('/v2/management/car', json=example, content_type='application/json')
+            example = c.get("/v2/management/openapi.json").json["components"][
+                "schemas"
+            ]["Car"]["example"]
+            c.post("/v2/management/car", json=example, content_type="application/json")
             response = c.get(f"/v2/management/car/{example['id']}")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json['name'], example['name'])
+            self.assertEqual(response.json["name"], example["name"])
 
 
 class Test_Logging_Car_Creation(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         app = _app.get_test_app()
         create_platform_hws(app)
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
-        with self.assertLogs('werkzeug', level='INFO') as logs:
+        with self.assertLogs("werkzeug", level="INFO") as logs:
             car = Car(name="Test Car", platform_hw_id=1)
             app = _app.get_test_app()
             with app.app.test_client() as c:
-                c.post('/v2/management/car', json=car, content_type='application/json')
+                c.post("/v2/management/car", json=car, content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
                 self.assertIn(str(car.name), logs.output[0])
 
-    def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(self):
-        with self.assertLogs('werkzeug', level='ERROR') as logs:
+    def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(
+        self,
+    ):
+        with self.assertLogs("werkzeug", level="ERROR") as logs:
             car = Car(name="Test Car", platform_hw_id=1)
             app = _app.get_test_app()
             with app.app.test_client() as c:
-                c.post('/v2/management/car', json=car, content_type='application/json')
-                c.post('/v2/management/car', json=car, content_type='application/json')
+                c.post("/v2/management/car", json=car, content_type="application/json")
+                c.post("/v2/management/car", json=car, content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
 
 
 class Test_Updating_Car(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         app = _app.get_test_app()
@@ -160,34 +170,41 @@ class Test_Updating_Car(unittest.TestCase):
         car = Car(name="Test Car", platform_hw_id=1)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post('/v2/management/car', json=car, content_type='application/json')
+            response = c.post(
+                "/v2/management/car", json=car, content_type="application/json"
+            )
             car.name = "Updated Test Car"
             car.id = 1
-            response = c.put('/v2/management/car', json=car, content_type='application/json')
+            response = c.put(
+                "/v2/management/car", json=car, content_type="application/json"
+            )
 
             self.assertEqual(response.status_code, 200)
-            response = c.get('/v2/management/car')
-            self.assertTrue(len(response.json) == 1) # type: ignore
-            self.assertEqual(response.json[0]['name'], "Updated Test Car") # type: ignore
+            response = c.get("/v2/management/car")
+            self.assertTrue(len(response.json) == 1)  # type: ignore
+            self.assertEqual(response.json[0]["name"], "Updated Test Car")  # type: ignore
 
     def test_updating_nonexistent_car_yields_404_error(self) -> None:
         car = Car(id=1, name="Test Car", platform_hw_id=1)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.put('/v2/management/car', json=car, content_type='application/json')
+            response = c.put(
+                "/v2/management/car", json=car, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 404)
 
     def test_passing_other_object_when_updating_car_yields_400_error(self) -> None:
         car = Car(name="Test Car", platform_hw_id=1)
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car)
-            response = c.put('/v2/management/car', json={'id': 1}, content_type='application/json')
+            c.post("/v2/management/car", json=car)
+            response = c.put(
+                "/v2/management/car", json={"id": 1}, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 400)
 
 
 class Test_Deleting_Car(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test("test_db.db")
         app = _app.get_test_app()
@@ -198,17 +215,17 @@ class Test_Deleting_Car(unittest.TestCase):
         app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1)
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car)
-            response = c.delete('/v2/management/car/1')
+            c.post("/v2/management/car", json=car)
+            response = c.delete("/v2/management/car/1")
             self.assertEqual(response.status_code, 200)
-            response = c.get('/v2/management/car')
+            response = c.get("/v2/management/car")
             self.assertEqual(response.json, [])
 
     def test_deleting_nonexistent_car_yields_404_error(self) -> None:
         car_id = 17
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.delete(f'/v2/management/car/{car_id}')
+            response = c.delete(f"/v2/management/car/{car_id}")
             self.assertEqual(response.status_code, 404)
 
     def test_car_with_assigned_order_cannot_be_deleted(self):
@@ -222,9 +239,9 @@ class Test_Deleting_Car(unittest.TestCase):
         app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1)
         with app.app.test_client() as c:
-            c.post('/v2/management/car', json=car)
-            c.post('/v2/management/order', json=order)
-            response = c.delete('/v2/management/car/1')
+            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/order", json=order)
+            response = c.delete("/v2/management/car/1")
             self.assertEqual(response.status_code, 400)
 
     def tearDown(self) -> None:
@@ -233,21 +250,26 @@ class Test_Deleting_Car(unittest.TestCase):
 
 
 class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
-
     def setUp(self) -> None:
         set_connection_source_test()
         app = _app.get_test_app()
         create_platform_hws(app)
 
-    def test_creating_car_using_platformhw_already_assigned_to_other_car_yields_code_400(self):
+    def test_creating_car_using_platformhw_already_assigned_to_other_car_yields_code_400(
+        self,
+    ):
         car_1 = Car(name="Test Car 1", platform_hw_id=1)
         car_2 = Car(name="Test Car 2", platform_hw_id=1)
         with _app.get_test_app().app.test_client() as c:
-            response = c.post('/v2/management/car', json=car_1, content_type='application/json')
+            response = c.post(
+                "/v2/management/car", json=car_1, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 200)
-            response = c.post('/v2/management/car', json=car_2, content_type='application/json')
+            response = c.post(
+                "/v2/management/car", json=car_2, content_type="application/json"
+            )
             self.assertEqual(response.status_code, 400)
 
 
-if __name__=="__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     unittest.main(buffer=True)

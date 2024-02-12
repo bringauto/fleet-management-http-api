@@ -4,7 +4,6 @@ import subprocess
 
 
 class Test_Running_New_API_Key_Script(unittest.TestCase):
-
     def test_adding_new_api_key_yields_code_0(self):
         process = subprocess.run(
             [
@@ -13,7 +12,7 @@ class Test_Running_New_API_Key_Script(unittest.TestCase):
                 "test_key",
                 "tests/script_args/test_config.json",
                 "-t",
-                "db_file.db"
+                "db_file.db",
             ],
             capture_output=True,
         )
@@ -27,7 +26,7 @@ class Test_Running_New_API_Key_Script(unittest.TestCase):
                 "Alice",
                 "config/config.json",
                 "-t",
-                "db_file.db"
+                "db_file.db",
             ],
             capture_output=True,
         )
@@ -38,7 +37,7 @@ class Test_Running_New_API_Key_Script(unittest.TestCase):
                 "Alice",
                 "config/config.json",
                 "-t",
-                "db_file.db"
+                "db_file.db",
             ],
             capture_output=True,
         )
@@ -50,4 +49,4 @@ class Test_Running_New_API_Key_Script(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main() # pragma: no cover
+    unittest.main()  # pragma: no cover

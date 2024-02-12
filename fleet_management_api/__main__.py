@@ -12,16 +12,18 @@ def _set_up_oauth(config: _args.Security) -> None:
         secret_key=config.client_secret_key,
         scope=config.scope,
         realm=config.realm,
-        callback=str(config.callback)
+        callback=str(config.callback),
     )
     public_key_file = open(config.keycloak_public_key_file, "r")
     set_public_key(public_key_file.read())
     public_key_file.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     application = app.get_app()
-    args = _args.request_and_get_script_arguments("Run the Fleet Management v2 HTTP API server.")
+    args = _args.request_and_get_script_arguments(
+        "Run the Fleet Management v2 HTTP API server."
+    )
 
     db_config = args.config.database
     api_config = args.config.api
@@ -30,8 +32,7 @@ if __name__ == '__main__':
     security_config.callback = args.config.http_server.base_uri
 
     set_up_database(db_config)
-    set_content_timeout_ms(api_config.request_for_data.timeout_in_seconds*1000)
+    set_content_timeout_ms(api_config.request_for_data.timeout_in_seconds * 1000)
     _set_up_oauth(security_config)
 
     application.run(port=http_server_config.port)
-

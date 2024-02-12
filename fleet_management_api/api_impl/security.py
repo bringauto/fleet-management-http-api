@@ -1,10 +1,18 @@
 import urllib.parse as _url
 
-from keycloak import KeycloakOpenID # type: ignore
+from keycloak import KeycloakOpenID  # type: ignore
 
 
 class SecurityObj:
-    def set_config(self, keycloak_url: str, client_id: str, secret_key: str, scope: str, realm: str, base_uri: str) -> None:
+    def set_config(
+        self,
+        keycloak_url: str,
+        client_id: str,
+        secret_key: str,
+        scope: str,
+        realm: str,
+        base_uri: str,
+    ) -> None:
         """Set configuration for keycloak authentication and initialize KeycloakOpenID."""
         self._keycloak_url = keycloak_url
         self._scope = scope
@@ -16,38 +24,36 @@ class SecurityObj:
             server_url=keycloak_url,
             client_id=client_id,
             realm_name=realm,
-            client_secret_key=secret_key
+            client_secret_key=secret_key,
         )
 
     def get_authentication_url(self) -> str:
         """Get keycloak url used for authentication."""
         auth_url = self._oid.auth_url(
-            redirect_uri=self._callback,
-            scope=self._scope,
-            state=self._state
+            redirect_uri=self._callback, scope=self._scope, state=self._state
         )
         return auth_url
 
-    def token_get(self, state: str|None, session_state: str|None, iss: str|None, code: str|None) -> dict:
+    def token_get(
+        self, state: str | None, session_state: str | None, iss: str | None, code: str | None
+    ) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
         if state != self._state:
             raise Exception("Invalid state")
 
-        if _url.urlparse(iss).geturl() != appended_uri(self._keycloak_url, "realms", self._realm_name):
+        if _url.urlparse(iss).geturl() != appended_uri(
+            self._keycloak_url, "realms", self._realm_name
+        ):
             raise Exception("Invalid issuer")
 
         token = self._oid.token(
-            grant_type="authorization_code",
-            code=code,
-            redirect_uri=self._callback
+            grant_type="authorization_code", code=code, redirect_uri=self._callback
         )
         return token
 
     def token_refresh(self, refresh_token: str) -> dict:
         """Get a new token from keycloak using the refresh token."""
-        token = self._oid.refresh_token(
-            refresh_token=refresh_token
-        )
+        token = self._oid.refresh_token(refresh_token=refresh_token)
         return token
 
 
@@ -61,5 +67,5 @@ def appended_uri(uri: str, *appended: str) -> str:
     if appended and not uri.endswith("/"):
         uri += "/"
     for part in appended:
-        uri = _url.urljoin(base=uri+"/", url=part.strip("/"))
+        uri = _url.urljoin(base=uri + "/", url=part.strip("/"))
     return uri

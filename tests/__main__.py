@@ -15,7 +15,7 @@ OMITTED_FILES = [
     "util.py",
     "typing_utils.py",
     "encoder.py",
-    "tests/__main__.py"
+    "tests/__main__.py",
 ]
 HTML_REPORT_FLAG = "-h"
 
@@ -34,7 +34,7 @@ def _report_coverage(cov: coverage.Coverage, html) -> None:
 
 
 def _run_tests(show_test_names: bool = True) -> None:
-    possible_paths = [os.path.join(TEST_DIR_NAME,path) for path in sys.argv[1:]]
+    possible_paths = [os.path.join(TEST_DIR_NAME, path) for path in sys.argv[1:]]
     if not possible_paths:
         paths = [TEST_DIR_NAME]
     else:
@@ -68,5 +68,3 @@ if __name__ == "__main__":
     cov.stop()
     cov.save()
     _report_coverage(cov, html)
-
-

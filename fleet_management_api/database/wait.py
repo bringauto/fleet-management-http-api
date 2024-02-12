@@ -13,14 +13,15 @@ class WaitObjManager:
         self._wait_dict: Dict[str, List[WaitObj]] = dict()
 
     @property
-    def timeout_ms(self) -> int: return self._timeout_ms
+    def timeout_ms(self) -> int:
+        return self._timeout_ms
 
     def new_wait_obj(
         self,
         key: Any,
         timeout_ms: Optional[int] = None,
-        validation: Optional[Callable[[Any], bool]] = None
-        ) -> WaitObj:
+        validation: Optional[Callable[[Any], bool]] = None,
+    ) -> WaitObj:
         """Create a new wait object and adds it to the wait queue for given key."""
 
         if timeout_ms is None or timeout_ms < 0:
@@ -33,7 +34,7 @@ class WaitObjManager:
 
     def notify(self, key: Any, response_content: Iterable[Any]) -> None:
         """Make the next wait object in the queue to respond with specified 'reponse_content' and remove it from the queue."""
-        response_content  = list(response_content)
+        response_content = list(response_content)
         if key in self._wait_dict:
             for wait_obj in self._wait_dict[key]:
                 wait_obj.stop_waiting_if_content_ok(response_content)
@@ -47,8 +48,8 @@ class WaitObjManager:
         self,
         key: Any,
         timeout_ms: Optional[int] = None,
-        validation: Optional[Callable[[Any], bool]] = None
-        ) -> List[Any]:
+        validation: Optional[Callable[[Any], bool]] = None,
+    ) -> List[Any]:
         """Wait for the next wait object in queue to respond and returns the response content.
         The queue is identified by given key.
         """
@@ -57,11 +58,13 @@ class WaitObjManager:
         self._remove_wait_obj(wait_obj)
         return reponse
 
-    def _remove_wait_obj(self, wait_obj:WaitObj) -> None:
+    def _remove_wait_obj(self, wait_obj: WaitObj) -> None:
         """Remove the wait obejct from the wait queue."""
         key = wait_obj.key
         if not key in self._wait_dict or not wait_obj in self._wait_dict[key]:
-            raise WaitObjManager.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
+            raise WaitObjManager.UnknownWaitingObj(
+                f"Wait object for key {key} does not exist."
+            )
         else:
             self._wait_dict[key].remove(wait_obj)
         if not self._wait_dict[key]:
@@ -77,8 +80,12 @@ class WaitObjManager:
 
 
 class WaitObj:
-
-    def __init__(self, key: Any, timeout_ms: int, validation: Optional[Callable[[Any], bool]] = None) -> None:
+    def __init__(
+        self,
+        key: Any,
+        timeout_ms: int,
+        validation: Optional[Callable[[Any], bool]] = None,
+    ) -> None:
         self._key = key
         self._response_content: List[Any] = list()
         self._condition = _threading.Condition()
@@ -86,9 +93,12 @@ class WaitObj:
         self._timeout_ms = max(timeout_ms, 0)
 
     @property
-    def key(self) -> str: return self._key
+    def key(self) -> str:
+        return self._key
+
     @property
-    def timeout_ms(self) -> int: return self._timeout_ms
+    def timeout_ms(self) -> int:
+        return self._timeout_ms
 
     def stop_waiting_if_content_ok(self, content: List[Any]):
         filtered_content = self.filter_content(content)
@@ -100,7 +110,7 @@ class WaitObj:
     def wait_and_get_response(self) -> List[Any]:
         """Wait for the response object to be set and then return it."""
         with self._condition:
-            self._condition.wait(timeout=self._timeout_ms/1000)
+            self._condition.wait(timeout=self._timeout_ms / 1000)
         return self._response_content
 
     def filter_content(self, content: List[Any]) -> List[Any]:

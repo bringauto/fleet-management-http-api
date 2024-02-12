@@ -8,7 +8,6 @@ import fleet_management_api.app as _app
 
 
 class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
-
     def setUp(self) -> None:
         self.src = _connection.get_connection_source_test("test_db_file.db")
 
@@ -27,8 +26,8 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
         code, data = _api_keys.verify_key_and_return_key_info("abcd", self.src)
         self.assertEqual(code, 200)
         self.assertTrue(isinstance(data, _api_keys._ApiKeyDBModel))
-        self.assertEqual(data.name, key_name) # type: ignore
-        self.assertEqual(data.key, "abcd") # type: ignore
+        self.assertEqual(data.name, key_name)  # type: ignore
+        self.assertEqual(data.key, "abcd")  # type: ignore
 
     def test_creating_duplicate_key_yields_code_400(self):
         key_name = "test_key"
@@ -37,29 +36,27 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
         code, msg = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 400)
 
-    def tearDown(self) -> None: # pragma: no cover
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
 
 
 class Test_Using_API_Key_In_App(unittest.TestCase):
-
     def setUp(self) -> None:
         _connection.set_connection_source_test("db_file.db")
         self.app = _app.get_test_app()
 
     def test_using_nonexistent_key_yields_code_401(self):
         with self.app.app.test_client() as c:
-            response = c.get('/v2/management/car')
+            response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None: # pragma: no cover
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("db_file.db"):
             os.remove("db_file.db")
 
 
 class Test_Using_Already_Existing_API_Key(unittest.TestCase):
-
     def setUp(self) -> None:
         _connection.set_connection_source_test("db_file.db")
         self.app = _app.get_test_app(predef_api_key="abcd")
@@ -68,15 +65,15 @@ class Test_Using_Already_Existing_API_Key(unittest.TestCase):
     def test_using_existing_key(self, mock_generate_key: Mock):
         mock_generate_key.return_value = "abcd"
         with self.app.app.test_client() as c:
-            response = c.get('/v2/management/car')
+            response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 401)
-            response = c.get('/v2/management/car?api_key=abcd')
+            response = c.get("/v2/management/car?api_key=abcd")
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None: # pragma: no cover
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("db_file.db"):
             os.remove("db_file.db")
 
 
-if __name__ == '__main__':
-    unittest.main() # pragma: no cover
+if __name__ == "__main__":
+    unittest.main()  # pragma: no cover

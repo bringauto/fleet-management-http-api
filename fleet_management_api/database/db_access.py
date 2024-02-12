@@ -7,10 +7,12 @@ from sqlalchemy.orm.exc import NoResultFound as _NoResultFound
 from sqlalchemy.orm import Session as _Session
 from sqlalchemy.orm import noload as _noload
 from sqlalchemy.orm import InstrumentedAttribute as _InstrumentedAttribute
-from connexion.lifecycle import ConnexionResponse as _Response # type: ignore
+from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
-from fleet_management_api.database.connection import check_and_return_current_connection_source
+from fleet_management_api.database.connection import (
+    check_and_return_current_connection_source,
+)
 import fleet_management_api.database.wait as wait
 
 
@@ -28,8 +30,8 @@ def add(
     base: Type[_Base],
     *sent_objs: _Base,
     check_reference_existence: Optional[Dict[Type[_Base], int]] = None,
-    conn_source: Optional[_sqa.Engine] = None
-    ) -> _Response:
+    conn_source: Optional[_sqa.Engine] = None,
+) -> _Response:
     """Adds a objects to the database.
 
     All the `sent_objs` must be instances of the `base`.
@@ -43,7 +45,11 @@ def add(
 
     global _wait_mg
     if not sent_objs:
-        return _Response(status_code=200, content_type="text/plain", body="Nothing to add to database")
+        return _Response(
+            status_code=200,
+            content_type="text/plain",
+            body="Nothing to add to database",
+        )
     _check_obj_bases_matches_specifed_base(base, *sent_objs)
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
@@ -52,18 +58,32 @@ def add(
                 for ref_type, ref_id in check_reference_existence.items():
                     session.get_one(ref_type, ref_id)
             for obj in sent_objs:
-                obj.id = None # type: ignore
+                obj.id = None  # type: ignore
             session.add_all(sent_objs)
             session.commit()
             inserted_objs = [obj.copy() for obj in sent_objs]
             _wait_mg.notify(base.__tablename__, inserted_objs)
-            return _Response(status_code=200, content_type="application/json", body=inserted_objs[0])
+            return _Response(
+                status_code=200, content_type="application/json", body=inserted_objs[0]
+            )
         except _NoResultFound as e:
-            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with id={ref_id} does not exist in the database.")
+            return _Response(
+                status_code=404,
+                content_type="text/plain",
+                body=f"{_model_name(base)} with id={ref_id} does not exist in the database.",
+            )
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="text/plain", body=f"Nothing added to the database. {e.orig}")
+            return _Response(
+                status_code=400,
+                content_type="text/plain",
+                body=f"Nothing added to the database. {e.orig}",
+            )
         except Exception as e:
-            return _Response(status_code=500, content_type="text/plain", body=f"Nothing added to the database. {e}")
+            return _Response(
+                status_code=500,
+                content_type="text/plain",
+                body=f"Nothing added to the database. {e}",
+            )
 
 
 def delete(base: Type[_Base], id_: Any) -> _Response:
@@ -74,13 +94,26 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
             inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _Response(body=f"{_model_name(base)} with {_ID_NAME}={id_} was deleted.", status_code=200)
+            return _Response(
+                body=f"{_model_name(base)} with {_ID_NAME}={id_} was deleted.",
+                status_code=200,
+            )
         except _NoResultFound as e:
-            return _Response(status_code=404, content_type="text/plain", body=f"{_model_name(base)} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}")
+            return _Response(
+                status_code=404,
+                content_type="text/plain",
+                body=f"{_model_name(base)} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}",
+            )
         except _sqaexc.IntegrityError as e:
-            return _Response(status_code=400, content_type="text/plain", body=f"{_model_name(base)} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}")
+            return _Response(
+                status_code=400,
+                content_type="text/plain",
+                body=f"{_model_name(base)} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}",
+            )
         except Exception as e:
-            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
+            return _Response(
+                status_code=500, content_type="text/plain", body=f"Error: {e}"
+            )
 
 
 def delete_n(
@@ -88,8 +121,8 @@ def delete_n(
     n: int,
     column_name: str,
     start_from: Literal["minimum", "maximum"],
-    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None
-    ) -> _Response:
+    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
+) -> _Response:
     """Delete multiple instances of the `base`.
 
     The `base` instances are first filtered by the `criteria` and sorted by values in a column with the `column_name`.
@@ -97,13 +130,19 @@ def delete_n(
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _Response(body=f"Column {column_name} not found in table {base.__tablename__}.", status_code=500)
+        return _Response(
+            body=f"Column {column_name} not found in table {base.__tablename__}.",
+            status_code=500,
+        )
     if criteria is None:
         criteria = {}
     table = base.__table__
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
-        clauses = [criteria[attr_label](getattr(table.columns, attr_label)) for attr_label in criteria.keys()]
+        clauses = [
+            criteria[attr_label](getattr(table.columns, attr_label))
+            for attr_label in criteria.keys()
+        ]
         query = _sqa.select(table.c.id).where(*clauses)
         if start_from == "minimum":
             query = query.order_by(table.c.id)
@@ -113,12 +152,16 @@ def delete_n(
         stmt = _sqa.delete(base).where(table.c.id.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
         return _Response(
-            content_type="text/plain", body=f"{n_of_deleted_items} objects deleted from the database.", status_code=200
+            content_type="text/plain",
+            body=f"{n_of_deleted_items} objects deleted from the database.",
+            status_code=200,
         )
 
 
-def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None) -> List[_Base]:
-    """ Returns instances of the `base` with ids from the `ids` tuple.
+def get_by_id(
+    base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None
+) -> List[_Base]:
+    """Returns instances of the `base` with ids from the `ids` tuple.
 
     The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
     the globally defined Engine is used.
@@ -133,19 +176,21 @@ def get_by_id(base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] =
                     results.append(result.copy())
             return results
         except _NoResultFound as e:
-            raise _NoResultFound(f"{_model_name(base)} with id={id_value} not found. {e}")
+            raise _NoResultFound(
+                f"{_model_name(base)} with id={id_value} not found. {e}"
+            )
         except Exception as e:
             raise e
 
 
 def get(
     base: Type[_Base],
-    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
+    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
     omitted_relationships: Optional[List[_InstrumentedAttribute]] = None,
-    conn_source: Optional[_sqa.Engine] = None
-    ) -> List[Any]:
+    conn_source: Optional[_sqa.Engine] = None,
+) -> List[Any]:
 
     """Get instances of the `base`.
 
@@ -168,7 +213,10 @@ def get(
     table = base.__table__
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session, session.begin():
-        clauses = [criteria[attr_label](getattr(table.columns,attr_label)) for attr_label in criteria.keys()]
+        clauses = [
+            criteria[attr_label](getattr(table.columns, attr_label))
+            for attr_label in criteria.keys()
+        ]
         stmt = _sqa.select(base).where(*clauses)
         if omitted_relationships is not None:
             for item in omitted_relationships:
@@ -178,17 +226,17 @@ def get(
             result = _wait_mg.wait_and_get_response(
                 base.__tablename__,
                 timeout_ms,
-                validation = _functools.partial(_result_is_ok, criteria)
+                validation=_functools.partial(_result_is_ok, criteria),
             )
         return result
 
 
 def get_children(
-    parent_base:Type[_Base],
+    parent_base: Type[_Base],
     parent_id: int,
     children_col_name: str,
-    conn_source: Optional[_sqa.Engine] = None
-    ) -> List[_Base]:
+    conn_source: Optional[_sqa.Engine] = None,
+) -> List[_Base]:
     """Get children of an instance of `parent_base` with `parent_id` from its `children_col_name`."""
 
     global _wait_mg
@@ -199,7 +247,9 @@ def get_children(
             children = list(getattr(parent, children_col_name))
             return children
         except _NoResultFound as e:
-            raise ParentNotFound(f"Parent with id={parent_id} not found in table {parent_base.__tablename__}. {e}")
+            raise ParentNotFound(
+                f"Parent with id={parent_id} not found in table {parent_base.__tablename__}. {e}"
+            )
         except Exception as e:
             raise e
 
@@ -207,7 +257,11 @@ def get_children(
 def update(updated_obj: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj."""
     if updated_obj.id is None:
-        return _Response(status_code=400, content_type="text/plain", body=f"Missing {_model_name(updated_obj.__class__)} ID. ID must be specified when updating object.")
+        return _Response(
+            status_code=400,
+            content_type="text/plain",
+            body=f"Missing {_model_name(updated_obj.__class__)} ID. ID must be specified when updating object.",
+        )
 
     table = updated_obj.__table__
     dict_data = _obj_to_dict(updated_obj)
@@ -221,8 +275,10 @@ def update(updated_obj: _Base) -> _Response:
             n_of_updated_items = result.rowcount
             if n_of_updated_items == 0:
                 code = 404
-                msg = f"Object with {_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. " \
+                msg = (
+                    f"Object with {_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. "
                     "Nothing to update."
+                )
             else:
                 code, msg = 200, "Succesfully updated record"
         except _sqaexc.IntegrityError as e:
@@ -232,9 +288,9 @@ def update(updated_obj: _Base) -> _Response:
 
 def wait_for_new(
     base: Type[_Base],
-    criteria: Optional[Dict[str, Callable[[Any],bool]]] = None,
-    timeout_ms: Optional[int] = None
-    ) -> List[Any]:
+    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
+    timeout_ms: Optional[int] = None,
+) -> List[Any]:
 
     global _wait_mg
     if criteria is None:
@@ -242,7 +298,7 @@ def wait_for_new(
     result = _wait_mg.wait_and_get_response(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
-        validation=_functools.partial(_result_is_ok, criteria)
+        validation=_functools.partial(_result_is_ok, criteria),
     )
     return result
 
@@ -260,13 +316,17 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     _wait_mg.set_timeout(timeout_ms)
 
 
-def _check_obj_bases_matches_specifed_base(specified_base: Type[_Base], *objs: _Base) -> None:
+def _check_obj_bases_matches_specifed_base(
+    specified_base: Type[_Base], *objs: _Base
+) -> None:
     for obj in objs:
         if not isinstance(obj, specified_base):
             raise TypeError(f"Object {obj} is not of type {specified_base}")
 
 
-def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa.engine.base.Engine:
+def _get_checked_connection_source(
+    source: Optional[_sqa.Engine] = None,
+) -> _sqa.engine.base.Engine:
     if source is None:
         return check_and_return_current_connection_source()
     else:
@@ -274,14 +334,16 @@ def _get_checked_connection_source(source: Optional[_sqa.Engine] = None) -> _sqa
 
 
 def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
-    return {col:obj.__dict__[col] for col in obj.__table__.columns.keys()}
+    return {col: obj.__dict__[col] for col in obj.__table__.columns.keys()}
 
 
 def _model_name(base: Type[_Base]) -> str:
     return base.__name__.rstrip("DBModel")
 
 
-def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
+def _result_is_ok(
+    attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any
+) -> bool:
     for attr_label, attr_criterion in attribute_criteria.items():
         if not hasattr(item, attr_label):
             return False
