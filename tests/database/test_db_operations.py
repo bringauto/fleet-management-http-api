@@ -74,17 +74,13 @@ class Test_Updating_Records(unittest.TestCase):
         test_obj = models.TestBase(test_str="test_string", test_int=5)
         _db_access.add(test_obj)
         updated_obj = models.TestBase(id=1, test_str="updated_test_string", test_int=6)
-        _db_access.update(updated_obj=updated_obj)
-        retrieved_obj = _db_access.get(
-            models.TestBase, criteria={"id": lambda x: x == 1}
-        )[0]
+        _db_access.update(updated_obj)
+        retrieved_obj = _db_access.get(models.TestBase, criteria={"id": lambda x: x == 1})[0]
         self.assertEqual(updated_obj, retrieved_obj)
 
     def test_updating_non_existing_record_yields_404_code(self):
-        test_obj = models.TestBase(id=7, test_str="test_string", test_int=5)
-        _db_access.add(test_obj)
-        updated_obj = models.TestBase(id=8, test_str="updated_test_string", test_int=6)
-        response = _db_access.update(updated_obj=updated_obj)
+        updated_obj = models.TestBase(id=2, test_str="updated_test_string", test_int=6)
+        response = _db_access.update(updated_obj)
         self.assertEqual(response.status_code, 404)
 
 

@@ -241,8 +241,7 @@ def get_children(
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
-            parent = session.get_one(parent_base, parent_id)
-            children = list(getattr(parent, children_col_name))
+            children = list(getattr(session.get_one(parent_base, parent_id), children_col_name))
             return children
         except _NoResultFound as e:
             raise ParentNotFound(
@@ -254,33 +253,18 @@ def get_children(
 
 def update(updated_obj: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj."""
-    if updated_obj.id is None:
-        return _Response(
-            status_code=400,
-            content_type="text/plain",
-            body=f"Missing {_model_name(updated_obj.__class__)} ID. ID must be specified when updating object.",
-        )
-
-    table = updated_obj.__table__
-    dict_data = _obj_to_dict(updated_obj)
     source = check_and_return_current_connection_source()
-    with source.begin() as conn:
-        id = updated_obj.__dict__[_ID_NAME]
-        id_match = getattr(table.columns, _ID_NAME) == id
-        stmt = _sqa.update(table).where(id_match).values(dict_data)
+    with _Session(source) as session, session.begin():
         try:
-            result = conn.execute(stmt)
-            n_of_updated_items = result.rowcount
-            if n_of_updated_items == 0:
-                code = 404
-                msg = (
-                    f"Object with {_ID_NAME}={id} was not found in table {updated_obj.__tablename__} in the database. "
-                    "Nothing to update."
-                )
-            else:
-                code, msg = 200, "Succesfully updated record"
+            session.get_one(updated_obj.__class__, updated_obj.id)
+            session.merge(updated_obj)
+            code, msg = 200, "Succesfully updated record"
         except _sqaexc.IntegrityError as e:
             code, msg = 400, str(e.orig)
+        except _sqaexc.NoResultFound as e:
+            code, msg = 404, f"{_model_name(updated_obj.__class__)} with id={updated_obj.id} was not found. Nothing to update."
+        except Exception as e:
+            code, msg = 500, str(e)
     return _Response(status_code=code, content_type="text/plain", body=msg)
 
 
