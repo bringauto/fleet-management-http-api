@@ -12,7 +12,6 @@
 
 # Manipulation of API Entities
 
-
 ## Car
 
 ### Post
