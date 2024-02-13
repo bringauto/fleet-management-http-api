@@ -57,7 +57,7 @@ Result:
 
 Requirements:
 - [Target Stop](#stop) of the Order must exist.
-- [Route](#route) referenced by the Order must exist.
+- [Route](#route) referenced by the Order must exist and must contain the Target Stop.
 - [Car](#car) referenced by the Order must exist.
 
 Result:

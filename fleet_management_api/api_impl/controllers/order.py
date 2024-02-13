@@ -23,6 +23,7 @@ def create_order() -> _Response:
             check_reference_existence={
                 _db_models.CarDBModel: order.car_id,
                 _db_models.StopDBModel: order.target_stop_id,
+                _db_models.RouteDBModel: order.stop_route_id,
             },
         )
         if response.status_code == 200:
