@@ -62,9 +62,7 @@ class WaitObjManager:
         """Remove the wait obejct from the wait queue."""
         key = wait_obj.key
         if not key in self._wait_dict or not wait_obj in self._wait_dict[key]:
-            raise WaitObjManager.UnknownWaitingObj(
-                f"Wait object for key {key} does not exist."
-            )
+            raise WaitObjManager.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
         else:
             self._wait_dict[key].remove(wait_obj)
         if not self._wait_dict[key]:
