@@ -10,7 +10,7 @@ sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
-from fleet_management_api.models import Car, Order, OrderState
+from fleet_management_api.models import Car, Order, OrderState, MobilePhone
 import fleet_management_api.database as database
 from tests.utils.setup_utils import create_platform_hws, create_stops
 
@@ -21,7 +21,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order = Order(
             priority="high",
             user_id=1,
@@ -88,7 +88,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
             priority="high",
             user_id=1,
@@ -143,7 +143,7 @@ class Test_Timeouts(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
+        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order = Order(
             priority="high",
             user_id=1,
@@ -189,7 +189,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
             priority="high",
             user_id=1,
