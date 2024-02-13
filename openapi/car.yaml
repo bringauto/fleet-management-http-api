@@ -255,6 +255,7 @@ components:
       required:
         - platformHwId
         - name
+        - carAdminPhone
       properties:
         id:
           $ref: 'common_models.yaml#/components/schemas/Id'

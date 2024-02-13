@@ -5,7 +5,7 @@ import sys
 sys.path.append(".")
 
 import fleet_management_api.app as _app
-from fleet_management_api.models import Car, CarState, GNSSPosition
+from fleet_management_api.models import Car, CarState, GNSSPosition, MobilePhone
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 from tests.utils.setup_utils import create_platform_hws
@@ -16,7 +16,7 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
-        self.car = Car(name="Test Car", platform_hw_id=1)
+        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
 
@@ -58,7 +58,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
-        self.car = Car(name="Test Car", platform_hw_id=1)
+        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
             example = c.get("/v2/management/openapi.json").json["components"][
@@ -76,10 +76,12 @@ class Test_Getting_All_Car_States(unittest.TestCase):
         car_1 = Car(
             platform_hw_id=1,
             name="car1",
+            car_admin_phone=MobilePhone(phone="123456789")
         )
         car_2 = Car(
             platform_hw_id=2,
             name="car2",
+            car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car_1)
@@ -122,13 +124,13 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         car_1 = Car(
             platform_hw_id=1,
             name="car1",
-            car_admin_phone={},
+            car_admin_phone=MobilePhone(phone="123456789"),
             under_test=False,
         )
         car_2 = Car(
             platform_hw_id=2,
             name="car2",
-            car_admin_phone={},
+            car_admin_phone=MobilePhone(phone="123456789"),
             under_test=False,
         )
         with self.app.app.test_client() as c:
@@ -199,7 +201,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
-        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car)
 
@@ -215,7 +217,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 status="idle", car_id=1, fuel=50, speed=7, position=test_position
             )
             c.post("/v2/management/carstate", json=oldest_state)
-            for i in range(1, max_n - 1):
+            for _ in range(1, max_n - 1):
                 car_state = CarState(
                     status="stopped_by_phone",
                     car_id=1,
@@ -260,7 +262,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         test_position = GNSSPosition(
             latitude=48.8606111, longitude=2.337644, altitude=50
         )
-        car_2 = Car(name="car2", platform_hw_id=2)
+        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car_2)
         _db_models.CarStateDBModel.set_max_n_of_stored_states(5)
@@ -303,7 +305,8 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
         create_platform_hws(self.app, 1)
         car = Car(
             platform_hw_id=1,
-            name="car1"
+            name="car1",
+            car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car)

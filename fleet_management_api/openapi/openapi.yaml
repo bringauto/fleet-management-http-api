@@ -1252,7 +1252,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PlatformHW'
-        description: Platform hardware json.
+        description: Platform hardware JSON.
         required: true
         x-body-name: platformHW
       responses:
@@ -2565,12 +2565,13 @@ components:
           title: underTest
           type: boolean
       required:
+      - carAdminPhone
       - name
       - platformHwId
       title: Car
       type: object
     Error:
-      description: Error object structure
+      description: Error object structure.
       properties:
         code:
           example: 404
@@ -2875,7 +2876,7 @@ components:
       title: id
       type: integer
     MobilePhone:
-      description: MobilePhone Primitive structure
+      description: MobilePhone Primitive structure.
       example:
         phone: "+420123456789"
       properties:
@@ -2886,7 +2887,7 @@ components:
       title: MobilePhone
       type: object
     GNSSPosition:
-      description: GNSSPosition primitive structure
+      description: GNSSPosition primitive structure.
       example:
         altitude: 400.25
         latitude: 49.204117
