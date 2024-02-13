@@ -43,7 +43,7 @@ class CarDBModel(Base):
         "OrderDBModel", back_populates="car"
     )
     default_route: _Mapped["RouteDBModel"] = _relationship(
-        "RouteDBModel", lazy="noload"
+        "RouteDBModel", lazy="noload", back_populates="cars"
     )
 
     def __repr__(self) -> str:
@@ -156,8 +156,7 @@ class RouteDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
 
-    cars: _Mapped[List[CarDBModel]] = _relationship("CarDBModel", lazy="noload", back_populates="default_route")
-
+    cars: _Mapped[List[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
     route_points: _Mapped[object] = _relationship(
         "RoutePointsDBModel",
         cascade="save-update, merge, delete",
@@ -174,9 +173,7 @@ class RoutePointsDBModel(Base):
     route: _Mapped[RouteDBModel] = _relationship(
         "RouteDBModel", back_populates="route_points", lazy="noload"
     )
-    route_id: _Mapped[int] = _mapped_column(
-        _sqa.ForeignKey("routes.id"), nullable=False
-    )
+    route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
 
     def __repr__(self) -> str:
         return (

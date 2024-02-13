@@ -318,4 +318,4 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2, buffer=True)  # pragma: no coverage
+    unittest.main(buffer=True)  # pragma: no coverage

@@ -76,16 +76,10 @@ class Test_Getting_All_Car_States(unittest.TestCase):
         car_1 = Car(
             platform_hw_id=1,
             name="car1",
-            car_admin_phone={},
-            default_route_id=1,
-            under_test=False,
         )
         car_2 = Car(
             platform_hw_id=2,
             name="car2",
-            car_admin_phone={},
-            default_route_id=1,
-            under_test=False,
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car_1)
@@ -129,14 +123,12 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             platform_hw_id=1,
             name="car1",
             car_admin_phone={},
-            default_route_id=1,
             under_test=False,
         )
         car_2 = Car(
             platform_hw_id=2,
             name="car2",
             car_admin_phone={},
-            default_route_id=1,
             under_test=False,
         )
         with self.app.app.test_client() as c:
@@ -268,7 +260,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         test_position = GNSSPosition(
             latitude=48.8606111, longitude=2.337644, altitude=50
         )
-        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone={})
+        car_2 = Car(name="car2", platform_hw_id=2)
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car_2)
         _db_models.CarStateDBModel.set_max_n_of_stored_states(5)
@@ -311,10 +303,7 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
         create_platform_hws(self.app, 1)
         car = Car(
             platform_hw_id=1,
-            name="car1",
-            car_admin_phone={},
-            default_route_id=1,
-            under_test=False,
+            name="car1"
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car)

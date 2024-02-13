@@ -44,6 +44,19 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             response = c.post("/v2/management/car", json=car, content_type="application/json")
             self.assertEqual(response.status_code, 404)
 
+    def test_deleting_cars_default_route_sets_the_default_route_id_of_the_car_to_none(self):
+        car = Car(name="Test Car", platform_hw_id=1, default_route_id=1)
+        app = _app.get_test_app()
+        with app.app.test_client() as c:
+            c.post("/v2/management/car", json=car, content_type="application/json")
+
+            response = c.get("/v2/management/car/1")
+            self.assertEqual(response.json["defaultRouteId"], 1)
+
+            c.delete("/v2/management/route/1")
+            response = c.get("/v2/management/car/1")
+            self.assertTrue("defaultRouteId" not in response.json)
+
     def test_creating_and_retrieving_a_car(self):
         car = Car(
             name="Test Car",
@@ -278,7 +291,4 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    # suite = unittest.TestLoader().loadTestsFromTestCase(Test_Creating_And_Getting_Cars)
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
     unittest.main(buffer=True)
