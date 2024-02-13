@@ -4,10 +4,10 @@ import sys
 sys.path.append(".")
 import unittest
 
-from fleet_management_api.models import Car, PlatformHW, Order
+from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
-from tests.utils.setup_utils import create_stops, create_platform_hws
+from tests.utils.setup_utils import create_stops, create_platform_hws, create_route
 
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
@@ -15,6 +15,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         set_connection_source_test()
         app = _app.get_test_app()
         create_platform_hws(app, 2)
+        create_stops(app, 3)
+        create_route(app, stop_ids=(1, 2))
 
     def test_cars_list_is_initially_available_and_empty(self):
         app = _app.get_test_app()
@@ -33,7 +35,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
     def test_creating_and_retrieving_a_car(self):
-        car = Car(name="Test Car", platform_hw_id=1, under_test=False)
+        car = Car(name="Test Car", platform_hw_id=1, default_route_id=1, under_test=False, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post(
@@ -47,6 +49,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.json[0]["name"], car.name)
             self.assertEqual(response.json[0]["platformHwId"], car.platform_hw_id)
             self.assertEqual(response.json[0]["underTest"], car.under_test)
+            self.assertEqual(response.json[0]["defaultRouteId"], car.default_route_id)
+            self.assertEqual(response.json[0]["carAdminPhone"]["phone"], car.car_admin_phone.phone)
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(name="Test Car 1", platform_hw_id=1)
