@@ -2,7 +2,7 @@ import sys
 sys.path.append('.')
 import unittest
 
-from fleet_management_api.models import Car
+from fleet_management_api.models import Car, MobilePhone
 import fleet_management_api.app as _app
 from fleet_management_api.app import get_app
 from fleet_management_api.database.connection import set_connection_source_test
@@ -21,7 +21,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.json, [])
 
     def test_creating_and_retrieving_a_car(self):
-        car = Car(id=1, name="Test Car", platform_id=5)
+        car = Car(id=1, name="Test Car", platform_id=5, under_test=True, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post('/v2/management/car', json=car, content_type='application/json')
@@ -29,6 +29,10 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             response = c.get('/v2/management/car')
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]['name'], car.name)
+            self.assertEqual(response.json[0]['platform_id'], car.platform_id)
+            self.assertEqual(response.json[0]['under_test'], car.under_test)
+            self.assertEqual(response.json[0]['car_admin_phone'], car.car_admin_phone.to_dict())
 
     def test_creating_and_retrieving_two_cars(self):
         car_1 = Car(id=1, name="Test Car 1", platform_id=5)

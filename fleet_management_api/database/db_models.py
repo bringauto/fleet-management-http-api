@@ -22,6 +22,7 @@ class CarDBModel(Base):
     platform_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     car_admin_phone: _Mapped[dict] = _mapped_column(_sqa.JSON, nullable=True)
     default_route_id: _Mapped[int] = _mapped_column(_sqa.Integer, nullable=True)
+    under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, default=False)
 
 
 @dataclasses.dataclass
