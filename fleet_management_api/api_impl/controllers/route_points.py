@@ -39,14 +39,18 @@ def redefine_route_points() -> _Response:
         if len(existing_route_points) == 0:
             response = _db_access.add(
                 rp_db_model,
-                check_objs=[_db_access.check_obj(_db_models.RouteDBModel, rp.route_id)]
+                check_objs=[
+                    _db_access.check_obj_exists_in_db(_db_models.RouteDBModel, rp.route_id)
+                ],
             )
             return _api.log_and_respond(response.status_code, response.body)
         else:
             _db_access.delete(_db_models.RoutePointsDBModel, existing_route_points[0].id)
             response = _db_access.add(
                 rp_db_model,
-                check_objs=[_db_access.check_obj(_db_models.RouteDBModel, rp.route_id)]
+                check_objs=[
+                    _db_access.check_obj_exists_in_db(_db_models.RouteDBModel, rp.route_id)
+                ],
             )
             if response.status_code == 200:
                 _api.log_info(f"Route points for route with ID={rp.route_id} have been redefined.")

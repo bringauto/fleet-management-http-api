@@ -24,7 +24,9 @@ def add_car_state() -> _Response:
         state_db_model = _api.car_state_to_db_model(car_state)
         response = _db_access.add(
             state_db_model,
-            check_objs=[_db_access.check_obj(_db_models.CarDBModel, id_=car_state.car_id)]
+            check_objs=[
+                _db_access.check_obj_exists_in_db(_db_models.CarDBModel, id_=car_state.car_id)
+            ],
         )
         if response.status_code == 200:
             inserted_model = _api.car_state_from_db_model(response.body)

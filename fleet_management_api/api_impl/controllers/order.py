@@ -21,12 +21,12 @@ def create_order() -> _Response:
         response = _db_access.add(
             db_model,
             check_objs=[
-                _db_access.check_obj(_db_models.CarDBModel, id_=order.car_id),
-                _db_access.check_obj(_db_models.StopDBModel, id_=order.target_stop_id),
-                _db_access.check_obj(
+                _db_access.check_obj_exists_in_db(_db_models.CarDBModel, id_=order.car_id),
+                _db_access.check_obj_exists_in_db(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.check_obj_exists_in_db(
                     _db_models.RouteDBModel,
                     order.stop_route_id,
-                    _db_access.condition(
+                    _db_access.db_obj_condition(
                         attribute_name="stop_ids",
                         func=lambda x: order.target_stop_id in x,
                         fail_message=f"Route with ID={order.stop_route_id} does not contain "

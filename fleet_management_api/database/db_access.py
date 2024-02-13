@@ -331,13 +331,13 @@ def wait_for_new(
     return result
 
 
-def check_obj(
+def check_obj_exists_in_db(
     base: Type[_Base], id_: int, *conditions: _AttributeCondition, nullable: bool = False
 ) -> _CheckBeforeAdd:
     return _CheckBeforeAdd(base, id_, *conditions, nullable=nullable)
 
 
-def condition(
+def db_obj_condition(
     attribute_name: str, func: Callable[[Any], bool], fail_message: str
 ) -> _AttributeCondition:
     return _AttributeCondition(attribute_name, func, fail_message)

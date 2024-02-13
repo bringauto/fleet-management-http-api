@@ -22,8 +22,12 @@ def create_car() -> _Response:  # noqa: E501
         response = _db_access.add(
             car_db_model,
             check_objs=[
-                _db_access.check_obj(_db_models.PlatformHWDBModel, id_=car.platform_hw_id),
-                _db_access.check_obj(_db_models.RouteDBModel, id_=car.default_route_id, nullable=True),
+                _db_access.check_obj_exists_in_db(
+                    _db_models.PlatformHWDBModel, id_=car.platform_hw_id
+                ),
+                _db_access.check_obj_exists_in_db(
+                    _db_models.RouteDBModel, id_=car.default_route_id, nullable=True
+                ),
             ],
         )
         if response.status_code == 200:
