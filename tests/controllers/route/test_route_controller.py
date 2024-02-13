@@ -47,9 +47,9 @@ class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
         set_connection_source_test()
         self.app = _app.get_test_app()
         with self.app.app.test_client() as c:
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["Route"]["example"]
+            example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Route"][
+                "example"
+            ]
             # remove stop ids (these stops are not defined for this test)
             example["stopIds"] = []
             response = c.post("/v2/management/route", json=example)
@@ -136,8 +136,8 @@ class Test_Retrieving_Route_Stops(unittest.TestCase):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/route/1")
             self.assertEqual(response.status_code, 200)
-            stops = response.json["stopIds"]
-            self.assertEqual(len(stops), 2)
+            route_stop_ids = response.json["stopIds"]
+            self.assertEqual(len(route_stop_ids), 2)
 
 
 class Test_Deleting_Route(unittest.TestCase):
@@ -206,4 +206,4 @@ class Test_Updating_Route(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(buffer=True)  # pragma: no coverages
+    unittest.main(buffer=True)  # pragma: no coverage
