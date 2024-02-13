@@ -151,6 +151,8 @@ class Car(Model):
         :param car_admin_phone: The car_admin_phone of this Car.
         :type car_admin_phone: MobilePhone
         """
+        if car_admin_phone is None:
+            raise ValueError("Invalid value for `car_admin_phone`, must not be `None`")  # noqa: E501
 
         self._car_admin_phone = car_admin_phone
 

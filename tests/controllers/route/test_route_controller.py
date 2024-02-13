@@ -12,6 +12,7 @@ from fleet_management_api.models import (
     PlatformHW,
     Stop,
     GNSSPosition,
+    MobilePhone
 )
 from tests.utils.setup_utils import create_stops
 
@@ -163,7 +164,7 @@ class Test_Deleting_Route(unittest.TestCase):
 
     def test_route_cannot_be_deleted_if_some_order_references_it(self):
         platform_hw = PlatformHW(name="test_platform_hw_1")
-        car = Car(id=1, name="test_car_1", platform_hw_id=1)
+        car = Car(id=1, name="test_car_1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         order = Order(id=1, stop_route_id=1, target_stop_id=1, user_id=1, car_id=1)
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/platformhw", json=platform_hw)

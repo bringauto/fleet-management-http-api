@@ -4,30 +4,22 @@ import fleet_management_api.database.timestamp as _tstamp
 
 
 def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
-    if car.car_admin_phone is None:
-        car_mobile_phone = None
-    else:
-        car_mobile_phone = car.car_admin_phone.to_dict()
     return _db_models.CarDBModel(
         id=car.id,
         name=car.name,
         platform_hw_id=car.platform_hw_id,
-        car_admin_phone=car_mobile_phone,
+        car_admin_phone=car.car_admin_phone.to_dict(),
         default_route_id=car.default_route_id,
         under_test=car.under_test,
     )
 
 
 def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
-    if car_db_model.car_admin_phone is None:
-        car_mobile_phone = None
-    else:
-        car_mobile_phone = _models.MobilePhone.from_dict(car_db_model.car_admin_phone)
     return _models.Car(
         id=car_db_model.id,
         name=car_db_model.name,
         platform_hw_id=car_db_model.platform_hw_id,
-        car_admin_phone=car_mobile_phone,
+        car_admin_phone=_models.MobilePhone.from_dict(car_db_model.car_admin_phone),
         default_route_id=car_db_model.default_route_id,
         under_test=car_db_model.under_test,
     )

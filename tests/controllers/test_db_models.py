@@ -37,15 +37,15 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
     def test_creating_car_db_model_from_car_object_with_only_required_attributes_specified_preserves_attribute_values(
         self,
     ):
-        car = Car(name="test_car", platform_hw_id=1)
+        car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         car_db_model = _obj_to_db.car_to_db_model(car)
         self.assertEqual(car_db_model.name, car.name)
         self.assertEqual(car_db_model.platform_hw_id, car.platform_hw_id)
-        self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone)
+        self.assertEqual(car_db_model.car_admin_phone, car.car_admin_phone.to_dict())
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
 
     def test_car_converted_to_db_model_and_back_is_unchanged(self):
-        car_in = Car(name="test_car", platform_hw_id=1)
+        car_in = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in))
         self.assertEqual(car_out, car_in)
 

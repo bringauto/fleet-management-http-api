@@ -13,7 +13,7 @@ def create_hw(platform_hw):  # noqa: E501
 
      # noqa: E501
 
-    :param platform_hw: Platform hardware json.
+    :param platform_hw: Platform hardware JSON.
     :type platform_hw: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
