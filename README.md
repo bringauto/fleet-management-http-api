@@ -59,6 +59,19 @@ To rebuild and start the server in a Docker container, use
 docker compose up --build
 ```
 
+# Installing project as a package
+
+In the root folder, run
+```bash
+pip install [-e] .
+```
+where `-e` flag stands for editable installation.
+
+You can uninstall the package using `pip`` by running
+```bash
+pip uninstall fleet_management_api
+```
+
 # Testing
 
 You have to have the project installed in your (virtual) environment as a package.
@@ -82,7 +95,7 @@ python -m tests database controllers/test_car_controller.py
 
 ## Adding new API key
 
-To generate a new api key (passed as a query parameter "api_key") run the following in the root directory:
+To generate a new API key (passed as a query parameter "api_key") run the following in the root directory:
 ```bash
 python scripts/add_api_key.py <api-key-name> <path-to-config-file> [OPTIONS].
 ```
@@ -128,7 +141,7 @@ To get Keycloak authentication working, all parameters in the security section o
 }
 ```
 
-- keycloak_url : base url of a working keycloak instance
+- keycloak_url : base URL of a working Kycloak instance
 - client_id : id of client in keycloak (Clients -> click on client representing http api -> Settings -> Client ID)
 - client_secret_key : secret key of client (Clients -> click on client representing http api -> Credentials -> Client Secret)
 - scope : checking of scopes is not yet implemented (must be `email` for now!)
