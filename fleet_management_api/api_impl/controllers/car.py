@@ -21,7 +21,10 @@ def create_car() -> _Response:  # noqa: E501
         car_db_model = _api.car_to_db_model(car)
         response = _db_access.add(
             car_db_model,
-            check_reference_existence={_db_models.PlatformHWDBModel: car.platform_hw_id},
+            check_reference_existence={
+                _db_models.PlatformHWDBModel: car.platform_hw_id,
+                _db_models.RouteDBModel: car.default_route_id,
+            },
         )
         if response.status_code == 200:
             inserted_model = _api.car_from_db_model(response.body)

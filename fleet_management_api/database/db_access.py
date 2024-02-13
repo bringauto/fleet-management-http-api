@@ -56,19 +56,22 @@ def add(
         try:
             if check_reference_existence is not None:
                 for ref_type, ref_id in check_reference_existence.items():
-                    session.get_one(ref_type, ref_id)
+                    if ref_id is None:
+                        continue
+                    try:
+                        session.get_one(ref_type, ref_id)
+                    except _NoResultFound as e:
+                        return _Response(
+                            status_code=404,
+                            content_type="text/plain",
+                            body=f"{_model_name(ref_type)} with ID={ref_id} does not exist in the database.",
+                        )
             session.add_all(sent_objs)
             session.commit()
             inserted_objs = [obj.copy() for obj in sent_objs]
             _wait_mg.notify(sent_objs[0].__tablename__, inserted_objs)
             return _Response(
                 status_code=200, content_type="application/json", body=inserted_objs[0]
-            )
-        except _NoResultFound as e:
-            return _Response(
-                status_code=404,
-                content_type="text/plain",
-                body=f"{_model_name(sent_objs[0].__class__)} with ID={ref_id} does not exist in the database.",
             )
         except _sqaexc.IntegrityError as e:
             return _Response(
@@ -312,12 +315,8 @@ def _get_checked_connection_source(
         return check_and_return_current_connection_source(source)
 
 
-def _obj_to_dict(obj: _Base) -> Dict[str, Any]:
-    return {col: obj.__dict__[col] for col in obj.__table__.columns.keys()}
-
-
 def _model_name(base: Type[_Base]) -> str:
-    return base.__name__.rstrip("DBModel")
+    return base.__name__.replace("DBModel", "")
 
 
 def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:

@@ -30,7 +30,7 @@ class CarDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     platform_hw_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("platform_hw.id"), nullable=False, unique=True)
     car_admin_phone: _Mapped[Optional[Dict]] = _mapped_column(_sqa.JSON)
-    default_route_id: _Mapped[Optional[int]] = _mapped_column(_sqa.Integer)
+    default_route_id: _Mapped[Optional[int]] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=True)
     under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, nullable=False)
 
     platformhw: _Mapped["PlatformHWDBModel"] = _relationship(
@@ -41,6 +41,9 @@ class CarDBModel(Base):
     )
     orders: _Mapped[List["OrderDBModel"]] = _relationship(
         "OrderDBModel", back_populates="car"
+    )
+    default_route: _Mapped["RouteDBModel"] = _relationship(
+        "RouteDBModel", lazy="noload"
     )
 
     def __repr__(self) -> str:
@@ -152,6 +155,8 @@ class RouteDBModel(Base):
     __tablename__ = "routes"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
+
+    cars: _Mapped[List[CarDBModel]] = _relationship("CarDBModel", lazy="noload", back_populates="default_route")
 
     route_points: _Mapped[object] = _relationship(
         "RoutePointsDBModel",
