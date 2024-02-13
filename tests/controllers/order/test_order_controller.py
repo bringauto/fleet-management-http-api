@@ -84,7 +84,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
         create_stops(app, 1)
-        create_route(self.app, stop_ids=(1,))
+        create_route(app, stop_ids=(1,))
         with app.app.test_client() as c:
             example = c.get("/v2/management/openapi.json").json["components"][
                 "schemas"
@@ -117,7 +117,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=1,
-            target_stop_id=7,
+            target_stop_id=2,
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
@@ -145,7 +145,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=1,
-            target_stop_id=7,
+            target_stop_id=4,
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
@@ -176,8 +176,8 @@ class Test_Deleting_Order(unittest.TestCase):
             self.order = Order(
                 user_id=789,
                 car_id=1,
-                target_stop_id=7,
-                stop_route_id1=1,
+                target_stop_id=6,
+                stop_route_id=1,
                 notification_phone=MobilePhone(phone="1234567890"),
             )
             c.post("/v2/management/order", json=self.order)
@@ -202,7 +202,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 2)
-        create_route(self.app, stop_ids=(1,))
+        create_route(self.app, stop_ids=(1,2))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)

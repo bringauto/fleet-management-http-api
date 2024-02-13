@@ -7,7 +7,7 @@ import fleet_management_api.app as _app
 from fleet_management_api.models import OrderState, Order, Car
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hws, create_stops
+from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
@@ -15,7 +15,8 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
-        create_stops(self.app, 1)
+        create_stops(self.app, 3)
+        create_route(self.app, stop_ids=(1, 2, 3))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             id=12,
@@ -54,6 +55,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         with self.app.app.test_client() as c:
             example = c.get("/v2/management/openapi.json").json["components"][
@@ -81,6 +83,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
@@ -119,6 +122,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
@@ -186,6 +190,7 @@ class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestC
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
@@ -224,6 +229,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
@@ -275,6 +281,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1, ))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",

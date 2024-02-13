@@ -1,8 +1,12 @@
 import unittest
+import sys
+
+sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.models import PlatformHW, Car, MobilePhone
+from tests.utils.setup_utils import create_route, create_stops
 
 
 class Test_Creating_Platform_HW(unittest.TestCase):
@@ -91,11 +95,13 @@ class Test_Getting_Single_Platform_HW(unittest.TestCase):
 class Test_Deleting_Platform_HW(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app()
+        create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
 
     def test_deleting_an_existing_platform_hw(self):
         platform_hw = PlatformHW(name="test_platform")
-        with self.app.test_client() as c:
+        with self.app.app.test_client() as c:
             c.post("/v2/management/platformhw", json=platform_hw)
             response = c.delete("/v2/management/platformhw/1")
             self.assertEqual(response.status_code, 200)
@@ -105,7 +111,7 @@ class Test_Deleting_Platform_HW(unittest.TestCase):
 
     def test_deleting_a_nonexistent_platform_hw_yields_code_404(self):
         nonexistent_platform_hw = 156155
-        with self.app.test_client() as c:
+        with self.app.app.test_client() as c:
             response = c.delete(f"/v2/management/platformhw/{nonexistent_platform_hw}")
             self.assertEqual(response.status_code, 404)
 
@@ -115,8 +121,9 @@ class Test_Deleting_Platform_HW(unittest.TestCase):
             platform_hw_id=1,
             name="test_car",
             car_admin_phone=MobilePhone(phone="123456789"),
+            default_route_id=1,
         )
-        with self.app.test_client() as c:
+        with self.app.app.test_client() as c:
             c.post("/v2/management/platformhw", json=platform_hw)
             response = c.post("/v2/management/car", json=car)
             self.assertEqual(response.status_code, 200)

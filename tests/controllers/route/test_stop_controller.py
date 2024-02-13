@@ -7,7 +7,7 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hws, create_stops
+from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Creating_Stop(unittest.TestCase):
@@ -235,6 +235,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
         )
         create_platform_hws(self.app, 2)
         create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         self.car = _models.Car(
             id=1,
             platform_hw_id=2,
@@ -261,6 +262,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
             c.delete("/v2/management/order/1")
+            c.delete("/v2/management/route/1")
             response = c.delete("/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)
 
