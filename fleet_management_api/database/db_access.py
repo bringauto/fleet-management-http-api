@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Any, Dict, Optional, List, Type, Literal, Callable
 import functools as _functools
 
@@ -26,9 +27,50 @@ class ParentNotFound(Exception):
     pass
 
 
+@dataclasses.dataclass(frozen=True)
+class _AttributeCondition:
+    atribute_name: str
+    func: Callable[[Any], bool]
+    fail_message: str
+
+    def check(self, obj: _Base) -> None:
+        value = getattr(obj, self.atribute_name)
+        if not self.func(value):
+            raise ValueError(self.fail_message)
+
+
+class _CheckBeforeAdd:
+    def __init__(
+        self,
+        object_base: Type[_Base],
+        id_: int,
+        *conditions: _AttributeCondition,
+        nullable: bool = False,
+    ):
+        self._base = object_base
+        self._id = id_
+        self._conditions = conditions
+        self._nullable = nullable
+
+    def check(self, session: _Session) -> None:
+        if self._conditions is None:
+            self._conditions = {}
+        try:
+            if self._nullable and self._id is None:
+                return
+            result = session.get_one(self._base, self._id)
+            for condition in self._conditions:
+                condition.check(result)
+
+        except _NoResultFound as e:
+            raise _NoResultFound(f"{_model_name(self._base)} with ID={self._id} not found. {e}")
+        except Exception as e:
+            raise e
+
+
 def add(
     *sent_objs: _Base,
-    check_reference_existence: Optional[Dict[Type[_Base], int]] = None,
+    check_objs: Optional[List[_CheckBeforeAdd]] = None,
     conn_source: Optional[_sqa.Engine] = None,
 ) -> _Response:
     """Adds a objects to the database.
@@ -54,18 +96,23 @@ def add(
     source = _get_checked_connection_source(conn_source)
     with _Session(source) as session:
         try:
-            if check_reference_existence is not None:
-                for ref_type, ref_id in check_reference_existence.items():
-                    if ref_id is None:
-                        continue
+            if check_objs is not None:
+                for check_obj in check_objs:
                     try:
-                        session.get_one(ref_type, ref_id)
+                        check_obj.check(session)
                     except _NoResultFound as e:
                         return _Response(
                             status_code=404,
                             content_type="text/plain",
-                            body=f"{_model_name(ref_type)} with ID={ref_id} does not exist in the database.",
+                            body=f"{_model_name(check_obj._base)} with ID={check_obj._id} does not exist in the database.",
                         )
+                    except Exception as e:
+                        return _Response(
+                            status_code=400,
+                            content_type="text/plain",
+                            body=str(e),
+                        )
+
             session.add_all(sent_objs)
             session.commit()
             inserted_objs = [obj.copy() for obj in sent_objs]
@@ -282,6 +329,18 @@ def wait_for_new(
         validation=_functools.partial(_result_is_ok, criteria),
     )
     return result
+
+
+def check_obj_exists_in_db(
+    base: Type[_Base], id_: int, *conditions: _AttributeCondition, nullable: bool = False
+) -> _CheckBeforeAdd:
+    return _CheckBeforeAdd(base, id_, *conditions, nullable=nullable)
+
+
+def db_obj_condition(
+    attribute_name: str, func: Callable[[Any], bool], fail_message: str
+) -> _AttributeCondition:
+    return _AttributeCondition(attribute_name, func, fail_message)
 
 
 def content_timeout() -> int:

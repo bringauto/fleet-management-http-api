@@ -6,7 +6,7 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hws, create_stops
+from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Sending_Order(unittest.TestCase):
@@ -15,6 +15,7 @@ class Test_Sending_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
@@ -23,8 +24,8 @@ class Test_Sending_Order(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=1,
-            target_stop_id=7,
-            stop_route_id=8,
+            target_stop_id=2,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
@@ -38,25 +39,37 @@ class Test_Sending_Order(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=nonexistent_car_id,
-            target_stop_id=7,
-            stop_route_id=8,
+            target_stop_id=2,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/order", json=order)
             self.assertEqual(response.status_code, 404)
 
-    def test_sending_order_to_nonexistent_stop_yields_code_404(self):
+    def test_sending_order_referencing_nonexistent_stop_yields_code_404(self):
         order = Order(
             user_id=789,
             car_id=1,
             target_stop_id=16316516,
-            stop_route_id=8,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/order", json=order)
             self.assertEqual(response.status_code, 404)
+
+    def test_specifying_route_not_containing_the_target_stop_yields_code_400(self):
+        order = Order(
+            user_id=789,
+            car_id=1,
+            target_stop_id=3,
+            stop_route_id=1,
+            notification_phone=MobilePhone(phone="1234567890"),
+        )
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/order", json=order)
+            self.assertEqual(response.status_code, 400)
 
     def test_sending_incomplete_order_data_yields_code_400(self):
         incomplete_order_dict = {}
@@ -71,6 +84,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
         create_stops(app, 1)
+        create_route(app, stop_ids=(1,))
         with app.app.test_client() as c:
             example = c.get("/v2/management/openapi.json").json["components"][
                 "schemas"
@@ -88,6 +102,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
@@ -102,8 +117,8 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=1,
-            target_stop_id=7,
-            stop_route_id=8,
+            target_stop_id=2,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
@@ -121,6 +136,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
@@ -129,8 +145,8 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         order = Order(
             user_id=789,
             car_id=1,
-            target_stop_id=7,
-            stop_route_id=8,
+            target_stop_id=4,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
@@ -153,14 +169,15 @@ class Test_Deleting_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
             self.order = Order(
                 user_id=789,
                 car_id=1,
-                target_stop_id=7,
-                stop_route_id=8,
+                target_stop_id=6,
+                stop_route_id=1,
                 notification_phone=MobilePhone(phone="1234567890"),
             )
             c.post("/v2/management/order", json=self.order)
@@ -185,6 +202,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 2)
+        create_route(self.app, stop_ids=(1,2))
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
@@ -192,14 +210,14 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             user_id=789,
             car_id=1,
             target_stop_id=1,
-            stop_route_id=8,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         self.order_2 = Order(
             user_id=789,
             car_id=1,
             target_stop_id=2,
-            stop_route_id=8,
+            stop_route_id=1,
             notification_phone=MobilePhone(phone="4444444444"),
         )
         with self.app.app.test_client() as c:

@@ -20,10 +20,20 @@ def create_order() -> _Response:
         db_model = _api.order_to_db_model(order)
         response = _db_access.add(
             db_model,
-            check_reference_existence={
-                _db_models.CarDBModel: order.car_id,
-                _db_models.StopDBModel: order.target_stop_id,
-            },
+            check_objs=[
+                _db_access.check_obj_exists_in_db(_db_models.CarDBModel, id_=order.car_id),
+                _db_access.check_obj_exists_in_db(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.check_obj_exists_in_db(
+                    _db_models.RouteDBModel,
+                    order.stop_route_id,
+                    _db_access.db_obj_condition(
+                        attribute_name="stop_ids",
+                        func=lambda x: order.target_stop_id in x,
+                        fail_message=f"Route with ID={order.stop_route_id} does not contain "
+                        f"stop with ID={order.target_stop_id}",
+                    ),
+                ),
+            ],
         )
         if response.status_code == 200:
             inserted_model = _api.order_from_db_model(response.body)
@@ -41,7 +51,9 @@ def delete_order(order_id: int) -> _Response:
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _api.log_info(msg)
-        return _Response(body=f"Order (ID={order_id})has been succesfully deleted.", status_code=200)
+        return _Response(
+            body=f"Order (ID={order_id})has been succesfully deleted.", status_code=200
+        )
     else:
         msg = f"Order (ID={order_id}) could not be deleted. {response.body}"
         _api.log_error(msg)

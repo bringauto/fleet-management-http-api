@@ -12,9 +12,9 @@ from fleet_management_api.models import (
     PlatformHW,
     Stop,
     GNSSPosition,
-    MobilePhone
+    MobilePhone,
 )
-from tests.utils.setup_utils import create_stops
+from tests.utils.setup_utils import create_stops, create_route
 
 
 class Test_Creating_Route(unittest.TestCase):
@@ -110,19 +110,9 @@ class Test_Retrieving_Route_Stops(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
         self.app = _app.get_test_app()
-        stop_1 = Stop(
-            name="test_stop_1",
-            position=GNSSPosition(latitude=1, longitude=1, altitude=1),
-        )
-        stop_2 = Stop(
-            name="test_stop_2",
-            position=GNSSPosition(latitude=2, longitude=2, altitude=2),
-        )
-        stop_3 = Stop(
-            name="test_stop_3",
-            position=GNSSPosition(latitude=3, longitude=3, altitude=3),
-        )
-
+        stop_1 = Stop(name="stop_1", position=GNSSPosition(latitude=1, longitude=1, altitude=1))
+        stop_2 = Stop(name="stop_2", position=GNSSPosition(latitude=2, longitude=2, altitude=2))
+        stop_3 = Stop(name="stop_3", position=GNSSPosition(latitude=3, longitude=3, altitude=3))
         self.route_1 = Route(name="test_route_1", stop_ids=[1, 2])
         self.route_2 = Route(name="test_route_2", stop_ids=[2, 3])
         with self.app.app.test_client() as c:
@@ -145,10 +135,8 @@ class Test_Deleting_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
         self.app = _app.get_test_app()
-        self.route_1 = Route(name="test_route_1")
         create_stops(self.app, 1)
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/route", json=self.route_1)
+        create_route(self.app, stop_ids=(1,))
 
     def test_deleting_an_existing_Route(self):
         with self.app.app.test_client() as c:
@@ -164,7 +152,12 @@ class Test_Deleting_Route(unittest.TestCase):
 
     def test_route_cannot_be_deleted_if_some_order_references_it(self):
         platform_hw = PlatformHW(name="test_platform_hw_1")
-        car = Car(id=1, name="test_car_1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(
+            id=1,
+            name="test_car_1",
+            platform_hw_id=1,
+            car_admin_phone=MobilePhone(phone="123456789"),
+        )
         order = Order(id=1, stop_route_id=1, target_stop_id=1, user_id=1, car_id=1)
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/platformhw", json=platform_hw)

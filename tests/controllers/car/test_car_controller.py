@@ -234,6 +234,7 @@ class Test_Deleting_Car(unittest.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
         create_stops(app, 7)
+        create_route(app, stop_ids=(2, 4, 6))
 
     def test_add_and_delete_car(self) -> None:
         app = _app.get_test_app()
@@ -257,8 +258,8 @@ class Test_Deleting_Car(unittest.TestCase):
             id=1,
             user_id=789,
             car_id=1,
-            target_stop_id=7,
-            stop_route_id=8,
+            target_stop_id=2,
+            stop_route_id=1,
         )
         app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
