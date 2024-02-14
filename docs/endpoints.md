@@ -5,14 +5,22 @@
 
 # Index
 - [Car](#car-endpoints)
+- [Car State](#car-state-endpoints)
 - [Order](#order-endpoints)
+- [Order State](#order-state-endpoints)
 - [Platform HW](#platform-hw-endpoints)
 - [Route](#route-endpoints)
+- [Route Points](#route-points-endpoints)
 - [Stop](#stop-endpoints)
 - [Security](#endpoints---keycloak-login)
 
 
 # Car endpoints
+
+Car [description](definitions.md#car).
+
+More on endpoints [here](entity_manipulations.md#car).
+
 
 ## /car
 
@@ -26,6 +34,7 @@ Response codes:
 - 200: Successfully created a new car.
 - 400: Bad request. The request body is not a valid Car.
 - 404: Not found. Some of the entities referenced by the Car do not exist.
+
 
 ### GET
 
@@ -68,6 +77,12 @@ Response codes:
 - 400: Bad request. The carId is not a valid integer.
 - 404: Not found. The Car with the given ID does not exist.
 
+# Car State endpoints
+
+Car State [description](definitions.md#car-state).
+
+More on endpoints [here](entity_manipulations.md#car-state).
+
 ## /carstate[?allAvailable=<allAvailable>]
 
 ### POST
@@ -106,6 +121,10 @@ Response codes:
 - 404: Not found. The Car with the given ID does not exist.
 
 # Order endpoints
+
+Order [description](definitions.md#order).
+
+More on endpoints [here](entity_manipulations.md#order).
 
 ## /order
 
@@ -164,6 +183,12 @@ Response codes:
 - 400: Bad request. The carId is not a valid integer.
 - 404: Not found. The Car with the given ID does not exist.
 
+# Order State endpoints
+
+Order State [description](definitions.md#order-state).
+
+More on endpoints [here](entity_manipulations.md#order-state).
+
 ## /orderstate[?since=<timestamp>&wait=<wait>]
 
 ### POST
@@ -203,6 +228,10 @@ Response codes:
 
 
 # Platform HW endpoints
+
+Platform HW [description](definitions.md#platform-hw).
+
+More on endpoints [here](entity_manipulations.md#platform-hw).
 
 ## /platformhw
 
@@ -250,6 +279,10 @@ Response codes:
 
 
 # Route endpoints
+
+Route [description](definitions.md#route).
+
+More on endpoints [here](entity_manipulations.md#route).
 
 ## /route
 
@@ -306,6 +339,12 @@ Response codes:
 - 400: Bad request. The routeId is not a valid integer.
 - 404: Not found. The Route with the given ID does not exist.
 
+# Route Points endpoints
+
+Route Points [description](definitions.md#route-points).
+
+More on endpoints [here](entity_manipulations.md#route-points).
+
 ## /routepoints/{routeId}
 
 ### GET
@@ -331,6 +370,10 @@ Response codes:
 - 404: Not found. The Route with the given ID does not exist.
 
 # Stop endpoints
+
+Stop [description](definitions.md#stop).
+
+More on endpoints [here](entity_manipulations.md#stop).
 
 ## /stop
 

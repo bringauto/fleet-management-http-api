@@ -14,6 +14,8 @@
 
 ## Car
 
+Entity [description](definitions.md#car).
+
 ### Post
 
 Requirements:
@@ -37,6 +39,8 @@ Result:
 
 ## Car State
 
+Entity [description](definitions.md#car-state).
+
 There is a maximum number $N_{car\,states}$ of Car States to be stored by the API.
 
 ### Post
@@ -51,6 +55,8 @@ Result:
 
 
 ## Order
+
+Entity [description](definitions.md#order).
 
 ### Post
 
@@ -75,6 +81,8 @@ Result:
 
 ## Order State
 
+Entity [description](definitions.md#order-state).
+
 There is a maximum number of Order States $N_{order\,states}$ that can be stored by the API.
 
 ### Post
@@ -91,6 +99,8 @@ Result:
 
 
 ## Platform HW
+
+Entity [description](definitions.md#platform-hw).
 
 ### Post
 
@@ -111,6 +121,8 @@ Result:
 
 
 ## Route
+
+Entity [description](definitions.md#route).
 
 ### Post
 
@@ -135,6 +147,8 @@ Result:
 
 ## Route Points
 
+Entity [description](definitions.md#route-points).
+
 ### Post
 
 Requirements:
@@ -149,6 +163,8 @@ The Route Points object is always deleted if and only if the referenced [Route](
 
 
 ## Stop
+
+Entity [description](definitions.md#stop).
 
 ### Post
 
