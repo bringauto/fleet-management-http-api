@@ -134,7 +134,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Get order by car ID only if it changed.
+      summary: Get an order by car ID only if it has changed.
       parameters:
         - name: carId
           in: path
