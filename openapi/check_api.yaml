@@ -1,0 +1,16 @@
+paths:
+  /apialive:
+    head:
+      operationId: checkApiIsAlive
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.api_check
+      tags:
+        - api-check
+      summary: Check if API is alive.
+      responses:
+        '200':
+          description: HTTP server has been reached successfully.
+          content:
+            text/plain:
+              type: string
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'

@@ -44,13 +44,17 @@ def verify_key_and_return_key_info(
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
-    _key_db_models = _db_access.get(
-        _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, conn_source=connection_source
-    )
-    if len(_key_db_models) == 0:
-        return 401, f"Invalid API key used."
-    else:
-        return 200, _key_db_models[0]
+
+    try:
+        _key_db_models = _db_access.get(
+            _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, conn_source=connection_source
+        )
+        if len(_key_db_models) == 0:
+            return 401, f"Invalid API key used."
+        else:
+            return 200, _key_db_models[0]
+    except RuntimeError:
+        return 503, "Server database is not available."
 
 
 def _generate_key() -> str:  # pragma: no cover

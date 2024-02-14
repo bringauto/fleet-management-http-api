@@ -19,6 +19,8 @@ security:
   - oAuth2AuthCode: []
 
 tags:
+  - name: api-check
+    description: API health check
   - name: car
     description: Car related functions
   - name: carState
@@ -37,6 +39,9 @@ tags:
     description: Authentication-related functions
 
 paths:
+  /apialive:
+    $ref: 'check_api.yaml#/paths/~1apialive'
+
   /car:
     $ref: 'car.yaml#/paths/~1car'
   /car/{carId}:

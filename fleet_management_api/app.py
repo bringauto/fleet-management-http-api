@@ -46,6 +46,10 @@ class _TestApp:
             url = self._insert_key(url)
             return super().get(url, *args, **kwargs)
 
+        def head(self, url: str, *args, **kwargs) -> Any:
+            url = self._insert_key(url)
+            return super().head(url, *args, **kwargs)
+
         def post(self, url: str, *args, **kwargs) -> Any:
             url = self._insert_key(url)
             return super().post(url, *args, **kwargs)

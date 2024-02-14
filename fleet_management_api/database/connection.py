@@ -13,6 +13,18 @@ import fleet_management_api.api_impl as _api
 _db_connection: None | _Engine = None
 
 
+def connected_to_database() -> bool:
+    """Return True if the module variable storing the connection source (sqlalchemy Engine object) is not None."""
+    if _db_connection is None:
+        return False
+    try:
+        with _db_connection.connect() as conn:
+            result = conn.scalar(_sqa.select(1))
+            return True
+    except Exception:
+        return False
+
+
 def current_connection_source() -> _Engine | None:
     """Return the current connection source (sqlalchemy Engine object) stored in the module variable."""
     global _db_connection
@@ -177,17 +189,21 @@ def _new_connection(url: str) -> _Engine:
             f"Could not create new connection source (url='{url}'). {e}"
         )
 
+    _test_new_connection(engine)
+    return engine
+
+
+def _test_new_connection(engine: _Engine) -> None:
     try:
         with engine.connect():
             pass
     except Exception as e:
         raise CannotConnectToDatabase(
             "Could not connect to the database with the given connection parameters: \n"
-            f"{url}\n\n"
+            f"{engine.url}\n\n"
             "Check the location, port number, username and password.\n"
             f"{e}"
         )
-    return engine
 
 
 class CannotConnectToDatabase(Exception):

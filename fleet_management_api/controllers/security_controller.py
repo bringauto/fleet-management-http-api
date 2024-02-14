@@ -1,7 +1,8 @@
-from typing import List, Dict
+from typing import Dict
 
 import jwt
 
+import fleet_management_api.api_impl as _api
 from fleet_management_api.api_impl.api_keys import verify_key_and_return_key_info as _verify_key_and_return_key_info
 
 
@@ -66,8 +67,9 @@ def info_from_APIKeyAuth(api_key, *args) -> None|Dict:
     :return: Information attached to provided api_key or None if api_key is invalid or does not allow access to called API
     :rtype: dict | None
     """
+
     code, info = _verify_key_and_return_key_info(api_key)
-    if code==401:
-        return None
-    else:
+    if code==200:
         return {'name': info.name} # type: ignore
+    else:
+        return None
