@@ -28,7 +28,7 @@ The main parts of the configuration file are the following:
 - `api`. This sets up the behavior of the API (e.g., timeout of waiting for initially unavailable content).
 
 
-## Starting server locally
+## Starting the server locally
 To run the server, please execute the following from the root directory:
 
 ```bash
@@ -59,7 +59,7 @@ To rebuild and start the server in a Docker container, use
 docker compose up --build
 ```
 
-# Installing project as a package
+# Installing as a package
 
 In the root folder, run
 ```bash
@@ -93,7 +93,7 @@ python -m tests database controllers/test_car_controller.py
 
 # Authentication
 
-## Adding new API key
+## Adding a new API key
 
 To generate a new API key (passed as a query parameter "api_key") run the following in the root directory:
 ```bash
@@ -141,12 +141,12 @@ To get Keycloak authentication working, all parameters in the security section o
 }
 ```
 
-- keycloak_url : base URL of a working Kycloak instance
-- client_id : id of client in keycloak (Clients -> click on client representing http api -> Settings -> Client ID)
-- client_secret_key : secret key of client (Clients -> click on client representing http api -> Credentials -> Client Secret)
-- scope : checking of scopes is not yet implemented (must be `email` for now!)
-- realm : realm in which the client belongs (seen on top of the left side panel in keycloak gui)
-- keycloak_public_key_file : path to public key used to decode jwt tokens (Realm settings -> Keys -> RS256 -> Public key)
+- keycloak_url : base URL of a working Keycloak instance.
+- client_id : ID of client in keycloak (Clients -> click on client representing http api -> Settings -> Client ID).
+- client_secret_key : secret key of client (Clients -> click on client representing http api -> Credentials -> Client Secret).
+- scope : checking of scopes is not yet implemented (must be `email` for now).
+- realm : realm in which the client belongs (seen on top of the left side panel in Keycloak GUI).
+- keycloak_public_key_file : path to a public key used to decode JWT tokens (Realm settings -> Keys -> RS256 -> Public key).
 
 
 
