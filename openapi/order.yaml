@@ -51,6 +51,7 @@ paths:
                     "status": "to_accept",
                     "carId": 1,
                     "targetStopId": 1,
+                    "notification": "Order notification",
                     "stopRouteId": 1,
                     "notificationPhone": {"phone":'+420123456789'}
                   }
