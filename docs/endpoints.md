@@ -466,6 +466,28 @@ Response codes:
 - 200: Returns a standard Keycloak token.
 - 500: The login failed due to an internal server error.
 
+Query options:
+- ?state
+    - State returned by the Keycloak authentication.
+    - type: string
+    - example: your_state_infos
+
+- ?session_state
+    - Session state returned by the Keycloak authentication.
+    - type: string
+    - example: 167e141d-2f55-4d...
+
+- ?iss
+    - Code issuer returned by the Keycloak authentication.
+    - type: string
+    - example: http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fmaster
+
+- ?code
+    - Code used for JWT token generation returned by Keycloak authentication.
+    - type: string
+    - example: 5dea27d2-4b2d-48...
+
+
 ## /token_refresh
 
 ### GET
@@ -476,5 +498,10 @@ Response codes:
 - 200: Returns a new standard Keycloak token.
 - 500: Token refresh failed due to an internal server error.
 
-
+Query options:
+?refresh_token
+- Refresh token used for JWT token generation.
+- required
+- type: string
+- example: eyJhbGciOiJIUzI1NiIsI...
 
