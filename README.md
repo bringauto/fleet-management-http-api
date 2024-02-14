@@ -28,7 +28,7 @@ The main parts of the configuration file are the following:
 - `api`. This sets up the behavior of the API (e.g., timeout of waiting for initially unavailable content).
 
 
-## Starting server locally
+## Starting the server locally
 To run the server, please execute the following from the root directory:
 
 ```bash
