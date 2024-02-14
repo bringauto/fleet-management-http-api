@@ -19,7 +19,6 @@ Entity [description](definitions.md#car).
 ### Post
 
 Requirements:
-- A unique ID.
 - [Platform HW](#platformhw) must exist and must not be used by some other Car.
 - [Default route ID](#route) must exist.
 
