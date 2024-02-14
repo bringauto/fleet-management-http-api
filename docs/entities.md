@@ -62,7 +62,7 @@ The Entity ID is an unsigned integer with a UNIQUE value for a given API instanc
 The Car represents a physical object with an assigned list of [Car States](#car-state).
 
 Required data:
-- name: string
+- name: UTF-8 encoded string
 - platform HW ID: unsigned integer
 - car admin phone: [Mobile Phone](#mobile-phone)
 - default route ID: unsigned integer
@@ -173,7 +173,7 @@ Example:
 Route groups Stops together.
 
 Required data:
-- name: string
+- name: UTF-8 encoded string
 - stop IDs: set of unsigned integers
 
 Example:
@@ -218,7 +218,7 @@ Example:
 Stop represents a target physical location, that can be assigned to an Order.
 
 Required data:
-- name: string
+- name: UTF-8 encoded string
 - position: [GNSSPosition](#gnss-position)
 - notification phone: [Mobile Phone](#mobile-phone)
 

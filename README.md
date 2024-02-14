@@ -59,7 +59,7 @@ To rebuild and start the server in a Docker container, use
 docker compose up --build
 ```
 
-# Installing project as a package
+# Installing as a package
 
 In the root folder, run
 ```bash
@@ -93,7 +93,7 @@ python -m tests database controllers/test_car_controller.py
 
 # Authentication
 
-## Adding new API key
+## Adding a new API key
 
 To generate a new API key (passed as a query parameter "api_key") run the following in the root directory:
 ```bash
@@ -141,7 +141,7 @@ To get Keycloak authentication working, all parameters in the security section o
 }
 ```
 
-- keycloak_url : base URL of a working Kycloak instance
+- keycloak_url : base URL of a working Keycloak instance
 - client_id : id of client in keycloak (Clients -> click on client representing http api -> Settings -> Client ID)
 - client_secret_key : secret key of client (Clients -> click on client representing http api -> Credentials -> Client Secret)
 - scope : checking of scopes is not yet implemented (must be `email` for now!)
