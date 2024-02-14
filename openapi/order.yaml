@@ -55,7 +55,6 @@ paths:
                     "notificationPhone": {"phone":'+420123456789'}
                   }
                 ]
-
         '401':
           $ref: 'errors.yaml#/components/responses/Unauthorized'
         '403':
