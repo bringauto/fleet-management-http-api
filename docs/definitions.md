@@ -34,12 +34,12 @@ Example:
 ## Mobile Phone
 
 Required data:
-- phone number: string
+- phone: string
 
 Example:
 ```json
 {
-    "phone_number": "+420123456789"
+    "phone": "+420123456789"
 }
 ```
 
