@@ -8,7 +8,7 @@ from fleet_management_api import util
 
 
 def check_api_is_alive():  # noqa: E501
-    """Check if API is alive.
+    """Check HTTP server is running and accessible.
 
      # noqa: E501
 

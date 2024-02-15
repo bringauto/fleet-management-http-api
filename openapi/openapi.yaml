@@ -19,7 +19,7 @@ security:
   - oAuth2AuthCode: []
 
 tags:
-  - name: api-check
+  - name: api
     description: API health check
   - name: car
     description: Car related functions

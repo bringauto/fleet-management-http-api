@@ -17,7 +17,7 @@ security:
 - oAuth2AuthCode: []
 tags:
 - description: API health check
-  name: api-check
+  name: api
 - description: Car related functions
   name: car
 - description: Car state-related functions
@@ -42,7 +42,18 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: HTTP server has been reached successfully.
+          description: The HTTP server has been reached successfully.
+        "503":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "503"
+                    message: Service unavailable
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Service unavailable
         default:
           content:
             application/json:
@@ -54,9 +65,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Check if API is alive.
+      summary: Check HTTP server is running and accessible.
       tags:
-      - api-check
+      - api
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.api_check
   /car:
     get:
@@ -2474,6 +2485,17 @@ components:
         format: int32
         type: integer
   responses:
+    ServiceUnavailable:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "503"
+                message: Service unavailable
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Service unavailable
     UnexpectedError:
       content:
         application/json:
