@@ -5,7 +5,7 @@ import fleet_management_api.database.connection as _connection
 
 def check_api_is_alive() -> _Response:
     try:
-        if not _connection.connected_to_database():
+        if not _connection.is_connected_to_database():
             return _Response(
                 status_code=503, content_type="text/plain", body="Server database is not available."
             )

@@ -86,7 +86,7 @@ class _CheckBeforeAdd:
                 condition.check(result)
 
         except _NoResultFound as e:
-            raise _NoResultFound(f"{_model_name(self._base)} with ID={self._id} not found. {e}")
+            raise _NoResultFound(f"{self._base.model_name} with ID={self._id} not found. {e}")
         except Exception as e:
             raise e
 
@@ -125,7 +125,7 @@ def add(
                         return _Response(
                             status_code=404,
                             content_type="text/plain",
-                            body=f"{_model_name(check_obj._base)} with ID={check_obj._id} does not exist in the database.",
+                            body=f"{added[0].model_name} with ID={check_obj._id} does not exist in the database.",
                         )
                     except Exception as e:
                         return _Response(
@@ -164,20 +164,20 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
             session.delete(inst)
             session.commit()
             return _Response(
-                body=f"{_model_name(base)} with {_ID_NAME}={id_} was deleted.",
+                body=f"{base.model_name} with {_ID_NAME}={id_} was deleted.",
                 status_code=200,
             )
         except _NoResultFound as e:
             return _Response(
                 status_code=404,
                 content_type="text/plain",
-                body=f"{_model_name(base)} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}",
+                body=f"{base.model_name} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}",
             )
         except _sqaexc.IntegrityError as e:
             return _Response(
                 status_code=400,
                 content_type="text/plain",
-                body=f"{_model_name(base)} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}",
+                body=f"{base.model_name} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}",
             )
         except Exception as e:
             return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
@@ -243,7 +243,7 @@ def get_by_id(
                     results.append(result.copy())
             return results
         except _NoResultFound as e:
-            raise _NoResultFound(f"{_model_name(base)} with ID={id_value} not found. {e}")
+            raise _NoResultFound(f"{base.model_name} with ID={id_value} not found. {e}")
         except Exception as e:
             raise e
 
@@ -340,7 +340,7 @@ def update(updated_obj: _Base) -> _Response:
         except _sqaexc.NoResultFound as e:
             code, msg = (
                 404,
-                f"{_model_name(updated_obj.__class__)} with ID={updated_obj.id} was not found. Nothing to update.",
+                f"{updated_obj.model_name} with ID={updated_obj.id} was not found. Nothing to update.",
             )
         except Exception as e:
             code, msg = 500, str(e)
@@ -421,11 +421,6 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
     for obj in objs[1:]:
         if not obj.__tablename__ == tablename:
             raise TypeError(f"Object being added to database must belong to the same table.")
-
-
-def _model_name(base: Type[_Base]) -> str:
-    """Extract the model N"""
-    return base.__name__.replace("DBModel", "")
 
 
 def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:

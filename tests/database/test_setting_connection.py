@@ -172,7 +172,7 @@ class Test_Failed_Connection(unittest.TestCase):
             password="invalid_password",
             db_name="test_db",
         )
-        self.assertFalse(_connection.connected_to_database())
+        self.assertFalse(_connection.is_connected_to_database())
 
 
 if __name__ == "__main__":
