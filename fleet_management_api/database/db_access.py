@@ -5,9 +5,11 @@ import functools as _functools
 import sqlalchemy as _sqa
 import sqlalchemy.exc as _sqaexc
 from sqlalchemy.orm.exc import NoResultFound as _NoResultFound
-from sqlalchemy.orm import Session as _Session
-from sqlalchemy.orm import noload as _noload
-from sqlalchemy.orm import InstrumentedAttribute as _InstrumentedAttribute
+from sqlalchemy.orm import (
+    Session as _Session,
+    noload as _noload,
+    InstrumentedAttribute as _InstrumentedAttribute
+)
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
@@ -29,6 +31,13 @@ class ParentNotFound(Exception):
 
 @dataclasses.dataclass(frozen=True)
 class _AttributeCondition:
+    """ An instance of this class binds together the following:
+    - an attribute name,
+    - a function that checks the attribute value meets condition expressed by the function,
+    - a message that is raised when the condition is not met.
+
+    The check method either does nothing or raises exception when the condition is not met.
+    """
     atribute_name: str
     func: Callable[[Any], bool]
     fail_message: str
@@ -40,19 +49,33 @@ class _AttributeCondition:
 
 
 class _CheckBeforeAdd:
+    """An instance of this class binds together the following:
+    - a class related to a table in database,
+    - an ID of an object in the table,
+    - a list of conditions that should be met by the object with the given ID,
+    - a flag that indicates that object non-existence is allowed (no exception is raised).
+
+    The check method either does nothing or raises exception when some of the conditions is not met.
+    """
+
     def __init__(
         self,
         object_base: Type[_Base],
         id_: int,
         *conditions: _AttributeCondition,
-        nullable: bool = False,
+        allow_nonexistence: bool = False,
     ):
         self._base = object_base
         self._id = id_
         self._conditions = conditions
-        self._nullable = nullable
+        self._nullable = allow_nonexistence
 
     def check(self, session: _Session) -> None:
+        """Raise exception if the object with the given ID does not exist in the database
+        (when allow_nonexistence is False) or if some of the conditions is not met.
+
+        Otherwise, return None.
+        """
         if self._conditions is None:
             self._conditions = {}
         try:
@@ -69,35 +92,33 @@ class _CheckBeforeAdd:
 
 
 def add(
-    *sent_objs: _Base,
-    check_objs: Optional[List[_CheckBeforeAdd]] = None,
-    conn_source: Optional[_sqa.Engine] = None,
+    *added: _Base,
+    checked: Optional[List[_CheckBeforeAdd]] = None,
+    connection_source: Optional[_sqa.Engine] = None,
 ) -> _Response:
     """Adds a objects to the database.
 
-    All the `sent_objs` must be instances of the same base.
+    All the `added` must be instances of the same ORM mapped class.
 
-    `check_reference_existence` can be used to check that given ID are present in other tables
-    correspoding to the key values in the `check_reference_existence` dictionary.
-
-    The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
-    the globally defined Engine is used.
+    - The optional `checked` may contain additional conditions put on any other objects contained in the
+    database (e.g., existence of object in some table).
+    - An optional `connection_source` may be specified to replace the otherwise used global connection source
+    (an sqlalchemy Engine object).
     """
-
     global _wait_mg
-    if not sent_objs:
+    if not added:
         return _Response(
             status_code=200,
             content_type="text/plain",
             body="Nothing to add to database",
         )
-    _check_common_base_for_all_objs(*sent_objs)
-    _set_all_obj_ids_to_none(*sent_objs)
-    source = _get_checked_connection_source(conn_source)
+    _check_common_base_for_all_objs(*added)
+    _set_all_obj_ids_to_none(*added)
+    source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
-            if check_objs is not None:
-                for check_obj in check_objs:
+            if checked is not None:
+                for check_obj in checked:
                     try:
                         check_obj.check(session)
                     except _NoResultFound as e:
@@ -113,10 +134,10 @@ def add(
                             body=str(e),
                         )
 
-            session.add_all(sent_objs)
+            session.add_all(added)
             session.commit()
-            inserted_objs = [obj.copy() for obj in sent_objs]
-            _wait_mg.notify(sent_objs[0].__tablename__, inserted_objs)
+            inserted_objs = [obj.copy() for obj in added]
+            _wait_mg.notify(added[0].__tablename__, inserted_objs)
             return _Response(
                 status_code=200, content_type="application/json", body=inserted_objs[0]
             )
@@ -135,7 +156,7 @@ def add(
 
 
 def delete(base: Type[_Base], id_: Any) -> _Response:
-    """Delete a single object with ID=`id_` from the database table correspoding to the `base`."""
+    """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
@@ -209,10 +230,10 @@ def get_by_id(
 ) -> List[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
-    The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
-    the globally defined Engine is used.
+    - An optional `connection_source` may be specified to replace the otherwise used global connection source
+    (an sqlalchemy Engine object).
     """
-    source = _get_checked_connection_source(conn_source)
+    source = check_and_return_current_connection_source(conn_source)
     with _Session(source) as session, session.begin():
         try:
             results = []
@@ -233,7 +254,7 @@ def get(
     wait: bool = False,
     timeout_ms: Optional[int] = None,
     omitted_relationships: Optional[List[_InstrumentedAttribute]] = None,
-    conn_source: Optional[_sqa.Engine] = None,
+    connection_source: Optional[_sqa.Engine] = None,
 ) -> List[Any]:
 
     """Get instances of the `base`.
@@ -244,7 +265,6 @@ def get(
     until some data that would satisfy the criteria are sent to the database.
 
     `timeout_ms` is the timeout for the waiting for data in milliseconds.
-
     `omitted_relationships` contain list of the instance relationship to instances of other bases, that should not be loaded.
 
     The `conn_source` specifies the Sqlalchemy Engine to access the database. If None,
@@ -254,7 +274,7 @@ def get(
     if criteria is None:
         criteria = {}
     table = base.__table__
-    source = _get_checked_connection_source(conn_source)
+    source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session, session.begin():
         clauses = [
             criteria[attr_label](getattr(table.columns, attr_label))
@@ -278,10 +298,16 @@ def get_children(
     parent_base: Type[_Base],
     parent_id: int,
     children_col_name: str,
-    conn_source: Optional[_sqa.Engine] = None,
+    connection_source: Optional[_sqa.Engine] = None,
 ) -> List[_Base]:
-    """Get children of an instance of `parent_base` with `parent_id` from its `children_col_name`."""
-    source = _get_checked_connection_source(conn_source)
+    """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
+
+    - `children_col_name` is the name of the relationship attribute in the parent_base class.
+
+    - An optional `connection_source` may be specified to replace the otherwise used global connection source
+    (an sqlalchemy Engine object).
+    """
+    source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
             children = list(getattr(session.get_one(parent_base, parent_id), children_col_name))
@@ -295,7 +321,14 @@ def get_children(
 
 
 def update(updated_obj: _Base) -> _Response:
-    """Updates an existing record in the database with the same ID as the updated_obj."""
+    """Updates an existing record in the database with the same ID as the updated_obj.
+
+    The updated_obj is an instance of the ORM mapped class related to a table in database.
+
+    - On successful update, the function returns response with 200 status code.
+    - In case of a conflict with the database constraints, the function returns response with 400 status code.
+    - If the record with the same ID does not exist, the function returns response with 404 status code.
+    """
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
@@ -319,7 +352,10 @@ def wait_for_new(
     criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
     timeout_ms: Optional[int] = None,
 ) -> List[Any]:
+    """Wait for new instances of the ORM mapped class `base` that satisfy the `criteria` to be sent to the database.
 
+    `timeout_ms` is the timeout for the waiting for data in milliseconds.
+    """
     global _wait_mg
     if criteria is None:
         criteria = {}
@@ -331,19 +367,37 @@ def wait_for_new(
     return result
 
 
-def check_obj_exists_in_db(
-    base: Type[_Base], id_: int, *conditions: _AttributeCondition, nullable: bool = False
+def db_object_check(
+    base: Type[_Base], id_: int, *conditions: _AttributeCondition, allow_nonexistence: bool = False
 ) -> _CheckBeforeAdd:
-    return _CheckBeforeAdd(base, id_, *conditions, nullable=nullable)
+    """Return an instance of object binding together:
+    - a ORM mapped class related to a table in database,
+    - an ID of an object in the table,
+    - a list of conditions that should be met by the object with the given ID,
+    - a flag that indicates that object non-existence is allowed (no exception is raised).
+
+    `base` is a class related to a table in database.
+    `id_` is an ID of an object in the table.
+    `conditions` is a list of conditions that should be met by the object with the given ID.
+    `allow_nonexistence` is a flag that indicates that object non-existence is allowed (no exception is raised and
+    checking of conditions is skipped).
+    """
+    return _CheckBeforeAdd(base, id_, *conditions, allow_nonexistence=allow_nonexistence)
 
 
 def db_obj_condition(
     attribute_name: str, func: Callable[[Any], bool], fail_message: str
 ) -> _AttributeCondition:
+    """Return an instance of object binding together:
+    - an attribute name,
+    - a function that checks the attribute value meets condition expressed by the function,
+    - a message that is raised when the condition is not met.
+    """
     return _AttributeCondition(attribute_name, func, fail_message)
 
 
 def content_timeout() -> int:
+    """Returns the currently set timeout for waiting for content from the database in milliseconds."""
     global _wait_mg
     return _wait_mg.timeout_ms
 
@@ -357,6 +411,10 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
 
 
 def _check_common_base_for_all_objs(*objs: _Base) -> None:
+    """Check if all the `objs` are instances of the same ORM mapped class.
+
+    If not, raise TypeError, otherwise do nothing.
+    """
     if not objs:
         return
     tablename = objs[0].__tablename__
@@ -365,16 +423,8 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
             raise TypeError(f"Object being added to database must belong to the same table.")
 
 
-def _get_checked_connection_source(
-    source: Optional[_sqa.Engine] = None,
-) -> _sqa.engine.base.Engine:
-    if source is None:
-        return check_and_return_current_connection_source()
-    else:
-        return check_and_return_current_connection_source(source)
-
-
 def _model_name(base: Type[_Base]) -> str:
+    """Extract the model N"""
     return base.__name__.replace("DBModel", "")
 
 
