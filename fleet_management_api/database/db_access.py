@@ -324,10 +324,6 @@ def update(updated_obj: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
-
-    - On successful update, the function returns response with 200 status code.
-    - In case of a conflict with the database constraints, the function returns response with 400 status code.
-    - If the record with the same ID does not exist, the function returns response with 404 status code.
     """
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
