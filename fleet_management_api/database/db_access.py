@@ -289,7 +289,7 @@ def get(
             result = _wait_mg.wait_and_get_response(
                 base.__tablename__,
                 timeout_ms,
-                validation=_functools.partial(_result_is_ok, criteria),
+                validation=_functools.partial(_is_awaited_result_valid, criteria),
             )
         return result
 
@@ -358,7 +358,7 @@ def wait_for_new(
     result = _wait_mg.wait_and_get_response(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
-        validation=_functools.partial(_result_is_ok, criteria),
+        validation=_functools.partial(_is_awaited_result_valid, criteria),
     )
     return result
 
@@ -419,8 +419,9 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
             raise TypeError(f"Object being added to database must belong to the same table.")
 
 
-def _result_is_ok(attribute_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
-    for attr_label, attr_criterion in attribute_criteria.items():
+def _is_awaited_result_valid(result_attr_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
+    """Return True if the `item` meets all the conditions expressed by the `attribute_criteria`"""
+    for attr_label, attr_criterion in result_attr_criteria.items():
         if not hasattr(item, attr_label):
             return False
         if not attr_criterion(item.__dict__[attr_label]):
