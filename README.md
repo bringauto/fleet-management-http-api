@@ -121,13 +121,13 @@ python scripts/add_api_key.py <api-key-name> <path-to-config-file> [OPTIONS].
 Working example for test database built from docker-compose (username and password can be found in the `config/config.json`).
 
 ```bash
-python scripts/new_admin.py 'Bob' config/config.json
+python scripts/add_api_key.py 'Bob' config/config.json
 ```
 
 After running the script, the api_key is printed to the console:
 
 ```bash
-New key for admin 'Bob':
+Admin 'Bob' added with key:
 
 MzLwgWGitBSDTNLjqktSnzNZQAjKaC
 ```
