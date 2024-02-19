@@ -12,27 +12,34 @@ _EMPTY_VALUE = None
 @dataclasses.dataclass
 class PositionalArgInfo:
     name: str
-    type:Type
+    type: Type
     help: str
 
 
 @dataclasses.dataclass(frozen=True)
 class ScriptArgs:
-    argvals: Dict[str,str]
+    argvals: Dict[str, str]
     config: _APIConfig
 
 
 def request_and_get_script_arguments(
-    script_description: str,
-    *positional_args: PositionalArgInfo,
-    include_db_args: bool = True
-    ) -> ScriptArgs:
+    script_description: str, *positional_args: PositionalArgInfo
+) -> ScriptArgs:
+    """Create base for the script.
+
+    `script_description` is the summary of the scritp's purpose shown as the first part of the script's help.
+    `positional_args` are the arguments that are required to run the script.
+
+    The script then returns ScriptArgs which contains
+    - `argvals` which is a dictionary of the arguments passed to the script,
+    - `config` which is the configuration for the script. If some of the arguments overriding the configuration
+       are passed, the configuration is updated with the arguments.
+    """
 
     parser = _new_arg_parser(script_description)
     _add_positional_args_to_parser(parser, *positional_args)
     _add_config_arg_to_parser(parser)
-    if include_db_args:
-        _add_db_args_to_parser(parser)
+    _add_db_args_to_parser(parser)
     return _parse_arguments(parser)
 
 
@@ -42,26 +49,58 @@ def _add_config_arg_to_parser(parser: argparse.ArgumentParser) -> None:
 
 def _add_db_args_to_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        "-usr", "--username", type=str, help="The username for the database server.", default=_EMPTY_VALUE, required=False
+        "-usr",
+        "--username",
+        type=str,
+        help="The username for the database server.",
+        default=_EMPTY_VALUE,
+        required=False,
     )
     parser.add_argument(
-        "-pwd", "--password", type=str, help="The password for the database server.", default=_EMPTY_VALUE, required=False
+        "-pwd",
+        "--password",
+        type=str,
+        help="The password for the database server.",
+        default=_EMPTY_VALUE,
+        required=False,
     )
     parser.add_argument(
-        "-l", "--location", type=str, help="The location/address of the database", default=_EMPTY_VALUE, required=False
+        "-l",
+        "--location",
+        type=str,
+        help="The location/address of the database",
+        default=_EMPTY_VALUE,
+        required=False,
     )
     parser.add_argument(
-        "-p", "--port", type=str, help="The database port number.", default=_EMPTY_VALUE, required=False
+        "-p",
+        "--port",
+        type=str,
+        help="The database port number.",
+        default=_EMPTY_VALUE,
+        required=False,
     )
     parser.add_argument(
-        "-db", "--database-name", type=str, help="The name of the database.", default=_EMPTY_VALUE, required=False
+        "-db",
+        "--database-name",
+        type=str,
+        help="The name of the database.",
+        default=_EMPTY_VALUE,
+        required=False,
     )
     parser.add_argument(
-        "-t", "--test", type=str, help="Connect to a sqlite database. Username and password are ignored.", default="", required=False
+        "-t",
+        "--test",
+        type=str,
+        help="Connect to a sqlite database. Username and password are ignored.",
+        default="",
+        required=False,
     )
 
 
-def _add_positional_args_to_parser(parser: argparse.ArgumentParser, *args: PositionalArgInfo) -> None:
+def _add_positional_args_to_parser(
+    parser: argparse.ArgumentParser, *args: PositionalArgInfo
+) -> None:
     for arg in args:
         parser.add_argument(arg.name, type=arg.type, help=arg.help)
 
@@ -70,7 +109,7 @@ def _new_arg_parser(script_description: str) -> argparse.ArgumentParser:
     return argparse.ArgumentParser(description=script_description)
 
 
-def load_config_file(path: str) -> Dict[str,Any]:
+def load_config_file(path: str) -> Dict[str, Any]:
     try:
         with open(path) as config_file:
             config = json.load(config_file)
@@ -93,7 +132,7 @@ def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     return ScriptArgs(args, config)
 
 
-def _update_config_with_args(args:Dict[str, Any], config: _APIConfig) -> None:
+def _update_config_with_args(args: Dict[str, Any], config: _APIConfig) -> None:
     if args["username"] != _EMPTY_VALUE:
         config.database.connection.username = args["username"]
     if args["password"] != _EMPTY_VALUE:
@@ -106,4 +145,5 @@ def _update_config_with_args(args:Dict[str, Any], config: _APIConfig) -> None:
         config.database.connection.database_name = args["database_name"]
 
 
-class ConfigFileNotFound(Exception): pass
+class ConfigFileNotFound(Exception):
+    pass
