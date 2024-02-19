@@ -20,10 +20,10 @@ def create_order() -> _Response:
         db_model = _api.order_to_db_model(order)
         response = _db_access.add(
             db_model,
-            check_objs=[
-                _db_access.check_obj_exists_in_db(_db_models.CarDBModel, id_=order.car_id),
-                _db_access.check_obj_exists_in_db(_db_models.StopDBModel, id_=order.target_stop_id),
-                _db_access.check_obj_exists_in_db(
+            checked=[
+                _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
+                _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.db_object_check(
                     _db_models.RouteDBModel,
                     order.stop_route_id,
                     _db_access.db_obj_condition(
