@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Dict, Optional, List, Type, Literal, Callable
+from typing import Any, Dict, Optional, List, Type, Literal, Callable, Tuple
 import functools as _functools
 
 import sqlalchemy as _sqa
@@ -63,37 +63,32 @@ class _CheckBeforeAdd:
 
     The check method either does nothing or raises exception when some of the conditions is not met.
     """
-
     def __init__(
         self,
         object_base: Type[_Base],
         id_: int,
         *conditions: _AttributeCondition,
-        allow_nonexistence: bool = False,
+        nullable: bool = False,
     ):
         self._base = object_base
         self._id = id_
         self._conditions = conditions
-        self._nullable = allow_nonexistence
+        self._nullable = nullable
 
     def check(self, session: _Session) -> None:
         """Raise exception if the object with the given ID does not exist in the database
-        (when allow_nonexistence is False) or if some of the conditions is not met.
+        (and nullable=False) or if some of the conditions is not met.
 
-        Otherwise, return None.
         """
-        if self._conditions is None:
-            self._conditions = {}
-        try:
-            if self._nullable and self._id is None:
-                return
+        if self._nullable and self._id is None:
+            return
+        else:
             result = session.get_one(self._base, self._id)
-            for condition in self._conditions:
-                condition.check(result)
-        except _NoResultFound as e:
-            raise _NoResultFound(f"{self._base.model_name} with ID={self._id} not found. {e}")
-        except Exception as e:
-            raise e
+            if self._conditions is None:
+                return
+            else:
+                for condition in self._conditions:
+                    condition.check(result)
 
 
 def add(
@@ -114,19 +109,17 @@ def add(
     if not added:
         return _api.text_response(200, "Empty request body. Nothing to add to database.")
     _check_common_base_for_all_objs(*added)
-    _set_all_obj_ids_to_none(*added)
     source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
             if checked is not None:
                 for check_obj in checked:
                     check_obj.check(session)
-            passed_to_session = [obj.copy() for obj in added]
-            session.add_all(passed_to_session)
+            _set_id_to_none(added)
+            session.add_all(added)
             session.commit()
-            inserted_objs = [obj.copy() for obj in passed_to_session]
-            _wait_mg.notify(inserted_objs[0].__tablename__, inserted_objs)
-            return _api.json_response(200, inserted_objs)
+            _wait_mg.notify(added[0].__tablename__, added)
+            return _api.json_response(200, [obj.copy() for obj in added])
         except _NoResultFound as e:
             msg = f"{added[0].model_name} (ID={check_obj._id}) does not exist in the database."
             return _api.text_response(404, msg)
@@ -340,7 +333,7 @@ def db_object_check(
     `allow_nonexistence` is a flag that indicates that object non-existence is allowed (no exception is raised and
     checking of conditions is skipped).
     """
-    return _CheckBeforeAdd(base, id_, *conditions, allow_nonexistence=allow_nonexistence)
+    return _CheckBeforeAdd(base, id_, *conditions, nullable=allow_nonexistence)
 
 
 def db_obj_condition(
@@ -393,6 +386,7 @@ def _is_awaited_result_valid(
     return True
 
 
-def _set_all_obj_ids_to_none(*sent_objs: _Base) -> None:
+def _set_id_to_none(sent_objs: Tuple[_Base, ...]) -> None:
+    """"""
     for obj in sent_objs:
         obj.id = None  # type: ignore
