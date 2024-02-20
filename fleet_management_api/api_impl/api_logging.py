@@ -1,5 +1,9 @@
 import logging as _logging
-from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
+
+from .api_responses import (
+    text_response as _text_response,
+    Response as _Response
+)
 
 
 _API_LOGGER_NAME = "werkzeug"
@@ -23,4 +27,4 @@ def log_and_respond(code: int, msg: str) -> _Response:
         log_info(msg)
     else:
         log_error(msg)
-    return _Response(status_code=code, content_type="text/plain", body=msg)
+    return _text_response(code, msg)
