@@ -1,6 +1,6 @@
 import random as _random
 import string as _string
-from typing import Tuple, Optional
+from typing import Optional
 
 from sqlalchemy import Engine as _Engine
 
@@ -13,7 +13,7 @@ import fleet_management_api.database.connection as _connection
 _KEY_LENGTH = 30
 
 
-def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
+def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     """Create a new API key with name 'key_name'.
 
     The key name must not be already used.
@@ -38,7 +38,7 @@ def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
 
 def verify_key_and_return_key_info(
     api_key: str, connection_source: Optional[_Engine] = None
-) -> Tuple[int, str | _ApiKeyDBModel]:
+) -> tuple[int, str | _ApiKeyDBModel]:
 
     """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 

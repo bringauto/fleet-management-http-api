@@ -10,7 +10,7 @@ import fleet_management_api.script_args.configs as _configs
 import fleet_management_api.api_impl as _api
 
 
-_db_connection: None | _Engine = None
+_db_connection: Optional[_Engine] = None
 
 
 def current_connection_source() -> _Engine | None:
@@ -29,7 +29,7 @@ def check_and_return_current_connection_source(
     variable, if it is not None.
     - Raise RuntimeError.
     """
-    source: _Engine | None = None
+    source: Optional[_Engine] = None
     if conn_source is not None:
         source = conn_source
     else:
@@ -104,7 +104,7 @@ def get_connection_source(
     return _get_connection(url)
 
 
-def replace_connection_source(source: _Engine | None) -> None:
+def replace_connection_source(source: Optional[_Engine]) -> None:
     """Replace the module variable storing the connection source (sqlalchemy Engine object)."""
     global _db_connection
     _db_connection = source

@@ -1,4 +1,3 @@
-from typing import List, Dict
 import unittest
 from unittest.mock import patch, Mock
 import os
@@ -273,7 +272,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             mock_timestamp_ms.return_value = 100
             c.post("/v2/management/orderstate", json=order_state_2)
 
-            states: List[Dict] = c.get("/v2/management/orderstate/1").json  # type: ignore
+            states: list[dict] = c.get("/v2/management/orderstate/1").json  # type: ignore
             self.assertEqual(len(states), 2)
 
     def tearDown(self) -> None:  # pragma: no cover

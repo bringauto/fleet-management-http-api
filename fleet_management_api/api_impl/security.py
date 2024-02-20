@@ -1,3 +1,5 @@
+from typing import Optional
+
 import urllib.parse as _url
 
 from keycloak import KeycloakOpenID  # type: ignore
@@ -35,7 +37,7 @@ class SecurityObj:
         return auth_url
 
     def token_get(
-        self, state: str | None, session_state: str | None, iss: str | None, code: str | None
+        self, state: Optional[str], session_state: Optional[str], iss: Optional[str], code: Optional[str]
     ) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
         if state != self._state:

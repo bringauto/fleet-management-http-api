@@ -1,5 +1,3 @@
-from typing import List
-
 import connexion  # type: ignore
 
 import fleet_management_api.api_impl as _api
@@ -79,7 +77,7 @@ def get_updated_orders(car_id: int) -> _api.Response:
     """
     if not _car_exist(car_id):
         return _api.log_and_respond(404, f"Car with ID={car_id} does not exist.")
-    order_db_models: List[_db_models.OrderDBModel] = _db_access.get(
+    order_db_models: list[_db_models.OrderDBModel] = _db_access.get(
         _db_models.OrderDBModel,
         criteria={"car_id": lambda x: x == car_id, "updated": lambda x: x == True},
     )

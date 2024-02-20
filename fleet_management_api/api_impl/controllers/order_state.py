@@ -1,4 +1,4 @@
-from typing import Dict, Callable, Any
+from typing import Callable, Any
 
 import connexion as _connexion  # type: ignore
 
@@ -50,12 +50,12 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _api.
         _api.log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _api.json_response(404, [])
     else:
-        criteria: Dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
+        criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
         return _get_order_states(criteria, wait, since)
 
 
 def _get_order_states(
-    criteria: Dict[str, Callable[[Any], bool]], wait: bool, since: int
+    criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int
 ) -> _api.Response:
     criteria["timestamp"] = lambda x: x >= since
     order_state_db_models = _db_access.get(

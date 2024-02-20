@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Type, Dict, Any
+from typing import Any
 import argparse
 import json
 
@@ -12,13 +12,13 @@ _EMPTY_VALUE = None
 @dataclasses.dataclass
 class PositionalArgInfo:
     name: str
-    type: Type
+    type: type
     help: str
 
 
 @dataclasses.dataclass(frozen=True)
 class ScriptArgs:
-    argvals: Dict[str, str]
+    argvals: dict[str, str]
     config: _APIConfig
 
 
@@ -48,52 +48,25 @@ def _add_config_arg_to_parser(parser: argparse.ArgumentParser) -> None:
 
 
 def _add_db_args_to_parser(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "-usr",
-        "--username",
-        type=str,
-        help="The username for the database server.",
-        default=_EMPTY_VALUE,
-        required=False,
+    _add_str_option(parser, "-usr", "--username", "The username for the database server.")
+    _add_str_option(parser, "-pwd", "--password", "The password for the database server.")
+    _add_str_option(parser, "-l", "--location", "The location/address of the database")
+    _add_str_option(parser, "-p", "--port", "The database port number.")
+    _add_str_option(parser, "-db", "--database-name", "The name of the database.")
+    _add_str_option(
+        parser, "-t", "--test", "Connect to a sqlite database. Username and password are ignored."
     )
+
+
+def _add_str_option(
+    parser: argparse.ArgumentParser, short: str, full: str, description: str
+) -> None:
     parser.add_argument(
-        "-pwd",
-        "--password",
+        short,
+        full,
         type=str,
-        help="The password for the database server.",
+        help=description,
         default=_EMPTY_VALUE,
-        required=False,
-    )
-    parser.add_argument(
-        "-l",
-        "--location",
-        type=str,
-        help="The location/address of the database",
-        default=_EMPTY_VALUE,
-        required=False,
-    )
-    parser.add_argument(
-        "-p",
-        "--port",
-        type=str,
-        help="The database port number.",
-        default=_EMPTY_VALUE,
-        required=False,
-    )
-    parser.add_argument(
-        "-db",
-        "--database-name",
-        type=str,
-        help="The name of the database.",
-        default=_EMPTY_VALUE,
-        required=False,
-    )
-    parser.add_argument(
-        "-t",
-        "--test",
-        type=str,
-        help="Connect to a sqlite database. Username and password are ignored.",
-        default="",
         required=False,
     )
 
@@ -109,7 +82,7 @@ def _new_arg_parser(script_description: str) -> argparse.ArgumentParser:
     return argparse.ArgumentParser(description=script_description)
 
 
-def load_config_file(path: str) -> Dict[str, Any]:
+def load_config_file(path: str) -> dict[str, Any]:
     try:
         with open(path) as config_file:
             config = json.load(config_file)
@@ -132,7 +105,7 @@ def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     return ScriptArgs(args, config)
 
 
-def _update_config_with_args(args: Dict[str, Any], config: _APIConfig) -> None:
+def _update_config_with_args(args: dict[str, Any], config: _APIConfig) -> None:
     if args["username"] != _EMPTY_VALUE:
         config.database.connection.username = args["username"]
     if args["password"] != _EMPTY_VALUE:

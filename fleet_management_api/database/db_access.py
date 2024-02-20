@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Dict, Optional, List, Type, Literal, Callable, Tuple
+from typing import Any, Optional, Literal, Callable, Iterable
 import functools as _functools
 
 import sqlalchemy as _sqa
@@ -63,7 +63,7 @@ class _CheckBeforeAdd:
 
     def __init__(
         self,
-        object_base: Type[_Base],
+        object_base: type[_Base],
         id_: int,
         *conditions: _AttributeCondition,
         nullable: bool = False,
@@ -91,7 +91,7 @@ class _CheckBeforeAdd:
 
 def add(
     *added: _Base,
-    checked: Optional[List[_CheckBeforeAdd]] = None,
+    checked: Optional[Iterable[_CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
 ) -> _Response:
     """Adds a objects to the database.
@@ -129,7 +129,7 @@ def add(
             return _api.text_response(500, f"Nothing added to the database. {e}")
 
 
-def delete(base: Type[_Base], id_: Any) -> _Response:
+def delete(base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = check_and_return_current_connection_source()
     with _Session(source) as session:
@@ -149,11 +149,11 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
 
 
 def delete_n(
-    base: Type[_Base],
+    base: type[_Base],
     n: int,
     column_name: str,
     start_from: Literal["minimum", "maximum"],
-    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
+    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
 ) -> _Response:
     """Delete multiple instances of the `base`.
 
@@ -186,8 +186,8 @@ def delete_n(
 
 
 def get_by_id(
-    base: Type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None
-) -> List[_Base]:
+    base: type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None
+) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     - An optional `connection_source` may be specified to replace the otherwise used global connection source
@@ -209,13 +209,13 @@ def get_by_id(
 
 
 def get(
-    base: Type[_Base],
-    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
+    base: type[_Base],
+    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
-    omitted_relationships: Optional[List[_InstrumentedAttribute]] = None,
+    omitted_relationships: Optional[list[_InstrumentedAttribute]] = None,
     connection_source: Optional[_sqa.Engine] = None,
-) -> List[Any]:
+) -> list[Any]:
 
     """Get instances of the `base`.
 
@@ -255,11 +255,11 @@ def get(
 
 
 def get_children(
-    parent_base: Type[_Base],
+    parent_base: type[_Base],
     parent_id: int,
     children_col_name: str,
     connection_source: Optional[_sqa.Engine] = None,
-) -> List[_Base]:
+) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
     - `children_col_name` is the name of the relationship attribute in the parent_base class.
@@ -301,10 +301,10 @@ def update(updated: _Base) -> _Response:
 
 
 def wait_for_new(
-    base: Type[_Base],
-    criteria: Optional[Dict[str, Callable[[Any], bool]]] = None,
+    base: type[_Base],
+    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     timeout_ms: Optional[int] = None,
-) -> List[Any]:
+) -> list[Any]:
     """Wait for new instances of the ORM mapped class `base` that satisfy the `criteria` to be sent to the database.
 
     `timeout_ms` is the timeout for the waiting for data in milliseconds.
@@ -321,7 +321,7 @@ def wait_for_new(
 
 
 def db_object_check(
-    base: Type[_Base], id_: int, *conditions: _AttributeCondition, allow_nonexistence: bool = False
+    base: type[_Base], id_: int, *conditions: _AttributeCondition, allow_nonexistence: bool = False
 ) -> _CheckBeforeAdd:
     """Return an instance of object binding together:
     - a ORM mapped class related to a table in database,
@@ -377,7 +377,7 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
 
 
 def _is_awaited_result_valid(
-    result_attr_criteria: Dict[str, Callable[[Any], bool]], item: Any
+    result_attr_criteria: dict[str, Callable[[Any], bool]], item: Any
 ) -> bool:
     """Return True if the `item` meets all the conditions expressed by the `attribute_criteria`"""
     for attr_label, attr_criterion in result_attr_criteria.items():
@@ -388,7 +388,7 @@ def _is_awaited_result_valid(
     return True
 
 
-def _set_id_to_none(db_model_instances: Tuple[_Base, ...]) -> None:
+def _set_id_to_none(db_model_instances: tuple[_Base, ...]) -> None:
     """Set "id" attribute of all the db_model_instances to None."""
     for obj in db_model_instances:
         obj.id = None  # type: ignore
