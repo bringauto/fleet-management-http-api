@@ -1,7 +1,6 @@
 from typing import List
 
 import connexion  # type: ignore
-from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models
@@ -9,7 +8,7 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 
 
-def create_order() -> _Response:
+def create_order() -> _api.Response:
     """Post a new order. The order must have a unique id and the car must exist."""
     if not connexion.request.is_json:
         return _api.log_invalid_request_body_format()
@@ -38,29 +37,27 @@ def create_order() -> _Response:
         if response.status_code == 200:
             inserted_model = _api.order_from_db_model(response.body[0])
             _api.log_info(f"Order (ID={inserted_model.id}) has been created and sent.")
-            return _Response(body=inserted_model, status_code=200, content_type="application/json")
+            return _api.json_response(200, inserted_model)
         else:
             return _api.log_and_respond(
                 response.status_code, f"Error when sending order. {response.body}."
             )
 
 
-def delete_order(order_id: int) -> _Response:
+def delete_order(order_id: int) -> _api.Response:
     """Delete an existing order."""
     response = _db_access.delete(_db_models.OrderDBModel, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _api.log_info(msg)
-        return _Response(
-            body=f"Order (ID={order_id})has been succesfully deleted.", status_code=200
-        )
+        return _api.text_response(200, f"Order (ID={order_id})has been succesfully deleted.")
     else:
         msg = f"Order (ID={order_id}) could not be deleted. {response.body}"
         _api.log_error(msg)
-        return _Response(body=msg, status_code=response.status_code)
+        return _api.text_response(response.status_code, msg)
 
 
-def get_order(order_id: int) -> _Response:
+def get_order(order_id: int) -> _api.Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
         _db_models.OrderDBModel, criteria={"id": lambda x: x == order_id}
@@ -68,14 +65,14 @@ def get_order(order_id: int) -> _Response:
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} was not found."
         _api.log_error(msg)
-        return _Response(body=msg, status_code=404)
+        return _api.text_response(404, msg)
     else:
         msg = f"Found order with ID={order_id}"
         _api.log_info(msg)
-        return _Response(body=_api.order_from_db_model(order_db_models[0]), status_code=200)
+        return _api.json_response(200, _api.order_from_db_model(order_db_models[0]))
 
 
-def get_updated_orders(car_id: int) -> _Response:
+def get_updated_orders(car_id: int) -> _api.Response:
     """Returns all orders for a given car that have been updated since their were last requested.
 
     After the order have been returned from the API, they are not longer considered updated.
@@ -95,20 +92,17 @@ def get_updated_orders(car_id: int) -> _Response:
             )
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
     _api.log_info(f"Returning {len(orders)} updated orders for car with ID={car_id}.")
-    return _Response(body=orders, status_code=200)
+    return _api.json_response(200, orders)
 
 
-def get_orders() -> _Response:
+def get_orders() -> _api.Response:
     """Get all existing orders."""
     _api.log_info("Listing all existing orders.")
-    return _Response(
-        content_type="application/json",
-        body=[
-            _api.order_from_db_model(order_db_model)
-            for order_db_model in _db_access.get(_db_models.OrderDBModel)
-        ],
-        status_code=200,
-    )
+    body = [
+        _api.order_from_db_model(order_db_model)
+        for order_db_model in _db_access.get(_db_models.OrderDBModel)
+    ]
+    return _api.json_response(200, body)
 
 
 def _car_exist(car_id: int) -> bool:

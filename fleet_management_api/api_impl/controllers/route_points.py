@@ -1,5 +1,4 @@
 import connexion as _connexion  # type: ignore
-from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 from fleet_management_api.models import RoutePoints as _RoutePoints
 import fleet_management_api.database.db_access as _db_access
@@ -7,26 +6,22 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl as _api
 
 
-def get_route_points(route_id: int) -> _Response:
+def get_route_points(route_id: int) -> _api.Response:
     """Get route points for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
         _db_models.RoutePointsDBModel, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
-        return _Response(
-            content_type="text/plain",
-            status_code=404,
-            body=f"Route points for EXISTING route with ID={route_id} not found.",
-        )
+        return _api.text_response(404, f"Route points for EXISTING route with ID={route_id} not found.")
     else:
         rp = _api.route_points_from_db_model(rp_db_models[0])
         _api.log_info(
             f"Found route points for route with ID={route_id} containing {len(rp.points)} points."
         )
-        return _Response(content_type="application/json", status_code=200, body=rp)
+        return _api.json_response(200, rp)
 
 
-def redefine_route_points() -> _Response:
+def redefine_route_points() -> _api.Response:
     """Redefine route points for an existing route."""
     if not _connexion.request.is_json:
         return _api.log_invalid_request_body_format()
@@ -54,10 +49,6 @@ def redefine_route_points() -> _Response:
             )
             if response.status_code == 200:
                 _api.log_info(f"Route points for route with ID={rp.route_id} have been redefined.")
-                return _Response(
-                    content_type="application/json",
-                    status_code=200,
-                    body=_api.route_points_from_db_model(response.body[0]),
-                )
+                return _api.json_response(200, _api.route_points_from_db_model(response.body[0]))
             else:
                 return _api.log_and_respond(response.status_code, response.body)
