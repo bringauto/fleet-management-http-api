@@ -4,7 +4,9 @@ import threading as _threading
 
 
 class WaitObjManager:
+    """ Instance of this class keeps track of waiting
 
+    """
     _default_timeout_ms: int = 5000
 
     def __init__(self, timeout_ms: int = _default_timeout_ms) -> None:
@@ -15,22 +17,6 @@ class WaitObjManager:
     @property
     def timeout_ms(self) -> int:
         return self._timeout_ms
-
-    def new_wait_obj(
-        self,
-        key: Any,
-        timeout_ms: Optional[int] = None,
-        validation: Optional[Callable[[Any], bool]] = None,
-    ) -> WaitObj:
-        """Create a new wait object and adds it to the wait queue for given key."""
-
-        if timeout_ms is None or timeout_ms < 0:
-            timeout_ms = self._timeout_ms
-        if not key in self._wait_dict:
-            self._wait_dict[key] = list()
-        wait_obj = WaitObj(key, timeout_ms, validation)
-        self._wait_dict[key].append(wait_obj)
-        return wait_obj
 
     def notify(self, key: Any, response_content: Iterable[Any]) -> None:
         """Make the next wait object in the queue to respond with specified 'reponse_content' and remove it from the queue."""
@@ -53,10 +39,26 @@ class WaitObjManager:
         """Wait for the next wait object in queue to respond and returns the response content.
         The queue is identified by given key.
         """
-        wait_obj = self.new_wait_obj(key, timeout_ms, validation)
+        wait_obj = self._new_wait_obj(key, timeout_ms, validation)
         reponse = wait_obj.wait_and_get_response()
         self._remove_wait_obj(wait_obj)
         return reponse
+
+    def _new_wait_obj(
+        self,
+        key: Any,
+        timeout_ms: Optional[int] = None,
+        validation: Optional[Callable[[Any], bool]] = None,
+    ) -> WaitObj:
+        """Create a new wait object and adds it to the wait queue for given key."""
+
+        if timeout_ms is None or timeout_ms < 0:
+            timeout_ms = self._timeout_ms
+        if not key in self._wait_dict:
+            self._wait_dict[key] = list()
+        wait_obj = WaitObj(key, timeout_ms, validation)
+        self._wait_dict[key].append(wait_obj)
+        return wait_obj
 
     def _remove_wait_obj(self, wait_obj: WaitObj) -> None:
         """Remove the wait obejct from the wait queue."""
