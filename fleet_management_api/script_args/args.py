@@ -34,6 +34,10 @@ def request_and_get_script_arguments(
     - `argvals` which is a dictionary of the arguments passed to the script,
     - `config` which is the configuration for the script. If some of the arguments overriding the configuration
        are passed, the configuration is updated with the arguments.
+
+    Raises error if
+    - the configuration file is not found or not valid,
+    - any of the positional arguments are missing or of invalid type.
     """
 
     parser = _new_arg_parser(script_description)
