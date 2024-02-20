@@ -65,8 +65,9 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
     ):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
-        test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
+        test_obj = _TestBase(test_str="test_name", test_int=1)
         response = _db_access.add(test_obj)
+        print(response.body)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(_db_access.get(_TestBase)), 1)
 
@@ -176,4 +177,4 @@ class Test_Failed_Connection(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(buffer=True)  # pragma: no cover
+    unittest.main(buffer=True, verbosity=2)  # pragma: no cover

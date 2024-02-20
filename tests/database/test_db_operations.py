@@ -148,7 +148,6 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=5)
         test_obj_3 = models.TestBase(id=4, test_str="test_string", test_int=5)
         _db_access.add(test_obj_3, test_obj_1, test_obj_2)
-
         _db_access.delete_n(
             models.TestBase, n=2, column_name="id", start_from="maximum"
         )

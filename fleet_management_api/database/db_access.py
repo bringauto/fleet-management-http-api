@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound as _NoResultFound
 from sqlalchemy.orm import (
     Session as _Session,
     noload as _noload,
-    InstrumentedAttribute as _InstrumentedAttribute
+    InstrumentedAttribute as _InstrumentedAttribute,
 )
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
@@ -17,6 +17,7 @@ from fleet_management_api.database.connection import (
     check_and_return_current_connection_source,
 )
 import fleet_management_api.database.wait as wait
+import fleet_management_api.api_impl as _api
 
 
 _ID_NAME = "id"
@@ -35,13 +36,14 @@ class DatabaseRecordValueError(Exception):
 
 @dataclasses.dataclass(frozen=True)
 class _AttributeCondition:
-    """ An instance of this class binds together the following:
+    """An instance of this class binds together the following:
     - an attribute name,
     - a function that checks the attribute value meets condition expressed by the function,
     - a message that is raised when the condition is not met.
 
     The check method either does nothing or raises exception when the condition is not met.
     """
+
     atribute_name: str
     func: Callable[[Any], bool]
     fail_message: str
@@ -88,7 +90,6 @@ class _CheckBeforeAdd:
             result = session.get_one(self._base, self._id)
             for condition in self._conditions:
                 condition.check(result)
-
         except _NoResultFound as e:
             raise _NoResultFound(f"{self._base.model_name} with ID={self._id} not found. {e}")
         except Exception as e:
@@ -111,11 +112,7 @@ def add(
     """
     global _wait_mg
     if not added:
-        return _Response(
-            status_code=200,
-            content_type="text/plain",
-            body="Nothing to add to database",
-        )
+        return _api.text_response(200, "Empty request body. Nothing to add to database.")
     _check_common_base_for_all_objs(*added)
     _set_all_obj_ids_to_none(*added)
     source = check_and_return_current_connection_source(connection_source)
@@ -124,37 +121,21 @@ def add(
             if checked is not None:
                 for check_obj in checked:
                     check_obj.check(session)
-            session.add_all(added)
+            passed_to_session = [obj.copy() for obj in added]
+            session.add_all(passed_to_session)
             session.commit()
-            inserted_objs = [obj.copy() for obj in added]
-            _wait_mg.notify(added[0].__tablename__, inserted_objs)
-            return _Response(
-                status_code=200, content_type="application/json", body=inserted_objs
-            )
+            inserted_objs = [obj.copy() for obj in passed_to_session]
+            _wait_mg.notify(inserted_objs[0].__tablename__, inserted_objs)
+            return _api.json_response(200, inserted_objs)
         except _NoResultFound as e:
-            return _Response(
-                status_code=404,
-                content_type="text/plain",
-                body=f"{added[0].model_name} with ID={check_obj._id} does not exist in the database.",
-            )
+            msg = f"{added[0].model_name} (ID={check_obj._id}) does not exist in the database."
+            return _api.text_response(404, msg)
         except DatabaseRecordValueError as e:
-            return _Response(
-                status_code=400,
-                content_type="text/plain",
-                body=f"Nothing added to the database. {e}",
-            )
+            return _api.text_response(400, f"Nothing added to the database. {e}")
         except _sqaexc.IntegrityError as e:
-            return _Response(
-                status_code=400,
-                content_type="text/plain",
-                body=f"Nothing added to the database. {e.orig}",
-            )
+            return _api.text_response(400, f"Nothing added to the database. {e.orig}")
         except Exception as e:
-            return _Response(
-                status_code=500,
-                content_type="text/plain",
-                body=f"Nothing added to the database. {e}",
-            )
+            return _api.text_response(500, f"Nothing added to the database. {e}")
 
 
 def delete(base: Type[_Base], id_: Any) -> _Response:
@@ -165,24 +146,13 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
             inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _Response(
-                body=f"{base.model_name} with {_ID_NAME}={id_} was deleted.",
-                status_code=200,
-            )
+            return _api.text_response(200, f"{base.model_name} with {_ID_NAME}={id_} was deleted.")
         except _NoResultFound as e:
-            return _Response(
-                status_code=404,
-                content_type="text/plain",
-                body=f"{base.model_name} with {_ID_NAME}={id_} not found in table {base.__tablename__}. {e}",
-            )
+            return _api.text_response(404, f"{base.model_name} (ID={id_}) not found. {e}")
         except _sqaexc.IntegrityError as e:
-            return _Response(
-                status_code=400,
-                content_type="text/plain",
-                body=f"{base.model_name} with {_ID_NAME}={id_} could not be deleted from table. {e.orig}",
-            )
+            return _api.text_response(400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}")
         except Exception as e:
-            return _Response(status_code=500, content_type="text/plain", body=f"Error: {e}")
+            return _api.text_response(500, f"Error: {e}")
 
 
 def delete_n(
@@ -199,10 +169,7 @@ def delete_n(
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _Response(
-            body=f"Column {column_name} not found in table {base.__tablename__}.",
-            status_code=500,
-        )
+        return _api.text_response(500, f"Column {column_name} not found in table {base.__tablename__}.")
     if criteria is None:
         criteria = {}
     table = base.__table__
@@ -220,11 +187,7 @@ def delete_n(
         query = query.limit(n)
         stmt = _sqa.delete(base).where(table.c.id.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
-        return _Response(
-            content_type="text/plain",
-            body=f"{n_of_deleted_items} objects deleted from the database.",
-            status_code=200,
-        )
+        return _api.text_response(200, f"{n_of_deleted_items} objects deleted from the database.")
 
 
 def get_by_id(
@@ -322,7 +285,7 @@ def get_children(
             raise e
 
 
-def update(updated_obj: _Base) -> _Response:
+def update(updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
@@ -330,19 +293,16 @@ def update(updated_obj: _Base) -> _Response:
     source = check_and_return_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
-            session.get_one(updated_obj.__class__, updated_obj.id)
-            session.merge(updated_obj)
-            code, msg = 200, "Succesfully updated record"
+            session.get_one(updated.__class__, updated.id)
+            session.merge(updated)
+            return _api.text_response(200, "Succesfully updated record.")
         except _sqaexc.IntegrityError as e:
-            code, msg = 400, str(e.orig)
+            return _api.text_response(400, str(e.orig))
         except _sqaexc.NoResultFound as e:
-            code, msg = (
-                404,
-                f"{updated_obj.model_name} with ID={updated_obj.id} was not found. Nothing to update.",
-            )
+            msg = (f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update.")
+            return _api.text_response(404, msg)
         except Exception as e:
-            code, msg = 500, str(e)
-    return _Response(status_code=code, content_type="text/plain", body=msg)
+            return _api.text_response(500, str(e))
 
 
 def wait_for_new(
@@ -421,7 +381,9 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
             raise TypeError(f"Object being added to database must belong to the same table.")
 
 
-def _is_awaited_result_valid(result_attr_criteria: Dict[str, Callable[[Any], bool]], item: Any) -> bool:
+def _is_awaited_result_valid(
+    result_attr_criteria: Dict[str, Callable[[Any], bool]], item: Any
+) -> bool:
     """Return True if the `item` meets all the conditions expressed by the `attribute_criteria`"""
     for attr_label, attr_criterion in result_attr_criteria.items():
         if not hasattr(item, attr_label):
