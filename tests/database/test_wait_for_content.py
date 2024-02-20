@@ -18,55 +18,45 @@ _TEST_DB_FILE_PATH = "test_db_file.db"
 class Test_Wait_Objects(unittest.TestCase):
     def test_setting_default_timeout(self) -> None:
         wait_manager = wait.WaitObjManager()
-        wait_manager.set_timeout(1234)
+        wait_manager.set_default_timeout(1234)
         self.assertEqual(wait_manager.timeout_ms, 1234)
-        wait_manager.set_timeout(4567)
+        wait_manager.set_default_timeout(4567)
         self.assertEqual(wait_manager.timeout_ms, 4567)
 
     def test_setting_negative_timeout_raises_value_error(self) -> None:
         wait_manager = wait.WaitObjManager()
         with self.assertRaises(ValueError):
-            wait_manager.set_timeout(-4567)
+            wait_manager.set_default_timeout(-4567)
 
     def test_initializing_wait_obj_with_negative_timeout_set_it_to_zero(self) -> None:
-        wait_obj = wait.WaitObj("key", timeout_ms=-1234)
-        self.assertEqual(wait_obj.timeout_ms, 0)
+        wait_obj = wait.WaitObject(timeout_ms=-1234)
+        self.assertEqual(wait_obj._timeout_ms, 0)
 
-    def test_content_filtered_by_wait_obj_with_validation_set_to_none_returns_the_unfiltered_content(
-        self,
-    ):
-        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=None)
+    def test_content_filtered_with_validation_set_to_none_returns_unfiltered_content(self):
+        wait_obj = wait.WaitObject(timeout_ms=5000, validation=None)
         content = [1, 2, 3, 4, 5]
         self.assertListEqual(wait_obj.filter_content(content), content)
 
-    def test_content_filtered_by_wait_obj_with_validation_set_to_true_returns_the_unfiltered_content(
-        self,
-    ):
-        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: True)
+    def test_content_filtered_with_validation_set_to_true_returns_the_unfiltered_content(self):
+        wait_obj = wait.WaitObject(timeout_ms=5000, validation=lambda x: True)
         content = [1, 2, 3, 4, 5]
         self.assertListEqual(wait_obj.filter_content(content), content)
 
-    def test_content_filtered_by_wait_obj_with_validation_set_to_false_returns_empty_list(
-        self,
-    ):
-        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: False)
+    def test_content_filtered_by_wait_obj_with_validation_set_to_false_returns_empty_list(self):
+        wait_obj = wait.WaitObject(timeout_ms=5000, validation=lambda x: False)
         content = [1, 2, 3, 4, 5]
         self.assertListEqual(wait_obj.filter_content(content), [])
 
-    def test_content_filtered_by_wait_obj_with_validation_set_to_filtering_function_returns_filtered_content(
-        self,
-    ):
-        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=lambda x: x > 2)
+    def test_content_filtered_with_filtering_function_returns_filtered_content(self):
+        wait_obj = wait.WaitObject(timeout_ms=5000, validation=lambda x: x > 2)
         content = [1, 2, 3, 4, 5]
         self.assertListEqual(wait_obj.filter_content(content), [3, 4, 5])
 
-    def test_removing_wait_object_for_which_no_key_exists_in_the_wait_obj_manager_dict_raises_key_error(
-        self,
-    ):
-        wait_obj = wait.WaitObj("key", timeout_ms=5000, validation=None)
+    def test_removing_wait_object_for_which_no_key_exists_raises_key_error(self):
+        wait_obj = wait.WaitObject(timeout_ms=5000, validation=None)
         wait_manager = wait.WaitObjManager()
         with self.assertRaises(wait.WaitObjManager.UnknownWaitingObj):
-            wait_manager._remove_wait_obj(wait_obj)
+            wait_manager._remove_wait_obj("nonexistent key", wait_obj)
 
 
 class Test_Waiting_For_Content(unittest.TestCase):
@@ -84,7 +74,7 @@ class Test_Waiting_For_Content(unittest.TestCase):
             retrieved_objs = future.result()
             self.assertEqual(retrieved_objs[0].test_str, test_obj.test_str)
 
-    def test_not_enabling_wait_mechanism_and_unavailable_content_makes_the_db_request_immediatelly_return_empty_list(
+    def test_not_enabling_wait_mechanism_and_unavailable_content_immediatelly_returns_empty_list(
         self,
     ):
         test_obj = models.TestBase(test_str="test", test_int=123)
@@ -123,9 +113,7 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
         _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(_connection.current_connection_source())
 
-    def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(
-        self,
-    ):
+    def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(

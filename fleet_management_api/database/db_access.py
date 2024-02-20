@@ -116,7 +116,7 @@ def add(
             _set_id_to_none(added)
             session.add_all(added)
             session.commit()
-            _wait_mg.notify(added[0].__tablename__, added)
+            _wait_mg.notify_about_content(added[0].__tablename__, added)
             return _api.json_response(200, [obj.copy() for obj in added])
         except _NoResultFound as e:
             msg = f"{added[0].model_name} (ID={check_obj._id}) does not exist in the database."
@@ -246,7 +246,7 @@ def get(
                 stmt = stmt.options(_noload(item))
         result = [item.copy() for item in session.scalars(stmt).all()]
         if not result and wait:
-            result = _wait_mg.wait_and_get_response(
+            result = _wait_mg.wait_for_content(
                 base.__tablename__,
                 timeout_ms,
                 validation=_functools.partial(_is_awaited_result_valid, criteria),
@@ -312,7 +312,7 @@ def wait_for_new(
     global _wait_mg
     if criteria is None:
         criteria = {}
-    result = _wait_mg.wait_and_get_response(
+    result = _wait_mg.wait_for_content(
         key=base.__tablename__,
         timeout_ms=timeout_ms,
         validation=_functools.partial(_is_awaited_result_valid, criteria),
@@ -360,7 +360,7 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     Sets common value for all endpoints with wait mechanism being applied."
     """
     global _wait_mg
-    _wait_mg.set_timeout(timeout_ms)
+    _wait_mg.set_default_timeout(timeout_ms)
 
 
 def _check_common_base_for_all_objs(*objs: _Base) -> None:
