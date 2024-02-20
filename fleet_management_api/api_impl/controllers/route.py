@@ -123,7 +123,7 @@ def _find_nonexistent_stops(route: _models.Route) -> _api.Response:
     if nonexistent_stop_ids:
         return _api.text_response(
             404,
-            f"Route (ID={route.id}, name='{route.name}) has not been created - some of the required stops do not exist."
+            f"Route (ID={route.id}, name='{route.name}) has not been created - some of the required stops do not exist. "
             f"Nonexstent stop ids: {nonexistent_stop_ids}",
         )
     else:
@@ -139,7 +139,7 @@ def _find_related_orders(route_id: int) -> _api.Response:
     if related_orders:
         return _api.text_response(
             400,
-            f"Route (ID={route_id}) could not be deleted, because there are orders related to it."
+            f"Route (ID={route_id}) could not be deleted, because there are orders related to it. "
             f"Related orders: {related_orders}",
         )
     else:

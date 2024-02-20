@@ -112,15 +112,16 @@ def add(
         try:
             if checked is not None:
                 for check_obj in checked:
-                    check_obj.check(session)
+                    try:
+                        check_obj.check(session)
+                    except _NoResultFound as e:
+                        msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
+                        return _api.text_response(404, msg)
             _set_id_to_none(added)
             session.add_all(added)
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
             return _api.json_response(200, [obj.copy() for obj in added])
-        except _NoResultFound as e:
-            msg = f"{added[0].model_name} (ID={check_obj._id}) does not exist in the database."
-            return _api.text_response(404, msg)
         except DatabaseRecordValueError as e:
             return _api.text_response(400, f"Nothing added to the database. {e}")
         except _sqaexc.IntegrityError as e:

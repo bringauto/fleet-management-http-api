@@ -100,7 +100,9 @@ def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
     config_path = args.pop("<config-file-path>")
     try:
         config_dict = load_config_file(config_path)
-        config_dict["database"]["test"] = args.pop("test")
+        test = args.pop("test")
+        if test is not None:
+            config_dict["database"]["test"] = test
         config = _APIConfig(**config_dict)
     except Exception as e:
         print(f"\nCheck the configuration file ('{config_path}').\n")
