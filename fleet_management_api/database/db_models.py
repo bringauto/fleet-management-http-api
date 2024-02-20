@@ -21,7 +21,7 @@ class Base(_DeclarativeBase):
 
 
 class PlatformHWDBModel(Base):
-    __modelname__ = "PlatformHW"
+    model_name = "PlatformHW"
     __tablename__ = "platform_hw"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     cars: _Mapped[list["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
@@ -31,7 +31,7 @@ class PlatformHWDBModel(Base):
 
 
 class CarDBModel(Base):
-    __modelname__ = "Car"
+    model_name = "Car"
     __tablename__ = "cars"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     platform_hw_id: _Mapped[int] = _mapped_column(
@@ -59,7 +59,7 @@ class CarDBModel(Base):
 
 
 class CarStateDBModel(Base):
-    __modelname__ = "CarState"
+    model_name = "CarState"
     __tablename__ = "car_states"
     _max_n_of_states: int = 50
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
@@ -90,7 +90,7 @@ class CarStateDBModel(Base):
 
 
 class OrderDBModel(Base):
-    __modelname__ = "Order"
+    model_name = "Order"
     __tablename__ = "orders"
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
@@ -119,7 +119,7 @@ class OrderDBModel(Base):
 
 
 class OrderStateDBModel(Base):
-    __modelname__ = "OrderState"
+    model_name = "OrderState"
     __tablename__ = "order_states"
     _max_n_of_states: int = 50
     status: _Mapped[str] = _mapped_column(_sqa.String)
@@ -143,7 +143,7 @@ class OrderStateDBModel(Base):
 
 
 class StopDBModel(Base):
-    __modelname__ = "Stop"
+    model_name = "Stop"
     __tablename__ = "stops"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
@@ -158,7 +158,7 @@ class StopDBModel(Base):
 
 
 class RouteDBModel(Base):
-    __modelname__ = "Route"
+    model_name = "Route"
     __tablename__ = "routes"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
@@ -175,7 +175,7 @@ class RouteDBModel(Base):
 
 
 class RoutePointsDBModel(Base):
-    __modelname__ = "RoutePoints"
+    model_name = "RoutePoints"
     __tablename__ = "route_points"
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
     route: _Mapped[RouteDBModel] = _relationship(
@@ -188,7 +188,7 @@ class RoutePointsDBModel(Base):
 
 
 class ApiKeyDBModel(Base):
-    __modelname__ = "ApiKey"
+    model_name = "ApiKey"
     __tablename__ = "api_keys"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     key: _Mapped[str] = _mapped_column(_sqa.String, unique=True)

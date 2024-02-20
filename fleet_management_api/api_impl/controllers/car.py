@@ -33,7 +33,7 @@ def create_car() -> _api.Response:  # noqa: E501
             return _api.json_response(200, inserted_model)
         else:
             return _api.log_and_respond(
-                response.status_code, f"Car (name='{car.name}) could not be sent. {response.body}"
+                response.status_code, f"Car (name='{car.name}) could not be created. {response.body}"
             )
 
 

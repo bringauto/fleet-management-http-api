@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_order(order):  # noqa: E501
-    """Create a new order
+    """Create a new Order.
 
      # noqa: E501
 
-    :param order: New order JSON.
+    :param order: Order model in JSON format.
     :type order: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -24,11 +24,11 @@ def create_order(order):  # noqa: E501
 
 
 def delete_order(order_id):  # noqa: E501
-    """Delete an order
+    """Delete an Order with the specified ID.
 
      # noqa: E501
 
-    :param order_id: ID of order to delete.
+    :param order_id: ID of the Order to be deleted.
     :type order_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -37,11 +37,11 @@ def delete_order(order_id):  # noqa: E501
 
 
 def get_order(order_id):  # noqa: E501
-    """Finds order by ID
+    """Find an existing Order by its ID and return it.
 
      # noqa: E501
 
-    :param order_id: ID of order to return.
+    :param order_id: ID of the Order to be returned.
     :type order_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
@@ -50,7 +50,7 @@ def get_order(order_id):  # noqa: E501
 
 
 def get_orders():  # noqa: E501
-    """Finds all orders
+    """Find all currently existing Orders.
 
      # noqa: E501
 
@@ -61,11 +61,11 @@ def get_orders():  # noqa: E501
 
 
 def get_updated_orders(car_id):  # noqa: E501
-    """Get order by car ID only if it changed.
+    """Get updated Orders for a given Car specified by its ID.
 
      # noqa: E501
 
-    :param car_id: ID of a car with order to return.
+    :param car_id: ID of the Car for which updated Orders are requested.
     :type car_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]

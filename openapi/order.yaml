@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Create a new order
+      summary: Create a new Order.
       requestBody:
-        description: New order JSON.
+        description: Order model in JSON format.
         x-body-name: order
         content:
           application/json:
@@ -16,7 +16,7 @@ paths:
         required: true
       responses:
         '200':
-          description: A successful creation of a new order.
+          description: The new Order has been successfully created.
           content:
             text/plain:
               type: string
@@ -33,10 +33,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Finds all orders
+      summary: Find all currently existing Orders.
       responses:
         '200':
-          description: Successfully found all orders.
+          description: All the currently existing Orders have been returned.
           content:
             application/json:
               schema:
@@ -67,11 +67,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Finds order by ID
+      summary: Find an existing Order by its ID and return it.
       parameters:
         - name: orderId
           in: path
-          description: ID of order to return.
+          description: ID of the Order to be returned.
           required: true
           example: 1
           schema:
@@ -79,7 +79,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfully found order.
+          description: The Order with the specified ID has been found and returned.
           content:
             application/json:
               schema:
@@ -99,11 +99,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Delete an order
+      summary: Delete an Order with the specified ID.
       parameters:
         - name: orderId
           in: path
-          description: ID of order to delete.
+          description: ID of the Order to be deleted.
           required: true
           example: 1
           schema:
@@ -111,7 +111,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successful order removal.
+          description: The Order with the specified ID has been successfully deleted.
           content:
             text/plain:
               type: string
@@ -133,11 +133,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Get order by car ID only if it changed.
+      summary: Get updated Orders for a given Car specified by its ID.
       parameters:
         - name: carId
           in: path
-          description: ID of a car with order to return.
+          description: ID of the Car for which updated Orders are requested.
           required: true
           example: 1
           schema:
@@ -145,7 +145,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfully received a new order.
+          description: All the updated Orders for the specified Car have been returned.
           content:
             application/json:
               schema:
@@ -168,9 +168,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Create a new order state.
+      summary: Add a new Order State.
       requestBody:
-        description: New order state JSON.
+        description: Order State model in JSON format.
         x-body-name: orderState
         content:
           application/json:
@@ -179,7 +179,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfully added new order state.
+          description: The new Order State has been successfully added.
           content:
             text/plain:
               type: string
@@ -198,13 +198,13 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds all order states
+      summary: Find one or all Order States for all existing Orders.
       parameters:
         - $ref: '#/components/parameters/Wait'
         - $ref: '#/components/parameters/Since'
       responses:
         '200':
-          description: Successfully found all order states.
+          description: Successfully found all Order States complying with the request parameters.
           content:
             application/json:
               schema:
@@ -231,11 +231,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds order state by ID
+      summary: Find all Order States for a particular Order specified by its ID.
       parameters:
         - name: orderId
           in: path
-          description: ID of order for which states shall be returned.
+          description: ID of the Order for which to find the Order States.
           required: true
           example: 1
           schema:
@@ -245,7 +245,7 @@ paths:
         - $ref: '#/components/parameters/Since'
       responses:
         '200':
-          description: Successfully found order state.
+          description: All the Order States for the Order specified by its ID have been returned.
           content:
             text/plain:
               type: string

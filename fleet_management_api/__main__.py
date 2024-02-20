@@ -14,9 +14,8 @@ def _set_up_oauth(config: _args.Security) -> None:
         realm=config.realm,
         callback=str(config.callback),
     )
-    public_key_file = open(config.keycloak_public_key_file, "r")
-    set_public_key(public_key_file.read())
-    public_key_file.close()
+    with open(config.keycloak_public_key_file, "r") as public_key_file:
+        set_public_key(public_key_file.read())
 
 
 if __name__ == "__main__":

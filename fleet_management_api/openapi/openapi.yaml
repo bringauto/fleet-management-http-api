@@ -78,7 +78,7 @@ paths:
             application/json:
               example:
               - id: 1
-                platformId: 5
+                platformHWId: 5
                 name: BAT-2022-01
                 carAdminPhone:
                   phone: "+420123456789"
@@ -88,7 +88,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Car'
                 type: array
-          description: Returning all existing cars.
+          description: All the currently existing Cars have been returned.
         "401":
           content:
             application/json:
@@ -122,7 +122,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all cars
+      summary: Find and return all existing Cars.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -140,7 +140,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successfully created a new car.
+          description: The Car has been successfully created.
         "400":
           content:
             application/json:
@@ -185,7 +185,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new car
+      summary: Create a new Car object.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -196,14 +196,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Car'
-        description: Car update json
+        description: JSON representation of the updated Car.
         required: true
         x-body-name: car
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful car update
+          description: The Car has been successfully updated.
         "400":
           content:
             application/json:
@@ -259,7 +259,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update an existing car by ID
+      summary: Update already existing Car.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -267,7 +267,7 @@ paths:
     delete:
       operationId: delete_car
       parameters:
-      - description: ID of car to delete
+      - description: The ID of the Car to be deleted.
         example: 1
         in: path
         name: carId
@@ -280,7 +280,7 @@ paths:
           content:
             text/plain:
               example: 2 cars were successfully removed.
-          description: Successful car removal
+          description: The Car has been successfully deleted.
         "400":
           content:
             application/json:
@@ -347,14 +347,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete a car
+      summary: Delete a Car identified by its ID.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     get:
       operationId: get_car
       parameters:
-      - description: ID of car to return
+      - description: An ID of the Car to be returned.
         example: 1
         in: path
         name: carId
@@ -368,7 +368,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Car'
-          description: Successfully found a car with the given ID.
+          description: The Car with the specified ID has been found and returned.
         "400":
           content:
             application/json:
@@ -424,7 +424,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds car by ID
+      summary: Find a single Car by its ID.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -439,7 +439,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/CarState'
                 type: array
-          description: Successfully found all car states.
+          description: Successfully found all Car States complying with the request
+            parameters.
         "401":
           content:
             application/json:
@@ -473,7 +474,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all car states
+      summary: Find one or all Car States for a Car with the specified ID.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -484,14 +485,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CarState'
-        description: Car state json
+        description: Car State model in JSON format.
         required: true
         x-body-name: carState
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successfully added new car state.
+          description: The new Car State has been successfully added.
         "400":
           content:
             application/json:
@@ -536,7 +537,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Add a new state for a car by ID
+      summary: Add a new Car State.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -544,7 +545,7 @@ paths:
     get:
       operationId: get_car_states
       parameters:
-      - description: ID of car for which states shall be returned
+      - description: ID of the Car for which to find the Car States.
         example: 1
         in: path
         name: carId
@@ -566,7 +567,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CarState'
-          description: Successfully found a car state.
+          description: Successfully found all Car States complying with the request
+            parameters.
         "400":
           content:
             application/json:
@@ -611,7 +613,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds car states by ID
+      summary: Find one or all Car States for a given Car.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -648,7 +650,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Order'
                 type: array
-          description: Successfully found all orders.
+          description: All the currently existing Orders have been returned.
         "401":
           content:
             application/json:
@@ -682,7 +684,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all orders
+      summary: Find all currently existing Orders.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -693,14 +695,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Order'
-        description: New order JSON.
+        description: Order model in JSON format.
         required: true
         x-body-name: order
       responses:
         "200":
           content:
             text/plain: {}
-          description: A successful creation of a new order.
+          description: The new Order has been successfully created.
         "400":
           content:
             application/json:
@@ -745,7 +747,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new order
+      summary: Create a new Order.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -753,7 +755,7 @@ paths:
     get:
       operationId: get_updated_orders
       parameters:
-      - description: ID of a car with order to return.
+      - description: ID of the Car for which updated Orders are requested.
         example: 1
         in: path
         name: carId
@@ -767,7 +769,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
-          description: Successfully received a new order.
+          description: All the updated Orders for the specified Car have been returned.
         "400":
           content:
             application/json:
@@ -834,7 +836,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Get order by car ID only if it changed.
+      summary: Get updated Orders for a given Car specified by its ID.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -842,7 +844,7 @@ paths:
     delete:
       operationId: delete_order
       parameters:
-      - description: ID of order to delete.
+      - description: ID of the Order to be deleted.
         example: 1
         in: path
         name: orderId
@@ -854,7 +856,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successful order removal.
+          description: The Order with the specified ID has been successfully deleted.
         "400":
           content:
             application/json:
@@ -921,14 +923,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete an order
+      summary: Delete an Order with the specified ID.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     get:
       operationId: get_order
       parameters:
-      - description: ID of order to return.
+      - description: ID of the Order to be returned.
         example: 1
         in: path
         name: orderId
@@ -942,7 +944,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
-          description: Successfully found order.
+          description: The Order with the specified ID has been found and returned.
         "400":
           content:
             application/json:
@@ -998,7 +1000,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds order by ID
+      summary: Find an existing Order by its ID and return it.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -1035,7 +1037,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/OrderState'
                 type: array
-          description: Successfully found all order states.
+          description: Successfully found all Order States complying with the request
+            parameters.
         "401":
           content:
             application/json:
@@ -1069,7 +1072,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all order states
+      summary: Find one or all Order States for all existing Orders.
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -1080,14 +1083,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OrderState'
-        description: New order state JSON.
+        description: Order State model in JSON format.
         required: true
         x-body-name: orderState
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successfully added new order state.
+          description: The new Order State has been successfully added.
         "400":
           content:
             application/json:
@@ -1143,7 +1146,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new order state.
+      summary: Add a new Order State.
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -1151,7 +1154,7 @@ paths:
     get:
       operationId: get_order_states
       parameters:
-      - description: ID of order for which states shall be returned.
+      - description: ID of the Order for which to find the Order States.
         example: 1
         in: path
         name: orderId
@@ -1180,7 +1183,8 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successfully found order state.
+          description: All the Order States for the Order specified by its ID have
+            been returned.
         "400":
           content:
             application/json:
@@ -1225,7 +1229,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds order state by ID
+      summary: Find all Order States for a particular Order specified by its ID.
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -1243,7 +1247,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/PlatformHW'
                 type: array
-          description: Successfully found all platform hardware.
+          description: All the currently existing Platform HW have been returned.
         "401":
           content:
             application/json:
@@ -1277,7 +1281,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all platform HW.
+      summary: Find and return all existing Platform HW.
       tags:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
@@ -1288,14 +1292,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PlatformHW'
-        description: Platform hardware JSON.
+        description: Platform HW model in JSON format.
         required: true
         x-body-name: platformHW
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful platform hardware creation.
+          description: The Platform HW has been successfully created.
         "400":
           content:
             application/json:
@@ -1340,7 +1344,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new platform HW.
+      summary: Create a new Platform HW object.
       tags:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
@@ -1348,7 +1352,7 @@ paths:
     delete:
       operationId: delete_hw
       parameters:
-      - description: ID of platform HW to delete.
+      - description: ID of Platform HW to delete.
         example: 1
         in: path
         name: platformHwId
@@ -1360,7 +1364,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successful platform HW removal.
+          description: The Platform HW with the specified ID has been deleted.
         "400":
           content:
             application/json:
@@ -1427,14 +1431,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete a platform HW.
+      summary: Delete Platform HW with given ID.
       tags:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     get:
       operationId: get_hw
       parameters:
-      - description: ID of platform HW to return.
+      - description: ID of the Platform HW to return.
         example: 1
         in: path
         name: platformHwId
@@ -1448,7 +1452,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformHW'
-          description: Successfully found platform HW.
+          description: The Platform HW with the specified ID has been found and returned.
         "400":
           content:
             application/json:
@@ -1504,7 +1508,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Find platform HW by ID.
+      summary: Find Platform HW with given ID.
       tags:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
@@ -1530,7 +1534,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Route'
                 type: array
-          description: Successfully found all routes.
+          description: All the currently existing Routes have been returned.
         "401":
           content:
             application/json:
@@ -1564,7 +1568,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all routes
+      summary: Find and return all existing Routes.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1575,14 +1579,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Route'
-        description: New route json.
+        description: Route model in JSON format.
         required: true
         x-body-name: route
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful route creation.
+          description: The Route has been successfully created.
         "400":
           content:
             application/json:
@@ -1627,7 +1631,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new route.
+      summary: Create a new Route.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1638,14 +1642,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Route'
-        description: Route update JSON.
+        description: JSON representation of the updated Route.
         required: true
         x-body-name: route
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful route update.
+          description: The Route has been successfully updated.
         "400":
           content:
             application/json:
@@ -1701,7 +1705,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update an existing route by ID.
+      summary: Update already existing Route.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1709,7 +1713,7 @@ paths:
     delete:
       operationId: delete_route
       parameters:
-      - description: ID of the route to delete.
+      - description: An ID a the Route
         example: 1
         in: path
         name: routeId
@@ -1721,7 +1725,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successful route removal.
+          description: The Route with the specified ID has been deleted.
         "400":
           content:
             application/json:
@@ -1788,14 +1792,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete a route
+      summary: Delete a Route with the specified ID.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     get:
       operationId: get_route
       parameters:
-      - description: ID of the route to return.
+      - description: An ID a the Route
         example: 1
         in: path
         name: routeId
@@ -1809,7 +1813,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Route'
-          description: Successfully found route.
+          description: The Route with the specified ID has been found and returned.
         "400":
           content:
             application/json:
@@ -1865,7 +1869,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds route by ID.
+      summary: Find a single Route with the specified ID.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1877,14 +1881,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RoutePoints'
-        description: Route points JSON.
+        description: Route Points model in JSON format.
         required: true
         x-body-name: routePoints
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successfully found route points.
+          description: The Route Points have been successfully redefined.
         "400":
           content:
             application/json:
@@ -1940,7 +1944,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds route points for the given route identified by the route's ID.
+      summary: Redefine Route Points for an existing Route.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
@@ -1948,7 +1952,7 @@ paths:
     get:
       operationId: get_route_points
       parameters:
-      - description: ID of the route to delete.
+      - description: An ID a the Route
         example: 1
         in: path
         name: routeId
@@ -1962,7 +1966,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoutePoints'
-          description: Successfully found route points
+          description: The Route Points for the specified Route ID have been found
+            and returned.
         "400":
           content:
             application/json:
@@ -2018,7 +2023,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds route points for the given route identified by the route's ID.
+      summary: Find Route Points for a Route identified by the route's ID.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
@@ -2042,7 +2047,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Stop'
                 type: array
-          description: Successfully found all stops.
+          description: All the currently existing Stops have been returned.
         "401":
           content:
             application/json:
@@ -2076,7 +2081,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all stops
+      summary: Find and return all existing Stops.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -2087,14 +2092,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Stop'
-        description: New stop JSON.
+        description: Stop model in JSON format.
         required: true
         x-body-name: stop
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful stop creation.
+          description: The Stop has been successfully created.
         "400":
           content:
             application/json:
@@ -2139,7 +2144,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new stop.
+      summary: Create a new Stop.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -2150,14 +2155,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Stop'
-        description: Stop update JSON.
+        description: JSON representation of the updated Stop.
         required: true
         x-body-name: stop
       responses:
         "200":
           content:
             text/plain: {}
-          description: Successful stop update.
+          description: The Stop has been successfully updated.
         "400":
           content:
             application/json:
@@ -2213,7 +2218,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update an existing stop by ID.
+      summary: Update already existing Stop.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -2221,7 +2226,7 @@ paths:
     delete:
       operationId: delete_stop
       parameters:
-      - description: ID of stop to delete.
+      - description: ID of the Stop to be deleted.
         example: 1
         in: path
         name: stopId
@@ -2233,7 +2238,7 @@ paths:
         "200":
           content:
             text/plain: {}
-          description: Successful stop removal.
+          description: The Stop with the specified ID has been deleted.
         "400":
           content:
             application/json:
@@ -2300,14 +2305,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Delete a stop.
+      summary: Delete a Stop with the specified ID.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     get:
       operationId: get_stop
       parameters:
-      - description: ID of the stop to return.
+      - description: ID of Stop to be returned.
         example: 1
         in: path
         name: stopId
@@ -2321,7 +2326,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Stop'
-          description: Successfully found a stop.
+          description: The Stop with the specified ID has been found and returned.
         "400":
           content:
             application/json:
@@ -2377,7 +2382,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds stop by ID
+      summary: Find and return a single Stop by its ID.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -2476,7 +2481,7 @@ components:
         format: int64
         type: integer
     RouteId:
-      description: ID of the route to delete.
+      description: An ID a the Route
       example: 1
       in: path
       name: routeId
@@ -2591,7 +2596,7 @@ components:
       title: Error
       type: object
     Car:
-      description: Car object structure
+      description: Car model structure.
       example:
         underTest: false
         name: BAT-2022-01
@@ -2634,7 +2639,7 @@ components:
       title: Car
       type: object
     CarState:
-      description: Car state object structure
+      description: Car State object structure
       example:
         fuel: 80
         id: 1
@@ -2678,7 +2683,7 @@ components:
       title: CarState
       type: object
     CarStatus:
-      description: CarStatus enum
+      description: Car Status enum
       enum:
       - idle
       - charging
