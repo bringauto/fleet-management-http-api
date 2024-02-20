@@ -19,7 +19,7 @@ def create_hw() -> _Response:
         response = _db_access.add(platform_hw_db_model)
         if response.status_code == 200:
             _api.log_info(f"Platform HW (name='{platform_hw.name}) has been created.")
-            inserted_model = _api.platform_hw_from_db_model(response.body)
+            inserted_model = _api.platform_hw_from_db_model(response.body[0])
             return _Response(body=inserted_model, status_code=200, content_type="application/json")
         else:
             return _api.log_and_respond(

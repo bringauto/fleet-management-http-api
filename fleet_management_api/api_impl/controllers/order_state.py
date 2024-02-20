@@ -19,7 +19,7 @@ def create_order_state() -> _Response:
     order_state_db_model = _api.order_state_to_db_model(order_state)
     response = _db_access.add(order_state_db_model)
     if response.status_code == 200:
-        inserted_model = _api.order_state_from_db_model(response.body)
+        inserted_model = _api.order_state_from_db_model(response.body[0])
         _mark_order_as_updated(order_state.order_id)
         _remove_old_states()
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")

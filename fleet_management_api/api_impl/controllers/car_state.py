@@ -29,7 +29,7 @@ def add_car_state() -> _Response:
             ],
         )
         if response.status_code == 200:
-            inserted_model = _api.car_state_from_db_model(response.body)
+            inserted_model = _api.car_state_from_db_model(response.body[0])
             code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
             _api.log_info(msg)
             cleanup_response = _remove_old_states(car_state.car_id)

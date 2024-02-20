@@ -21,7 +21,7 @@ def create_route() -> _Response:
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(route_db_model)
         if response.status_code == 200:
-            inserted_db_model = response.body
+            inserted_db_model = response.body[0]
             route_points_response = _create_empty_route_points_list(inserted_db_model.id)
             if not route_points_response.status_code == 200:
                 return route_points_response
