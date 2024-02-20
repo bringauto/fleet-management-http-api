@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Optional
 import dataclasses
 
 from sqlalchemy import Integer, String, Engine
@@ -31,7 +32,7 @@ class TestBase2(Base):
     test_int_2: Mapped[int] = mapped_column(Integer)
 
 
-def initialize_test_tables(connection_engine: Engine | None) -> None:
+def initialize_test_tables(connection_engine: Optional[Engine]) -> None:
     if connection_engine is None:
         raise RuntimeError("Database connection not set up.")
     for table in Base.metadata.tables.values():

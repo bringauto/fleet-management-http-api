@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Optional, Literal
+from typing import Optional, Literal
 
 import pydantic
 
@@ -19,7 +19,7 @@ class HTTPServer(pydantic.BaseModel):
 class Database(pydantic.BaseModel):
     connection: Connection
     test: str = pydantic.Field(default="")
-    maximum_number_of_table_rows: Dict[str, int]
+    maximum_number_of_table_rows: dict[str, int]
 
     class Connection(pydantic.BaseModel):
         username: str
@@ -30,7 +30,7 @@ class Database(pydantic.BaseModel):
 
     @pydantic.validator("maximum_number_of_table_rows")
     @classmethod
-    def maximum_row_number_at_least_one(cls, val_dict: Dict[str, int]) -> Dict[str, int]:
+    def maximum_row_number_at_least_one(cls, val_dict: dict[str, int]) -> dict[str, int]:
         for key, value in val_dict.items():
             if value < 1:
                 raise ValueError(

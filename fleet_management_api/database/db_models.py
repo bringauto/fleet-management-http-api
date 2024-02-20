@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Optional, Dict
+from typing import Optional
 
 import sqlalchemy as _sqa
 from sqlalchemy.orm import Mapped as _Mapped
@@ -24,7 +24,7 @@ class PlatformHWDBModel(Base):
     __modelname__ = "PlatformHW"
     __tablename__ = "platform_hw"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    cars: _Mapped[List["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
+    cars: _Mapped[list["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
 
     def __repr__(self) -> str:
         return f"PlatformHW(ID={self.id}, name={self.name})"
@@ -37,7 +37,7 @@ class CarDBModel(Base):
     platform_hw_id: _Mapped[int] = _mapped_column(
         _sqa.ForeignKey("platform_hw.id"), nullable=False, unique=True
     )
-    car_admin_phone: _Mapped[Optional[Dict]] = _mapped_column(_sqa.JSON)
+    car_admin_phone: _Mapped[Optional[dict]] = _mapped_column(_sqa.JSON)
     default_route_id: _Mapped[Optional[int]] = _mapped_column(
         _sqa.ForeignKey("routes.id"), nullable=True
     )
@@ -46,10 +46,10 @@ class CarDBModel(Base):
     platformhw: _Mapped["PlatformHWDBModel"] = _relationship(
         "PlatformHWDBModel", back_populates="cars", lazy="noload"
     )
-    states: _Mapped[List["CarStateDBModel"]] = _relationship(
+    states: _Mapped[list["CarStateDBModel"]] = _relationship(
         "CarStateDBModel", cascade="save-update, merge, delete", back_populates="car"
     )
-    orders: _Mapped[List["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
+    orders: _Mapped[list["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
     default_route: _Mapped["RouteDBModel"] = _relationship(
         "RouteDBModel", lazy="noload", back_populates="cars"
     )
@@ -100,7 +100,7 @@ class OrderDBModel(Base):
     updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
 
-    states: _Mapped[List["OrderStateDBModel"]] = _relationship(
+    states: _Mapped[list["OrderStateDBModel"]] = _relationship(
         "OrderStateDBModel",
         cascade="save-update, merge, delete",
         back_populates="order",
@@ -149,7 +149,7 @@ class StopDBModel(Base):
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
 
-    orders: _Mapped[List["OrderDBModel"]] = _relationship(
+    orders: _Mapped[list["OrderDBModel"]] = _relationship(
         "OrderDBModel", back_populates="target_stop"
     )
 
@@ -163,7 +163,7 @@ class RouteDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
 
-    cars: _Mapped[List[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
+    cars: _Mapped[list[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
     route_points: _Mapped[object] = _relationship(
         "RoutePointsDBModel",
         cascade="save-update, merge, delete",

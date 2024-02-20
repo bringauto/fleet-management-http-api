@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, List, Any, Iterable, Optional, Callable
+from typing import Any, Iterable, Optional, Callable
 import threading as _threading
 
 
@@ -18,7 +18,7 @@ class WaitObjManager:
         """
         WaitObjManager._check_nonnegative_timeout(timeout_ms)
         self._timeout_ms = timeout_ms
-        self._wait_dict: Dict[str, List[WaitObject]] = dict()
+        self._wait_dict: dict[str, list[WaitObject]] = dict()
 
     @property
     def timeout_ms(self) -> int:
@@ -43,7 +43,7 @@ class WaitObjManager:
         key: Any,
         timeout_ms: Optional[int] = None,
         validation: Optional[Callable[[Any], bool]] = None,
-    ) -> List[Any]:
+    ) -> list[Any]:
         """ Wait for notification about available content sent from another thread with the same `key`.
 
         If `timeout_ms` is set to 0, the wait will return immediatelly empty content.
@@ -102,19 +102,19 @@ class WaitObject:
         - If `validation` is set, the WaitObject will only accept the data that passes the validation.
         - If `timeout_ms` is set to 0, the WaitObject will respond immediatelly.
         """
-        self._response_content: List[Any] = list()
+        self._response_content: list[Any] = list()
         self._wait_condition = _threading.Condition()
         self._is_valid = validation
         self._timeout_ms = max(timeout_ms, 0)
 
-    def resume_with_available_content(self, content: List[Any]) -> None:
+    def resume_with_available_content(self, content: Iterable[Any]) -> None:
         """ Resume the waiting thread given content."""
         self._response_content = self.filter_content(content).copy()
         if self._response_content:
             with self._wait_condition:
                 self._wait_condition.notify()
 
-    def wait_and_return_content(self) -> List[Any]:
+    def wait_and_return_content(self) -> list[Any]:
         """ Wait for a content from another thread.
 
         If the content passes the validation, resume the current thread and return the content.
@@ -123,9 +123,9 @@ class WaitObject:
             self._wait_condition.wait(timeout=self._timeout_ms / 1000)
         return self._response_content
 
-    def filter_content(self, content: List[Any]) -> List[Any]:
+    def filter_content(self, content: Iterable[Any]) -> list[Any]:
         """ Return only the part of `content` passing the validation."""
         if self._is_valid is None:
-            return content
+            return list(content)
         else:
             return [item for item in content if self._is_valid(item)]

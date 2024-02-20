@@ -1,5 +1,3 @@
-from typing import List, Set, Dict
-
 import connexion  # type: ignore
 
 import fleet_management_api.api_impl as _api
@@ -65,17 +63,17 @@ def get_route(route_id: int) -> _models.Route:
         return _api.json_response(200, routes[0])
 
 
-def get_routes() -> List[_models.Route]:
+def get_routes() -> list[_models.Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(_db_models.RouteDBModel)
-    route: List[_models.Route] = [
+    route: list[_models.Route] = [
         _api.route_from_db_model(route_db_model) for route_db_model in route_db_models
     ]
     _api.log_info(f"Found {len(route)} routes.")
     return _api.json_response(200, route)
 
 
-def update_route(route: Dict | _models.Route) -> _api.Response:
+def update_route(route: dict | _models.Route) -> _api.Response:
     """Update an existing route identified by 'route_id'."""
     if not connexion.request.is_json:
         return _api.log_invalid_request_body_format()
@@ -119,7 +117,7 @@ def _create_empty_route_points_list(route_id: int) -> _api.Response:
 
 
 def _find_nonexistent_stops(route: _models.Route) -> _api.Response:
-    checked_id_set: Set[int] = set(route.stop_ids)
+    checked_id_set: set[int] = set(route.stop_ids)
     existing_ids = set([stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)])
     nonexistent_stop_ids = checked_id_set.difference(existing_ids)
     if nonexistent_stop_ids:

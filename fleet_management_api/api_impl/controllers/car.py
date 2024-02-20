@@ -1,5 +1,3 @@
-from typing import Dict
-
 import connexion  # type: ignore
 
 import fleet_management_api.api_impl as _api
@@ -80,7 +78,7 @@ def get_cars() -> _api.Response:  # noqa: E501
     return _api.json_response(200, [_api.car_from_db_model(c) for c in cars])
 
 
-def update_car(car: Dict | _models.Car) -> _api.Response:
+def update_car(car: dict | _models.Car) -> _api.Response:
     """Update an existing car.
 
     :param car: Updated car object.

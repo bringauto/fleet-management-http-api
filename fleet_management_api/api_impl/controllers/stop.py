@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 import connexion  # type: ignore
 
 import fleet_management_api.api_impl as _api
@@ -43,7 +41,7 @@ def delete_stop(stop_id: int) -> _api.Response:
 
 def get_stop(stop_id: int) -> _api.Response:
     """Get an existing stop identified by 'stop_id'."""
-    stop_db_models: List[_db_models.StopDBModel] = _db_access.get(
+    stop_db_models: list[_db_models.StopDBModel] = _db_access.get(
         _db_models.StopDBModel, criteria={"id": lambda x: x == stop_id}
     )
     stops = [_api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
@@ -57,14 +55,14 @@ def get_stop(stop_id: int) -> _api.Response:
 def get_stops() -> _api.Response:
     """Get all existing stops."""
     stop_db_models = _db_access.get(_db_models.StopDBModel)
-    stops: List[_Stop] = [
+    stops: list[_Stop] = [
         _api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
     _api.log_info(f"Found {len(stops)} stops.")
     return _api.json_response(200, stops)
 
 
-def update_stop(stop: Dict | _Stop) -> _api.Response:
+def update_stop(stop: dict | _Stop) -> _api.Response:
     """Update an existing stop."""
     if not connexion.request.is_json:
         return _api.log_invalid_request_body_format()
