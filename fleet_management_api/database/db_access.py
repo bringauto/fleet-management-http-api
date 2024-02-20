@@ -20,9 +20,6 @@ import fleet_management_api.database.wait as wait
 import fleet_management_api.api_impl as _api
 
 
-_ID_NAME = "id"
-
-
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
@@ -139,7 +136,7 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
             inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _api.text_response(200, f"{base.model_name} with {_ID_NAME}={id_} was deleted.")
+            return _api.text_response(200, f"{base.model_name} (ID={id_}) was deleted.")
         except _NoResultFound as e:
             return _api.text_response(404, f"{base.model_name} (ID={id_}) not found. {e}")
         except _sqaexc.IntegrityError as e:
