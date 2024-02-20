@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_hw(platform_hw):  # noqa: E501
-    """Create a new platform HW.
+    """Create a new Platform HW object.
 
      # noqa: E501
 
-    :param platform_hw: Platform hardware JSON.
+    :param platform_hw: Platform HW model in JSON format.
     :type platform_hw: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -24,11 +24,11 @@ def create_hw(platform_hw):  # noqa: E501
 
 
 def delete_hw(platform_hw_id):  # noqa: E501
-    """Delete a platform HW.
+    """Delete Platform HW with given ID.
 
      # noqa: E501
 
-    :param platform_hw_id: ID of platform HW to delete.
+    :param platform_hw_id: ID of Platform HW to delete.
     :type platform_hw_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -37,11 +37,11 @@ def delete_hw(platform_hw_id):  # noqa: E501
 
 
 def get_hw(platform_hw_id):  # noqa: E501
-    """Find platform HW by ID.
+    """Find Platform HW with given ID.
 
      # noqa: E501
 
-    :param platform_hw_id: ID of platform HW to return.
+    :param platform_hw_id: ID of the Platform HW to return.
     :type platform_hw_id: int
 
     :rtype: Union[PlatformHW, Tuple[PlatformHW, int], Tuple[PlatformHW, int, Dict[str, str]]
@@ -50,7 +50,7 @@ def get_hw(platform_hw_id):  # noqa: E501
 
 
 def get_hws():  # noqa: E501
-    """Finds all platform HW.
+    """Find and return all existing Platform HW.
 
      # noqa: E501
 

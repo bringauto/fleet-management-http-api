@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Create a new platform HW.
+      summary: Create a new Platform HW object.
       requestBody:
-        description: Platform hardware JSON.
+        description: Platform HW model in JSON format.
         x-body-name: platformHW
         content:
           application/json:
@@ -16,7 +16,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful platform hardware creation.
+          description: The Platform HW has been successfully created.
           content:
             text/plain:
               type: string
@@ -33,10 +33,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Finds all platform HW.
+      summary: Find and return all existing Platform HW.
       responses:
         '200':
-          description: Successfully found all platform hardware.
+          description: All the currently existing Platform HW have been returned.
           content:
             application/json:
               schema:
@@ -62,11 +62,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Find platform HW by ID.
+      summary: Find Platform HW with given ID.
       parameters:
         - name: platformHwId
           in: path
-          description: ID of platform HW to return.
+          description: ID of the Platform HW to return.
           required: true
           example: 1
           schema:
@@ -74,7 +74,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfully found platform HW.
+          description: The Platform HW with the specified ID has been found and returned.
           content:
             application/json:
               schema:
@@ -94,11 +94,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Delete a platform HW.
+      summary: Delete Platform HW with given ID.
       parameters:
         - name: platformHwId
           in: path
-          description: ID of platform HW to delete.
+          description: ID of Platform HW to delete.
           required: true
           example: 1
           schema:
@@ -106,7 +106,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successful platform HW removal.
+          description: The Platform HW with the specified ID has been deleted.
           content:
             text/plain:
               type: string
