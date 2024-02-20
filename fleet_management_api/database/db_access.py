@@ -29,6 +29,10 @@ class ParentNotFound(Exception):
     pass
 
 
+class DatabaseRecordValueError(Exception):
+    pass
+
+
 @dataclasses.dataclass(frozen=True)
 class _AttributeCondition:
     """ An instance of this class binds together the following:
@@ -45,7 +49,7 @@ class _AttributeCondition:
     def check(self, obj: _Base) -> None:
         value = getattr(obj, self.atribute_name)
         if not self.func(value):
-            raise ValueError(self.fail_message)
+            raise DatabaseRecordValueError(self.fail_message)
 
 
 class _CheckBeforeAdd:
@@ -119,27 +123,25 @@ def add(
         try:
             if checked is not None:
                 for check_obj in checked:
-                    try:
-                        check_obj.check(session)
-                    except _NoResultFound as e:
-                        return _Response(
-                            status_code=404,
-                            content_type="text/plain",
-                            body=f"{added[0].model_name} with ID={check_obj._id} does not exist in the database.",
-                        )
-                    except Exception as e:
-                        return _Response(
-                            status_code=400,
-                            content_type="text/plain",
-                            body=str(e),
-                        )
-
+                    check_obj.check(session)
             session.add_all(added)
             session.commit()
             inserted_objs = [obj.copy() for obj in added]
             _wait_mg.notify(added[0].__tablename__, inserted_objs)
             return _Response(
                 status_code=200, content_type="application/json", body=inserted_objs[0]
+            )
+        except _NoResultFound as e:
+            return _Response(
+                status_code=404,
+                content_type="text/plain",
+                body=f"{added[0].model_name} with ID={check_obj._id} does not exist in the database.",
+            )
+        except DatabaseRecordValueError as e:
+            return _Response(
+                status_code=400,
+                content_type="text/plain",
+                body=f"Nothing added to the database. {e}",
             )
         except _sqaexc.IntegrityError as e:
             return _Response(
