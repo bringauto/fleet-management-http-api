@@ -1,21 +1,17 @@
-from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
-
 import fleet_management_api.database.connection as _connection
+from fleet_management_api.api_impl import (
+    Response as _Response,
+    text_response as _text_response
+)
 
 
 def check_api_is_alive() -> _Response:
     try:
         if not _connection.is_connected_to_database():
-            return _Response(
-                status_code=503, content_type="text/plain", body="Server database is not available."
-            )
+            return _text_response(503, "Server database is not available.")
+        else:
+            return _text_response(200, "API is alive.")
     except RuntimeError as e:
-        return _Response(
-            status_code=503,
-            content_type="text/plain",
-            body=f"Server database is not available. {e}",
-        )
+        return _text_response(503, f"Server database is not available. {e}")
     except Exception as e:
-        return _Response(status_code=500, content_type="text/plain", body=e)
-
-    return _Response(status_code=200, content_type="text/plain", body="API is alive")
+        return _text_response(500, f"Server database is not available. {e}")
