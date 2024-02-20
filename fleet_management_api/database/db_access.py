@@ -60,6 +60,7 @@ class _CheckBeforeAdd:
 
     The check method either does nothing or raises exception when some of the conditions is not met.
     """
+
     def __init__(
         self,
         object_base: Type[_Base],
@@ -131,7 +132,7 @@ def add(
 def delete(base: Type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = check_and_return_current_connection_source()
-    with _Session(source) as session, session.begin():
+    with _Session(source) as session:
         try:
             inst = session.get_one(base, id_)
             session.delete(inst)
@@ -140,7 +141,9 @@ def delete(base: Type[_Base], id_: Any) -> _Response:
         except _NoResultFound as e:
             return _api.text_response(404, f"{base.model_name} (ID={id_}) not found. {e}")
         except _sqaexc.IntegrityError as e:
-            return _api.text_response(400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}")
+            return _api.text_response(
+                400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}"
+            )
         except Exception as e:
             return _api.text_response(500, f"Error: {e}")
 
@@ -159,7 +162,9 @@ def delete_n(
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _api.text_response(500, f"Column {column_name} not found in table {base.__tablename__}.")
+        return _api.text_response(
+            500, f"Column {column_name} not found in table {base.__tablename__}."
+        )
     if criteria is None:
         criteria = {}
     table = base.__table__
@@ -289,7 +294,7 @@ def update(updated: _Base) -> _Response:
         except _sqaexc.IntegrityError as e:
             return _api.text_response(400, str(e.orig))
         except _sqaexc.NoResultFound as e:
-            msg = (f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update.")
+            msg = f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update."
             return _api.text_response(404, msg)
         except Exception as e:
             return _api.text_response(500, str(e))
