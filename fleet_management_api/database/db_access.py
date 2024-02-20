@@ -386,7 +386,7 @@ def _is_awaited_result_valid(
     return True
 
 
-def _set_id_to_none(sent_objs: Tuple[_Base, ...]) -> None:
-    """"""
-    for obj in sent_objs:
+def _set_id_to_none(db_model_instances: Tuple[_Base, ...]) -> None:
+    """Set "id" attribute of all the db_model_instances to None."""
+    for obj in db_model_instances:
         obj.id = None  # type: ignore
