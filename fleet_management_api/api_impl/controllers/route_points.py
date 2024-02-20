@@ -57,7 +57,7 @@ def redefine_route_points() -> _Response:
                 return _Response(
                     content_type="application/json",
                     status_code=200,
-                    body=_api.route_points_from_db_model(response.body),
+                    body=_api.route_points_from_db_model(response.body[0]),
                 )
             else:
                 return _api.log_and_respond(response.status_code, response.body)

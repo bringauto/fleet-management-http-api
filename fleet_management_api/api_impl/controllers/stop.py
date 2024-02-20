@@ -18,9 +18,9 @@ def create_stop() -> _Response:
         stop_db_model = _api.stop_to_db_model(stop)
         response = _db_access.add(stop_db_model)
         if response.status_code == 200:
-            _api.log_info(f"Stop (ID={response.body}, name='{stop.name}) has been created.")
+            _api.log_info(f"Stop (ID={response.body[0].id}, name='{stop.name}) has been created.")
             return _Response(
-                body=_api.stop_from_db_model(response.body),
+                body=_api.stop_from_db_model(response.body[0]),
                 status_code=200,
                 content_type="application/json",
             )

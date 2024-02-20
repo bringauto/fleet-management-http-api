@@ -31,7 +31,7 @@ def create_car() -> _Response:  # noqa: E501
             ],
         )
         if response.status_code == 200:
-            inserted_model = _api.car_from_db_model(response.body)
+            inserted_model = _api.car_from_db_model(response.body[0])
             _api.log_info(f"Car (ID={inserted_model.id}, name='{car.name}) has been created.")
             return _Response(body=inserted_model, status_code=200, content_type="application/json")
         else:

@@ -129,7 +129,7 @@ def add(
             inserted_objs = [obj.copy() for obj in added]
             _wait_mg.notify(added[0].__tablename__, inserted_objs)
             return _Response(
-                status_code=200, content_type="application/json", body=inserted_objs[0]
+                status_code=200, content_type="application/json", body=inserted_objs
             )
         except _NoResultFound as e:
             return _Response(
