@@ -33,7 +33,9 @@ class Database(pydantic.BaseModel):
     def maximum_row_number_at_least_one(cls, val_dict: Dict[str, int]) -> Dict[str, int]:
         for key, value in val_dict.items():
             if value < 1:
-                raise ValueError(f"The maximum number of rows in a table '{key}' must be at least one.")
+                raise ValueError(
+                    f"The maximum number of rows in a table '{key}' must be at least one."
+                )
         return val_dict
 
 
@@ -43,7 +45,7 @@ class Security(pydantic.BaseModel):
     client_secret_key: str
     scope: str
     realm: str
-    keycloak_public_key_file: Literal[""] | pydantic.FilePath = pydantic.Field(default="", validate_default=False)
+    keycloak_public_key_file: pydantic.FilePath | Literal[""]
     callback: pydantic.AnyUrl = pydantic.Field(Optional)
 
 
