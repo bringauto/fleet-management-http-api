@@ -64,8 +64,6 @@ def appended_uri(uri: str, *appended: str) -> str:
     """
     if uri.endswith("//"):
         raise ValueError("Invalid URI: " + uri)
-    if appended and not uri.endswith("/"):
-        uri += "/"
     for part in appended:
         uri = _url.urljoin(base=uri + "/", url=part.strip("/"))
     return uri
