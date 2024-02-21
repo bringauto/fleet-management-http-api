@@ -27,11 +27,11 @@ def create_order_state(order_state) -> _Response:
         return _api.log_and_respond(response.status_code, f"Order state (id={order_state.id}) could not be sent. {response.body}")
 
 
-def get_all_order_states(wait: bool = False, since: Optional[int] = None) -> _Response:
+def get_all_order_states(wait: bool = False, since: int = 0) -> _Response:
     return _get_order_states({}, wait, since)
 
 
-def get_order_states(order_id: int, wait: bool = False, since: Optional[int] = None) -> _Response:
+def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _Response:
     if not _order_exists(order_id):
         return _api.log_and_respond(404, f"Order with id='{order_id}' was not found. Cannot get its state.")
     else:
@@ -39,17 +39,10 @@ def get_order_states(order_id: int, wait: bool = False, since: Optional[int] = N
         return _get_order_states(criteria, wait, since)
 
 
-def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool = False, since: Optional[int] = None) -> _Response:
-    if since is None:
-        if wait:
-            order_state_db_models = _db_access.wait_for_new(_db_models.OrderStateDBModel, criteria=criteria)
-        else:
-            order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, criteria=criteria)
-            if order_state_db_models:
-                order_state_db_models = [max(order_state_db_models, key=lambda x: x.timestamp)]
-    else:
-        criteria['timestamp'] = lambda x: x>=since
-        order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, wait=wait, criteria=criteria)
+def _get_order_states(criteria: Dict[str, Callable[[Any],bool]], wait: bool = False, since: int = 0) -> _Response:
+    criteria['timestamp'] = lambda x: x>=since
+    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, wait=wait, criteria=criteria)
+
     order_states = [_api.order_state_from_db_model(order_state_db_model) for order_state_db_model in order_state_db_models]
     return _Response(body=order_states, status_code=200, content_type="application/json")
 

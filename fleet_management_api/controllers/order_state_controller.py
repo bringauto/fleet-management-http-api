@@ -24,7 +24,7 @@ def create_order_state(order_state):  # noqa: E501
 
 
 def get_all_order_states(wait=None, since=None):  # noqa: E501
-    """Finds all order states
+    """Find one or multiple order states according to the request parameters
 
      # noqa: E501
 
@@ -39,7 +39,7 @@ def get_all_order_states(wait=None, since=None):  # noqa: E501
 
 
 def get_order_states(order_id, wait=None, since=None):  # noqa: E501
-    """Finds order state by ID
+    """Find one or multiple order states for given Order, according to the request parameters
 
      # noqa: E501
 

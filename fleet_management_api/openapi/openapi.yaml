@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 1.0.2
+  version: 1.0.3
 servers:
 - url: /v2/management
 security:
@@ -1078,7 +1078,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/OrderState'
                 type: array
-          description: Successfuly found all order states
+          description: Successfully found all order states
         "401":
           content:
             application/json:
@@ -1112,7 +1112,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds all order states
+      summary: Find one or multiple order states according to the request parameters
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -1132,7 +1132,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderState'
-          description: Succesfully added new order state
+          description: Successfully added new order state
         "400":
           content:
             application/json:
@@ -1272,7 +1272,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Finds order state by ID
+      summary: "Find one or multiple order states for given Order, according to the\
+        \ request parameters"
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state

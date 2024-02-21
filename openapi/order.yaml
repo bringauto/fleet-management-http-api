@@ -178,7 +178,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Succesfully added new order state
+          description: Successfully added new order state
           content:
             application/json:
               schema:
@@ -198,13 +198,13 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds all order states
+      summary: Find one or multiple order states according to the request parameters
       parameters:
         - $ref: '#/components/parameters/Wait'
         - $ref: '#/components/parameters/Since'
       responses:
         '200':
-          description: Successfuly found all order states
+          description: Successfully found all order states
           content:
             application/json:
               schema:
@@ -232,7 +232,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds order state by ID
+      summary: Find one or multiple order states for given Order, according to the request parameters
       parameters:
         - name: orderId
           in: path

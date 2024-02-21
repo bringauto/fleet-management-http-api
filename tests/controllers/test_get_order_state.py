@@ -183,7 +183,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             self.assertEqual(len(response.json), 0)
 
     @patch('fleet_management_api.database.timestamp.timestamp_ms')
-    def test_unspecified_since_parameter_yields_the_list_containing_the_newest_order_state_or_empty_list(self, mock_timestamp_ms: Mock):
+    def test_unspecified_since_parameter_yields_the_list_containing_the_all_order_states(self, mock_timestamp_ms: Mock):
         order_state_1 = OrderState(id=1, order_id=12, status="accepted")
         order_state_2 = OrderState(id=2, order_id=12, status="in_progress")
         with self.app.test_client() as c:
@@ -196,20 +196,26 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             c.post('/v2/management/orderstate', json=order_state_2)
 
             states: List[Dict] = c.get('/v2/management/orderstate/12').json
-            self.assertEqual(len(states), 1)
-            self.assertEqual(states[0]["id"], 2)
+            self.assertEqual(len(states), 2)
+            self.assertEqual(states[0]["id"], 1)
+            self.assertEqual(states[1]["id"], 2)
 
-    def test_waiting_with_since_parameter_unspecified_makes_the_api_wait_for_some_new_state_to_come(self):
+    @patch('fleet_management_api.database.timestamp.timestamp_ms')
+    def test_waiting_with_since_parameter_set_to_newest_unspecified_makes_the_api_wait_for_some_new_state_to_come(self, mock_timestamp: Mock):
         old_state = OrderState(id=123, order_id=12, status="accepted")
         new_state = OrderState(id=456, order_id=12, status="accepted")
         with self.app.test_client() as c:
+            mock_timestamp.return_value = 1000
             c.post('/v2/management/orderstate', json=old_state)
             with ThreadPoolExecutor(max_workers=5) as executor:
-                future = executor.submit(c.get, '/v2/management/orderstate/12?wait=true')
+                since = 1001
+                mock_timestamp.return_value = 1005
+                future = executor.submit(c.get, f'/v2/management/orderstate/12?wait=true&since={since}')
                 time.sleep(0.01)
                 executor.submit(c.post, '/v2/management/orderstate', json=new_state)
                 response = future.result()
                 states = response.json
+                print(states)
                 self.assertEqual(len(states), 1)
                 self.assertEqual(states[0]["id"], 456)
 
