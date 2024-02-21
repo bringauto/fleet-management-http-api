@@ -101,17 +101,27 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         self,
     ):
         with self.app.app.test_client() as c:
-            response = c.get("/v2/management/orderstate")
+            response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
-    def test_getting_all_order_states(self):
+    def test_getting_all_existing_states_for_given_order_by_specifying_since_as_zero(self):
         order_state_1 = OrderState(status="to_accept", order_id=1)
         order_state_2 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
             c.post("/v2/management/orderstate", json=order_state_1)
             c.post("/v2/management/orderstate", json=order_state_2)
-            response = c.get("/v2/management/orderstate?since=0")
+            response = c.get("/v2/management/orderstate/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+
+    def test_getting_all_existing_states_for_given_order_without_specifying_since(self):
+        order_state_1 = OrderState(status="to_accept", order_id=1)
+        order_state_2 = OrderState(status="canceled", order_id=1)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/orderstate", json=order_state_1)
+            c.post("/v2/management/orderstate", json=order_state_2)
+            response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 
