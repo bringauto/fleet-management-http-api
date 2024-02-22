@@ -12,7 +12,7 @@ def get_route_visualization(route_id: int) -> _api.Response:
         _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
-        return _api.text_response(404, f"Route visualization for EXISTING route with ID={route_id} not found.")
+        return _api.text_response(404, f"Route visualization for route with ID={route_id} was not found.")
     else:
         rp = _api.route_visualization_from_db_model(rp_db_models[0])
         _api.log_info(
