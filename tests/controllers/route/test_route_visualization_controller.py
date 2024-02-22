@@ -25,7 +25,7 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
 
     def test_post_route_visualization_to_existing_route(self):
         points = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
-        route_visualization = RouteVisualization(route_id=1, points=points)
+        route_visualization = RouteVisualization(route_id=1, points=points, hexcolor="#FF0000")
         with self.app.test_client() as c:
             c.post("/v2/management/route", json=self.route)
         with self.app.test_client() as c:
@@ -37,6 +37,16 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
             self.assertEqual(response.json["routeId"], 1)
             self.assertEqual(len(response.json["points"]), 2)
 
+    def test_route_visualization_accepts_only_hexadecimal_color_code(self):
+        invalid_colors = ["#FF000", "#", "   ", "red"]
+        with self.app.test_client() as c:
+            c.post("/v2/management/route", json=self.route)
+        for color in invalid_colors:
+            with self.subTest(color=color):
+                visualization_json = {"points": [], "routeId": 1, "hexcolor": color}
+                response = c.post("/v2/management/route-visualization", json=visualization_json)
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("hexcolor", response.json["detail"])
 
 class Updating_Route_Visualization(unittest.TestCase):
     def setUp(self) -> None:
