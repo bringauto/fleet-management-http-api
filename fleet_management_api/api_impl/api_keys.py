@@ -44,6 +44,7 @@ def verify_key_and_return_key_info(
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
+
     _key_db_models = _db_access.get(
         _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, connection_source=connection_source
     )

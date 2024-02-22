@@ -192,17 +192,21 @@ def _new_connection(url: str) -> _Engine:
             f"Could not create new connection source (url='{url}'). {e}"
         )
 
+    _test_new_connection(engine)
+    return engine
+
+
+def _test_new_connection(engine: _Engine) -> None:
     try:
         with engine.connect():
             pass
     except Exception as e:
         raise CannotConnectToDatabase(
             "Could not connect to the database with the given connection parameters: \n"
-            f"{url}\n\n"
+            f"{engine.url}\n\n"
             "Check the location, port number, username and password.\n"
             f"{e}"
         )
-    return engine
 
 
 class CannotConnectToDatabase(Exception):

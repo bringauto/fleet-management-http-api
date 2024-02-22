@@ -16,6 +16,8 @@ security:
 - APIKeyAuth: []
 - oAuth2AuthCode: []
 tags:
+- description: API health check
+  name: api
 - description: Car related functions
   name: car
 - description: Car state-related functions
@@ -33,6 +35,40 @@ tags:
 - description: Authentication-related functions
   name: security
 paths:
+  /apialive:
+    head:
+      operationId: check_api_is_alive
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The HTTP server has been reached successfully.
+        "503":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "503"
+                    message: Service unavailable
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Service unavailable
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Check HTTP server is running and accessible.
+      tags:
+      - api
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.api_check
   /car:
     get:
       operationId: get_cars
@@ -2454,6 +2490,28 @@ components:
         format: int32
         type: integer
   responses:
+    ServiceUnavailable:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "503"
+                message: Service unavailable
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Service unavailable
+    UnexpectedError:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "500"
+                message: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unexpected error
     Unauthorized:
       content:
         application/json:
@@ -2476,17 +2534,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Forbidden
-    UnexpectedError:
-      content:
-        application/json:
-          examples:
-            error:
-              value:
-                code: "500"
-                message: Unexpected error
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Unexpected error
     BadRequest:
       content:
         application/json:
@@ -2532,6 +2579,22 @@ components:
             $ref: '#/components/schemas/Error'
       description: Request timeout
   schemas:
+    Error:
+      description: Error object structure.
+      properties:
+        code:
+          example: 404
+          title: code
+          type: integer
+        message:
+          example: Not found
+          title: message
+          type: string
+      required:
+      - code
+      - message
+      title: Error
+      type: object
     Car:
       description: Car model structure.
       example:
@@ -2574,22 +2637,6 @@ components:
       - name
       - platformHwId
       title: Car
-      type: object
-    Error:
-      description: Error object structure.
-      properties:
-        code:
-          example: 404
-          title: code
-          type: integer
-        message:
-          example: Not found
-          title: message
-          type: string
-      required:
-      - code
-      - message
-      title: Error
       type: object
     CarState:
       description: Car State object structure

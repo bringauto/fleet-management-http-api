@@ -66,6 +66,17 @@ components:
               value:
                 code: '408'
                 message: 'Request timeout'
+    ServiceUnavailable:
+      description: Service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            error:
+              value:
+                code: '503'
+                message: 'Service unavailable'
     UnexpectedError:
       description: Unexpected error
       content:

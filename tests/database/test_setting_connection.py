@@ -15,20 +15,12 @@ from tests.database.models import initialize_test_tables as _initialize_test_tab
 
 class Test_Creating_Database_URL(unittest.TestCase):
     def test_production_database_url_with_specified_port_username_and_password(self):
-        url = _connection.db_url(
-            "test_user", "test_password", "localhost", 5432, "test_db"
-        )
-        self.assertEqual(
-            url, "postgresql+psycopg://test_user:test_password@localhost:5432/test_db"
-        )
+        url = _connection.db_url("test_user", "test_password", "localhost", 5432, "test_db")
+        self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost:5432/test_db")
 
     def test_production_database_url_with_specified_username_and_password(self):
-        url = _connection.db_url(
-            "test_user", "test_password", "localhost", db_name="test_db"
-        )
-        self.assertEqual(
-            url, "postgresql+psycopg://test_user:test_password@localhost/test_db"
-        )
+        url = _connection.db_url("test_user", "test_password", "localhost", db_name="test_db")
+        self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost/test_db")
 
     def test_production_database_url_without_username_and_password(self):
         url = _connection.db_url(location="localhost", db_name="test_db")
@@ -142,6 +134,8 @@ class Test_Setting_Up_Database(unittest.TestCase):
 
     def tearDown(self) -> None:  # pragma: no cover
         _connection.replace_connection_source(self._orig_connection_source)
+        if os.path.isfile("test_db_file.db"):
+            os.remove("test_db_file.db")
 
 
 class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):
@@ -166,6 +160,20 @@ class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
+
+
+class Test_Failed_Connection(unittest.TestCase):
+    @patch("fleet_management_api.database.db_models.Base.metadata.create_all")
+    @patch("fleet_management_api.database.connection._test_new_connection")
+    def test_invalid_connection_source(self, mock_test_new_connection: Mock, create_all: Mock):
+        _connection.set_connection_source(
+            db_location="localhost",
+            port=1111,
+            username="invalid_name",
+            password="invalid_password",
+            db_name="test_db",
+        )
+        self.assertFalse(_connection.is_connected_to_database())
 
 
 if __name__ == "__main__":
