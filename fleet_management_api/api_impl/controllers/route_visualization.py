@@ -16,7 +16,7 @@ def get_route_visualization(route_id: int) -> _api.Response:
     else:
         rp = _api.route_visualization_from_db_model(rp_db_models[0])
         _api.log_info(
-            f"Found route visualization for route with ID={route_id} containing {len(rp.points)} points."
+            f"Found route visualization for route with ID={route_id}."
         )
         return _api.json_response(200, rp)
 
@@ -48,7 +48,7 @@ def redefine_route_visualization() -> _api.Response:
                 ],
             )
             if response.status_code == 200:
-                _api.log_info(f"Route visualization for route with ID={rp.route_id} have been redefined.")
+                _api.log_info(f"Route visualization for route with ID={rp.route_id} has been redefined.")
                 return _api.json_response(200, _api.route_visualization_from_db_model(response.body[0]))
             else:
                 return _api.log_and_respond(response.status_code, response.body)
