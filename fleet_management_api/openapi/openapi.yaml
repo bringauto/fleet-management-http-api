@@ -2855,6 +2855,7 @@ components:
       description: Route Visualization object structure.
       example:
         routeId: 1
+        hexcolor: '#FF0000'
         id: 1
         points:
         - latitude: 49.204117
@@ -2874,6 +2875,13 @@ components:
           format: int32
           title: id
           type: integer
+        hexcolor:
+          default: '#FF0000'
+          description: Color in hexadecimal format.
+          example: '#FF0000'
+          pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          title: hexcolor
+          type: string
         points:
           default: []
           example:
@@ -2892,6 +2900,13 @@ components:
       - routeId
       title: RouteVisualization
       type: object
+    Color:
+      default: '#FF0000'
+      description: Color in hexadecimal format.
+      example: '#FF0000'
+      pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+      title: hexcolor
+      type: string
     Stop:
       description: Stop object structure.
       example:

@@ -139,7 +139,10 @@ def route_visualization_to_db_model(
     route_visualization: _models.RouteVisualization,
 ) -> _db_models.RouteVisualizationDBModel:
     return _db_models.RouteVisualizationDBModel(
-        id=route_visualization.id, route_id=route_visualization.route_id, points=route_visualization.points
+        id=route_visualization.id,
+        route_id=route_visualization.route_id,
+        points=route_visualization.points,
+        hexcolor=route_visualization.hexcolor,
     )
 
 
@@ -150,6 +153,7 @@ def route_visualization_from_db_model(
         id=route_visualization_db_model.id,
         route_id=route_visualization_db_model.route_id,
         points=route_visualization_db_model.points,
+        hexcolor=route_visualization_db_model.hexcolor,
     )
 
 

@@ -178,6 +178,7 @@ class RouteVisualizationDBModel(Base):
     model_name = "RouteVisualization"
     __tablename__ = "route_visualization"
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
+    hexcolor: _Mapped[str] = _mapped_column(_sqa.String, nullable=True)
     route: _Mapped[RouteDBModel] = _relationship(
         "RouteDBModel", back_populates="route_visualization", lazy="noload"
     )

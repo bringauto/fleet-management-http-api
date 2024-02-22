@@ -279,11 +279,13 @@ class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
                 GNSSPosition(latitude=49.8645611, longitude=1.337644, altitude=10),
             ],
+            hexcolor="#ABCDEF",
         )
         route_visualization_db_model = _obj_to_db.route_visualization_to_db_model(route_visualization)
         self.assertEqual(route_visualization_db_model.route_id, route_visualization.route_id)
         self.assertEqual(route_visualization_db_model.points[0], route_visualization.points[0])
         self.assertEqual(route_visualization_db_model.points[1], route_visualization.points[1])
+        self.assertEqual(route_visualization_db_model.hexcolor, route_visualization.hexcolor)
 
     def test_route_visualization_converted_to_db_model_and_back_preserves_its_attributes(self):
         route_visualization_in = RouteVisualization(
@@ -292,6 +294,7 @@ class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             ],
+            hexcolor="#ABCDEF",
         )
         route_visualization_out = _obj_to_db.route_visualization_from_db_model(
             _obj_to_db.route_visualization_to_db_model(route_visualization_in)

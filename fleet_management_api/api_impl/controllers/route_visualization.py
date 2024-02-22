@@ -28,10 +28,10 @@ def redefine_route_visualization() -> _api.Response:
     else:
         rp = _RouteVisualization.from_dict(_connexion.request.get_json())
         rp_db_model = _api.route_visualization_to_db_model(rp)
-        existing_route_visualization = _db_access.get(
+        existing_visualization = _db_access.get(
             _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == rp.route_id}
         )
-        if len(existing_route_visualization) == 0:
+        if len(existing_visualization) == 0:
             response = _db_access.add(
                 rp_db_model,
                 checked=[
@@ -40,7 +40,7 @@ def redefine_route_visualization() -> _api.Response:
             )
             return _api.log_and_respond(response.status_code, response.body)
         else:
-            _db_access.delete(_db_models.RouteVisualizationDBModel, existing_route_visualization[0].id)
+            _db_access.delete(_db_models.RouteVisualizationDBModel, existing_visualization[0].id)
             response = _db_access.add(
                 rp_db_model,
                 checked=[

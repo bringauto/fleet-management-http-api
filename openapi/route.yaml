@@ -243,6 +243,8 @@ components:
           $ref: 'common_models.yaml#/components/schemas/Id'
         routeId:
           $ref: 'common_models.yaml#/components/schemas/Id'
+        hexcolor:
+          $ref: '#/components/schemas/Color'
         points:
           type: array
           default: []
@@ -261,3 +263,9 @@ components:
                 "altitude": 400.78
               }
             ]
+    Color:
+      type: string
+      description: Color in hexadecimal format.
+      pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+      example: '#FF0000'
+      default: '#FF0000'
