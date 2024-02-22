@@ -10,7 +10,7 @@ import fleet_management_api.script_args.configs as _configs
 import fleet_management_api.api_impl as _api
 
 
-_db_connection: None | _Engine = None
+_db_connection: Optional[_Engine] = None
 
 
 def current_connection_source() -> _Engine | None:
@@ -22,11 +22,14 @@ def current_connection_source() -> _Engine | None:
 def check_and_return_current_connection_source(
     conn_source: Optional[_Engine] = None,
 ) -> _sqa.engine.base.Engine:
-    """Check whether currently set module variable storing connection source (sqlalchemy Engine object) is not None.
+    """Return the passed `conn_source` if it is not None.
 
-    If it is None, raise RuntimeError. Otherwise return its value.
+    If it is None, do the following:
+    - Return the currently used global connection source (sqlalchemy Engine object) stored in the module
+    variable, if it is not None.
+    - Raise RuntimeError.
     """
-    source: _Engine | None = None
+    source: Optional[_Engine] = None
     if conn_source is not None:
         source = conn_source
     else:
@@ -65,6 +68,18 @@ def db_url_test(db_file_location: str = "") -> str:
         return f"sqlite:///{db_file_location}"
 
 
+def is_connected_to_database() -> bool:
+    """Return True if the module variable storing the connection source (sqlalchemy Engine object) is not None."""
+    if _db_connection is None:
+        return False
+    try:
+        with _db_connection.connect() as conn:
+            conn.scalar(_sqa.select(1))
+            return True
+    except Exception:
+        return False
+
+
 def set_connection_source(
     db_location: str,
     port: Optional[int] = None,
@@ -89,7 +104,7 @@ def get_connection_source(
     return _get_connection(url)
 
 
-def replace_connection_source(source: _Engine | None) -> None:
+def replace_connection_source(source: Optional[_Engine]) -> None:
     """Replace the module variable storing the connection source (sqlalchemy Engine object)."""
     global _db_connection
     _db_connection = source

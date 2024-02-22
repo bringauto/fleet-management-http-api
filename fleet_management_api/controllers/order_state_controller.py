@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_order_state(order_state):  # noqa: E501
-    """Create a new order state.
+    """Add a new Order State.
 
      # noqa: E501
 
-    :param order_state: New order state JSON.
+    :param order_state: Order State model in JSON format.
     :type order_state: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -24,7 +24,7 @@ def create_order_state(order_state):  # noqa: E501
 
 
 def get_all_order_states(wait=None, since=None):  # noqa: E501
-    """Finds all order states
+    """Find one or all Order States for all existing Orders.
 
      # noqa: E501
 
@@ -39,11 +39,11 @@ def get_all_order_states(wait=None, since=None):  # noqa: E501
 
 
 def get_order_states(order_id, wait=None, since=None):  # noqa: E501
-    """Finds order state by ID
+    """Find all Order States for a particular Order specified by its ID.
 
      # noqa: E501
 
-    :param order_id: ID of order for which states shall be returned.
+    :param order_id: ID of the Order for which to find the Order States.
     :type order_id: int
     :param wait: Applies to GET methods when no order statuses would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next order state to be created and then return it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool

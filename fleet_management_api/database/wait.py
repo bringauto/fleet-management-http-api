@@ -1,66 +1,77 @@
 from __future__ import annotations
-from typing import Dict, List, Any, Iterable, Optional, Callable
+from typing import Any, Iterable, Optional, Callable
 import threading as _threading
 
 
 class WaitObjManager:
+    """ Instance of this class keeps track of WaitObjects and notifies them.
 
-    _default_timeout_ms: int = 5000
+    It also keeps a default timeout value for WaitObjects.
+    """
+    _class_default_timeout_ms: int = 5000
 
-    def __init__(self, timeout_ms: int = _default_timeout_ms) -> None:
+    def __init__(self, timeout_ms: int = _class_default_timeout_ms) -> None:
+        """ Initialize the WaitObjManager with a default timeout in milliseconds.
+
+        If `timeout_ms` is set to 0, the wait will return immediatelly empty content.
+        If `timeout_ms` is set to None, the default timeout defined by the class will be used.
+        """
         WaitObjManager._check_nonnegative_timeout(timeout_ms)
         self._timeout_ms = timeout_ms
-        self._wait_dict: Dict[str, List[WaitObj]] = dict()
+        self._wait_dict: dict[str, list[WaitObject]] = dict()
 
     @property
     def timeout_ms(self) -> int:
         return self._timeout_ms
 
-    def new_wait_obj(
+    def notify_about_content(self, key: Any, content: Iterable[Any]) -> None:
+        """Send content to all waiting threads referenced by WaitObjects, which are stored under given key."""
+        if key in self._wait_dict:
+            for wait_obj in self._wait_dict[key]:
+                wait_obj.resume_with_available_content(list(content))
+        else:
+            # No WaitObjects exists (no threads are paused) under the given key, do nothing.
+            pass
+
+    def set_default_timeout(self, timeout_ms: int) -> None:
+        """Set the default timeout for new WaitObjects in milliseconds."""
+        self._check_nonnegative_timeout(timeout_ms)
+        self._timeout_ms = timeout_ms
+
+    def wait_for_content(
         self,
         key: Any,
         timeout_ms: Optional[int] = None,
         validation: Optional[Callable[[Any], bool]] = None,
-    ) -> WaitObj:
-        """Create a new wait object and adds it to the wait queue for given key."""
+    ) -> list[Any]:
+        """ Wait for notification about available content sent from another thread with the same `key`.
+
+        If `timeout_ms` is set to 0, the wait will return immediatelly empty content.
+        If `validation` is set, the wait will only accept the content that passes the validation.
+        """
+        wait_obj = self._new_wait_obj(key, timeout_ms, validation)
+        reponse = wait_obj.wait_and_return_content()
+        self._remove_wait_obj(key, wait_obj)
+        return reponse
+
+    def _new_wait_obj(
+        self,
+        key: Any,
+        timeout_ms: Optional[int] = None,
+        validation: Optional[Callable[[Any], bool]] = None,
+    ) -> WaitObject:
+        """ Create new WaitObject and add it to list under the given key."""
 
         if timeout_ms is None or timeout_ms < 0:
             timeout_ms = self._timeout_ms
         if not key in self._wait_dict:
             self._wait_dict[key] = list()
-        wait_obj = WaitObj(key, timeout_ms, validation)
+        wait_obj = WaitObject(timeout_ms, validation)
         self._wait_dict[key].append(wait_obj)
         return wait_obj
 
-    def notify(self, key: Any, response_content: Iterable[Any]) -> None:
-        """Make the next wait object in the queue to respond with specified 'reponse_content' and remove it from the queue."""
-        response_content = list(response_content)
-        if key in self._wait_dict:
-            for wait_obj in self._wait_dict[key]:
-                wait_obj.stop_waiting_if_content_ok(response_content)
-
-    def set_timeout(self, timeout_ms: int) -> None:
-        """Set the timeout for wait objects in milliseconds."""
-        self._check_nonnegative_timeout(timeout_ms)
-        self._timeout_ms = timeout_ms
-
-    def wait_and_get_response(
-        self,
-        key: Any,
-        timeout_ms: Optional[int] = None,
-        validation: Optional[Callable[[Any], bool]] = None,
-    ) -> List[Any]:
-        """Wait for the next wait object in queue to respond and returns the response content.
-        The queue is identified by given key.
-        """
-        wait_obj = self.new_wait_obj(key, timeout_ms, validation)
-        reponse = wait_obj.wait_and_get_response()
-        self._remove_wait_obj(wait_obj)
-        return reponse
-
-    def _remove_wait_obj(self, wait_obj: WaitObj) -> None:
-        """Remove the wait obejct from the wait queue."""
-        key = wait_obj.key
+    def _remove_wait_obj(self, key: Any, wait_obj: WaitObject) -> None:
+        """ Remove the WaitObject from the list of WaitObjects."""
         if not key in self._wait_dict or not wait_obj in self._wait_dict[key]:
             raise WaitObjManager.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
         else:
@@ -77,42 +88,44 @@ class WaitObjManager:
         pass
 
 
-class WaitObj:
+class WaitObject:
+    """ This class keeps track of a paused thread waiting for a data to become available,
+
+    and resumes the thread when the data is available.
+    """
     def __init__(
         self,
-        key: Any,
         timeout_ms: int,
         validation: Optional[Callable[[Any], bool]] = None,
     ) -> None:
-        self._key = key
-        self._response_content: List[Any] = list()
-        self._condition = _threading.Condition()
+        """
+        - If `validation` is set, the WaitObject will only accept the data that passes the validation.
+        - If `timeout_ms` is set to 0, the WaitObject will respond immediatelly.
+        """
+        self._response_content: list[Any] = list()
+        self._wait_condition = _threading.Condition()
         self._is_valid = validation
         self._timeout_ms = max(timeout_ms, 0)
 
-    @property
-    def key(self) -> str:
-        return self._key
+    def resume_with_available_content(self, content: Iterable[Any]) -> None:
+        """ Resume the waiting thread given content."""
+        self._response_content = self.filter_content(content).copy()
+        if self._response_content:
+            with self._wait_condition:
+                self._wait_condition.notify()
 
-    @property
-    def timeout_ms(self) -> int:
-        return self._timeout_ms
+    def wait_and_return_content(self) -> list[Any]:
+        """ Wait for a content from another thread.
 
-    def stop_waiting_if_content_ok(self, content: List[Any]):
-        filtered_content = self.filter_content(content)
-        if filtered_content:
-            self._response_content = content.copy()
-            with self._condition:
-                self._condition.notify()
-
-    def wait_and_get_response(self) -> List[Any]:
-        """Wait for the response object to be set and then return it."""
-        with self._condition:
-            self._condition.wait(timeout=self._timeout_ms / 1000)
+        If the content passes the validation, resume the current thread and return the content.
+        """
+        with self._wait_condition:
+            self._wait_condition.wait(timeout=self._timeout_ms / 1000)
         return self._response_content
 
-    def filter_content(self, content: List[Any]) -> List[Any]:
+    def filter_content(self, content: Iterable[Any]) -> list[Any]:
+        """ Return only the part of `content` passing the validation."""
         if self._is_valid is None:
-            return content
+            return list(content)
         else:
             return [item for item in content if self._is_valid(item)]

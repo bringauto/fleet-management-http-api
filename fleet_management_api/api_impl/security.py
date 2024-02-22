@@ -1,3 +1,5 @@
+from typing import Optional
+
 import urllib.parse as _url
 
 from keycloak import KeycloakOpenID  # type: ignore
@@ -35,7 +37,7 @@ class SecurityObj:
         return auth_url
 
     def token_get(
-        self, state: str | None, session_state: str | None, iss: str | None, code: str | None
+        self, state: Optional[str], session_state: Optional[str], iss: Optional[str], code: Optional[str]
     ) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
         if state != self._state:
@@ -64,8 +66,6 @@ def appended_uri(uri: str, *appended: str) -> str:
     """
     if uri.endswith("//"):
         raise ValueError("Invalid URI: " + uri)
-    if appended and not uri.endswith("/"):
-        uri += "/"
     for part in appended:
         uri = _url.urljoin(base=uri + "/", url=part.strip("/"))
     return uri

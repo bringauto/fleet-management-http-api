@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def add_car_state(car_state):  # noqa: E501
-    """Add a new state for a car by ID
+    """Add a new Car State.
 
      # noqa: E501
 
-    :param car_state: Car state json
+    :param car_state: Car State model in JSON format.
     :type car_state: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -24,7 +24,7 @@ def add_car_state(car_state):  # noqa: E501
 
 
 def get_all_car_states():  # noqa: E501
-    """Finds all car states
+    """Find one or all Car States for a Car with the specified ID.
 
      # noqa: E501
 
@@ -35,11 +35,11 @@ def get_all_car_states():  # noqa: E501
 
 
 def get_car_states(car_id, all_available=None):  # noqa: E501
-    """Finds car states by ID
+    """Find one or all Car States for a given Car.
 
      # noqa: E501
 
-    :param car_id: ID of car for which states shall be returned
+    :param car_id: ID of the Car for which to find the Car States.
     :type car_id: int
     :param all_available: Whether to return all available car states or only the latest one
     :type all_available: bool

@@ -1,6 +1,6 @@
 import random as _random
 import string as _string
-from typing import Tuple, Optional
+from typing import Optional
 
 from sqlalchemy import Engine as _Engine
 
@@ -13,7 +13,7 @@ import fleet_management_api.database.connection as _connection
 _KEY_LENGTH = 30
 
 
-def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
+def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     """Create a new API key with name 'key_name'.
 
     The key name must not be already used.
@@ -21,14 +21,14 @@ def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
     already_existing_keys = _db_access.get(
-        _ApiKeyDBModel, criteria={"name": lambda x: x == key_name}, conn_source=connection_source
+        _ApiKeyDBModel, criteria={"name": lambda x: x == key_name}, connection_source=connection_source
     )
     if len(already_existing_keys) > 0:
         return 400, _key_already_exists_msg(key_name)
     else:
         response = _db_access.add(
             _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now),
-            conn_source=connection_source,
+            connection_source=connection_source,
         )
         if response.status_code == 400:
             return 400, str(response.body)
@@ -38,14 +38,14 @@ def create_key(key_name: str, connection_source: _Engine) -> Tuple[int, str]:
 
 def verify_key_and_return_key_info(
     api_key: str, connection_source: Optional[_Engine] = None
-) -> Tuple[int, str | _ApiKeyDBModel]:
+) -> tuple[int, str | _ApiKeyDBModel]:
 
     """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
     _key_db_models = _db_access.get(
-        _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, conn_source=connection_source
+        _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, connection_source=connection_source
     )
     if len(_key_db_models) == 0:
         return 401, f"Invalid API key used."

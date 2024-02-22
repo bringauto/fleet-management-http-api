@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Optional
-import os
+from typing import Optional, Literal
 
 import pydantic
 
@@ -20,7 +19,7 @@ class HTTPServer(pydantic.BaseModel):
 class Database(pydantic.BaseModel):
     connection: Connection
     test: str = pydantic.Field(default="")
-    maximum_number_of_table_rows: Dict[str, int]
+    maximum_number_of_table_rows: dict[str, int]
 
     class Connection(pydantic.BaseModel):
         username: str
@@ -31,10 +30,12 @@ class Database(pydantic.BaseModel):
 
     @pydantic.validator("maximum_number_of_table_rows")
     @classmethod
-    def maximum_row_number_at_least_one(cls, val_dict: Dict[str, int]) -> Dict[str, int]:
+    def maximum_row_number_at_least_one(cls, val_dict: dict[str, int]) -> dict[str, int]:
         for key, value in val_dict.items():
             if value < 1:
-                raise ValueError(f"The maximum number of rows in a table '{key}' must be at least one.")
+                raise ValueError(
+                    f"The maximum number of rows in a table '{key}' must be at least one."
+                )
         return val_dict
 
 
@@ -44,17 +45,8 @@ class Security(pydantic.BaseModel):
     client_secret_key: str
     scope: str
     realm: str
-    keycloak_public_key_file: str
+    keycloak_public_key_file: pydantic.FilePath | Literal[""]
     callback: pydantic.AnyUrl = pydantic.Field(Optional)
-
-    @pydantic.validator("keycloak_public_key_file")
-    @classmethod
-    def keycloak_public_key_file_must_be_valid_or_empty(cls, file_path: str) -> str:
-        if file_path == "":
-            return file_path
-        if not os.path.isfile(file_path):
-            raise ValueError(f"The keycloak public key file '{file_path}' does not exist.")
-        return file_path
 
 
 class API(pydantic.BaseModel):

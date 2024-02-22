@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 import jwt
 
 from fleet_management_api.api_impl.api_keys import verify_key_and_return_key_info as _verify_key_and_return_key_info
@@ -44,9 +42,9 @@ def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
     Validate required scopes are included in token scope
 
     :param required_scopes Required scope to access called API
-    :type required_scopes: List[str]
+    :type required_scopes: list[str]
     :param token_scopes Scope present in token
-    :type token_scopes: List[str]
+    :type token_scopes: list[str]
     :return: True if access to called API is allowed
     :rtype: bool
     """
@@ -55,7 +53,7 @@ def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
     return True
 
 
-def info_from_APIKeyAuth(api_key, *args) -> None|Dict:
+def info_from_APIKeyAuth(api_key, *args) -> None | dict:
     """
     Check and retrieve authentication information from api_key.
     Returned value will be passed in 'token_info' parameter of your operation function, if there is one.
