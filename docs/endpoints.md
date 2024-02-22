@@ -4,6 +4,7 @@
 
 
 # Index
+- [API]()
 - [Car](#car-endpoints)
 - [Car State](#car-state-endpoints)
 - [Order](#order-endpoints)
@@ -13,6 +14,19 @@
 - [Route Points](#route-points-endpoints)
 - [Stop](#stop-endpoints)
 - [Security](#endpoints---keycloak-login)
+
+
+# API endpoints
+
+## /apialive
+
+### HEAD
+
+Check if the API is alive.
+
+Response codes:
+- 200: The API is alive.
+- 503: A component of the API is not working properly.
 
 
 # Car endpoints
