@@ -164,8 +164,8 @@ class RouteDBModel(Base):
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
 
     cars: _Mapped[list[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
-    route_points: _Mapped[object] = _relationship(
-        "RoutePointsDBModel",
+    route_visualization: _Mapped[object] = _relationship(
+        "RouteVisualizationDBModel",
         cascade="save-update, merge, delete",
         back_populates="route",
     )
@@ -174,17 +174,17 @@ class RouteDBModel(Base):
         return f"Route(ID={self.id}, name={self.name}, stop_ids={self.stop_ids})"
 
 
-class RoutePointsDBModel(Base):
-    model_name = "RoutePoints"
-    __tablename__ = "route_points"
+class RouteVisualizationDBModel(Base):
+    model_name = "RouteVisualization"
+    __tablename__ = "route_visualization"
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
     route: _Mapped[RouteDBModel] = _relationship(
-        "RouteDBModel", back_populates="route_points", lazy="noload"
+        "RouteDBModel", back_populates="route_visualization", lazy="noload"
     )
     route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
 
     def __repr__(self) -> str:
-        return f"RoutePoints(ID={self.id}, route_ID={self.route_id}, points={self.points})"
+        return f"RouteVisualization (ID={self.id}, route_ID={self.route_id}, points={self.points})"
 
 
 class ApiKeyDBModel(Base):

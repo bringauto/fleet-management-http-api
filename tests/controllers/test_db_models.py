@@ -12,7 +12,7 @@ from fleet_management_api.models import (
     PlatformHW,
     Route,
     Stop,
-    RoutePoints,
+    RouteVisualization,
 )
 
 
@@ -270,9 +270,9 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         self.assertEqual(order_state_db_model.timestamp, 1234567890)
 
 
-class Test_Creating_RoutePointsDBModel(unittest.TestCase):
-    def test_creating_db_model_from_route_points_preserves_attribute_values(self):
-        route_points = RoutePoints(
+class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
+    def test_creating_db_model_from_route_visualization_preserves_attribute_values(self):
+        route_visualization = RouteVisualization(
             id=8,
             route_id=1,
             points=[
@@ -280,23 +280,23 @@ class Test_Creating_RoutePointsDBModel(unittest.TestCase):
                 GNSSPosition(latitude=49.8645611, longitude=1.337644, altitude=10),
             ],
         )
-        route_points_db_model = _obj_to_db.route_points_to_db_model(route_points)
-        self.assertEqual(route_points_db_model.route_id, route_points.route_id)
-        self.assertEqual(route_points_db_model.points[0], route_points.points[0])
-        self.assertEqual(route_points_db_model.points[1], route_points.points[1])
+        route_visualization_db_model = _obj_to_db.route_visualization_to_db_model(route_visualization)
+        self.assertEqual(route_visualization_db_model.route_id, route_visualization.route_id)
+        self.assertEqual(route_visualization_db_model.points[0], route_visualization.points[0])
+        self.assertEqual(route_visualization_db_model.points[1], route_visualization.points[1])
 
-    def test_route_points_converted_to_db_model_and_back_preserves_its_attributes(self):
-        route_points_in = RoutePoints(
+    def test_route_visualization_converted_to_db_model_and_back_preserves_its_attributes(self):
+        route_visualization_in = RouteVisualization(
             route_id=1,
             points=[
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
                 GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             ],
         )
-        route_points_out = _obj_to_db.route_points_from_db_model(
-            _obj_to_db.route_points_to_db_model(route_points_in)
+        route_visualization_out = _obj_to_db.route_visualization_from_db_model(
+            _obj_to_db.route_visualization_to_db_model(route_visualization_in)
         )
-        self.assertEqual(route_points_out, route_points_in)
+        self.assertEqual(route_visualization_out, route_visualization_in)
 
 
 if __name__ == "__main__":

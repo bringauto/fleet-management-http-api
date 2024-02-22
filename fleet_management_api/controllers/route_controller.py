@@ -5,7 +5,7 @@ from typing import Union
 
 from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api.models.route import Route  # noqa: E501
-from fleet_management_api.models.route_points import RoutePoints  # noqa: E501
+from fleet_management_api.models.route_visualization import RouteVisualization  # noqa: E501
 from fleet_management_api import util
 
 
@@ -50,15 +50,15 @@ def get_route(route_id):  # noqa: E501
     return 'do some magic!'
 
 
-def get_route_points(route_id):  # noqa: E501
-    """Find Route Points for a Route identified by the route&#39;s ID.
+def get_route_visualization(route_id):  # noqa: E501
+    """Find Route Visualization for a Route identified by the route&#39;s ID.
 
      # noqa: E501
 
     :param route_id: An ID a the Route
     :type route_id: int
 
-    :rtype: Union[RoutePoints, Tuple[RoutePoints, int], Tuple[RoutePoints, int, Dict[str, str]]
+    :rtype: Union[RouteVisualization, Tuple[RouteVisualization, int], Tuple[RouteVisualization, int, Dict[str, str]]
     """
     return 'do some magic!'
 
@@ -74,18 +74,18 @@ def get_routes():  # noqa: E501
     return 'do some magic!'
 
 
-def redefine_route_points(route_points):  # noqa: E501
-    """Redefine Route Points for an existing Route.
+def redefine_route_visualization(route_visualization):  # noqa: E501
+    """Redefine Route Visualization for an existing Route.
 
      # noqa: E501
 
-    :param route_points: Route Points model in JSON format.
-    :type route_points: dict | bytes
+    :param route_visualization: Route Visualization model in JSON format.
+    :type route_visualization: dict | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        route_points = RoutePoints.from_dict(connexion.request.get_json())  # noqa: E501
+        route_visualization = RouteVisualization.from_dict(connexion.request.get_json())  # noqa: E501
     return 'do some magic!'
 
 

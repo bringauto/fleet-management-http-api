@@ -1709,6 +1709,160 @@ paths:
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+  /route-visualization:
+    post:
+      operationId: redefine_route_visualization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteVisualization'
+        description: Route Visualization model in JSON format.
+        required: true
+        x-body-name: RouteVisualization
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Route Visualization has been successfully redefined.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Redefine Route Visualization for an existing Route.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
+  /route-visualization/{routeId}:
+    get:
+      operationId: get_route_visualization
+      parameters:
+      - description: An ID a the Route
+        example: 1
+        in: path
+        name: routeId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteVisualization'
+          description: The Route Visualization for the specified Route ID has been
+            found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find Route Visualization for a Route identified by the route's ID.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
   /route/{routeId}:
     delete:
       operationId: delete_route
@@ -1873,160 +2027,6 @@ paths:
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
-  /routepoints:
-    post:
-      operationId: redefine_route_points
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoutePoints'
-        description: Route Points model in JSON format.
-        required: true
-        x-body-name: routePoints
-      responses:
-        "200":
-          content:
-            text/plain: {}
-          description: The Route Points have been successfully redefined.
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Redefine Route Points for an existing Route.
-      tags:
-      - route
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
-  /routepoints/{routeId}:
-    get:
-      operationId: get_route_points
-      parameters:
-      - description: An ID a the Route
-        example: 1
-        in: path
-        name: routeId
-        required: true
-        schema:
-          format: int32
-          type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoutePoints'
-          description: The Route Points for the specified Route ID have been found
-            and returned.
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Find Route Points for a Route identified by the route's ID.
-      tags:
-      - route
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
   /stop:
     get:
       operationId: get_stops
@@ -2851,8 +2851,8 @@ components:
       - name
       title: Route
       type: object
-    RoutePoints:
-      description: Route points object structure.
+    RouteVisualization:
+      description: Route Visualization object structure.
       example:
         routeId: 1
         id: 1
@@ -2890,7 +2890,7 @@ components:
       required:
       - points
       - routeId
-      title: RoutePoints
+      title: RouteVisualization
       type: object
     Stop:
       description: Stop object structure.

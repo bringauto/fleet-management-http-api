@@ -19,9 +19,9 @@ def create_route() -> _api.Response:
         response = _db_access.add(route_db_model)
         if response.status_code == 200:
             inserted_db_model = response.body[0]
-            route_points_response = _create_empty_route_points_list(inserted_db_model.id)
-            if not route_points_response.status_code == 200:
-                return route_points_response
+            route_visualization_response = _create_empty_route_visualization(inserted_db_model.id)
+            if not route_visualization_response.status_code == 200:
+                return route_visualization_response
             _api.log_info(f"Route (name='{route.name}) has been created.")
             return _api.json_response(200, _api.route_from_db_model(inserted_db_model))
         else:
@@ -101,18 +101,18 @@ def _check_route_model(route: _models.Route) -> _api.Response:
     return _api.text_response(200, f"Route (ID={route.id}, name='{route.name}) has been checked.")
 
 
-def _create_empty_route_points_list(route_id: int) -> _api.Response:
+def _create_empty_route_visualization(route_id: int) -> _api.Response:
     response = _db_access.add(
-        _db_models.RoutePointsDBModel(id=route_id, route_id=route_id, points=[]),
+        _db_models.RouteVisualizationDBModel(id=route_id, route_id=route_id, points=[]),
     )
     if not response.status_code == 200:
         return _api.text_response(
             response.status_code,
-            f"Could not create route point for route with ID={route_id}. {response.body}",
+            f"Could not create route visualization for route with ID={route_id}. {response.body}",
         )
     else:
         return _api.text_response(
-            200, f"Empty list of route points (route ID={route_id}) has been created."
+            200, f"Empty route visualization (route ID={route_id}) has been created."
         )
 
 

@@ -18,8 +18,8 @@ from .obj_to_db import (
     stop_to_db_model,
     route_from_db_model,
     route_to_db_model,
-    route_points_from_db_model,
-    route_points_to_db_model
+    route_visualization_from_db_model,
+    route_visualization_to_db_model
 )
 from .controllers.utils import log_invalid_request_body_format
 from .api_responses import (

@@ -145,22 +145,22 @@ paths:
           $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
-  /routepoints/{routeId}:
+  /route-visualization/{routeId}:
     get:
-      operationId: getRoutePoints
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
+      operationId: getRouteVisualization
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
       tags:
         - route
-      summary: Find Route Points for a Route identified by the route's ID.
+      summary: Find Route Visualization for a Route identified by the route's ID.
       parameters:
         - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
-          description: The Route Points for the specified Route ID have been found and returned.
+          description: The Route Visualization for the specified Route ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoutePoints'
+                $ref: '#/components/schemas/RouteVisualization'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -171,24 +171,24 @@ paths:
           $ref: 'errors.yaml#/components/responses/NotFound'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
-  /routepoints:
+  /route-visualization:
     post:
-      operationId: redefineRoutePoints
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_points
+      operationId: redefineRouteVisualization
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
       tags:
         - route
-      summary: Redefine Route Points for an existing Route.
+      summary: Redefine Route Visualization for an existing Route.
       requestBody:
-        description: Route Points model in JSON format.
-        x-body-name: routePoints
+        description: Route Visualization model in JSON format.
+        x-body-name: RouteVisualization
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoutePoints'
+              $ref: '#/components/schemas/RouteVisualization'
         required: true
       responses:
         '200':
-          description: The Route Points have been successfully redefined.
+          description: The Route Visualization has been successfully redefined.
           content:
             text/plain:
               type: string
@@ -232,9 +232,9 @@ components:
           items:
             type: integer
           example: [1, 2, 3, 4]
-    RoutePoints:
+    RouteVisualization:
       type: object
-      description: Route points object structure.
+      description: Route Visualization object structure.
       required:
         - routeId
         - points

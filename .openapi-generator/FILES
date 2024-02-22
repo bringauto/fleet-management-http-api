@@ -22,7 +22,7 @@ fleet_management_api/models/order_state.py
 fleet_management_api/models/order_status.py
 fleet_management_api/models/platform_hw.py
 fleet_management_api/models/route.py
-fleet_management_api/models/route_points.py
+fleet_management_api/models/route_visualization.py
 fleet_management_api/models/stop.py
 fleet_management_api/openapi/openapi.yaml
 fleet_management_api/test/__init__.py

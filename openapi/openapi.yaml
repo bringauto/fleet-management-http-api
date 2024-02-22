@@ -71,10 +71,10 @@ paths:
     $ref: 'route.yaml#/paths/~1route'
   /route/{routeId}:
     $ref: 'route.yaml#/paths/~1route~1{routeId}'
-  /routepoints:
-    $ref: 'route.yaml#/paths/~1routepoints'
-  /routepoints/{routeId}:
-    $ref: 'route.yaml#/paths/~1routepoints~1{routeId}'
+  /route-visualization:
+    $ref: 'route.yaml#/paths/~1route-visualization'
+  /route-visualization/{routeId}:
+    $ref: 'route.yaml#/paths/~1route-visualization~1{routeId}'
 
   /stop:
     $ref: 'stop.yaml#/paths/~1stop'

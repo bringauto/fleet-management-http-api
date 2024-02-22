@@ -11,7 +11,7 @@
 - [Order State](#order-state-endpoints)
 - [Platform HW](#platform-hw-endpoints)
 - [Route](#route-endpoints)
-- [Route Points](#route-points-endpoints)
+- [Route Visualization](#route-points-endpoints)
 - [Stop](#stop-endpoints)
 - [Security](#endpoints---keycloak-login)
 
@@ -353,9 +353,9 @@ Response codes:
 - 400: Bad request. The routeId is not a valid integer.
 - 404: Not found. The Route with the given ID does not exist.
 
-# Route Points endpoints
+# Route Visualization endpoints
 
-Route Points [description](definitions.md#route-points).
+Route Visualization [description](definitions.md#route-points).
 
 More on endpoints [here](entity_manipulations.md#route-points).
 
@@ -363,24 +363,24 @@ More on endpoints [here](entity_manipulations.md#route-points).
 
 ### GET
 
-Finds route points for the given route identified by the route's ID.
+Finds route visualization for the given route identified by the route's ID.
 
-Response format: JSON version of the RoutePoints.
+Response format: JSON version of the RouteVisualization.
 
 Response codes:
-- 200: Successfully found route points.
+- 200: Successfully found route visualization.
 - 400: Bad request. The routeId is not a valid integer.
 - 404: Not found. The Route with the given ID does not exist.
 
 ### POST
 
-Redefine route points for the given route identified by the route's ID.
+Redefine route visualization for the given route identified by the route's ID.
 
-Request body format: JSON version of the RoutePoints.
+Request body format: JSON version of the RouteVisualization.
 
 Response codes:
-- 200: Successfully found route points.
-- 400: Bad request. The request body is not a valid Route Points.
+- 200: Successfully found route visualization.
+- 400: Bad request. The request body is not a valid Route Visualization.
 - 404: Not found. The Route with the given ID does not exist.
 
 # Stop endpoints

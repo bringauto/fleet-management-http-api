@@ -50,7 +50,7 @@ Example:
 - [Order State](#order-state)
 - [Platform HW](#platform-hw)
 - [Route](#route)
-- [Route Points](#route-points)
+- [Route Visualization](#route-points)
 - [Stop](#stop)
 
 API automatically assigns an ID to each entity passed to a POST method.
@@ -185,9 +185,9 @@ Example:
 }
 ```
 
-## Route Points
+## Route Visualization
 
-Route Points represent an ordered set of physical locations for visualization of a particular [Route](#route) on a map.
+Route Visualization represent an ordered set of physical locations for visualization of a particular [Route](#route) on a map.
 
 Required data:
 - route ID: unsigned integer
