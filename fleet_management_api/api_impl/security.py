@@ -37,7 +37,11 @@ class SecurityObj:
         return auth_url
 
     def token_get(
-        self, state: Optional[str], session_state: Optional[str], iss: Optional[str], code: Optional[str]
+        self,
+        state: Optional[str],
+        session_state: Optional[str],
+        iss: Optional[str],
+        code: Optional[str],
     ) -> dict:
         """Get token from keycloak using a code returned by keycloak."""
         if state != self._state:

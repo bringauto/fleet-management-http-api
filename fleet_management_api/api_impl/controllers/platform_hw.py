@@ -34,6 +34,7 @@ def get_hws() -> _api.Response:
     _api.log_info(f"Found {len(platform_hw_ids)} platform HWs.")
     return _api.json_response(200, platform_hw_ids)
 
+
 def get_hw(platform_hw_id: int) -> _api.Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
     hw_models = _db_access.get(

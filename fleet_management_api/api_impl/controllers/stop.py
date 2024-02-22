@@ -18,7 +18,9 @@ def create_stop() -> _api.Response:
             _api.log_info(f"Stop (ID={response.body[0].id}, name='{stop.name}) has been created.")
             return _api.json_response(200, _api.stop_from_db_model(response.body[0]))
         else:
-            return _api.text_response(response.status_code, f"Stop (name='{stop.name}) could not be sent. {response.body}")
+            return _api.text_response(
+                response.status_code, f"Stop (name='{stop.name}) could not be sent. {response.body}"
+            )
 
 
 def delete_stop(stop_id: int) -> _api.Response:

@@ -21,7 +21,9 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
     already_existing_keys = _db_access.get(
-        _ApiKeyDBModel, criteria={"name": lambda x: x == key_name}, connection_source=connection_source
+        _ApiKeyDBModel,
+        criteria={"name": lambda x: x == key_name},
+        connection_source=connection_source,
     )
     if len(already_existing_keys) > 0:
         return 400, _key_already_exists_msg(key_name)
@@ -46,7 +48,9 @@ def verify_key_and_return_key_info(
         connection_source = _connection.current_connection_source()
 
     _key_db_models = _db_access.get(
-        _ApiKeyDBModel, criteria={"key": lambda x: x == api_key}, connection_source=connection_source
+        _ApiKeyDBModel,
+        criteria={"key": lambda x: x == api_key},
+        connection_source=connection_source,
     )
     if len(_key_db_models) == 0:
         return 401, f"Invalid API key used."

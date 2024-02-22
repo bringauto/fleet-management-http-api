@@ -12,12 +12,10 @@ def get_route_visualization(route_id: int) -> _api.Response:
         _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
-        return _api.text_response(404, f"Route visualization for route with ID={route_id} was not found.")
+        return _api.text_response(404, f"Route visualization (route ID={route_id}) was not found.")
     else:
         rp = _api.route_visualization_from_db_model(rp_db_models[0])
-        _api.log_info(
-            f"Found route visualization for route with ID={route_id}."
-        )
+        _api.log_info(f"Found route visualization (route ID={route_id}).")
         return _api.json_response(200, rp)
 
 
@@ -34,21 +32,21 @@ def redefine_route_visualization() -> _api.Response:
         if len(existing_visualization) == 0:
             response = _db_access.add(
                 rp_db_model,
-                checked=[
-                    _db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)
-                ],
+                checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
             )
             return _api.log_and_respond(response.status_code, response.body)
         else:
             _db_access.delete(_db_models.RouteVisualizationDBModel, existing_visualization[0].id)
             response = _db_access.add(
                 rp_db_model,
-                checked=[
-                    _db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)
-                ],
+                checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
             )
             if response.status_code == 200:
-                _api.log_info(f"Route visualization for route with ID={rp.route_id} has been redefined.")
-                return _api.json_response(200, _api.route_visualization_from_db_model(response.body[0]))
+                _api.log_info(
+                    f"Route visualization for route with ID={rp.route_id} has been redefined."
+                )
+                return _api.json_response(
+                    200, _api.route_visualization_from_db_model(response.body[0])
+                )
             else:
                 return _api.log_and_respond(response.status_code, response.body)

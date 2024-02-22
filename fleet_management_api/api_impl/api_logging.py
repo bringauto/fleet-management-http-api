@@ -1,9 +1,6 @@
 import logging as _logging
 
-from .api_responses import (
-    text_response as _text_response,
-    Response as _Response
-)
+from .api_responses import text_response as _text_response, Response as _Response
 
 
 _API_LOGGER_NAME = "werkzeug"
