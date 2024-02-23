@@ -9,14 +9,14 @@ from fleet_management_api import util
 
 
 def create_car(car):  # noqa: E501
-    """Create a new car
+    """Create a new Car object.
 
      # noqa: E501
 
-    :param car: New car json
+    :param car: A Car model in JSON format.
     :type car: dict | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501
@@ -24,11 +24,11 @@ def create_car(car):  # noqa: E501
 
 
 def delete_car(car_id):  # noqa: E501
-    """Delete a car
+    """Delete a Car identified by its ID.
 
      # noqa: E501
 
-    :param car_id: ID of car to delete
+    :param car_id: The ID of the Car to be deleted.
     :type car_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -37,11 +37,11 @@ def delete_car(car_id):  # noqa: E501
 
 
 def get_car(car_id):  # noqa: E501
-    """Finds car by ID
+    """Find a single Car by its ID.
 
      # noqa: E501
 
-    :param car_id: ID of car to return
+    :param car_id: An ID of the Car to be returned.
     :type car_id: int
 
     :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
@@ -50,7 +50,7 @@ def get_car(car_id):  # noqa: E501
 
 
 def get_cars():  # noqa: E501
-    """Finds all cars
+    """Find and return all existing Cars.
 
      # noqa: E501
 
@@ -60,28 +60,15 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def startstop_car(car_id):  # noqa: E501
-    """Start/stop car by ID (intended for phonecalls)
-
-     # noqa: E501
-
-    :param car_id: ID of car to start/stop
-    :type car_id: int
-
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
-    """
-    return 'do some magic!'
-
-
 def update_car(car):  # noqa: E501
-    """Update an existing car by ID
+    """Update already existing Car.
 
      # noqa: E501
 
-    :param car: Car update json
+    :param car: JSON representation of the updated Car.
     :type car: dict | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         car = Car.from_dict(connexion.request.get_json())  # noqa: E501

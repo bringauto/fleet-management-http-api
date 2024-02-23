@@ -1,0 +1,166 @@
+security:
+  - APIKeyAuth: []
+  - oAuth2AuthCode: []
+
+paths:
+  /login:
+    get:
+      description: Login using Keycloak.
+      operationId: login
+      responses:
+        "302":
+          description: Redirect to the Keycloak authentication.
+        "500":
+          description: The login failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+
+  /token_get:
+    get:
+      description: Callback endpoint for the Keycloak to receive JWT token.
+      operationId: token_get
+      parameters:
+      - description: State returned by the Keycloak authentication.
+        example: your_state_info
+        explode: true
+        in: query
+        name: state
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Session state returned by the Keycloak authentication.
+        example: 167e141d-2f55-4d...
+        explode: true
+        in: query
+        name: session_state
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Code issuer returned by the Keycloak authentication.
+        example: http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fmaster
+        explode: true
+        in: query
+        name: iss
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Code used for JWT token generation returned by Keycloak authentication.
+        example: 5dea27d2-4b2d-48...
+        explode: true
+        in: query
+        name: code
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Returns a standard Keycloak token.
+        "500":
+          description: The login failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+
+  /token_refresh:
+    get:
+      description: Endpoint to receive JWT token from refresh token.
+      operationId: token_refresh
+      parameters:
+      - description: Refresh token used for JWT token generation.
+        example: eyJhbGciOiJIUzI1NiIsI...
+        explode: true
+        in: query
+        name: refresh_token
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Returns a new standard Keycloak token.
+        "500":
+          description: Token refresh failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+
+components:
+  parameters:
+    kcState:
+      description: State returned by Keycloak authentication.
+      example: your_state_info
+      explode: true
+      in: query
+      name: state
+      required: false
+      schema:
+        type: string
+      style: form
+    kcSessionState:
+      description: Session state returned by Keycloak authentication.
+      example: 167e141d-2f55-4d...
+      explode: true
+      in: query
+      name: session_state
+      required: false
+      schema:
+        type: string
+      style: form
+    kcIss:
+      description: Code issuer returned by Keycloak authentication.
+      example: http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fmaster
+      explode: true
+      in: query
+      name: iss
+      required: false
+      schema:
+        type: string
+      style: form
+    kcCode:
+      description: Code used for JWT token generation returned by Keycloak authentication.
+      example: 5dea27d2-4b2d-48...
+      explode: true
+      in: query
+      name: code
+      required: false
+      schema:
+        type: string
+      style: form
+    RefreshToken:
+      description: Refresh token used for JWT token generation.
+      example: eyJhbGciOiJIUzI1NiIsI...
+      explode: true
+      in: query
+      name: refresh_token
+      required: true
+      schema:
+        type: string
+      style: form
+
+  securitySchemes:
+
+    oAuth2AuthCode:
+      description: oAuth2 authorization
+      flows:
+        authorizationCode:
+          authorizationUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/auth
+          refreshUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+          scopes: {}
+          tokenUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+      type: oauth2
+      x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
+      x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
+
+    APIKeyAuth:
+      description: Authentication using an API key.
+      type: apiKey
+      in: query
+      name: api_key

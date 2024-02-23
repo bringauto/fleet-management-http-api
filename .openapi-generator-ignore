@@ -39,3 +39,5 @@ test-requirements.txt
 /requirements.txt
 /fleet_management_api/__main__.py
 /fleet_management_api/controllers/security_controller.py
+/fleet_management_api/controllers/login_controller.py
+/fleet_management_api/api_impl/security.py

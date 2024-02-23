@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Create a new order
+      summary: Create a new Order.
       requestBody:
-        description: New order json
+        description: Order model in JSON format.
         x-body-name: order
         content:
           application/json:
@@ -16,11 +16,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful order creation
+          description: The new Order has been successfully created.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -34,10 +33,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Finds all orders
+      summary: Find all currently existing Orders.
       responses:
         '200':
-          description: Successfuly found all orders
+          description: All the currently existing Orders have been returned.
           content:
             application/json:
               schema:
@@ -47,12 +46,11 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "priority": "normal",
                     "userId": 1,
-                    "status": "to_accept",
                     "carId": 1,
                     "targetStopId": 1,
+                    "notification": "Order notification",
                     "stopRouteId": 1,
                     "notificationPhone": {"phone":'+420123456789'}
                   }
@@ -69,11 +67,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Finds order by ID
+      summary: Find an existing Order by its ID and return it.
       parameters:
         - name: orderId
           in: path
-          description: ID of order to return
+          description: ID of the Order to be returned.
           required: true
           example: 1
           schema:
@@ -81,7 +79,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly found order
+          description: The Order with the specified ID has been found and returned.
           content:
             application/json:
               schema:
@@ -101,11 +99,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Delete an order
+      summary: Delete an Order with the specified ID.
       parameters:
         - name: orderId
           in: path
-          description: ID of order to delete
+          description: ID of the Order to be deleted.
           required: true
           example: 1
           schema:
@@ -113,7 +111,10 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successful order removal
+          description: The Order with the specified ID has been successfully deleted.
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -132,11 +133,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Get order by car ID only if it changed
+      summary: Get updated Orders for a given Car specified by its ID.
       parameters:
         - name: carId
           in: path
-          description: ID of car with order to return
+          description: ID of the Car for which updated Orders are requested.
           required: true
           example: 1
           schema:
@@ -144,7 +145,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly received new order
+          description: All the updated Orders for the specified Car have been returned.
           content:
             application/json:
               schema:
@@ -167,9 +168,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Create a new order state
+      summary: Add a new Order State.
       requestBody:
-        description: New order state json
+        description: Order State model in JSON format.
         x-body-name: orderState
         content:
           application/json:
@@ -178,11 +179,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Succesfully added new order state
+          description: The new Order State has been successfully added.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -198,13 +198,13 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds all order states
+      summary: Find one or all Order States for all existing Orders.
       parameters:
         - $ref: '#/components/parameters/Wait'
         - $ref: '#/components/parameters/Since'
       responses:
         '200':
-          description: Successfuly found all order states
+          description: Successfully found all Order States complying with the request parameters.
           content:
             application/json:
               schema:
@@ -214,7 +214,6 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "orderId": 1,
                     "status": "to_accept",
                     "carId": 1
@@ -232,11 +231,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Finds order state by ID
+      summary: Find all Order States for a particular Order specified by its ID.
       parameters:
         - name: orderId
           in: path
-          description: ID of order for which states shall be returned
+          description: ID of the Order for which to find the Order States.
           required: true
           example: 1
           schema:
@@ -246,11 +245,10 @@ paths:
         - $ref: '#/components/parameters/Since'
       responses:
         '200':
-          description: Successfuly found order state
+          description: All the Order States for the Order specified by its ID have been returned.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderState'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -264,9 +262,8 @@ components:
   schemas:
     Order:
       type: object
-      description: Order object structure
+      description: Order object structure.
       required:
-        - id
         - userId
         - carId
         - targetStopId
@@ -291,9 +288,8 @@ components:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
     OrderState:
       type: object
-      description: Order state object structure
+      description: Order state object structure.
       required:
-        - id
         - status
         - orderId
       properties:
@@ -307,7 +303,7 @@ components:
           $ref: 'common_models.yaml#/components/schemas/Timestamp'
     OrderStatus:
       type: string
-      description: OrderStatus (to_accept, accepted, in_progress, done, canceled)
+      description: OrderStatus (to_accept, accepted, in_progress, done, canceled).
       enum:
         - to_accept
         - accepted
@@ -315,8 +311,8 @@ components:
         - done
         - canceled
       example: to_accept
-    # OpenAPI Generator IGNORES default value when using enum. Using pattern matching instead.
-    # The pattern is checked ONLY when the value is passed to the API, not when any of the objects below is created.
+    # OpenAPI Generator IGNORES default value when using an enum. Using pattern matching instead.
+    # The pattern is checked ONLY when the value is passed to the API, not when any of the objects below are created.
     Priority:
       type: string
       description: Priority (low, normal, high)
@@ -326,8 +322,8 @@ components:
   parameters:
     Wait:
       name: wait
-      description: Applies for GET methods when no order statuses would be returned at the moment of request. If wait=true, \
-        the request will wait for the next order state to be created and return it. If wait=False or unspecified, the request will return \
+      description: Applies to GET methods when no order statuses would be returned at the moment of request. If wait=true, \
+        the request will wait for the next order state to be created and then return it. If wait=False or unspecified, the request will return \
         an empty list.
       in: query
       schema:

@@ -1,0 +1,32 @@
+{
+    "http_server": {
+        "base_uri": "https://someadress.com/",
+        "port": 8080
+    },
+    "security": {
+        "keycloak_url": "https://keycloak.bringauto.com/",
+        "client_id": "",
+        "client_secret_key": "",
+        "scope": "",
+        "realm": "",
+        "keycloak_public_key_file": "config/keycloak.pem"
+    },
+    "database": {
+        "connection": {
+            "location": "localhost",
+            "database_name": "fleet_management",
+            "username": "postgres",
+            "password": "1234",
+            "port": 5432
+        },
+        "maximum_number_of_table_rows": {
+            "car_states": 10,
+            "order_states": 10
+        }
+    },
+    "api": {
+        "request_for_data": {
+            "timeout_in_seconds": 5
+        }
+    }
+}

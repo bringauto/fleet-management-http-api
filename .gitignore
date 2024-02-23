@@ -69,7 +69,6 @@ target/
 .travis.yml
 Dockerfile
 git_push.sh
-openapitools.json
 README.md
 setup.py
 test-requirements.txt
@@ -79,6 +78,7 @@ requirements.txt
 
 fleet_management_api/test/*
 
+/db
 .vscode
 .venv
 .mypy*
@@ -86,6 +86,7 @@ fleet_management_api/test/*
 __pycache__
 .coverage
 /htmlcov
+/dummy.py
 
 /restart.sh
 /*.db

@@ -1,0 +1,32 @@
+version: '3.0'
+
+services:
+
+  server:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgresql-database
+    ports:
+      - 8080:8080
+    networks:
+      - api-network
+    entrypoint:
+      ["python", "-m", "fleet_management_api", "config/config.json", "--location", "postgresql-database"]
+
+  postgresql-database:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: fleet_management_api_db
+    networks:
+      - api-network
+    ports:
+      - 5432:5432
+
+networks:
+  api-network:

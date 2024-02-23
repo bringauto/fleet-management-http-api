@@ -6,7 +6,7 @@ components:
       example: 1
     GNSSPosition:
       type: object
-      description: GNSSPosition primitive structure
+      description: GNSSPosition primitive structure.
       properties:
         latitude:
           type: number
@@ -25,13 +25,13 @@ components:
           default: 0.0
     MobilePhone:
       type: object
-      description: MobilePhone Primitive structure
+      description: MobilePhone Primitive structure.
       properties:
         phone:
           type: string
           example: '+420123456789'
     Timestamp:
-      description: Unix timestamp in milliseconds
+      description: A Unix timestamp in milliseconds.
       type: integer
       format: int64
       example: 1616425200000

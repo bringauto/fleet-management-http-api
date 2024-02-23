@@ -9,6 +9,7 @@ from fleet_management_api.models.mobile_phone import MobilePhone
 from fleet_management_api.models.order import Order
 from fleet_management_api.models.order_state import OrderState
 from fleet_management_api.models.order_status import OrderStatus
-from fleet_management_api.models.platform_hw_id import PlatformHwId
+from fleet_management_api.models.platform_hw import PlatformHW
 from fleet_management_api.models.route import Route
+from fleet_management_api.models.route_visualization import RouteVisualization
 from fleet_management_api.models.stop import Stop

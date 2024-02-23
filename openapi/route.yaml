@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Create a new route
+      summary: Create a new Route.
       requestBody:
-        description: New route json
+        description: Route model in JSON format.
         x-body-name: route
         content:
           application/json:
@@ -16,11 +16,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful route creation
+          description: The Route has been successfully created.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -34,10 +33,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Finds all routes
+      summary: Find and return all existing Routes.
       responses:
         '200':
-          description: Successfuly found all routes
+          description: All the currently existing Routes have been returned.
           content:
             application/json:
               schema:
@@ -47,7 +46,6 @@ paths:
               example:
                 [
                   {
-                    "id": 1,
                     "name": 'Lužánky',
                     "points": [
                       {
@@ -70,9 +68,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Update an existing route by ID
+      summary: Update already existing Route.
       requestBody:
-        description: Route update json
+        description: JSON representation of the updated Route.
         x-body-name: route
         content:
           application/json:
@@ -81,11 +79,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful route update
+          description: The Route has been successfully updated.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Route'
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -102,19 +99,12 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Finds route by ID
+      summary: Find a single Route with the specified ID.
       parameters:
-        - name: routeId
-          in: path
-          description: ID of route to return
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+      - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
-          description: Successfuly found route
+          description: The Route with the specified ID has been found and returned.
           content:
             application/json:
               schema:
@@ -134,19 +124,15 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Delete a route
+      summary: Delete a Route with the specified ID.
       parameters:
-        - name: routeId
-          in: path
-          description: ID of route to delete
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+      - $ref: '#/components/parameters/RouteId'
       responses:
         '200':
-          description: Successful route removal
+          description: The Route with the specified ID has been deleted.
+          content:
+            text/plain:
+              type: string
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -159,14 +145,80 @@ paths:
           $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
+  /route-visualization/{routeId}:
+    get:
+      operationId: getRouteVisualization
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
+      tags:
+        - route
+      summary: Find Route Visualization for a Route identified by the route's ID.
+      parameters:
+        - $ref: '#/components/parameters/RouteId'
+      responses:
+        '200':
+          description: The Route Visualization for the specified Route ID has been found and returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteVisualization'
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+  /route-visualization:
+    post:
+      operationId: redefineRouteVisualization
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
+      tags:
+        - route
+      summary: Redefine Route Visualization for an existing Route.
+      requestBody:
+        description: Route Visualization model in JSON format.
+        x-body-name: RouteVisualization
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteVisualization'
+        required: true
+      responses:
+        '200':
+          description: The Route Visualization has been successfully redefined.
+          content:
+            text/plain:
+              type: string
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
 components:
+  parameters:
+    RouteId:
+      name: routeId
+      in: path
+      description: An ID a the Route
+      required: true
+      example: 1
+      schema:
+        type: integer
+        format: int32
   schemas:
     Route:
       type: object
-      description: Route object structure
+      description: Route object structure.
       required:
-        - id
         - name
       properties:
         id:
@@ -174,6 +226,25 @@ components:
         name:
           type: string
           example: 'Lužánky'
+        stopIds:
+          type: array
+          default: []
+          items:
+            type: integer
+          example: [1, 2, 3, 4]
+    RouteVisualization:
+      type: object
+      description: Route Visualization object structure.
+      required:
+        - routeId
+        - points
+      properties:
+        id:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        routeId:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        hexcolor:
+          $ref: '#/components/schemas/Color'
         points:
           type: array
           default: []
@@ -185,11 +256,16 @@ components:
                 "latitude": 49.204117,
                 "longitude": 16.606525,
                 "altitude": 400.25
+              },
+              {
+                "latitude": 49.70425,
+                "longitude": 16.65151,
+                "altitude": 400.78
               }
             ]
-        stopIds:
-          type: array
-          default: []
-          items:
-            type: integer
-          example: [1, 2, 3, 4]
+    Color:
+      type: string
+      description: Color in hexadecimal format.
+      pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+      example: '#FF0000'
+      default: '#FF0000'

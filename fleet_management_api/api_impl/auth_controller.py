@@ -1,15 +1,21 @@
 import sys
-sys.path.append('./server')
+
+sys.path.append("./server")
 from typing import Optional
 
-from connexion.lifecycle import ConnexionResponse
+from connexion.lifecycle import ConnexionResponse  # type: ignore
+
 from fleet_management_api.api_impl.security import SecurityObj
 from flask import redirect
 from fleet_management_api.api_impl.api_logging import log_info, log_error
 
 
 _security = SecurityObj()
-def init_security(keycloak_url: str, client_id: str, secret_key: str, scope: str, realm: str, callback: str) -> None:
+
+
+def init_security(
+    keycloak_url: str, client_id: str, secret_key: str, scope: str, realm: str, callback: str
+) -> None:
     _security.set_config(keycloak_url, client_id, secret_key, scope, realm, callback)
 
 
@@ -28,12 +34,11 @@ def login() -> ConnexionResponse:
         return ConnexionResponse(body=msg, status_code=500)
 
 
-
 def token_get(
     state: Optional[str] = None,
     session_state: Optional[str] = None,
     iss: Optional[str] = None,
-    code: Optional[str] = None
+    code: Optional[str] = None,
 ) -> ConnexionResponse:
     """token_get
 
@@ -60,9 +65,7 @@ def token_get(
     return ConnexionResponse(body=token, status_code=200)
 
 
-def token_refresh(
-    refresh_token: str
-) -> ConnexionResponse:
+def token_refresh(refresh_token: str) -> ConnexionResponse:
     """token_refresh
 
     Generate a new token using the refresh token. # noqa: E501

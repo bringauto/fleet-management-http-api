@@ -1,16 +1,15 @@
-FROM python:3-alpine
+FROM python:3.10-alpine
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
+COPY ./requirements.txt /usr/src/app/
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /usr/src/app
 
-#EXPOSE 8080
+EXPOSE 8080
 
-ENTRYPOINT ["python3"]
-
-CMD ["-m", "fleet_management_api"]
+ENTRYPOINT ["python"]
+CMD ["-m", "fleet_management_api", "config/config.json"]

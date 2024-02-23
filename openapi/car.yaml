@@ -5,10 +5,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Create a new car
+      summary: Create a new Car object.
       requestBody:
         x-body-name: car
-        description: New car json
+        description: A Car model in JSON format.
         content:
           application/json:
             schema:
@@ -16,11 +16,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful car creation
+          description: The Car has been successfully created.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -34,10 +33,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Finds all cars
+      summary: Find and return all existing Cars.
       responses:
         '200':
-          description: Successfuly found all cars
+          description: All the currently existing Cars have been returned.
           content:
             application/json:
               schema:
@@ -48,7 +47,7 @@ paths:
                 [
                   {
                     "id": 1,
-                    "platformId": 1,
+                    "platformHWId": 5,
                     "name": 'BAT-2022-01',
                     "carAdminPhone": {"phone":'+420123456789'},
                     "defaultRouteId": 1,
@@ -66,9 +65,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Update an existing car by ID
+      summary: Update already existing Car.
       requestBody:
-        description: Car update json
+        description: JSON representation of the updated Car.
         x-body-name: car
         content:
           application/json:
@@ -77,11 +76,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful car update
+          description: The Car has been successfully updated.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Car'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -98,11 +96,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Finds car by ID
+      summary: Find a single Car by its ID.
       parameters:
         - name: carId
           in: path
-          description: ID of car to return
+          description: An ID of the Car to be returned.
           required: true
           example: 1
           schema:
@@ -110,7 +108,7 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successfuly found car
+          description: The Car with the specified ID has been found and returned.
           content:
             application/json:
               schema:
@@ -130,11 +128,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Delete a car
+      summary: Delete a Car identified by its ID.
       parameters:
         - name: carId
           in: path
-          description: ID of car to delete
+          description: The ID of the Car to be deleted.
           required: true
           example: 1
           schema:
@@ -142,7 +140,11 @@ paths:
             format: int32
       responses:
         '200':
-          description: Successful car removal
+          description: The Car has been successfully deleted.
+          content:
+            text/plain:
+              type: string
+              example: 2 cars were successfully removed.
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -155,44 +157,15 @@ paths:
           $ref: './errors.yaml#/components/responses/MethodNotAllowed'
         default:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
-  /car/startstop/{carId}:
-    get:
-      operationId: startstopCar
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_startstop
-      tags:
-        - car
-      summary: Start/stop car by ID (intended for phonecalls)
-      parameters:
-        - name: carId
-          in: path
-          description: ID of car to start/stop
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: Successful car start/stop
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
-        default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
       operationId: addCarState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Add a new state for a car by ID
+      summary: Add a new Car State.
       requestBody:
-        description: Car state json
+        description: Car State model in JSON format.
         x-body-name: carState
         content:
           application/json:
@@ -201,11 +174,10 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfuly added car state
+          description: The new Car State has been successfully added.
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CarState'
+            text/plain:
+              type: string
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -219,10 +191,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Finds all car states
+      summary: Find one or all Car States for a Car with the specified ID.
       responses:
         '200':
-          description: Successfuly found all car states
+          description: Successfully found all Car States complying with the request parameters.
           content:
             application/json:
               schema:
@@ -242,11 +214,11 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Finds car states by ID
+      summary: Find one or all Car States for a given Car.
       parameters:
         - name: carId
           in: path
-          description: ID of car for which states shall be returned
+          description: ID of the Car for which to find the Car States.
           required: true
           example: 1
           schema:
@@ -261,7 +233,7 @@ paths:
             type: boolean
       responses:
         '200':
-          description: Successfuly found car state
+          description: Successfully found all Car States complying with the request parameters.
           content:
             application/json:
               schema:
@@ -279,15 +251,15 @@ components:
   schemas:
     Car:
       type: object
-      description: Car object structure
+      description: Car model structure.
       required:
-        - id
-        - platformId
+        - platformHwId
         - name
+        - carAdminPhone
       properties:
         id:
           $ref: 'common_models.yaml#/components/schemas/Id'
-        platformId:
+        platformHwId:
           $ref: 'common_models.yaml#/components/schemas/Id'
           example: 5
         name:
@@ -303,9 +275,8 @@ components:
           example: false
     CarState:
       type: object
-      description: Car state object structure
+      description: Car State object structure
       required:
-        - id
         - status
         - carId
       properties:
@@ -329,7 +300,7 @@ components:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
     CarStatus:
       type: string
-      description: CarStatus enum
+      description: Car Status enum
       enum:
         - idle
         - charging

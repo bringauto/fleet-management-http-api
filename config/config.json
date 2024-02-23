@@ -1,6 +1,7 @@
 {
     "http_server": {
-        "base_uri": "https://portal.bringautofleet.com"
+        "base_uri": "http://localhost:8080/v2/management",
+        "port": 8080
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com",
@@ -12,14 +13,15 @@
     },
     "database": {
         "connection": {
-            "location": "localhost:5432",
-            "database_name": "fleet_management",
+            "location": "localhost",
+            "database_name": "fleet_management_api_db",
             "username": "postgres",
-            "password": "1234"
+            "password": "1234",
+            "port": 5432
         },
         "maximum_number_of_table_rows": {
-            "car_states": 10,
-            "order_states": 10
+            "car_states": 100,
+            "order_states": 100
         }
     },
     "api": {

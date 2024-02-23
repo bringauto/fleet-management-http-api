@@ -9,14 +9,14 @@ from fleet_management_api import util
 
 
 def create_stop(stop):  # noqa: E501
-    """Create a new stop
+    """Create a new Stop.
 
      # noqa: E501
 
-    :param stop: New stop json
+    :param stop: Stop model in JSON format.
     :type stop: dict | bytes
 
-    :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         stop = Stop.from_dict(connexion.request.get_json())  # noqa: E501
@@ -24,11 +24,11 @@ def create_stop(stop):  # noqa: E501
 
 
 def delete_stop(stop_id):  # noqa: E501
-    """Delete a stop
+    """Delete a Stop with the specified ID.
 
      # noqa: E501
 
-    :param stop_id: ID of stop to delete
+    :param stop_id: ID of the Stop to be deleted.
     :type stop_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -37,11 +37,11 @@ def delete_stop(stop_id):  # noqa: E501
 
 
 def get_stop(stop_id):  # noqa: E501
-    """Finds stop by ID
+    """Find and return a single Stop by its ID.
 
      # noqa: E501
 
-    :param stop_id: ID of stop to return
+    :param stop_id: ID of Stop to be returned.
     :type stop_id: int
 
     :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
@@ -50,7 +50,7 @@ def get_stop(stop_id):  # noqa: E501
 
 
 def get_stops():  # noqa: E501
-    """Finds all stops
+    """Find and return all existing Stops.
 
      # noqa: E501
 
@@ -61,14 +61,14 @@ def get_stops():  # noqa: E501
 
 
 def update_stop(stop):  # noqa: E501
-    """Update an existing stop by ID
+    """Update already existing Stop.
 
      # noqa: E501
 
-    :param stop: Stop update json
+    :param stop: JSON representation of the updated Stop.
     :type stop: dict | bytes
 
-    :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         stop = Stop.from_dict(connexion.request.get_json())  # noqa: E501
