@@ -11,14 +11,14 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
         self.app = _app.get_test_app().app
         self.route = Route(name="test_route")
 
-    def test_getting_routepoints_for_newly_defined_route_yields_empty_list(self):
+    def test_getting_route-visualization_for_newly_defined_route_yields_empty_list(self):
         with self.app.test_client() as c:
             c.post("/v2/management/route", json=self.route)
             response = c.get("/v2/management/route-visualization/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["points"], [])
 
-    def test_getting_routepoints_for_nonexistent_route_yields_404(self):
+    def test_getting_route-visualization_for_nonexistent_route_yields_404(self):
         with self.app.test_client() as c:
             response = c.get("/v2/management/route-visualization/1")
             self.assertEqual(response.status_code, 404)

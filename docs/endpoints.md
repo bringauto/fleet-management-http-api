@@ -359,7 +359,7 @@ Route Visualization [description](definitions.md#route-visualization).
 
 More on endpoints [here](entity_manipulations.md#route-visualization).
 
-## /routepoints/{routeId}
+## /route-visualization/{routeId}
 
 ### GET
 
