@@ -11,7 +11,7 @@
 - [Order State](#order-state-endpoints)
 - [Platform HW](#platform-hw-endpoints)
 - [Route](#route-endpoints)
-- [Route Visualization](#route-points-endpoints)
+- [Route Visualization](#route-visualization-endpoints)
 - [Stop](#stop-endpoints)
 - [Security](#endpoints---keycloak-login)
 
@@ -355,9 +355,9 @@ Response codes:
 
 # Route Visualization endpoints
 
-Route Visualization [description](definitions.md#route-points).
+Route Visualization [description](definitions.md#route-visualization).
 
-More on endpoints [here](entity_manipulations.md#route-points).
+More on endpoints [here](entity_manipulations.md#route-visualization).
 
 ## /routepoints/{routeId}
 

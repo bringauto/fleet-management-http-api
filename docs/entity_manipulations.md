@@ -6,7 +6,7 @@
 - [Order State](#order-state)
 - [Platform HW](#platform-hw)
 - [Route](#route)
-- [Route Visualization](#route-points)
+- [Route Visualization](#route-visualization)
 - [Stop](#stop)
 
 
@@ -131,7 +131,7 @@ Requirements:
 Result:
 - The Route ID is automatically set by the server.
 - A Route is created.
-- [Route Visualization](#route-points) object with an empty list of points is created.
+- [Route Visualization](#route-visualization) object with an empty list of points is created.
 
 ### Delete
 
@@ -140,13 +140,13 @@ Requirements:
 
 Result:
 - The Route is deleted.
-- The corresponding [Route Visualization](#route-points) object is deleted.
+- The corresponding [Route Visualization](#route-visualization) object is deleted.
 - The default route ID attribute of every [Car](#car) equal to this deleted Route is set to None.
 
 
 ## Route Visualization
 
-Entity [description](definitions.md#route-points).
+Entity [description](definitions.md#route-visualization).
 
 ### Post
 

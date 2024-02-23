@@ -50,7 +50,7 @@ Example:
 - [Order State](#order-state)
 - [Platform HW](#platform-hw)
 - [Route](#route)
-- [Route Visualization](#route-points)
+- [Route Visualization](#route-visualization)
 - [Stop](#stop)
 
 API automatically assigns an ID to each entity passed to a POST method.
@@ -209,7 +209,8 @@ Example:
             "longitude": 16.93658,
             "altitude": 430
         }
-    ]
+    ],
+    "hexcolor": "#FF0000"
 }
 ```
 
