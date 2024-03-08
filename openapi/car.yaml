@@ -305,5 +305,9 @@ components:
         - idle
         - charging
         - out_of_order
-        - stopped_by_phone
+        - driving
+        - in_stop
+        - paused_by_phone
+        - paused_by_obstacle
+        - paused_by_button
       example: idle

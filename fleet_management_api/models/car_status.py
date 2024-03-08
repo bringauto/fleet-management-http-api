@@ -18,7 +18,11 @@ class CarStatus(Model):
     IDLE = 'idle'
     CHARGING = 'charging'
     OUT_OF_ORDER = 'out_of_order'
-    STOPPED_BY_PHONE = 'stopped_by_phone'
+    DRIVING = 'driving'
+    IN_STOP = 'in_stop'
+    PAUSED_BY_PHONE = 'paused_by_phone'
+    PAUSED_BY_OBSTACLE = 'paused_by_obstacle'
+    PAUSED_BY_BUTTON = 'paused_by_button'
     def __init__(self):  # noqa: E501
         """CarStatus - a model defined in OpenAPI
 

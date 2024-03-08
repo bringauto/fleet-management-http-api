@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 1.1.0
+  version: 1.2.0
 servers:
 - url: /v2/management
 security:
@@ -2688,7 +2688,11 @@ components:
       - idle
       - charging
       - out_of_order
-      - stopped_by_phone
+      - driving
+      - in_stop
+      - paused_by_phone
+      - paused_by_obstacle
+      - paused_by_button
       example: idle
       title: CarStatus
       type: string
