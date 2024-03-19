@@ -7,7 +7,7 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 
 
-def add_car_state() -> _api.Response:
+def add_car_state(car_state: _models.CarState) -> _api.Response:
     """Post new car state.
 
     :param car_state: Car state to be added.
@@ -21,28 +21,31 @@ def add_car_state() -> _api.Response:
         return _api.log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        state_db_model = _api.car_state_to_db_model(car_state)
-        response = _db_access.add(
-            state_db_model,
-            checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_state.car_id)],
-        )
-        if response.status_code == 200:
-            inserted_model = _api.car_state_from_db_model(response.body[0])
-            code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
-            _api.log_info(msg)
-            cleanup_response = _remove_old_states(car_state.car_id)
-            if cleanup_response.status_code != 200:
-                code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
-                _api.log_error(cleanup_error_msg)
-                msg = msg + "\n" + cleanup_error_msg
-            else:
-                return _api.json_response(code, inserted_model)
+        return add_car_state_from_argument(car_state)
+
+def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
+    state_db_model = _api.car_state_to_db_model(car_state)
+    response = _db_access.add(
+        state_db_model,
+        checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_state.car_id)],
+    )
+    if response.status_code == 200:
+        inserted_model = _api.car_state_from_db_model(response.body[0])
+        code, msg = 200, f"Car stat (ID={inserted_model.id}) was succesfully created."
+        _api.log_info(msg)
+        cleanup_response = _remove_old_states(car_state.car_id)
+        if cleanup_response.status_code != 200:
+            code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
+            _api.log_error(cleanup_error_msg)
+            msg = msg + "\n" + cleanup_error_msg
         else:
-            code, msg = (
-                response.status_code,
-                f"Car state could not be sent. {response.body}",
-            )
-            _api.log_error(msg)
+            return _api.json_response(code, inserted_model)
+    else:
+        code, msg = (
+            response.status_code,
+            f"Car state could not be sent. {response.body}",
+        )
+        _api.log_error(msg)
     return _api.text_response(code, msg)
 
 
