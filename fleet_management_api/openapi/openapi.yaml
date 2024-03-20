@@ -566,7 +566,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarState'
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
           description: Successfully found all Car States complying with the request
             parameters.
         "400":
