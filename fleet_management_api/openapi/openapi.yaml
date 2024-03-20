@@ -1591,7 +1591,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
           description: The Route has been successfully created.
         "400":
           content:
