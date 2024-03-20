@@ -110,6 +110,7 @@ def order_state_from_db_model(
         id=order_state_db_model.id,
         status=order_state_db_model.status,
         order_id=order_state_db_model.order_id,
+        timestamp=order_state_db_model.timestamp
     )
 
 
