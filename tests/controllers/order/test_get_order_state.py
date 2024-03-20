@@ -150,23 +150,26 @@ class Test_Timeouts(unittest.TestCase):
             c.post("/v2/management/order", json=order)
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        database.set_content_timeout_ms(100)
+        database.set_content_timeout_ms(150)
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate?&since=0")
             default_state_timestamp = response.json[0]["timestamp"]
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
+                # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(
                     c.get, f"/v2/management/orderstate?wait=true&since={default_state_timestamp+1}"
                 )
-                time.sleep(0.05)
+                # this waiting thread gets the state before timeout is exceeded
+                time.sleep(0.1)
                 future_2 = executor.submit(
                     c.get, f"/v2/management/orderstate?wait=true&since={default_state_timestamp+1}"
                 )
-                time.sleep(0.05)
+                time.sleep(0.1)
+                # this thread posts the state. It is expected that the first waiting thread already exceeded timeout at this point
+                # and the second waiting thread gets the state
                 executor.submit(c.post, "/v2/management/orderstate", json=order_state)
-                time.sleep(0.05)
                 # first request times out and gets empty list
                 response = future_1.result()
                 self.assertEqual(len(response.json), 0)
