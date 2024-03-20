@@ -131,14 +131,6 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             c.post("/v2/management/car", json=car_1)
             c.post("/v2/management/car", json=car_2)
 
-    # def test_getting_car_state_for_existing_car_before_any_state_has_been_created_yields_empty_list(
-    #     self,
-    # ):
-    #     with self.app.app.test_client() as c:
-    #         response = c.get("/v2/management/carstate/1")
-    #         self.assertEqual(response.status_code, 200)
-    #         self.assertEqual(response.json, [])
-
     def test_a_car_state_is_automatically_created_for_any_new_car(self):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/carstate/1")
