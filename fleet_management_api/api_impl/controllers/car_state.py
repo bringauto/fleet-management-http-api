@@ -7,7 +7,7 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 
 
-def add_car_state(car_state: _models.CarState) -> _api.Response:
+def add_car_state() -> _api.Response:
     """Post new car state.
 
     :param car_state: Car state to be added.
