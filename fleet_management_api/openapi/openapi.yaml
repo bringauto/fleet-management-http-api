@@ -703,7 +703,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
           description: The new Order has been successfully created.
         "400":
           content:
