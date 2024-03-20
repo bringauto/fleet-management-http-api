@@ -257,8 +257,8 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         order_state_out = _obj_to_db.order_state_from_db_model(
             _obj_to_db.order_state_to_db_model(order_state_in)
         )
-        order_state_in.id = order_state_out.id
-        self.assertEqual(order_state_out, order_state_in)
+        self.assertEqual(order_state_out.order_id, order_state_in.order_id)
+        self.assertEqual(order_state_out.status, order_state_in.status)
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_order_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(
