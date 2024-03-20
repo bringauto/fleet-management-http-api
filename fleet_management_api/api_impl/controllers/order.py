@@ -4,6 +4,9 @@ import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.api_impl.controllers.order_state import (
+    create_order_state_from_argument as _create_order_state_from_argument
+)
 
 
 def create_order() -> _api.Response:
@@ -34,7 +37,12 @@ def create_order() -> _api.Response:
         )
         if response.status_code == 200:
             inserted_model = _api.order_from_db_model(response.body[0])
-            _api.log_info(f"Order (ID={inserted_model.id}) has been created and sent.")
+            _api.log_info(f"Order (ID={inserted_model.id}) has been created.")
+            order_state = _models.OrderState(
+                status=_models.OrderStatus.TO_ACCEPT,
+                order_id=inserted_model.id
+            )
+            _create_order_state_from_argument(order_state)
             return _api.json_response(200, inserted_model)
         else:
             return _api.log_and_respond(
