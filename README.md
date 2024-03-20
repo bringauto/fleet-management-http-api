@@ -162,8 +162,6 @@ To get Keycloak authentication working, all parameters in the security section o
 
 # Development
 
-# Development
-
 Before contributing to the project, make sure you have read the section (testing)[#testing] and (server re-generation)[#server-re-generation].
 
 Also, see the [docs](docs/development.md) that might contain important notes on how to create and modify API models and controllers.
