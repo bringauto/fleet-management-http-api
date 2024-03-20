@@ -160,6 +160,7 @@ To get Keycloak authentication working, all parameters in the security section o
 - realm : realm in which the client belongs (seen on top of the left side panel in Keycloak GUI).
 - keycloak_public_key_file : path to a public key used to decode JWT tokens (Realm settings -> Keys -> RS256 -> Public key).
 
+# Development
 
 # Development
 
