@@ -2106,7 +2106,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
           description: The Stop has been successfully created.
         "400":
           content:
