@@ -25,6 +25,7 @@ Requirements:
 Result:
 - The Car ID is automatically set by the server.
 - A Car is created.
+- A [Car State](#car-state) created with the `out_of_order` status.
 
 ### Delete
 
@@ -67,6 +68,7 @@ Requirements:
 Result:
 - The Order ID is automatically set by the server.
 - An Order is created.
+- An [Order State](#order-state) created with the `to_accept` status.
 
 ### Delete
 

@@ -17,7 +17,7 @@ def create_route(route):  # noqa: E501
     :param route: Route model in JSON format.
     :type route: dict | bytes
 
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route = Route.from_dict(connexion.request.get_json())  # noqa: E501

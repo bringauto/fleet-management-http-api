@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 1.2.0
+  version: 1.3.0
 servers:
 - url: /v2/management
 security:
@@ -566,7 +566,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarState'
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
           description: Successfully found all Car States complying with the request
             parameters.
         "400":
@@ -701,7 +703,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
           description: The new Order has been successfully created.
         "400":
           content:
@@ -1031,7 +1035,7 @@ paths:
             application/json:
               example:
               - orderId: 1
-                status: to_accept
+                status: accepted
                 carId: 1
               schema:
                 items:
@@ -1182,7 +1186,11 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
           description: All the Order States for the Order specified by its ID have
             been returned.
         "400":
@@ -1585,7 +1593,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
           description: The Route has been successfully created.
         "400":
           content:
@@ -2098,7 +2108,9 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
           description: The Stop has been successfully created.
         "400":
           content:

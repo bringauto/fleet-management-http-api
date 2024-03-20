@@ -38,7 +38,10 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         self,
     ):
         with self.app.app.test_client() as c:
-            response = c.get("/v2/management/orderstate?since=0")
+            response = c.get("/v2/management/orderstate")
+            default_state_timestamp = response.json[0]["timestamp"]
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/orderstate?since={default_state_timestamp+1}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
@@ -46,30 +49,20 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
-                future = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
-                )
+                future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 time.sleep(0.01)
                 executor.submit(c.post, "/v2/management/orderstate", json=order_state)
                 response = future.result()
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(len(response.json), 1)
 
-    def test_all_clients_waiting_get_responses_when_order_state_relevant_for_them_is_sent(
-        self,
-    ):
+    def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
-                future_1 = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
-                )
-                future_2 = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
-                )
-                future_3 = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
-                )
+                future_1 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
+                future_2 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
+                future_3 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 time.sleep(0.01)
                 executor.submit(c.post, "/v2/management/orderstate", json=order_state)
                 for fut in [future_1, future_2, future_3]:
@@ -89,7 +82,9 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
-        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
+        car = Car(
+            id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
+        )
         order_1 = Order(
             priority="high",
             user_id=1,
@@ -114,24 +109,18 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
-                future = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
-                )
-                future_1 = executor.submit(
-                    c.get, "/v2/management/orderstate/1?wait=true&since=0"
-                )
-                future_2 = executor.submit(
-                    c.get, "/v2/management/orderstate/2?wait=true&since=0"
-                )
+                future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
+                future_1 = executor.submit(c.get, "/v2/management/orderstate/1?wait=true&since=0")
+                future_2 = executor.submit(c.get, "/v2/management/orderstate/2?wait=true&since=0")
                 time.sleep(0.01)
                 executor.submit(c.post, "/v2/management/orderstate", json=order_state)
 
                 response = future.result()
-                self.assertEqual(len(response.json), 1)
+                self.assertEqual(len(response.json), 2)
                 response = future_1.result()
                 self.assertEqual(len(response.json), 1)
                 response = future_2.result()
-                self.assertEqual(len(response.json), 0)
+                self.assertEqual(len(response.json), 1)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
@@ -144,8 +133,10 @@ class Test_Timeouts(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
-        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
+        create_route(self.app, stop_ids=(1,))
+        car = Car(
+            id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
+        )
         order = Order(
             priority="high",
             user_id=1,
@@ -159,20 +150,26 @@ class Test_Timeouts(unittest.TestCase):
             c.post("/v2/management/order", json=order)
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        database.set_content_timeout_ms(120)
+        database.set_content_timeout_ms(150)
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?&since=0")
+            default_state_timestamp = response.json[0]["timestamp"]
+        with self.app.app.test_client() as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
+                # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
+                    c.get, f"/v2/management/orderstate?wait=true&since={default_state_timestamp+1}"
                 )
-                time.sleep(0.05)
+                # this waiting thread gets the state before timeout is exceeded
+                time.sleep(0.1)
                 future_2 = executor.submit(
-                    c.get, "/v2/management/orderstate?wait=true&since=0"
+                    c.get, f"/v2/management/orderstate?wait=true&since={default_state_timestamp+1}"
                 )
-                time.sleep(0.05)
+                time.sleep(0.1)
+                # this thread posts the state. It is expected that the first waiting thread already exceeded timeout at this point
+                # and the second waiting thread gets the state
                 executor.submit(c.post, "/v2/management/orderstate", json=order_state)
-                time.sleep(0.05)
                 # first request times out and gets empty list
                 response = future_1.result()
                 self.assertEqual(len(response.json), 0)
@@ -186,7 +183,8 @@ class Test_Timeouts(unittest.TestCase):
 
 
 class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
-    def setUp(self) -> None:
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mock_timestamp_ms: Mock) -> None:
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -209,6 +207,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             stop_route_id=1,
             notification_phone={},
         )
+        mock_timestamp_ms.return_value = 0
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car)
             c.post("/v2/management/order", json=order_1)
@@ -224,7 +223,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             mock_timestamp_ms.return_value = 100
             c.post("/v2/management/orderstate", json=order_state_2)
             response = c.get("/v2/management/orderstate?since=0")
-            self.assertEqual(len(response.json), 2)  # type: ignore
+            self.assertEqual(len(response.json), 4)  # type: ignore
             response = c.get("/v2/management/orderstate?since=60")
             self.assertEqual(len(response.json), 1)  # type: ignore
             response = c.get("/v2/management/orderstate?since=100")
@@ -266,14 +265,14 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate/1")
 
-            self.assertEqual(len(response.json), 0)  # type: ignore
+            self.assertEqual(len(response.json), 1)  # type: ignore
             mock_timestamp_ms.return_value = 50
             c.post("/v2/management/orderstate", json=order_state_1)
             mock_timestamp_ms.return_value = 100
             c.post("/v2/management/orderstate", json=order_state_2)
 
             states: list[dict] = c.get("/v2/management/orderstate/1").json  # type: ignore
-            self.assertEqual(len(states), 2)
+            self.assertEqual(len(states), 3)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
@@ -281,4 +280,4 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()  # pragma: no cover
+    unittest.main(buffer=True)

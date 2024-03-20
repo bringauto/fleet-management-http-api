@@ -6,6 +6,7 @@ Flask == 2.1.1
 python-dotenv >= 1.0.0
 psycopg2-binary >= 2.9.9
 python-keycloak == 3.7.0
+keycloak-client == 0.15.4
 pyjwt == 2.3.0
 cryptography == 3.4.8
 coverage>=2.17

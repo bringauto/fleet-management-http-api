@@ -4,6 +4,7 @@ import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.api_impl.controllers.car_state import add_car_state_from_argument as _add_car_state_from_argument
 
 
 def create_car() -> _api.Response:  # noqa: E501
@@ -28,6 +29,7 @@ def create_car() -> _api.Response:  # noqa: E501
         if response.status_code == 200:
             inserted_model = _api.car_from_db_model(response.body[0])
             _api.log_info(f"Car (ID={inserted_model.id}, name='{car.name}) has been created.")
+            _create_default_car_state(inserted_model.id)
             return _api.json_response(200, inserted_model)
         else:
             return _api.log_and_respond(
@@ -95,3 +97,14 @@ def update_car(car: dict | _models.Car) -> _api.Response:
             return _api.log_and_respond(response.status_code, msg)
     else:
         return _api.log_invalid_request_body_format()
+
+
+def _create_default_car_state(car_id: int) -> _api.Response:
+    car_state = _models.CarState(
+        status=_models.CarStatus.OUT_OF_ORDER,
+        car_id=car_id,
+        fuel=0,
+        speed=0.0
+    )
+    response = _add_car_state_from_argument(car_state)
+    return response

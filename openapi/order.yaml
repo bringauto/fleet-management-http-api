@@ -18,8 +18,9 @@ paths:
         '200':
           description: The new Order has been successfully created.
           content:
-            text/plain:
-              type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -215,7 +216,7 @@ paths:
                 [
                   {
                     "orderId": 1,
-                    "status": "to_accept",
+                    "status": "accepted",
                     "carId": 1
                   }
                 ]
@@ -247,8 +248,11 @@ paths:
         '200':
           description: All the Order States for the Order specified by its ID have been returned.
           content:
-            text/plain:
-              type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderState'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

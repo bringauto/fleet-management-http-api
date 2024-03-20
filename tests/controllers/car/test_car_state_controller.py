@@ -87,12 +87,6 @@ class Test_Getting_All_Car_States(unittest.TestCase):
             c.post("/v2/management/car", json=car_1)
             c.post("/v2/management/car", json=car_2)
 
-    def test_getting_all_car_states_when_state_has_been_created_yields_empty_list(self):
-        with self.app.app.test_client() as c:
-            response = c.get("/v2/management/carstate")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, [])
-
     def test_getting_all_car_states(self):
         car_state_1 = CarState(
             status="idle",
@@ -113,7 +107,7 @@ class Test_Getting_All_Car_States(unittest.TestCase):
             c.post("/v2/management/carstate", json=car_state_2)
             response = c.get("/v2/management/carstate")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 4)
 
 
 class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
@@ -137,13 +131,11 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             c.post("/v2/management/car", json=car_1)
             c.post("/v2/management/car", json=car_2)
 
-    def test_getting_car_state_for_existing_car_before_any_state_has_been_created_yields_empty_list(
-        self,
-    ):
+    def test_a_car_state_is_automatically_created_for_any_new_car(self):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/carstate/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, [])
+            self.assertEqual(len(response.json), 1)
 
     def test_getting_car_state_for_existing_car_after_state_has_been_created_yields_list_with_the_single_state(
         self,
@@ -193,7 +185,7 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             c.post("/v2/management/carstate", json=car_state_2)
             response = c.get("/v2/management/carstate/1?allAvailable=true")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 3)
 
 
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
@@ -217,9 +209,9 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 status="idle", car_id=1, fuel=50, speed=7, position=test_position
             )
             c.post("/v2/management/carstate", json=oldest_state)
-            for _ in range(1, max_n - 1):
+            for _ in range(1, max_n - 2):
                 car_state = CarState(
-                    status="stopped_by_phone",
+                    status="paused_by_phone",
                     car_id=1,
                     fuel=50,
                     speed=7,
@@ -232,7 +224,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(len(response.json), max_n - 1)
 
             car_state = CarState(
-                status="stopped_by_phone",
+                status="paused_by_phone",
                 car_id=1,
                 fuel=50,
                 speed=7,
@@ -244,7 +236,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(len(response.json), max_n)
 
             newest_state = CarState(
-                status="stopped_by_phone",
+                status="paused_by_phone",
                 car_id=1,
                 fuel=50,
                 speed=7,
@@ -270,7 +262,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         with self.app.app.test_client() as c:
             for i in range(0, max_n + 5):
                 car_state = CarState(
-                    status="stopped_by_phone",
+                    status="paused_by_phone",
                     car_id=1,
                     fuel=50,
                     speed=7,
@@ -279,7 +271,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 c.post("/v2/management/carstate", json=car_state)
             for i in range(max_n, 2 * max_n + 5):
                 car_state = CarState(
-                    status="stopped_by_phone",
+                    status="paused_by_phone",
                     car_id=2,
                     fuel=50,
                     speed=7,
@@ -331,10 +323,10 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
             c.post("/v2/management/carstate", json=state_1)
             c.post("/v2/management/carstate", json=state_2)
             response = c.get("/v2/management/carstate?allAvailable=true")
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 3)
             response = c.get("/v2/management/carstate/1?allAvailable=true")
             self.assertEqual(
-                len(response.json), 2, "Assert car states have been created."
+                len(response.json), 3, "Assert car states have been created."
             )
             c.delete("/v2/management/car/1")
             response = c.get("/v2/management/car/1")

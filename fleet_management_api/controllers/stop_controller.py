@@ -16,7 +16,7 @@ def create_stop(stop):  # noqa: E501
     :param stop: Stop model in JSON format.
     :type stop: dict | bytes
 
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         stop = Stop.from_dict(connexion.request.get_json())  # noqa: E501

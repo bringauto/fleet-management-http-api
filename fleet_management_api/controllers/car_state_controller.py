@@ -44,6 +44,6 @@ def get_car_states(car_id, all_available=None):  # noqa: E501
     :param all_available: Whether to return all available car states or only the latest one
     :type all_available: bool
 
-    :rtype: Union[CarState, Tuple[CarState, int], Tuple[CarState, int, Dict[str, str]]
+    :rtype: Union[List[CarState], Tuple[List[CarState], int], Tuple[List[CarState], int, Dict[str, str]]
     """
     return 'do some magic!'

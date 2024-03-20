@@ -55,13 +55,11 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         with self.app.app.test_client() as c:
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["OrderState"]["example"]
-
+            spec = c.get("/v2/management/openapi.json").json
+            example = spec["components"]["schemas"]["OrderState"]["example"]
             order = Order(
                 priority="high",
                 user_id=1,
@@ -83,7 +81,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
@@ -97,13 +95,13 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
             c.post("/v2/management/car", json=car)
             c.post("/v2/management/order", json=order)
 
-    def test_getting_all_order_states_when_state_has_been_created_yields_empty_list(
+    def test_a_single_order_state_is_automatically_created_when_order_is_created_with_to_accept_status(
         self,
     ):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, [])
+            self.assertEqual(len(response.json), 1)
 
     def test_getting_all_existing_states_for_given_order_by_specifying_since_as_zero(self):
         order_state_1 = OrderState(status="to_accept", order_id=1)
@@ -113,7 +111,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
             c.post("/v2/management/orderstate", json=order_state_2)
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 3)
 
     def test_getting_all_existing_states_for_given_order_without_specifying_since(self):
         order_state_1 = OrderState(status="to_accept", order_id=1)
@@ -123,7 +121,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
             c.post("/v2/management/orderstate", json=order_state_2)
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 3)
 
 
 class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
@@ -132,7 +130,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
@@ -155,27 +153,6 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             c.post("/v2/management/order", json=order_1)
             c.post("/v2/management/order", json=order_2)
 
-    def test_getting_order_state_for_existing_order_before_any_state_has_been_created_yields_empty_list(
-        self,
-    ):
-        with self.app.app.test_client() as c:
-            response = c.get("/v2/management/orderstate/1")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json, [])
-
-    def test_getting_order_state_for_existing_order_after_state_has_been_created_yields_list_containing_the_one_state(
-        self,
-    ):
-        order_state_1 = OrderState(status="to_accept", order_id=1)
-        order_state_2 = OrderState(status="canceled", order_id=2)
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=order_state_1)
-            c.post("/v2/management/orderstate", json=order_state_2)
-            response = c.get("/v2/management/orderstate/1")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
-            self.assertEqual(response.json[0]["id"], 1)
-
     def test_getting_order_state_for_nonexisting_order_returns_code_404(self):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate/4651684651")
@@ -189,9 +166,10 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             c.post("/v2/management/orderstate", json=order_state_2)
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 2)
-            self.assertEqual(response.json[0]["id"], 1)
-            self.assertEqual(response.json[1]["id"], 2)
+            self.assertEqual(len(response.json), 3)
+            self.assertListEqual(
+                [state["status"] for state in response.json], ["to_accept", "to_accept", "canceled"]
+            )
 
 
 class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestCase):
@@ -200,7 +178,7 @@ class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestC
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
@@ -239,7 +217,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
@@ -260,7 +238,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         with self.app.app.test_client() as c:
             oldest_state = OrderState(status="to_accept", order_id=1)
             c.post("/v2/management/orderstate", json=oldest_state)
-            for i in range(1, self.max_n - 1):
+            for i in range(1, self.max_n - 2):
                 order_state = OrderState(status="to_accept", order_id=1)
                 c.post("/v2/management/orderstate", json=order_state)
             response = c.get("/v2/management/orderstate/1?since=0")
@@ -291,7 +269,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1, ))
+        create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
@@ -323,7 +301,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
             c.post("/v2/management/orderstate", json=order_state_2)
             c.post("/v2/management/orderstate", json=other_order_state)
             response = c.get("/v2/management/orderstate/1?since=0")
-            self.assertEqual(len(response.json), 2)
+            self.assertEqual(len(response.json), 3)
 
             c.delete("/v2/management/order/1")
             response = c.get("/v2/management/orderstate/1?since=0")
@@ -331,7 +309,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
 
             response = c.get("/v2/management/orderstate?since=0")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 2)
 
 
 if __name__ == "__main__":
