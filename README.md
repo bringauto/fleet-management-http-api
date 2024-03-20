@@ -161,4 +161,8 @@ To get Keycloak authentication working, all parameters in the security section o
 - keycloak_public_key_file : path to a public key used to decode JWT tokens (Realm settings -> Keys -> RS256 -> Public key).
 
 
+# Development
 
+Before contributing to the project, make sure you have read the section (testing)[#testing] and (server re-generation)[#server-re-generation].
+
+Also, see the [docs](docs/development.md) that might contain important notes on how to create and modify API models and controllers.

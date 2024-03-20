@@ -1031,7 +1031,7 @@ paths:
             application/json:
               example:
               - orderId: 1
-                status: to_accept
+                status: accepted
                 carId: 1
               schema:
                 items:
@@ -1182,7 +1182,11 @@ paths:
       responses:
         "200":
           content:
-            text/plain: {}
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
           description: All the Order States for the Order specified by its ID have
             been returned.
         "400":
