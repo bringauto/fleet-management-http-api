@@ -18,8 +18,9 @@ paths:
         '200':
           description: The Platform HW has been successfully created.
           content:
-            text/plain:
-              type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformHW'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
