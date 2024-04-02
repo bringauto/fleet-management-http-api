@@ -16,7 +16,7 @@ def create_order_state(order_state):  # noqa: E501
     :param order_state: Order State model in JSON format.
     :type order_state: dict | bytes
 
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    :rtype: Union[OrderState, Tuple[OrderState, int], Tuple[OrderState, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         order_state = OrderState.from_dict(connexion.request.get_json())  # noqa: E501
