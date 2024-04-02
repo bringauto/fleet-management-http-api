@@ -48,13 +48,7 @@ paths:
                 [
                   {
                     "name": 'Lužánky',
-                    "points": [
-                      {
-                        "latitude": 49.204117,
-                        "longitude": 16.606525,
-                        "altitude": 400.25
-                      }
-                    ],
+
                     "stopIds": [1, 2, 3, 4]
                   }
                 ]

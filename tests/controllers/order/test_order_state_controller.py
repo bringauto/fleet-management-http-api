@@ -219,7 +219,15 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
-        order = Order(
+        order_1 = Order(
+            priority="high",
+            user_id=1,
+            car_id=1,
+            target_stop_id=1,
+            stop_route_id=1,
+            notification_phone={},
+        )
+        order_2 = Order(
             priority="high",
             user_id=1,
             car_id=1,
@@ -229,7 +237,8 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/order", json=order_1)
+            c.post("/v2/management/order", json=order_2)
         self.max_n = _db_models.OrderStateDBModel.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
@@ -261,6 +270,30 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             ids = [state["id"] for state in response.json]
             self.assertFalse(oldest_state.id in ids)
             self.assertTrue(newest_state.id in ids)
+
+    def test_total_number_of_order_states_does_not_exceed_number_of_orders_times_the_maximum_number_of_states_for_single_order(
+        self,
+    ):
+        _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
+        with self.app.app.test_client() as c:
+            order_state_1 = OrderState(status="to_accept", order_id=1)
+            for _ in range(200):
+                c.post("/v2/management/orderstate", json=order_state_1)
+            order_state_2 = OrderState(status="to_accept", order_id=2)
+            for _ in range(200):
+                c.post("/v2/management/orderstate", json=order_state_2)
+
+            response = c.get("/v2/management/orderstate/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 50)
+
+            response = c.get("/v2/management/orderstate/2?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 50)
+
+            response = c.get("/v2/management/orderstate?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 100)
 
 
 class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):

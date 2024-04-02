@@ -25,7 +25,7 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
     if response.status_code == 200:
         inserted_model = _api.order_state_from_db_model(response.body[0])
         _mark_order_as_updated(order_state.order_id)
-        _remove_old_states()
+        _remove_old_states(order_state.order_id)
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
         return _api.json_response(200, inserted_model)
     else:
@@ -73,14 +73,16 @@ def _get_order_states(
     return _api.json_response(200, order_states)
 
 
-def _remove_old_states() -> _api.Response:
-    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel)
-    extras = max(
-        len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states(), 0
-    )
-    if extras > 0:
+def _remove_old_states(order_id: int) -> _api.Response:
+    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id})
+    delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
+    if delta > 0:
         response = _db_access.delete_n(
-            _db_models.OrderStateDBModel, n=extras, column_name="timestamp", start_from="minimum"
+            _db_models.OrderStateDBModel,
+            n=delta,
+            column_name="timestamp",
+            start_from="minimum",
+            criteria={"order_id": lambda x: x == order_id},
         )
         return _api.log_and_respond(response.status_code, response.body)
     else:
