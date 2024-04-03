@@ -16,7 +16,7 @@ def create_hw(platform_hw):  # noqa: E501
     :param platform_hw: Platform HW model in JSON format.
     :type platform_hw: dict | bytes
 
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    :rtype: Union[PlatformHW, Tuple[PlatformHW, int], Tuple[PlatformHW, int, Dict[str, str]]
     """
     if connexion.request.is_json:
         platform_hw = PlatformHW.from_dict(connexion.request.get_json())  # noqa: E501

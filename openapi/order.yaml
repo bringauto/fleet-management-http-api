@@ -182,8 +182,9 @@ paths:
         '200':
           description: The new Order State has been successfully added.
           content:
-            text/plain:
-              type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

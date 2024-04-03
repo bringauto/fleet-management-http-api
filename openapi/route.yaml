@@ -47,14 +47,8 @@ paths:
               example:
                 [
                   {
+                    "id": 1,
                     "name": 'Lužánky',
-                    "points": [
-                      {
-                        "latitude": 49.204117,
-                        "longitude": 16.606525,
-                        "altitude": 400.25
-                      }
-                    ],
                     "stopIds": [1, 2, 3, 4]
                   }
                 ]
@@ -191,8 +185,9 @@ paths:
         '200':
           description: The Route Visualization has been successfully redefined.
           content:
-            text/plain:
-              type: string
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteVisualization'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
