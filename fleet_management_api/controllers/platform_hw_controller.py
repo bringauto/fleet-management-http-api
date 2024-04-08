@@ -24,7 +24,7 @@ def create_hw(platform_hw):  # noqa: E501
 
 
 def delete_hw(platform_hw_id):  # noqa: E501
-    """Delete Platform HW with given ID.
+    """Delete Platform HW with the given ID.
 
      # noqa: E501
 
@@ -37,7 +37,7 @@ def delete_hw(platform_hw_id):  # noqa: E501
 
 
 def get_hw(platform_hw_id):  # noqa: E501
-    """Find Platform HW with given ID.
+    """Find Platform HW with the given ID.
 
      # noqa: E501
 

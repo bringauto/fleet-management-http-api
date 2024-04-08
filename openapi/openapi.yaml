@@ -53,10 +53,10 @@ paths:
 
   /order:
     $ref: 'order.yaml#/paths/~1order'
-  /order/{orderId}:
-    $ref: 'order.yaml#/paths/~1order~1{orderId}'
-  /order/wait/{carId}:
-    $ref: 'order.yaml#/paths/~1order~1wait~1{carId}'
+  /order/{carId}:
+    $ref: 'order.yaml#/paths/~1order~1{carId}'
+  /order/{carId}/{orderId}:
+    $ref: 'order.yaml#/paths/~1order~1{carId}~1{orderId}'
   /orderstate:
     $ref: 'order.yaml#/paths/~1orderstate'
   /orderstate/{orderId}:

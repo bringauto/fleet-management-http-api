@@ -24,7 +24,7 @@ def create_order_state(order_state):  # noqa: E501
 
 
 def get_all_order_states(wait=None, since=None):  # noqa: E501
-    """Find one or all Order States for all existing Orders.
+    """Find Order States for all existing Orders.
 
      # noqa: E501
 
