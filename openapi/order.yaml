@@ -68,7 +68,7 @@ paths:
 
   /order/{carId}:
     get:
-      operationId: getOrder
+      operationId: getCarOrders
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order

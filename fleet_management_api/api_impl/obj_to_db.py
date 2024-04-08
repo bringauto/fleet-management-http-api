@@ -30,7 +30,7 @@ def car_state_to_db_model(car_state: _models.CarState) -> _db_models.CarStateDBM
         car_position = None
     else:
         car_position = car_state.position.to_dict()
-    timestamp = timestamp = _tstamp.timestamp_ms()
+    timestamp = _tstamp.timestamp_ms()
     return _db_models.CarStateDBModel(
         id=car_state.id,
         status=str(car_state.status),
@@ -51,6 +51,7 @@ def car_state_from_db_model(
         car_position = _models.GNSSPosition.from_dict(car_state_db_model.position)
     return _models.CarState(
         id=car_state_db_model.id,
+        timestamp=car_state_db_model.timestamp,
         status=car_state_db_model.status,
         car_id=car_state_db_model.car_id,
         speed=car_state_db_model.speed,

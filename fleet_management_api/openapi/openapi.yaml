@@ -813,7 +813,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/{carId}:
     get:
-      operationId: get_order
+      operationId: get_car_orders
       parameters:
       - description: "Applies to GET methods when no order statuses would be returned\
           \ at the moment of request. If wait=true, \\ the request will wait for the\

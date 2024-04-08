@@ -23,7 +23,7 @@ def create_order(order):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order(car_id, wait=None, since=None):  # noqa: E501
+def get_car_orders(car_id, wait=None, since=None):  # noqa: E501
     """Find existing Orders by the corresponding Car ID and return them.
 
      # noqa: E501
@@ -40,7 +40,7 @@ def get_order(car_id, wait=None, since=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order_0(car_id, order_id, wait=None, since=None):  # noqa: E501
+def get_order(car_id, order_id, wait=None, since=None):  # noqa: E501
     """Find an existing Order by the car ID and the order ID and return it.
 
      # noqa: E501

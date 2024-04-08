@@ -74,6 +74,7 @@ class Test_Creating_Car_State_DB_Model(unittest.TestCase):
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
         )
         car_state_db_model = _obj_to_db.car_state_to_db_model(car_state)
+
         self.assertEqual(car_state_db_model.status, car_state.status)
         self.assertEqual(car_state_db_model.car_id, car_state.car_id)
         self.assertEqual(car_state_db_model.speed, car_state.speed)
@@ -91,26 +92,27 @@ class Test_Creating_Car_State_DB_Model(unittest.TestCase):
         self.assertEqual(car_state_db_model.fuel, car_state.fuel)
         self.assertEqual(car_state_db_model.position, car_state.position)
 
-    def test_car_state_converted_to_db_model_and_back_is_unchanged(self):
-        state_in = CarState(status="idle", car_id=1)
-        state_out = _obj_to_db.car_state_from_db_model(
-            _obj_to_db.car_state_to_db_model(state_in)
-        )
+    @patch("fleet_management_api.database.timestamp._get_time_in_ms")
+    def test_car_state_converted_to_db_model_and_back_is_unchanged(self, mock_timestamp_in_ms: Mock):
+        mock_timestamp_in_ms.return_value = 123456
+        state_in = CarState(status="idle", car_id=1, timestamp=123456)
+        state_out = _obj_to_db.car_state_from_db_model(_obj_to_db.car_state_to_db_model(state_in))
         self.assertEqual(state_out, state_in)
 
+    @patch("fleet_management_api.database.timestamp._get_time_in_ms")
     def test_car_state_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(
-        self,
+        self, mock_timestamp_in_ms: Mock
     ):
+        mock_timestamp_in_ms.return_value = 123456
         state_in = CarState(
+            timestamp=123456,
             status="idle",
             car_id=1,
             speed=7,
             fuel=8,
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
         )
-        state_out = _obj_to_db.car_state_from_db_model(
-            _obj_to_db.car_state_to_db_model(state_in)
-        )
+        state_out = _obj_to_db.car_state_from_db_model(_obj_to_db.car_state_to_db_model(state_in))
         state_in.id = state_out.id
         self.assertEqual(state_out, state_in)
 
