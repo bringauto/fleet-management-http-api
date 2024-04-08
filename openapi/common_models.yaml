@@ -35,3 +35,22 @@ components:
       type: integer
       format: int64
       example: 1616425200000
+
+  parameters:
+    Wait:
+      name: wait
+      description: Applies to GET methods when no order statuses would be returned at the moment of request. If wait=true, \
+        the request will wait for the next order state to be created and then return it. If wait=False or unspecified, the request will return \
+        an empty list.
+      in: query
+      schema:
+        type: boolean
+        default: false
+    Since:
+      name: since
+      description: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified,
+        all states are returned (since is set to 0 in that case).
+      in: query
+      schema:
+        type: integer
+        format: int64

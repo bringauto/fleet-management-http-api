@@ -32,8 +32,8 @@ paths:
     get:
       operationId: getOrders
       parameters:
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
@@ -74,8 +74,8 @@ paths:
         - order
       summary: Find existing Orders by the corresponding Car ID and return them.
       parameters:
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
         - name: carId
           in: path
           description: ID of the Car for which Orders shall be returned.
@@ -128,8 +128,8 @@ paths:
         - order
       summary: Find an existing Order by the car ID and the order ID and return it.
       parameters:
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
           description: The Order with the specified car ID and order ID has been found and returned.
@@ -154,15 +154,6 @@ paths:
       tags:
         - order
       summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
-      parameters:
-        - name: orderId
-          in: path
-          description: ID of the Order to be deleted.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
       responses:
         '200':
           description: The Order with the specified ID has been successfully deleted.
@@ -221,8 +212,8 @@ paths:
         - orderState
       summary: Find Order States for all existing Orders.
       parameters:
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
           description: Successfully found all Order States complying with the request parameters.
@@ -262,8 +253,8 @@ paths:
           schema:
             type: integer
             format: int32
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
           description: Order States for the Order specified by its ID have been found, sorted by their creation timestamp \
@@ -345,24 +336,4 @@ components:
       description: Priority (low, normal, high)
       pattern: ^(low|normal|high)$
       default: "normal"
-
-  parameters:
-    Wait:
-      name: wait
-      description: Applies to GET methods when no order statuses would be returned at the moment of request. If wait=true, \
-        the request will wait for the next order state to be created and then return it. If wait=False or unspecified, the request will return \
-        an empty list.
-      in: query
-      schema:
-        type: boolean
-        default: false
-    Since:
-      name: since
-      description: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified,
-        all states are returned (since is set to 0 in that case).
-      in: query
-      schema:
-        type: integer
-        format: int64
-
 
