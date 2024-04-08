@@ -63,7 +63,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Find Platform HW with given ID.
+      summary: Find Platform HW with the given ID.
       parameters:
         - name: platformHwId
           in: path
@@ -95,7 +95,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Delete Platform HW with given ID.
+      summary: Delete Platform HW with the given ID.
       parameters:
         - name: platformHwId
           in: path
