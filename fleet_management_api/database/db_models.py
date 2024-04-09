@@ -67,9 +67,7 @@ class CarStateDBModel(Base):
     speed: _Mapped[float] = _mapped_column(_sqa.Float)
     fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    timestamp: _Mapped[int] = _mapped_column(
-        _sqa.BigInteger
-    )  # timestamp attribute serves for auto-removal of old states
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="noload")
 
@@ -94,6 +92,7 @@ class OrderDBModel(Base):
     __tablename__ = "orders"
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
     target_stop_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("stops.id"), nullable=False)
     stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
@@ -112,9 +111,9 @@ class OrderDBModel(Base):
 
     def __repr__(self) -> str:
         return (
-            f"Order(ID={self.id}, priority={self.priority}, user_ID={self.user_id}, car_ID={self.car_id}, "
-            f"target_stop_ID={self.target_stop_id}, stop_route_ID={self.stop_route_id}, "
-            f"notification_phone={self.notification_phone})"
+            f"Order(ID={self.id}, priority={self.priority}, user_ID={self.user_id}, "
+            f"car_ID={self.car_id}, target_stop_ID={self.target_stop_id}, "
+            f"stop_route_ID={self.stop_route_id}, notification_phone={self.notification_phone})"
         )
 
 

@@ -23,6 +23,7 @@ def add_car_state() -> _api.Response:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
         return add_car_state_from_argument(car_state)
 
+
 def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
     state_db_model = _api.car_state_to_db_model(car_state)
     response = _db_access.add(
@@ -49,9 +50,13 @@ def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
     return _api.text_response(code, msg)
 
 
-def get_all_car_states() -> _api.Response:
+def get_all_car_states(since: int = 0, wait: bool = False) -> _api.Response:
     """Get all car states for all the cars."""
-    car_state_db_models = _db_access.get(_db_models.CarStateDBModel)
+    car_state_db_models = _db_access.get(
+        _db_models.CarStateDBModel,
+        criteria={"timestamp": lambda x: x >= since},
+        wait=wait
+    )
     car_states = [
         _api.car_state_from_db_model(car_state_db_model)
         for car_state_db_model in car_state_db_models
@@ -59,12 +64,16 @@ def get_all_car_states() -> _api.Response:
     return _api.json_response(200, car_states)
 
 
-def get_car_states(car_id: int, all_available: bool = False) -> _api.Response:
+def get_car_states(car_id: int, since: int = 0, wait: bool = False) -> _api.Response:
     """Get all car states for a car idenfified by 'car_id' of an existing car."""
     try:
-        car_state_db_models = _db_access.get_children(_db_models.CarDBModel, car_id, "states")
-        if not all_available and car_state_db_models:
-            car_state_db_models = [car_state_db_models[-1]]
+        car_state_db_models = _db_access.get_children(
+            parent_base=_db_models.CarDBModel,
+            parent_id=car_id,
+            children_col_name="states",
+            criteria={"timestamp": lambda x: x >= since},
+            wait=wait
+        )
         car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
         return _api.json_response(200, car_states)
     except _db_access.ParentNotFound as e:

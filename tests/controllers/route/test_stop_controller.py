@@ -261,7 +261,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
             response = c.delete("/v2/management/stop/1")
             self.assertEqual(response.status_code, 400)
 
-            c.delete("/v2/management/order/1")
+            c.delete("/v2/management/order/1/1")
             c.delete("/v2/management/route/1")
             response = c.delete("/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)

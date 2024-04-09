@@ -30,7 +30,7 @@ def car_state_to_db_model(car_state: _models.CarState) -> _db_models.CarStateDBM
         car_position = None
     else:
         car_position = car_state.position.to_dict()
-    timestamp = timestamp = _tstamp.timestamp_ms()
+    timestamp = _tstamp.timestamp_ms()
     return _db_models.CarStateDBModel(
         id=car_state.id,
         status=str(car_state.status),
@@ -51,6 +51,7 @@ def car_state_from_db_model(
         car_position = _models.GNSSPosition.from_dict(car_state_db_model.position)
     return _models.CarState(
         id=car_state_db_model.id,
+        timestamp=car_state_db_model.timestamp,
         status=car_state_db_model.status,
         car_id=car_state_db_model.car_id,
         speed=car_state_db_model.speed,
@@ -66,6 +67,7 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
         notification_phone = order.notification_phone.to_dict()
     return _db_models.OrderDBModel(
         id=order.id,
+        timestamp=_tstamp.timestamp_ms(),
         priority=order.priority,
         user_id=order.user_id,
         car_id=order.car_id,
@@ -83,6 +85,7 @@ def order_from_db_model(order_db_model: _db_models.OrderDBModel) -> _models.Orde
         notification_phone = _models.MobilePhone.from_dict(order_db_model.notification_phone)
     return _models.Order(
         id=order_db_model.id,
+        timestamp=order_db_model.timestamp,
         priority=order_db_model.priority,
         user_id=order_db_model.user_id,
         car_id=order_db_model.car_id,

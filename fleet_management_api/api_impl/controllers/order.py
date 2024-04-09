@@ -50,7 +50,7 @@ def create_order() -> _api.Response:
             )
 
 
-def delete_order(order_id: int) -> _api.Response:
+def delete_order(car_id: int, order_id: int) -> _api.Response:
     """Delete an existing order."""
     response = _db_access.delete(_db_models.OrderDBModel, order_id)
     if response.status_code == 200:
@@ -63,50 +63,51 @@ def delete_order(order_id: int) -> _api.Response:
         return _api.text_response(response.status_code, msg)
 
 
-def get_order(order_id: int) -> _api.Response:
+def get_order(car_id: int, order_id: int, since: int = 0) -> _api.Response:
     """Get an existing order."""
-    order_db_models = _db_access.get(
-        _db_models.OrderDBModel, criteria={"id": lambda x: x == order_id}
+    order_db_models = _db_access.get_children(
+        parent_base=_db_models.CarDBModel,
+        parent_id=car_id,
+        children_col_name="orders",
+        criteria={
+            "id": lambda x: x == order_id,
+            "timestamp": lambda z: z >= since
+        }
     )
     if len(order_db_models) == 0:
-        msg = f"Order with ID={order_id} was not found."
+        msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
         _api.log_error(msg)
         return _api.text_response(404, msg)
     else:
-        msg = f"Found order with ID={order_id}"
+        msg = f"Found order with ID={order_id} of car with ID={car_id}."
         _api.log_info(msg)
         return _api.json_response(200, _api.order_from_db_model(order_db_models[0]))
 
 
-def get_updated_orders(car_id: int) -> _api.Response:
-    """Returns all orders for a given car that have been updated since their were last requested.
-
-    After the order have been returned from the API, they are not longer considered updated.
-    """
+def get_car_orders(car_id: int, since: int = 0) -> _api.Response:
+    """Get all orders for a given car."""
     if not _car_exist(car_id):
         return _api.log_and_respond(404, f"Car with ID={car_id} does not exist.")
-    order_db_models: list[_db_models.OrderDBModel] = _db_access.get(
-        _db_models.OrderDBModel,
-        criteria={"car_id": lambda x: x == car_id, "updated": lambda x: x == True},
+    order_db_models = _db_access.get_children(
+        parent_base=_db_models.CarDBModel,
+        parent_id=car_id,
+        children_col_name="orders",
+        criteria={"timestamp": lambda z: z >= since}
     )
-    for m in order_db_models:
-        m.updated = False
-        response = _db_access.update(m)
-        if response.status_code != 200:
-            return _api.log_and_respond(
-                response.status_code, f"Error when updating order (ID={m.id}). {response.body}"
-            )
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
-    _api.log_info(f"Returning {len(orders)} updated orders for car with ID={car_id}.")
+    _api.log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
     return _api.json_response(200, orders)
 
 
-def get_orders() -> _api.Response:
+def get_orders(since: int = 0) -> _api.Response:
     """Get all existing orders."""
     _api.log_info("Listing all existing orders.")
     body = [
         _api.order_from_db_model(order_db_model)
-        for order_db_model in _db_access.get(_db_models.OrderDBModel)
+        for order_db_model in _db_access.get(
+            _db_models.OrderDBModel,
+            criteria={"timestamp": lambda x: x >= since}
+        )
     ]
     return _api.json_response(200, body)
 

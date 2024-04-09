@@ -31,7 +31,26 @@ components:
           type: string
           example: '+420123456789'
     Timestamp:
-      description: A Unix timestamp in milliseconds.
+      description: A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.
       type: integer
       format: int64
       example: 1616425200000
+
+  parameters:
+    Wait:
+      name: wait
+      description: Applies to GET methods when no objects would be returned at the moment of request. If wait=true, \
+        the request will wait for the next object to be created and then returns it. If wait=False or unspecified, the request will return \
+        an empty list.
+      in: query
+      schema:
+        type: boolean
+        default: false
+    Since:
+      name: since
+      description: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified,
+        all objects are returned (since is set to 0 in that case).
+      in: query
+      schema:
+        type: integer
+        format: int64

@@ -172,45 +172,6 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             )
 
 
-class Test_Adding_Order_State_Makes_Order_To_Be_Listed_As_Updated(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
-        create_platform_hws(self.app)
-        create_stops(self.app, 1)
-        create_route(self.app, stop_ids=(1,))
-        car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
-        order_1 = Order(
-            priority="high",
-            user_id=1,
-            car_id=1,
-            target_stop_id=1,
-            stop_route_id=1,
-            notification_phone={},
-        )
-        order_2 = Order(
-            priority="high",
-            user_id=1,
-            car_id=1,
-            target_stop_id=1,
-            stop_route_id=1,
-            notification_phone={},
-        )
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order_1)
-            c.post("/v2/management/order", json=order_2)
-
-    def test_adding_state_to_existing_order_makes_the_order_to_appear_as_updated(self):
-        order_state = OrderState(status="to_accept", order_id=1)
-        with self.app.app.test_client() as c:
-            c.get("/v2/management/order/wait/1")
-            c.post("/v2/management/orderstate", json=order_state)
-            response = c.get("/v2/management/order/wait/1")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
-
-
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
@@ -336,7 +297,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(len(response.json), 3)
 
-            c.delete("/v2/management/order/1")
+            c.delete("/v2/management/order/1/1")
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 404)
 

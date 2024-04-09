@@ -189,10 +189,13 @@ paths:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getAllCarStates
+      parameters:
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Find one or all Car States for a Car with the specified ID.
+      summary: Find one or all Car States for all existing Cars.
       responses:
         '200':
           description: Successfully found all Car States complying with the request parameters.
@@ -215,8 +218,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Find one or all Car States for a given Car.
+      summary: Find one or all Car States for a Car with given ID.
       parameters:
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
         - name: carId
           in: path
           description: ID of the Car for which to find the Car States.
@@ -225,13 +230,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: allAvailable
-          in: query
-          description: Whether to return all available car states or only the latest one
-          required: false
-          example: true
-          schema:
-            type: boolean
       responses:
         '200':
           description: Successfully found all Car States complying with the request parameters.
@@ -285,6 +283,8 @@ components:
       properties:
         id:
           $ref: 'common_models.yaml#/components/schemas/Id'
+        timestamp:
+          $ref: 'common_models.yaml#/components/schemas/Timestamp'
         status:
           $ref: '#/components/schemas/CarStatus'
         fuel:

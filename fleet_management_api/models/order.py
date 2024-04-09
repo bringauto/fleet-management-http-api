@@ -16,7 +16,7 @@ class Order(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, priority='normal', user_id=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None):  # noqa: E501
+    def __init__(self, id=None, priority='normal', user_id=None, timestamp=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None):  # noqa: E501
         """Order - a model defined in OpenAPI
 
         :param id: The id of this Order.  # noqa: E501
@@ -25,6 +25,8 @@ class Order(Model):
         :type priority: str
         :param user_id: The user_id of this Order.  # noqa: E501
         :type user_id: int
+        :param timestamp: The timestamp of this Order.  # noqa: E501
+        :type timestamp: int
         :param car_id: The car_id of this Order.  # noqa: E501
         :type car_id: int
         :param notification: The notification of this Order.  # noqa: E501
@@ -40,6 +42,7 @@ class Order(Model):
             'id': int,
             'priority': str,
             'user_id': int,
+            'timestamp': int,
             'car_id': int,
             'notification': str,
             'target_stop_id': int,
@@ -51,6 +54,7 @@ class Order(Model):
             'id': 'id',
             'priority': 'priority',
             'user_id': 'userId',
+            'timestamp': 'timestamp',
             'car_id': 'carId',
             'notification': 'notification',
             'target_stop_id': 'targetStopId',
@@ -61,6 +65,7 @@ class Order(Model):
         self._id = id
         self._priority = priority
         self._user_id = user_id
+        self._timestamp = timestamp
         self._car_id = car_id
         self._notification = notification
         self._target_stop_id = target_stop_id
@@ -146,6 +151,29 @@ class Order(Model):
             raise ValueError("Invalid value for `user_id`, must not be `None`")  # noqa: E501
 
         self._user_id = user_id
+
+    @property
+    def timestamp(self) -> int:
+        """Gets the timestamp of this Order.
+
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
+
+        :return: The timestamp of this Order.
+        :rtype: int
+        """
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp: int):
+        """Sets the timestamp of this Order.
+
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
+
+        :param timestamp: The timestamp of this Order.
+        :type timestamp: int
+        """
+
+        self._timestamp = timestamp
 
     @property
     def car_id(self) -> int:

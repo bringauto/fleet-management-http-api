@@ -31,13 +31,15 @@ paths:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
     get:
       operationId: getOrders
+      parameters:
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Find all currently existing Orders.
       responses:
         '200':
-          description: All the currently existing Orders have been returned.
+          description: All the currently existing Orders have been sorted by their creation timestamp from the oldest to newest and returned.
           content:
             application/json:
               schema:
@@ -62,25 +64,72 @@ paths:
           $ref: 'errors.yaml#/components/responses/Forbidden'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
-  /order/{orderId}:
+
+  /order/{carId}:
+    get:
+      operationId: getCarOrders
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+      tags:
+        - order
+      summary: Find existing Orders by the corresponding Car ID and return them.
+      parameters:
+        - $ref: 'common_models.yaml#/components/parameters/Since'
+        - name: carId
+          in: path
+          description: ID of the Car for which Orders shall be returned.
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The Orders assigned to the Car with the given ID have been found, sorted by their creation timestamp from oldest to newest and returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: 'errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: 'errors.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'errors.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+
+  /order/{carId}/{orderId}:
+    parameters:
+    - name: carId
+      in: path
+      description: ID of the Car to which the Order is assigned.
+      required: true
+      example: 1
+      schema:
+        type: integer
+        format: int32
+    - name: orderId
+      in: path
+      description: ID of the Order to be returned.
+      required: true
+      example: 1
+      schema:
+        type: integer
+        format: int32
+
     get:
       operationId: getOrder
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Find an existing Order by its ID and return it.
+      summary: Find an existing Order by the car ID and the order ID and return it.
       parameters:
-        - name: orderId
-          in: path
-          description: ID of the Order to be returned.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
-          description: The Order with the specified ID has been found and returned.
+          description: The Order with the specified car ID and order ID has been found and returned.
           content:
             application/json:
               schema:
@@ -95,74 +144,32 @@ paths:
           $ref: 'errors.yaml#/components/responses/NotFound'
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
+
     delete:
-      operationId: deleteOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-      tags:
-        - order
-      summary: Delete an Order with the specified ID.
-      parameters:
-        - name: orderId
-          in: path
-          description: ID of the Order to be deleted.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: The Order with the specified ID has been successfully deleted.
-          content:
-            text/plain:
-              type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
-        default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
-  /order/wait/{carId}:
-    get:
-      operationId: getUpdatedOrders
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-      tags:
-        - order
-      summary: Get updated Orders for a given Car specified by its ID.
-      parameters:
-        - name: carId
-          in: path
-          description: ID of the Car for which updated Orders are requested.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: All the updated Orders for the specified Car have been returned.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '408':
-          $ref: 'errors.yaml#/components/responses/RequestTimeout'
-        default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+        operationId: deleteOrder
+        x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+        tags:
+          - order
+        summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
+        responses:
+          '200':
+            description: The Order with the specified ID has been successfully deleted.
+            content:
+              text/plain:
+                type: string
+          '400':
+            $ref: 'errors.yaml#/components/responses/BadRequest'
+          '401':
+            $ref: 'errors.yaml#/components/responses/Unauthorized'
+          '403':
+            $ref: 'errors.yaml#/components/responses/Forbidden'
+          '404':
+            $ref: 'errors.yaml#/components/responses/NotFound'
+          '405':
+            $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+          default:
+            $ref: 'errors.yaml#/components/responses/UnexpectedError'
+
   /orderstate:
     post:
       operationId: createOrderState
@@ -180,7 +187,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The new Order State has been successfully added.
+          description: The new Order State has been successfully posted.
           content:
             application/json:
               schema:
@@ -200,10 +207,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Find one or all Order States for all existing Orders.
+      summary: Find Order States for all existing Orders.
       parameters:
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
           description: Successfully found all Order States complying with the request parameters.
@@ -243,11 +250,12 @@ paths:
           schema:
             type: integer
             format: int32
-        - $ref: '#/components/parameters/Wait'
-        - $ref: '#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
-          description: All the Order States for the Order specified by its ID have been returned.
+          description: Order States for the Order specified by its ID have been found, sorted by their creation timestamp \
+            from the oldest to the newest and returned.
           content:
             application/json:
               schema:
@@ -280,6 +288,8 @@ components:
           $ref: "#/components/schemas/Priority"
         userId:
           $ref: 'common_models.yaml#/components/schemas/Id'
+        timestamp:
+          $ref: 'common_models.yaml#/components/schemas/Timestamp'
         carId:
           $ref: 'common_models.yaml#/components/schemas/Id'
         notification:
@@ -323,24 +333,4 @@ components:
       description: Priority (low, normal, high)
       pattern: ^(low|normal|high)$
       default: "normal"
-
-  parameters:
-    Wait:
-      name: wait
-      description: Applies to GET methods when no order statuses would be returned at the moment of request. If wait=true, \
-        the request will wait for the next order state to be created and then return it. If wait=False or unspecified, the request will return \
-        an empty list.
-      in: query
-      schema:
-        type: boolean
-        default: false
-    Since:
-      name: since
-      description: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified,
-        all states are returned (since is set to 0 in that case).
-      in: query
-      schema:
-        type: integer
-        format: int64
-
 

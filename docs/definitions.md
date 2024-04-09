@@ -68,10 +68,15 @@ Required data:
 - default route ID: unsigned integer
 - under test: boolean
 
+Data assigned by API:
+- id: unsigned integer
+- timestamp: unsigned integer
+
 Example:
 ```json
 {
     "id": 12,
+    "timestamp": 1707805396,
     "name": "Car 1",
     "platform_hw_id": 1,
     "car_admin_phone": "123456789",
@@ -95,6 +100,7 @@ Example:
 ```json
 {
     "id": 12,
+    "timestamp": 1707805396,
     "car_id": 1,
     "status": "idle",
     "fuel": 100,
@@ -119,11 +125,16 @@ Required data:
 - route ID: unsigned integer
 - notification phone: Mobile Phone
 
+Data assigned by API:
+- id: unsigned integer
+- timestamp: unsigned integer (time of the order's creation)
+
 Example:
 ```json
 {
     "id": 12,
     "priority": "normal",
+    "timestamp": 1707805396,
     "user_id": 1,
     "notification": "Please deliver the package to the address",
     "target_stop_id": 1,
@@ -138,9 +149,9 @@ Data structure containing attributes of a given Order, that change in time.
 
 Required data:
 - order status: enum, available options = {to_accept, accepted, in_progress, done, cancelled}
-- order ID: unsigned integer
 
 Data assigned by API:
+- order ID: unsigned integer
 - Timestamp: unsigned integer
 
 Example:
@@ -176,6 +187,9 @@ Required data:
 - name: UTF-8 encoded string
 - stop IDs: set of unsigned integers
 
+Data assigned by API:
+- id: unsigned integer
+
 Example:
 ```json
 {
@@ -192,6 +206,10 @@ Route Visualization represent an ordered set of physical locations for visualiza
 Required data:
 - route ID: unsigned integer
 - points: list of GNSSPosition
+- hexcolor: string
+
+Data assigned by API:
+- id: unsigned integer
 
 Example:
 ```json
@@ -222,6 +240,9 @@ Required data:
 - name: UTF-8 encoded string
 - position: [GNSSPosition](#gnss-position)
 - notification phone: [Mobile Phone](#mobile-phone)
+
+Data assigned by API:
+- id: unsigned integer
 
 Example:
 ```json

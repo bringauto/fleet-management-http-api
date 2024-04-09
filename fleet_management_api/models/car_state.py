@@ -16,11 +16,13 @@ class CarState(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, status=None, fuel=0, car_id=None, speed=0.0, position=None):  # noqa: E501
+    def __init__(self, id=None, timestamp=None, status=None, fuel=0, car_id=None, speed=0.0, position=None):  # noqa: E501
         """CarState - a model defined in OpenAPI
 
         :param id: The id of this CarState.  # noqa: E501
         :type id: int
+        :param timestamp: The timestamp of this CarState.  # noqa: E501
+        :type timestamp: int
         :param status: The status of this CarState.  # noqa: E501
         :type status: CarStatus
         :param fuel: The fuel of this CarState.  # noqa: E501
@@ -34,6 +36,7 @@ class CarState(Model):
         """
         self.openapi_types = {
             'id': int,
+            'timestamp': int,
             'status': CarStatus,
             'fuel': int,
             'car_id': int,
@@ -43,6 +46,7 @@ class CarState(Model):
 
         self.attribute_map = {
             'id': 'id',
+            'timestamp': 'timestamp',
             'status': 'status',
             'fuel': 'fuel',
             'car_id': 'carId',
@@ -51,6 +55,7 @@ class CarState(Model):
         }
 
         self._id = id
+        self._timestamp = timestamp
         self._status = status
         self._fuel = fuel
         self._car_id = car_id
@@ -88,6 +93,29 @@ class CarState(Model):
         """
 
         self._id = id
+
+    @property
+    def timestamp(self) -> int:
+        """Gets the timestamp of this CarState.
+
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
+
+        :return: The timestamp of this CarState.
+        :rtype: int
+        """
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp: int):
+        """Sets the timestamp of this CarState.
+
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
+
+        :param timestamp: The timestamp of this CarState.
+        :type timestamp: int
+        """
+
+        self._timestamp = timestamp
 
     @property
     def status(self) -> CarStatus:

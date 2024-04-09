@@ -175,7 +175,7 @@ def delete_n(
             criteria[attr_label](getattr(table.columns, attr_label))
             for attr_label in criteria.keys()
         ]
-        query = _sqa.select(table.c.id).where(*clauses)
+        query = _sqa.select(table.c.id).where(*clauses)  # type: ignore
         if start_from == "minimum":
             query = query.order_by(table.c.id)
         else:
@@ -241,7 +241,7 @@ def get(
             criteria[attr_label](getattr(table.columns, attr_label))
             for attr_label in criteria.keys()
         ]
-        stmt = _sqa.select(base).where(*clauses)
+        stmt = _sqa.select(base).where(*clauses)  # type: ignore
         if omitted_relationships is not None:
             for item in omitted_relationships:
                 stmt = stmt.options(_noload(item))
@@ -260,6 +260,9 @@ def get_children(
     parent_id: int,
     children_col_name: str,
     connection_source: Optional[_sqa.Engine] = None,
+    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
+    wait: bool = False,
+    timeout_ms: int = 1000
 ) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
@@ -269,9 +272,20 @@ def get_children(
     (an sqlalchemy Engine object).
     """
     source = check_and_return_current_connection_source(connection_source)
+    if criteria is None:
+        criteria = {}
+    child_base = getattr(parent_base, children_col_name).property.mapper.class_
     with _Session(source) as session:
         try:
-            children = list(getattr(session.get_one(parent_base, parent_id), children_col_name))
+            raw_chilren = getattr(session.get_one(parent_base, parent_id), children_col_name)
+            children = [child for child in raw_chilren if all(crit(getattr(child, attr)) for attr,crit in criteria.items())]
+            if not children and wait:
+                updated_criteria = {**criteria, parent_base.__tablename__: lambda x: x == parent_id}
+                children = _return_awaited_result(
+                    child_base,
+                    timeout_ms=timeout_ms,
+                    criteria=updated_criteria
+                )
             return children
         except _NoResultFound as e:
             raise ParentNotFound(
@@ -279,6 +293,19 @@ def get_children(
             )
         except Exception as e:
             raise e
+
+
+def _return_awaited_result(
+    base: type[_Base],
+    timeout_ms: int,
+    criteria: Optional[dict[str, Callable[[Any], bool]]] = None
+) -> list[Any]:
+
+    return _wait_mg.wait_for_content(
+        base.__tablename__,
+        timeout_ms,
+        validation=_functools.partial(_is_awaited_result_valid, criteria),
+    )
 
 
 def update(updated: _Base) -> _Response:

@@ -1,6 +1,7 @@
 import unittest
 import os
 import sys
+from unittest.mock import patch, Mock
 
 sys.path.append(".")
 
@@ -157,9 +158,9 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=car_state_1)
             c.post("/v2/management/carstate", json=car_state_2)
-            response = c.get("/v2/management/carstate/1")
+            response = c.get(f"/v2/management/carstate/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 3)
 
     def test_getting_car_state_for_nonexisting_car_returns_code_404(self):
         with self.app.app.test_client() as c:
@@ -172,9 +173,9 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=car_state_1)
             c.post("/v2/management/carstate", json=car_state_2)
-            response = c.get("/v2/management/carstate/1?allAvailable=false")
+            response = c.get("/v2/management/carstate/1?")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
+            self.assertEqual(len(response.json), 3)
             self.assertEqual(response.json[0]["status"], "out_of_order")
 
     def test_getting_all_car_states(self):
@@ -183,7 +184,7 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=car_state_1)
             c.post("/v2/management/carstate", json=car_state_2)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
 
@@ -219,7 +220,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 )
                 c.post("/v2/management/carstate", json=car_state)
 
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n - 1)
 
@@ -231,7 +232,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 position=test_position,
             )
             c.post("/v2/management/carstate", json=car_state)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n)
 
@@ -243,7 +244,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 position=test_position,
             )
             c.post("/v2/management/carstate", json=newest_state)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n)
             self.assertTrue(isinstance(response.json, list))
@@ -279,10 +280,10 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 )
                 c.post("/v2/management/carstate", json=car_state)
             self.assertEqual(
-                len(c.get("/v2/management/carstate/1?allAvailable=True").json), max_n
+                len(c.get("/v2/management/carstate/1?since=0").json), max_n
             )
             self.assertEqual(
-                len(c.get("/v2/management/carstate/2?allAvailable=True").json), max_n
+                len(c.get("/v2/management/carstate/2?since=0").json), max_n
             )
 
     def tearDown(self) -> None:
@@ -301,7 +302,8 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
             car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
+            response = c.post("/v2/management/car", json=car)
+            assert response.json is not None
 
     def test_car_states_are_deleted_when_car_is_deleted(self):
         state_1 = CarState(
@@ -322,21 +324,79 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=state_1)
             c.post("/v2/management/carstate", json=state_2)
-            response = c.get("/v2/management/carstate?allAvailable=true")
+            response = c.get("/v2/management/carstate?since=0")
             self.assertEqual(len(response.json), 3)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(
                 len(response.json), 3, "Assert car states have been created."
             )
             c.delete("/v2/management/car/1")
             response = c.get("/v2/management/car/1")
             self.assertEqual(response.status_code, 404, "Assert car has been deleted.")
-            response = c.get("/v2/management/carstate?allAvailable=true")
+            response = c.get("/v2/management/carstate?since=0")
             self.assertEqual(
                 len(response.json), 0, "Assert car states have been deleted."
             )
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1")
             self.assertEqual(response.status_code, 404)
+
+
+class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 1)
+        car = Car(
+            platform_hw_id=1,
+            name="car1",
+            car_admin_phone=MobilePhone(phone="123456789")
+        )
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            response = c.post("/v2/management/car", json=car)
+            assert response.json is not None
+            car_id = response.json["id"]
+
+        state_1 = CarState(
+            status="idle",
+            car_id=car_id,
+            speed=7,
+            fuel=80,
+            position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+        )
+        state_2 = CarState(
+            status="charging",
+            car_id=car_id,
+            speed=7,
+            fuel=80,
+            position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+        )
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/carstate", json=state_1)
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/carstate", json=state_2)
+
+    def test_setting_since_to_zero_returns_all_states_of_given_car(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/carstate/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 3)
+
+    def test_setting_since_to_1000_returns_states_created_after_timestamp_1000(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/carstate/1?since=1000")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["timestamp"], 1000)
+
+    def test_setting_since_to_3000_returns_empty_list(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/carstate/1?since=3000")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 0)
 
 
 if __name__ == "__main__":  # pragma: no coverage
