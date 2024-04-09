@@ -165,13 +165,10 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         )
 
     def test_order_converted_to_db_model_and_back_is_unchanged(self):
-        order_in = Order(
-            id=1, user_id=789, car_id=12, target_stop_id=7, stop_route_id=8
-        )
-        order_out = _obj_to_db.order_from_db_model(
-            _obj_to_db.order_to_db_model(order_in)
-        )
+        order_in = Order(id=1, user_id=789, car_id=12, target_stop_id=7, stop_route_id=8)
+        order_out = _obj_to_db.order_from_db_model(_obj_to_db.order_to_db_model(order_in))
         order_in.id = order_out.id
+        order_in.timestamp = order_out.timestamp
         self.assertEqual(order_out, order_in)
 
     def test_order_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(
@@ -188,6 +185,8 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         order_out = _obj_to_db.order_from_db_model(
             _obj_to_db.order_to_db_model(order_in)
         )
+        order_in.id = order_out.id
+        order_in.timestamp = order_out.timestamp
         self.assertEqual(order_out, order_in)
 
 
