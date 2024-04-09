@@ -67,6 +67,7 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
         notification_phone = order.notification_phone.to_dict()
     return _db_models.OrderDBModel(
         id=order.id,
+        timestamp=_tstamp.timestamp_ms(),
         priority=order.priority,
         user_id=order.user_id,
         car_id=order.car_id,
@@ -84,6 +85,7 @@ def order_from_db_model(order_db_model: _db_models.OrderDBModel) -> _models.Orde
         notification_phone = _models.MobilePhone.from_dict(order_db_model.notification_phone)
     return _models.Order(
         id=order_db_model.id,
+        timestamp=order_db_model.timestamp,
         priority=order_db_model.priority,
         user_id=order_db_model.user_id,
         car_id=order_db_model.car_id,

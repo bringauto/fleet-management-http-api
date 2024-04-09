@@ -909,6 +909,101 @@ paths:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
   /order/{carId}/{orderId}:
+    delete:
+      operationId: delete_order
+      parameters:
+      - description: ID of the Car to which the Order is assigned.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: ID of the Order to be returned.
+        example: 1
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Order with the specified ID has been successfully deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete an Order identified by its ID and ID of a car to which it is
+        assigned.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     get:
       operationId: get_order
       parameters:

@@ -148,30 +148,30 @@ paths:
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
-  delete:
-      operationId: deleteOrder
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-      tags:
-        - order
-      summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
-      responses:
-        '200':
-          description: The Order with the specified ID has been successfully deleted.
-          content:
-            text/plain:
-              type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
-        default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+    delete:
+        operationId: deleteOrder
+        x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+        tags:
+          - order
+        summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
+        responses:
+          '200':
+            description: The Order with the specified ID has been successfully deleted.
+            content:
+              text/plain:
+                type: string
+          '400':
+            $ref: 'errors.yaml#/components/responses/BadRequest'
+          '401':
+            $ref: 'errors.yaml#/components/responses/Unauthorized'
+          '403':
+            $ref: 'errors.yaml#/components/responses/Forbidden'
+          '404':
+            $ref: 'errors.yaml#/components/responses/NotFound'
+          '405':
+            $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+          default:
+            $ref: 'errors.yaml#/components/responses/UnexpectedError'
 
   /orderstate:
     post:

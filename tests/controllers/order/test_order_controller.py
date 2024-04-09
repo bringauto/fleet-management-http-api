@@ -1,5 +1,6 @@
 import unittest
 import sys
+from unittest.mock import patch, Mock
 
 sys.path.append(".")
 
@@ -20,9 +21,12 @@ class Test_Sending_Order(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
 
-    def test_sending_order_to_exising_car(self):
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_sending_order_to_exising_car(self, mock_timestamp: Mock):
+        mock_timestamp.return_value = 1000
         order = Order(
             user_id=789,
+            timestamp=1000,
             car_id=1,
             target_stop_id=2,
             stop_route_id=1,
@@ -132,6 +136,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -141,9 +146,12 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
 
-    def test_retrieving_existing_order(self):
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_retrieving_existing_order(self, mock_timestamp: Mock):
+        mock_timestamp.return_value = 1000
         order = Order(
             user_id=789,
+            timestamp=1000,
             car_id=1,
             target_stop_id=4,
             stop_route_id=1,
@@ -151,7 +159,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         )
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=order)
-            response = c.get(f"/v2/management/order/1")
+            response = c.get(f"/v2/management/order/1/1")
             self.assertEqual(response.status_code, 200)
             order.id = 1
             self.assertEqual(Order.from_dict(response.json), order)
@@ -184,7 +192,7 @@ class Test_Deleting_Order(unittest.TestCase):
 
     def test_deleting_existing_order(self):
         with self.app.app.test_client() as c:
-            response = c.delete(f"/v2/management/order/1")
+            response = c.delete(f"/v2/management/order/1/1")
             self.assertEqual(response.status_code, 200)
             response = c.get(f"/v2/management/order")
             self.assertEqual(response.json, [])
@@ -192,12 +200,14 @@ class Test_Deleting_Order(unittest.TestCase):
     def test_deleting_nonexistent_order_yields_code_404(self):
         nonexistent_order_id = 651651651
         with self.app.app.test_client() as c:
-            response = c.delete(f"/v2/management/order/{nonexistent_order_id}")
+            response = c.delete(f"/v2/management/order/1/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
 
-class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
-    def setUp(self) -> None:
+class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mock_timestamp: Mock) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -206,6 +216,7 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
         self.car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=self.car)
+
         self.order_1 = Order(
             user_id=789,
             car_id=1,
@@ -221,23 +232,34 @@ class Test_Listing_Updated_Orders_For_Car(unittest.TestCase):
             notification_phone=MobilePhone(phone="4444444444"),
         )
         with self.app.app.test_client() as c:
+            mock_timestamp.return_value = 1000
             c.post("/v2/management/order", json=self.order_1)
+            mock_timestamp.return_value = 2000
             c.post("/v2/management/order", json=self.order_2)
 
-    def test_all_orders_not_yet_retrieved_are_listed_as_updated(self):
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order/wait/1")
-            returned_orders = response.json
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(returned_orders), 2)
 
-    def test_not_updated_orders_cannot_be_listed_repeatedly_without_updating_them(self):
+    def test_setting_since_to_zero_returns_all_orders(self) -> None:
         with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order/wait/1")
-            response = c.get(f"/v2/management/order/wait/1")
-            returned_orders = response.json
+            response = c.get(f"/v2/management/order?since=0")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(returned_orders), 0)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["timestamp"], 1000)
+
+    def test_setting_since_to_time_after_some_status_returns_only_statuses_after_that(self) -> None:
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/order?since=1001")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["timestamp"], 2000)
+
+    def test_filtering_out_all_statuses(self) -> None:
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/order?since=2001")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 0)
 
 
 if __name__ == "__main__":
