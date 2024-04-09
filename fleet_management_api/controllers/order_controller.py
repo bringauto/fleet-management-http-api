@@ -38,16 +38,14 @@ def delete_order(car_id, order_id):  # noqa: E501
     return 'do some magic!'
 
 
-def get_car_orders(car_id, wait=None, since=None):  # noqa: E501
+def get_car_orders(car_id, since=None):  # noqa: E501
     """Find existing Orders by the corresponding Car ID and return them.
 
      # noqa: E501
 
     :param car_id: ID of the Car for which Orders shall be returned.
     :type car_id: int
-    :param wait: Applies to GET methods when no order statuses would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next order state to be created and then return it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
-    :type wait: bool
-    :param since: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified, all states are returned (since is set to 0 in that case).
+    :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
@@ -55,7 +53,7 @@ def get_car_orders(car_id, wait=None, since=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order(car_id, order_id, wait=None, since=None):  # noqa: E501
+def get_order(car_id, order_id, since=None):  # noqa: E501
     """Find an existing Order by the car ID and the order ID and return it.
 
      # noqa: E501
@@ -64,9 +62,7 @@ def get_order(car_id, order_id, wait=None, since=None):  # noqa: E501
     :type car_id: int
     :param order_id: ID of the Order to be returned.
     :type order_id: int
-    :param wait: Applies to GET methods when no order statuses would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next order state to be created and then return it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
-    :type wait: bool
-    :param since: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified, all states are returned (since is set to 0 in that case).
+    :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
@@ -74,14 +70,12 @@ def get_order(car_id, order_id, wait=None, since=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_orders(wait=None, since=None):  # noqa: E501
+def get_orders(since=None):  # noqa: E501
     """Find all currently existing Orders.
 
      # noqa: E501
 
-    :param wait: Applies to GET methods when no order statuses would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next order state to be created and then return it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
-    :type wait: bool
-    :param since: A Unix timestamp in milliseconds. If specified, only states created at the time or later will be returned. If unspecified, all states are returned (since is set to 0 in that case).
+    :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
 
     :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]

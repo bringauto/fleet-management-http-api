@@ -230,13 +230,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: allAvailable
-          in: query
-          description: Whether to return all available car states or only the latest one
-          required: false
-          example: true
-          schema:
-            type: boolean
       responses:
         '200':
           description: Successfully found all Car States complying with the request parameters.

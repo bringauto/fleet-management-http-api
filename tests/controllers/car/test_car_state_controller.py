@@ -184,7 +184,7 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=car_state_1)
             c.post("/v2/management/carstate", json=car_state_2)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
 
@@ -220,7 +220,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 )
                 c.post("/v2/management/carstate", json=car_state)
 
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n - 1)
 
@@ -232,7 +232,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 position=test_position,
             )
             c.post("/v2/management/carstate", json=car_state)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n)
 
@@ -244,7 +244,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 position=test_position,
             )
             c.post("/v2/management/carstate", json=newest_state)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n)
             self.assertTrue(isinstance(response.json, list))
@@ -280,10 +280,10 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                 )
                 c.post("/v2/management/carstate", json=car_state)
             self.assertEqual(
-                len(c.get("/v2/management/carstate/1?allAvailable=True").json), max_n
+                len(c.get("/v2/management/carstate/1?since=0").json), max_n
             )
             self.assertEqual(
-                len(c.get("/v2/management/carstate/2?allAvailable=True").json), max_n
+                len(c.get("/v2/management/carstate/2?since=0").json), max_n
             )
 
     def tearDown(self) -> None:
@@ -324,9 +324,9 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=state_1)
             c.post("/v2/management/carstate", json=state_2)
-            response = c.get("/v2/management/carstate?allAvailable=true")
+            response = c.get("/v2/management/carstate?since=0")
             self.assertEqual(len(response.json), 3)
-            response = c.get("/v2/management/carstate/1?allAvailable=true")
+            response = c.get("/v2/management/carstate/1?since=0")
             self.assertEqual(
                 len(response.json), 3, "Assert car states have been created."
             )

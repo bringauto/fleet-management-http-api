@@ -49,9 +49,11 @@ Requirements:
 - The referenced [Car](#car) must exist.
 
 Result:
-- The Car State is automatically set by the server.
+- The Car State ID is automatically set by the server.
+- The Car State's timestamp is set to match the time it was posted.
 - A Car State is created.
 - Oldest Car States might be deleted, so the number of states stored by the API for the particular [Car](#car) is not greater than $N_{car\,states}$.
+- All the Clients waiting for some new Car States of a particular [Car](#car) receive a response (for the order state GET method).
 
 
 ## Order
@@ -67,6 +69,7 @@ Requirements:
 
 Result:
 - The Order ID is automatically set by the server.
+- The Order's timestamp is set to match the time it was posted.
 - An Order is created.
 - An [Order State](#order-state) created with the `to_accept` status.
 
@@ -94,7 +97,7 @@ Requirements:
 Result:
 - The Order State ID is automatically set by the server.
 - An Order State is created.
-- The Order State's timestamp is updated to match the time it was posted.
+- The Order State's timestamp is set to match the time it was posted.
 - Oldest Order States might be deleted, so the number of states stored by the API for a particular [Order](#order) is not greater than $N_{order\,states}$.
 - All the Clients waiting for some new Order States of a particular [Order](#order) receive a response (for the order state GET method).
 

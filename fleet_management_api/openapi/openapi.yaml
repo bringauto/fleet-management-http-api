@@ -434,17 +434,17 @@ paths:
     get:
       operationId: get_all_car_states
       parameters:
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
           \ the request will return \\ an empty list."
         in: query
         name: wait
         schema:
           default: false
           type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -565,17 +565,17 @@ paths:
     get:
       operationId: get_car_states
       parameters:
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
           \ the request will return \\ an empty list."
         in: query
         name: wait
         schema:
           default: false
           type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -590,14 +590,6 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: Whether to return all available car states or only the latest
-          one
-        example: true
-        in: query
-        name: allAvailable
-        required: false
-        schema:
-          type: boolean
       responses:
         "200":
           content:
@@ -673,17 +665,8 @@ paths:
     get:
       operationId: get_orders
       parameters:
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
-          \ the request will return \\ an empty list."
-        in: query
-        name: wait
-        schema:
-          default: false
-          type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -815,17 +798,8 @@ paths:
     get:
       operationId: get_car_orders
       parameters:
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
-          \ the request will return \\ an empty list."
-        in: query
-        name: wait
-        schema:
-          default: false
-          type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -1023,17 +997,8 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
-          \ the request will return \\ an empty list."
-        in: query
-        name: wait
-        schema:
-          default: false
-          type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -1111,17 +1076,17 @@ paths:
     get:
       operationId: get_all_order_states
       parameters:
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
           \ the request will return \\ an empty list."
         in: query
         name: wait
         schema:
           default: false
           type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -1267,17 +1232,17 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: "Applies to GET methods when no order statuses would be returned\
-          \ at the moment of request. If wait=true, \\ the request will wait for the\
-          \ next order state to be created and then return it. If wait=False or unspecified,\
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
           \ the request will return \\ an empty list."
         in: query
         name: wait
         schema:
           default: false
           type: boolean
-      - description: "A Unix timestamp in milliseconds. If specified, only states\
-          \ created at the time or later will be returned. If unspecified, all states\
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
         in: query
         name: since
@@ -2577,18 +2542,18 @@ paths:
 components:
   parameters:
     Wait:
-      description: "Applies to GET methods when no order statuses would be returned\
-        \ at the moment of request. If wait=true, \\ the request will wait for the\
-        \ next order state to be created and then return it. If wait=False or unspecified,\
-        \ the request will return \\ an empty list."
+      description: "Applies to GET methods when no objects would be returned at the\
+        \ moment of request. If wait=true, \\ the request will wait for the next object\
+        \ to be created and then returns it. If wait=False or unspecified, the request\
+        \ will return \\ an empty list."
       in: query
       name: wait
       schema:
         default: false
         type: boolean
     Since:
-      description: "A Unix timestamp in milliseconds. If specified, only states created\
-        \ at the time or later will be returned. If unspecified, all states are returned\
+      description: "A Unix timestamp in milliseconds. If specified, only objects created\
+        \ at the time or later will be returned. If unspecified, all objects are returned\
         \ (since is set to 0 in that case)."
       in: query
       name: since
@@ -2762,7 +2727,8 @@ components:
           title: id
           type: integer
         timestamp:
-          description: A Unix timestamp in milliseconds.
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
           example: 1616425200000
           format: int64
           title: timestamp
@@ -2818,7 +2784,7 @@ components:
         id: 1
         priority: normal
         userId: 1
-        timestamp: ""
+        timestamp: 1616425200000
         carId: 1
       properties:
         id:
@@ -2838,7 +2804,12 @@ components:
           title: id
           type: integer
         timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425200000
+          format: int64
           title: timestamp
+          type: integer
         carId:
           example: 1
           format: int32
@@ -2894,7 +2865,8 @@ components:
           title: id
           type: integer
         timestamp:
-          description: A Unix timestamp in milliseconds.
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
           example: 1616425200000
           format: int64
           title: timestamp
@@ -3072,7 +3044,8 @@ components:
       title: MobilePhone
       type: object
     Timestamp:
-      description: A Unix timestamp in milliseconds.
+      description: A Unix timestamp in milliseconds. The timestamp is used to determine
+        the time of creation of an object.
       example: 1616425200000
       format: int64
       title: timestamp

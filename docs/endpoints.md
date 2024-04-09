@@ -97,15 +97,13 @@ Car State [description](definitions.md#car-state).
 
 More on endpoints [here](entity_manipulations.md#car-state).
 
-## /carstate[?allAvailable=<allAvailable>]
+## /carstate[?since=<timestamp>&wait=<wait>]
 
 ### POST
 
-Add a new state for a car by ID.
+Add a new state for a car by ID. Query parameters are ignored for this method.
 
-Request body format:
-- allAvailable=true: JSON containing list of the Car States.
-- allAvailable=false or unspecified: JSON version of the Car State.
+Request body format: JSON containing a Car State data.
 
 Response codes:
 - 200: Successfully added new Car State.
@@ -114,20 +112,19 @@ Response codes:
 
 ### GET
 
-Finds states of all cars.
+Finds states of all cars with timestamp >= since.
+If the wait=True and no states would be returned, the request will wait for the next relevant state to be added.
+By default, wait=False, since=0.
 
 Response codes:
 - 200: Returning all existing car states.
 
-## /carstate/{carId}[?allAvailable=<allAvailable>]
+## /carstate/{carId}[?since=<timestamp>&wait=<wait>]
 
 ### GET
 
-Finds car states by ID.
-
-Response format:
-- allAvailable=true: JSON containing list of the Car States.
-- allAvailable=false or unspecified: JSON version of the Car State.
+Finds car states for a car with given ID with timestamp >= since.
+Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
 Response codes:
 - 200: Successfully found a car state.
@@ -140,13 +137,15 @@ Order [description](definitions.md#order).
 
 More on endpoints [here](entity_manipulations.md#order).
 
-## /order
+## /order[?since=<timestamp>]
 
 ### POST
 
 Create a new order.
 
 Request body format: JSON version of the Order.
+
+Query parameters are ignored for this method.
 
 Response codes:
 - 200: Successfully created a new order.
@@ -155,18 +154,31 @@ Response codes:
 
 ### GET
 
-Finds all orders.
+Finds all orders with timestamp >= since. By default, since=0.
+If no such orders are found, empty list is returned, along with response code 200.
 
 Response body format: JSON array of Order objects.
 
 Response codes:
 - 200: Returning all existing orders.
 
-## /order/{orderId}
+## /order/{carId}[?since=<timestamp>]
 
 ### GET
 
-Finds order by ID.
+Finds all orders assigned to a car referenced by car ID with timestamp >= since. By default, since=0.
+
+Response body format: JSON array of Order objects.
+
+Response codes:
+- 200: Returning all existing orders for given Car.
+- 404: Not found. The Car with the given ID does not exist.
+
+## /order/{carId}/{orderId}
+
+### GET
+
+Finds order by car ID and order ID.
 
 Response format: JSON version of the Order.
 
@@ -184,19 +196,6 @@ Response codes:
 - 400: Bad request. The orderId is not a valid integer.
 - 404: Not found. The Order with the given ID does not exist.
 
-## /order/wait/{carId}
-
-### GET
-
-Get an order by car ID only if it has changed.
-
-Response format: JSON version of the Order.
-
-Response codes:
-- 200: Successfully received a new order.
-- 400: Bad request. The carId is not a valid integer.
-- 404: Not found. The Car with the given ID does not exist.
-
 # Order State endpoints
 
 Order State [description](definitions.md#order-state).
@@ -211,7 +210,7 @@ Create a new order state.
 
 Request body format: JSON version of the OrderState.
 
-Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
+Query parameters are ignored for this method.
 
 Response codes:
 - 200: Successfully added new order state.
@@ -223,6 +222,8 @@ Response codes:
 Finds states of all Orders.
 
 Response body format: JSON array of OrderState objects.
+
+Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
 Response codes:
 - 200: Returning all existing order states.

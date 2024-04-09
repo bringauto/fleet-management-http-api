@@ -32,7 +32,6 @@ paths:
     get:
       operationId: getOrders
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
@@ -74,7 +73,6 @@ paths:
         - order
       summary: Find existing Orders by the corresponding Car ID and return them.
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
         - name: carId
           in: path
@@ -128,7 +126,6 @@ paths:
         - order
       summary: Find an existing Order by the car ID and the order ID and return it.
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
@@ -292,7 +289,7 @@ components:
         userId:
           $ref: 'common_models.yaml#/components/schemas/Id'
         timestamp:
-          $reg: 'common_models.yaml#/components/schemas/Timestamp'
+          $ref: 'common_models.yaml#/components/schemas/Timestamp'
         carId:
           $ref: 'common_models.yaml#/components/schemas/Id'
         notification:

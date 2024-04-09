@@ -26,7 +26,7 @@ class Order(Model):
         :param user_id: The user_id of this Order.  # noqa: E501
         :type user_id: int
         :param timestamp: The timestamp of this Order.  # noqa: E501
-        :type timestamp: object
+        :type timestamp: int
         :param car_id: The car_id of this Order.  # noqa: E501
         :type car_id: int
         :param notification: The notification of this Order.  # noqa: E501
@@ -42,7 +42,7 @@ class Order(Model):
             'id': int,
             'priority': str,
             'user_id': int,
-            'timestamp': object,
+            'timestamp': int,
             'car_id': int,
             'notification': str,
             'target_stop_id': int,
@@ -153,22 +153,24 @@ class Order(Model):
         self._user_id = user_id
 
     @property
-    def timestamp(self) -> object:
+    def timestamp(self) -> int:
         """Gets the timestamp of this Order.
 
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
 
         :return: The timestamp of this Order.
-        :rtype: object
+        :rtype: int
         """
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, timestamp: object):
+    def timestamp(self, timestamp: int):
         """Sets the timestamp of this Order.
 
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
 
         :param timestamp: The timestamp of this Order.
-        :type timestamp: object
+        :type timestamp: int
         """
 
         self._timestamp = timestamp

@@ -98,7 +98,7 @@ class CarState(Model):
     def timestamp(self) -> int:
         """Gets the timestamp of this CarState.
 
-        A Unix timestamp in milliseconds.  # noqa: E501
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
 
         :return: The timestamp of this CarState.
         :rtype: int
@@ -109,7 +109,7 @@ class CarState(Model):
     def timestamp(self, timestamp: int):
         """Sets the timestamp of this CarState.
 
-        A Unix timestamp in milliseconds.  # noqa: E501
+        A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.  # noqa: E501
 
         :param timestamp: The timestamp of this CarState.
         :type timestamp: int
