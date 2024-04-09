@@ -78,6 +78,18 @@ def get_order(order_id: int) -> _api.Response:
         return _api.json_response(200, _api.order_from_db_model(order_db_models[0]))
 
 
+def get_car_orders(car_id: int) -> _api.Response:
+    """Get all orders for a given car."""
+    if not _car_exist(car_id):
+        return _api.log_and_respond(404, f"Car with ID={car_id} does not exist.")
+    order_db_models = _db_access.get(
+        _db_models.OrderDBModel, criteria={"car_id": lambda x: x == car_id}
+    )
+    orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
+    _api.log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
+    return _api.json_response(200, orders)
+
+
 def get_updated_orders(car_id: int) -> _api.Response:
     """Returns all orders for a given car that have been updated since their were last requested.
 
