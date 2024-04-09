@@ -195,7 +195,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Find one or all Car States for a Car with the specified ID.
+      summary: Find one or all Car States for all existing Cars.
       responses:
         '200':
           description: Successfully found all Car States complying with the request parameters.
@@ -218,7 +218,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Find one or all Car States for a given Car.
+      summary: Find one or all Car States for a Car with given ID.
       parameters:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'

@@ -24,7 +24,7 @@ def add_car_state(car_state):  # noqa: E501
 
 
 def get_all_car_states(wait=None, since=None):  # noqa: E501
-    """Find one or all Car States for a Car with the specified ID.
+    """Find one or all Car States for all existing Cars.
 
      # noqa: E501
 
@@ -39,7 +39,7 @@ def get_all_car_states(wait=None, since=None):  # noqa: E501
 
 
 def get_car_states(car_id, wait=None, since=None, all_available=None):  # noqa: E501
-    """Find one or all Car States for a given Car.
+    """Find one or all Car States for a Car with given ID.
 
      # noqa: E501
 

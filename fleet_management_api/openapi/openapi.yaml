@@ -494,7 +494,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Find one or all Car States for a Car with the specified ID.
+      summary: Find one or all Car States for all existing Cars.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -652,7 +652,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Find one or all Car States for a given Car.
+      summary: Find one or all Car States for a Car with given ID.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
