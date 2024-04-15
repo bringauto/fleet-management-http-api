@@ -8,6 +8,9 @@ from sqlalchemy.orm import mapped_column as _mapped_column
 from sqlalchemy.orm import relationship as _relationship
 
 
+OrderId = int
+
+
 class Base(_DeclarativeBase):
     model_name: str = "Base"
     id: _Mapped[Optional[int]] = _mapped_column(
@@ -108,6 +111,7 @@ class OrderDBModel(Base):
         "StopDBModel", back_populates="orders", lazy="noload"
     )
     car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
+    active_orders: set[OrderId] = set()
 
     def __repr__(self) -> str:
         return (

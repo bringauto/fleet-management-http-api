@@ -8,6 +8,12 @@ import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 
 
+OrderId = int
+
+
+FINAL_STATES = {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}
+
+
 def create_order_state() -> _api.Response:
     """Post a new state of an existing order."""
     if not _connexion.request.is_json:
@@ -20,13 +26,21 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
     """Create a new state of an existing order. The Order State model is passed as an argument."""
     if not _order_exists(order_state.order_id):
         return _api.log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")
+    if not _is_order_active(order_state.order_id):
+        return _api.log_and_respond(
+            403,
+            f"Order with id='{order_state.order_id}' has already received status DONE or CANCELED. "
+            "No other Order State can be added."
+        )
+
     order_state_db_model = _api.order_state_to_db_model(order_state)
     response = _db_access.add(order_state_db_model)
     if response.status_code == 200:
         inserted_model = _api.order_state_from_db_model(response.body[0])
-        _mark_order_as_updated(order_state.order_id)
         _remove_old_states(order_state.order_id)
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
+        if inserted_model.status in FINAL_STATES:
+            _remove_from_active_orders(order_state.order_id)
         return _api.json_response(200, inserted_model)
     else:
         return _api.log_and_respond(
@@ -96,9 +110,11 @@ def _order_exists(order_id: int) -> bool:
     return len(order_db_models) > 0
 
 
-def _mark_order_as_updated(order_id: int) -> None:
-    order_db_model = _db_access.get(
-        _db_models.OrderDBModel, criteria={"id": lambda x: x == order_id}
-    )[0]
-    order_db_model.updated = True
-    _db_access.update(order_db_model)
+def _is_order_active(order_id: int) -> bool:
+    return order_id in _db_models.OrderDBModel.active_orders
+
+
+def _remove_from_active_orders(order_id: int) -> None:
+    if order_id in _db_models.OrderDBModel.active_orders:
+        _db_models.OrderDBModel.active_orders.remove(order_id)
+

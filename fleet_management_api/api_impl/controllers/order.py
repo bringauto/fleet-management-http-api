@@ -38,6 +38,7 @@ def create_order() -> _api.Response:
         if response.status_code == 200:
             inserted_model = _api.order_from_db_model(response.body[0])
             _api.log_info(f"Order (ID={inserted_model.id}) has been created.")
+            _add_active_order(inserted_model.id)
             order_state = _models.OrderState(
                 status=_models.OrderStatus.TO_ACCEPT,
                 order_id=inserted_model.id
@@ -114,3 +115,7 @@ def get_orders(since: int = 0) -> _api.Response:
 
 def _car_exist(car_id: int) -> bool:
     return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
+
+
+def _add_active_order(order_id: int) -> None:
+    _db_models.OrderDBModel.active_orders.add(order_id)
