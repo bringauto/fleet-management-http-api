@@ -88,7 +88,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
