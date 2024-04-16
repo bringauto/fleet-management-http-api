@@ -215,6 +215,7 @@ Query parameters are ignored for this method.
 Response codes:
 - 200: Successfully added new order state.
 - 400: Bad request. The request body is not a valid Order State.
+- 403: Forbidden. The Order State cannot be accepted by the API, because the Order has already received State with status DONE or CANCELED.
 - 404: Not found. The Order with the given ID does not exist.
 
 ### GET
