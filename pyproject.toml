@@ -1,6 +1,6 @@
 [project]
 name = "fleet_management_api"
-version = "2.0.2"
+version = "2.1.0"
 
 
 [tool.setuptools.packages.find]
