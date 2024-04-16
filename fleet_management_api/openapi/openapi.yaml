@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 2.0.0
+  version: 2.1.0
 servers:
 - url: /v2/management
 security:
@@ -22,7 +22,7 @@ tags:
   name: car
 - description: Car state-related functions
   name: carState
-- description: Order related functions
+- description: Order-related functions
   name: order
 - description: Order state-related functions
   name: orderState

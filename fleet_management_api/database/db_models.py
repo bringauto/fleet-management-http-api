@@ -8,6 +8,9 @@ from sqlalchemy.orm import mapped_column as _mapped_column
 from sqlalchemy.orm import relationship as _relationship
 
 
+OrderId = int
+
+
 class Base(_DeclarativeBase):
     model_name: str = "Base"
     id: _Mapped[Optional[int]] = _mapped_column(

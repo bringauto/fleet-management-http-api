@@ -8,8 +8,30 @@ import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 
 
+OrderId = int
+
+
+_last_order_status: dict[OrderId, _models.OrderStatus] = dict()
+
+
+def initialize_last_order_status_dict() -> None:
+    """Initialize the dictionary that stores the last status of each order.
+
+    The states are primarily stored in the database. The dictionary serves as a cache.
+    If last status is not found in the dictionary when needed, the database is queried.
+
+    This initialization thus does not affect recognizing the order as done or canceled.
+    """
+    global _last_order_status
+    _last_order_status = dict()
+
+
 def create_order_state() -> _api.Response:
-    """Post a new state of an existing order."""
+    """Post a new state of an existing order.
+
+    If there already exists an Order State with final status (DONE or CANCELED),
+    any other Order State is refused (i.e., 403 is returned).
+    """
     if not _connexion.request.is_json:
         return _api.log_invalid_request_body_format()
     order_state = _models.OrderState.from_dict(_connexion.request.get_json())
@@ -17,16 +39,35 @@ def create_order_state() -> _api.Response:
 
 
 def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Response:
-    """Create a new state of an existing order. The Order State model is passed as an argument."""
+    """Create a new state of an existing order. The Order State model is passed as an argument.
+
+    If there already exists an Order State with final status (DONE or CANCELED),
+    any other Order State is refused (i.e., 403 is returned).
+    """
     if not _order_exists(order_state.order_id):
         return _api.log_and_respond(404, f"Order with id='{order_state.order_id}' was not found.")
+
+    # order exists
+    if _is_order_done(order_state):
+        return _api.log_and_respond(
+            403,
+            f"Order with id='{order_state.order_id}' has already received status DONE."
+            "No other Order State can be added."
+        )
+    elif _is_order_canceled(order_state):
+        return _api.log_and_respond(
+            403,
+            f"Order with id='{order_state.order_id}' has already received status CANCELED."
+            "No other Order State can be added."
+        )
+
     order_state_db_model = _api.order_state_to_db_model(order_state)
     response = _db_access.add(order_state_db_model)
     if response.status_code == 200:
         inserted_model = _api.order_state_from_db_model(response.body[0])
-        _mark_order_as_updated(order_state.order_id)
         _remove_old_states(order_state.order_id)
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
+        _save_last_status(order_state)
         return _api.json_response(200, inserted_model)
     else:
         return _api.log_and_respond(
@@ -96,9 +137,27 @@ def _order_exists(order_id: int) -> bool:
     return len(order_db_models) > 0
 
 
-def _mark_order_as_updated(order_id: int) -> None:
-    order_db_model = _db_access.get(
-        _db_models.OrderDBModel, criteria={"id": lambda x: x == order_id}
-    )[0]
-    order_db_model.updated = True
-    _db_access.update(order_db_model)
+def _is_order_done(order_state: _models.OrderState) -> bool:
+    _load_last_status_from_db_if_missing(order_state)
+    return _last_order_status.get(order_state.order_id) == _models.OrderStatus.DONE
+
+
+def _is_order_canceled(order_state: _models.OrderState) -> bool:
+    _load_last_status_from_db_if_missing(order_state)
+    return _last_order_status.get(order_state.order_id) == _models.OrderStatus.CANCELED
+
+
+def _save_last_status(order_state: _models.OrderState) -> None:
+    _last_order_status[order_state.order_id] = order_state.status
+
+
+def _load_last_status_from_db_if_missing(order_state: _models.OrderState) -> None:
+    if order_state.order_id not in _last_order_status:
+        order_state_db_models: list[_db_models.OrderStateDBModel] = _db_access.get(
+            _db_models.OrderStateDBModel,
+            criteria={"order_id": lambda x: x == order_state.order_id},
+            wait=False
+        )
+        if order_state_db_models:
+            _last_order_status[order_state.order_id] = order_state_db_models[-1].status
+    return

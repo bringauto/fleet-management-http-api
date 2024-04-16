@@ -34,7 +34,7 @@ components:
       description: A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.
       type: integer
       format: int64
-      example: 1616425200000
+      example: 1616425275913
 
   parameters:
     Wait:

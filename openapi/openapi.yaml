@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: BringAuto Fleet Management v2 API
   description: Specification for BringAuto fleet backend HTTP API
-  version: 2.0.0
+  version: 2.1.0
   contact:
     name: BringAuto s.r.o
     url: https://bringauto.com
@@ -26,7 +26,7 @@ tags:
   - name: carState
     description: Car state-related functions
   - name: order
-    description: Order related functions
+    description: Order-related functions
   - name: orderState
     description: Order state-related functions
   - name: platformHW

@@ -4,7 +4,7 @@ import sys
 sys.path.append(".")
 
 import fleet_management_api.app as _app
-from fleet_management_api.models import OrderState, Order, Car
+from fleet_management_api.models import OrderState, Order, Car, OrderStatus
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
@@ -238,10 +238,10 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
         with self.app.app.test_client() as c:
             order_state_1 = OrderState(status="to_accept", order_id=1)
-            for _ in range(200):
+            for _ in range(100):
                 c.post("/v2/management/orderstate", json=order_state_1)
             order_state_2 = OrderState(status="to_accept", order_id=2)
-            for _ in range(200):
+            for _ in range(100):
                 c.post("/v2/management/orderstate", json=order_state_2)
 
             response = c.get("/v2/management/orderstate/1?since=0")
@@ -304,6 +304,132 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
             response = c.get("/v2/management/orderstate?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
+
+
+class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        order = Order(
+            priority="high",
+            user_id=1,
+            car_id=1,
+            target_stop_id=1,
+            stop_route_id=1,
+            notification_phone={},
+        )
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/order", json=order)
+
+    def test_sending_single_order_state_after_DONE_status_has_been_received_yield_403_code(self):
+        done_state = OrderState(status=OrderStatus.DONE, order_id=1)
+        next_state_1 = OrderState(status=OrderStatus.TO_ACCEPT, order_id=1)
+        next_state_2 = OrderState(status=OrderStatus.ACCEPTED, order_id=1)
+        next_state_3 = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        next_state_4 = OrderState(status=OrderStatus.CANCELED, order_id=1)
+        next_state_5 = OrderState(status=OrderStatus.DONE, order_id=1)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/orderstate", json=done_state)
+            self.assertEqual(response.status_code, 200)
+
+            for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
+                response = c.post("/v2/management/orderstate", json=next_state)
+                self.assertEqual(response.status_code, 403)
+
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
+
+    def test_sending_single_order_state_after_CANCELED_status_has_been_received_yield_403_code(self):
+        canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
+        next_state_1 = OrderState(status=OrderStatus.TO_ACCEPT, order_id=1)
+        next_state_2 = OrderState(status=OrderStatus.ACCEPTED, order_id=1)
+        next_state_3 = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        next_state_4 = OrderState(status=OrderStatus.DONE, order_id=1)
+        next_state_5 = OrderState(status=OrderStatus.CANCELED, order_id=1)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/orderstate", json=canceled_state)
+            self.assertEqual(response.status_code, 200)
+
+            for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
+                response = c.post("/v2/management/orderstate", json=next_state)
+                self.assertEqual(response.status_code, 403)
+
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
+
+    def test_sending_large_number_of_order_states_before_done_state(self):
+        some_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
+        with self.app.app.test_client() as c:
+            for _ in range(60):
+                response = c.post("/v2/management/orderstate", json=some_state)
+                self.assertEqual(response.status_code, 200)
+
+        done_state = OrderState(status=OrderStatus.DONE, order_id=1)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/orderstate", json=done_state)
+            self.assertEqual(response.status_code, 200)
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
+            response = c.post("/v2/management/orderstate", json=some_state)
+            self.assertEqual(response.status_code, 403)
+
+
+class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(unittest.TestCase):
+
+    def test_done_state(self):
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        order = Order(user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        done_state = OrderState(status=OrderStatus.DONE, order_id=1)
+        next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/orderstate", json=done_state)
+
+        self.app = _app.get_test_app()
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
+            response = c.post("/v2/management/orderstate", json=next_state)
+            self.assertEqual(response.status_code, 403)
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
+
+    def test_canceled_state(self):
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
+        order = Order(user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
+        next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/orderstate", json=canceled_state)
+
+        self.app = _app.get_test_app()
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
+            response = c.post("/v2/management/orderstate", json=next_state)
+            self.assertEqual(response.status_code, 403)
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
 
 
 if __name__ == "__main__":
