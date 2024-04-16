@@ -96,8 +96,8 @@ Requirements:
 
 Result:
 - The Order State ID is automatically set by the server.
-- An Order State is created.
 - The Order State's timestamp is set to match the time it was posted.
+- An Order State is created IF there is no older Order State with a final status (DONE or CANCELED).
 - Oldest Order States might be deleted, so the number of states stored by the API for a particular [Order](#order) is not greater than $N_{order\,states}$.
 - All the Clients waiting for some new Order States of a particular [Order](#order) receive a response (for the order state GET method).
 
