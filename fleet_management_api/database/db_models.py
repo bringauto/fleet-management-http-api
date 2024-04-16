@@ -111,7 +111,6 @@ class OrderDBModel(Base):
         "StopDBModel", back_populates="orders", lazy="noload"
     )
     car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
-    active_orders: set[OrderId] = set()
 
     def __repr__(self) -> str:
         return (

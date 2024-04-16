@@ -8,9 +8,11 @@ from .encoder import JSONEncoder
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBModel
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
+from fleet_management_api.api_impl.controllers.order_state import initialize_last_order_status_dict
 
 
 def get_app() -> connexion.FlaskApp:
+    initialize_last_order_status_dict()
     app = connexion.App(__name__, specification_dir="./openapi/")
     app.app.json_encoder = JSONEncoder
     app.add_api("openapi.yaml", pythonic_params=True)
