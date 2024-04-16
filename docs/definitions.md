@@ -76,7 +76,7 @@ Example:
 ```json
 {
     "id": 12,
-    "timestamp": 1707805396,
+    "timestamp": 1707805396152,
     "name": "Car 1",
     "platform_hw_id": 1,
     "car_admin_phone": "123456789",
@@ -100,7 +100,7 @@ Example:
 ```json
 {
     "id": 12,
-    "timestamp": 1707805396,
+    "timestamp": 1707805396753,
     "car_id": 1,
     "status": "idle",
     "fuel": 100,
@@ -134,7 +134,7 @@ Example:
 {
     "id": 12,
     "priority": "normal",
-    "timestamp": 1707805396,
+    "timestamp": 1707805396456,
     "user_id": 1,
     "notification": "Please deliver the package to the address",
     "target_stop_id": 1,
@@ -160,7 +160,7 @@ Example:
     "id": 12,
     "order_id": 1,
     "order_status": "accepted",
-    "timestamp": 1707805396
+    "timestamp": 1707805396123
 }
 ```
 

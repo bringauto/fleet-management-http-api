@@ -52,6 +52,7 @@ paths:
                     "priority": "normal",
                     "userId": 1,
                     "carId": 1,
+                    "timestamp": 1713256508978,
                     "targetStopId": 1,
                     "notification": "Order notification",
                     "stopRouteId": 1,
