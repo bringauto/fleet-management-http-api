@@ -75,13 +75,13 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
         )
 
 
-def get_all_order_states(wait: bool = False, since: int = 0) -> _api.Response:
+def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
     """Get all order states for all the existing orders."""
     _api.log_info("Getting all order states for all orders.")
-    return _get_order_states({}, wait, since)
+    return _get_order_states({}, wait, since, last_n=last_n)
 
 
-def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _api.Response:
+def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
     :param order_id: Id of the order.
@@ -97,20 +97,25 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _api.
         return _api.json_response(404, [])
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
-        return _get_order_states(criteria, wait, since)
+        return _get_order_states(criteria, wait, since, last_n)
 
 
 def _get_order_states(
-    criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int
+    criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int, last_n: int = 0
 ) -> _api.Response:
     criteria["timestamp"] = lambda x: x >= since
     order_state_db_models = _db_access.get(
-        _db_models.OrderStateDBModel, wait=wait, criteria=criteria
+        _db_models.OrderStateDBModel,
+        wait=wait,
+        criteria=criteria,
+        first_n=last_n,
+        sort_result_by={"timestamp": "desc", "id": "desc"}
     )
     order_states = [
         _api.order_state_from_db_model(order_state_db_model)
         for order_state_db_model in order_state_db_models
     ]
+    order_states.reverse()
     return _api.json_response(200, order_states)
 
 

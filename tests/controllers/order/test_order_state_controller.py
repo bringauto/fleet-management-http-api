@@ -1,10 +1,11 @@
 import unittest
 import sys
+from unittest.mock import patch, Mock
 
 sys.path.append(".")
 
 import fleet_management_api.app as _app
-from fleet_management_api.models import OrderState, Order, Car, OrderStatus
+from fleet_management_api.models import OrderState, Order, Car, OrderStatus, GNSSPosition, MobilePhone
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
@@ -430,6 +431,141 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
             self.assertEqual(response.status_code, 403)
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
+
+
+POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+PHONE = MobilePhone(phone="123456789")
+
+
+class Test_Returning_Last_N_Order_States(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 1)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        order = Order(
+            user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
+        )
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            response = c.post("/v2/management/car", json=car)
+            assert response.json is not None
+            car_id = response.json["id"]
+            order.car_id = car_id
+            response = c.post("/v2/management/order", json=order)
+            assert response.json is not None
+            order_id = response.json["id"]
+
+        state_1 = OrderState(status="accepted", order_id=order_id)
+        state_2 = OrderState(status="in_progress", order_id=order_id)
+
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/orderstate", json=state_1)
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/orderstate", json=state_2)
+
+    def test_returning_last_1_state(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["status"], "in_progress")
+
+    def test_returning_last_2_states(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?lastN=2")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["status"], "accepted")
+            self.assertEqual(response.json[1]["status"], "in_progress")
+
+    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?lastN=100000")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 3)
+            self.assertEqual(response.json[0]["status"], "to_accept")
+            self.assertEqual(response.json[1]["status"], "accepted")
+            self.assertEqual(response.json[2]["status"], "in_progress")
+
+    def test_returning_last_two_states_newer_than_given_timestamp(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?lastN=2&since=1500")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["status"], "in_progress")
+
+    def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(self):
+        state_3 = OrderState(status="canceled", order_id=1)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/orderstate", json=state_3)
+            response = c.get("/v2/management/orderstate?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["status"], "canceled")
+
+
+class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 2)
+        create_stops(self.app, 2)
+        create_route(self.app, stop_ids=(1, 2))
+        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        self.order_1 = Order(
+            user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
+        )
+        self.order_2 = Order(
+            user_id=1, car_id=1, target_stop_id=2, stop_route_id=1, notification_phone=PHONE
+        )
+
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            c.post("/v2/management/car", json=car_1)
+            c.post("/v2/management/order", json=self.order_1)
+            c.post("/v2/management/order", json=self.order_2)
+
+        state_1 = OrderState(status="accepted", order_id=1)
+        state_2 = OrderState(status="in_progress", order_id=1)
+        state_3 = OrderState(status="accepted", order_id=2)
+        state_4 = OrderState(status="done", order_id=2)
+
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/orderstate", json=state_1)
+            c.post("/v2/management/orderstate", json=state_3)
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/orderstate", json=state_2)
+            c.post("/v2/management/orderstate", json=state_4)
+
+    def test_returning_last_1_state_for_given_car(self):
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/orderstate/1?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["status"], "in_progress")
+
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/orderstate/2?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["status"], "done")
+
+    def test_returning_last_2_states_for_given_car(self):
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/orderstate/1?lastN=2")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["status"], "accepted")
+            self.assertEqual(response.json[1]["status"], "in_progress")
 
 
 if __name__ == "__main__":
