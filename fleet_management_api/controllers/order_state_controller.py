@@ -23,7 +23,7 @@ def create_order_state(order_state):  # noqa: E501
     return 'do some magic!'
 
 
-def get_all_order_states(wait=None, since=None):  # noqa: E501
+def get_all_order_states(wait=None, since=None, last_n=None):  # noqa: E501
     """Find Order States for all existing Orders.
 
      # noqa: E501
@@ -32,13 +32,15 @@ def get_all_order_states(wait=None, since=None):  # noqa: E501
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
+    :param last_n: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \\ If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned. Minimum value is 1.
+    :type last_n: int
 
     :rtype: Union[List[OrderState], Tuple[List[OrderState], int], Tuple[List[OrderState], int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def get_order_states(order_id, wait=None, since=None):  # noqa: E501
+def get_order_states(order_id, wait=None, since=None, last_n=None):  # noqa: E501
     """Find all Order States for a particular Order specified by its ID.
 
      # noqa: E501
@@ -49,6 +51,8 @@ def get_order_states(order_id, wait=None, since=None):  # noqa: E501
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
+    :param last_n: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \\ If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned. Minimum value is 1.
+    :type last_n: int
 
     :rtype: Union[List[OrderState], Tuple[List[OrderState], int], Tuple[List[OrderState], int, Dict[str, str]]
     """

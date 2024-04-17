@@ -399,5 +399,42 @@ class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
             self.assertEqual(len(response.json), 0)
 
 
+POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+
+
+class Test_Returning_Last_N_Car_States(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 1)
+        car = Car(
+            platform_hw_id=1,
+            name="car1",
+            car_admin_phone=MobilePhone(phone="123456789")
+        )
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            response = c.post("/v2/management/car", json=car)
+            assert response.json is not None
+            car_id = response.json["id"]
+
+        state_1 = CarState(status="idle", car_id=car_id, position=POSITION)
+        state_2 = CarState(status="charging", car_id=car_id, position=POSITION)
+
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/carstate", json=state_1)
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/carstate", json=state_2)
+
+    def test_returning_last_1_state(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/carstate?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+
+
 if __name__ == "__main__":  # pragma: no coverage
     unittest.main(buffer=True)

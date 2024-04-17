@@ -192,6 +192,7 @@ paths:
       parameters:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
@@ -222,6 +223,7 @@ paths:
       parameters:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
         - name: carId
           in: path
           description: ID of the Car for which to find the Car States.

@@ -54,3 +54,13 @@ components:
       schema:
         type: integer
         format: int64
+    LastN:
+      name: lastN
+      description: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \
+        If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned.
+        Minimum value is 1.
+      in: query
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
