@@ -279,7 +279,9 @@ def get_children(
     connection_source: Optional[_sqa.Engine] = None,
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     wait: bool = False,
-    timeout_ms: int = 1000
+    timeout_ms: int = 1000,
+    sort_result_by: Optional[dict[str, Order]] = None,
+    first_n: int = 0
 ) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
