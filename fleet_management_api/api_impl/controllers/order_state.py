@@ -76,7 +76,15 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
 
 
 def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
-    """Get all order states for all the existing orders."""
+    """Get all order states for all the existing orders.
+
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+        and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
+        Default value is 0.
+
+    :param wait: If True, wait for new states if there are no states for the order yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
+    """
     _api.log_info("Getting all order states for all orders.")
     return _get_order_states({}, wait, since, last_n=last_n)
 
@@ -86,11 +94,12 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: 
 
     :param order_id: Id of the order.
 
-    :param since: Only statuses with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
         and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
         Default value is 0.
 
     :param wait: If True, wait for new states if there are no states for the order yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     if not _order_exists(order_id):
         _api.log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
