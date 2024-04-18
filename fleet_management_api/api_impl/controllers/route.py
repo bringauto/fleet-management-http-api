@@ -14,7 +14,7 @@ def create_route() -> _api.Response:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_response = _check_route_model(route)
         if not check_response.status_code == 200:
-            return _api.log_and_respond(check_response.status_code, check_response.body)
+            return _api.log_error_and_respond(check_response.body['detail'], check_response.status_code, check_response.body['title'])
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.add(route_db_model)
         if response.status_code == 200:
@@ -23,11 +23,12 @@ def create_route() -> _api.Response:
             if not route_visualization_response.status_code == 200:
                 return route_visualization_response
             _api.log_info(f"Route (name='{route.name}) has been created.")
-            return _api.json_response(200, _api.route_from_db_model(inserted_db_model))
+            return _api.json_response(_api.route_from_db_model(inserted_db_model))
         else:
-            return _api.log_and_respond(
+            return _api.log_error_and_respond(
+                f"Route (name='{route.name}) could not be sent. {response.body['detail']}",
                 response.status_code,
-                f"Route (name='{route.name}) could not be sent. {response.body}",
+                response.body['title'],
             )
 
 
@@ -35,19 +36,20 @@ def delete_route(route_id: int) -> _api.Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(route_id)
     if not related_orders_response.status_code == 200:
-        return _api.log_and_respond(
-            related_orders_response.status_code, related_orders_response.body
+        return _api.log_error_and_respond(
+            related_orders_response.status_code, related_orders_response.status_code,  related_orders_response.body
         )
     response = _db_access.delete(_db_models.RouteDBModel, route_id)
     if not response.status_code == 200:
         note = " (not found)" if response.status_code == 404 else ""
-        return _api.log_and_respond(
+        return _api.log_error_and_respond(
+            f"Could not delete route with ID={route_id}{note}. {response.body['detail']}",
             response.status_code,
-            f"Could not delete route with ID={route_id}{note}. {response.body}",
+            response.body['title']
         )
     else:
         route_deletion_msg = f"Route with ID={route_id} has been deleted."
-        return _api.log_and_respond(200, route_deletion_msg)
+        return _api.log_info_and_respond(route_deletion_msg)
 
 
 def get_route(route_id: int) -> _models.Route:
@@ -57,10 +59,10 @@ def get_route(route_id: int) -> _models.Route:
     )
     routes = [_api.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     if len(routes) == 0:
-        return _api.log_and_respond(404, f"Route with ID={route_id} was not found.")
+        return _api.log_error_and_respond(f"Route with ID={route_id} was not found.", 404, title="Object not found")
     else:
         _api.log_info(f"Found {len(routes)} route with ID={route_id}")
-        return _api.json_response(200, routes[0])
+        return _api.json_response(routes[0])
 
 
 def get_routes() -> list[_models.Route]:
@@ -70,7 +72,7 @@ def get_routes() -> list[_models.Route]:
         _api.route_from_db_model(route_db_model) for route_db_model in route_db_models
     ]
     _api.log_info(f"Found {len(route)} routes.")
-    return _api.json_response(200, route)
+    return _api.json_response(route)
 
 
 def update_route(route: dict | _models.Route) -> _api.Response:
@@ -81,16 +83,22 @@ def update_route(route: dict | _models.Route) -> _api.Response:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_stops_response = _find_nonexistent_stops(route)
         if not check_stops_response.status_code == 200:
-            return _api.log_and_respond(check_stops_response.status_code, check_stops_response.body)
+            return _api.log_error_and_respond(
+                check_stops_response.body,
+                check_stops_response.status_code,
+                "Object not found"
+            )
         route_db_model = _api.route_to_db_model(route)
         response = _db_access.update(updated=route_db_model)
         if response.status_code == 200:
             _api.log_info(f"Route (ID={route.id} has been succesfully updated.")
-            return _api.json_response(200, route)
+            return _api.json_response(route)
         else:
             note = " (not found)" if response.status_code == 404 else ""
-            return _api.log_and_respond(
-                404, f"Route (ID={route.id}) could not be updated{note}. {response.body}"
+            return _api.log_error_and_respond(
+                f"Route (ID={route.id}) could not be updated{note}. {response.body['detail']}",
+                404,
+                response.body['title']
             )
 
 
@@ -98,7 +106,7 @@ def _check_route_model(route: _models.Route) -> _api.Response:
     check_stops_response = _find_nonexistent_stops(route)
     if not check_stops_response.status_code == 200:
         return check_stops_response
-    return _api.text_response(200, f"Route (ID={route.id}, name='{route.name}) has been checked.")
+    return _api.text_response(f"Route (ID={route.id}, name='{route.name}) has been checked.")
 
 
 def _create_empty_route_visualization(route_id: int) -> _api.Response:
@@ -106,13 +114,14 @@ def _create_empty_route_visualization(route_id: int) -> _api.Response:
         _db_models.RouteVisualizationDBModel(id=route_id, route_id=route_id, points=[]),
     )
     if not response.status_code == 200:
-        return _api.text_response(
+        return _api.error(
             response.status_code,
-            f"Could not create route visualization for route with ID={route_id}. {response.body}",
+            f"Could not create route visualization for route with ID={route_id}. {response.body['detail']}",
+            response.body['title'],
         )
     else:
         return _api.text_response(
-            200, f"Empty route visualization (route ID={route_id}) has been created."
+            f"Empty route visualization (route ID={route_id}) has been created."
         )
 
 
@@ -121,15 +130,14 @@ def _find_nonexistent_stops(route: _models.Route) -> _api.Response:
     existing_ids = set([stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)])
     nonexistent_stop_ids = checked_id_set.difference(existing_ids)
     if nonexistent_stop_ids:
-        return _api.text_response(
+        return _api.error(
             404,
             f"Route (ID={route.id}, name='{route.name}) has not been created - some of the required stops do not exist. "
             f"Nonexstent stop ids: {nonexistent_stop_ids}",
+            title="Object not found",
         )
     else:
-        return _api.text_response(
-            200, f"Route (ID={route.id}, name='{route.name}) has been checked."
-        )
+        return _api.text_response(f"Route (ID={route.id}, name='{route.name}) has been checked.")
 
 
 def _find_related_orders(route_id: int) -> _api.Response:
@@ -137,10 +145,11 @@ def _find_related_orders(route_id: int) -> _api.Response:
         _db_models.OrderDBModel, criteria={"stop_route_id": lambda x: x == route_id}
     )
     if related_orders:
-        return _api.text_response(
+        return _api.error(
             400,
             f"Route (ID={route_id}) could not be deleted, because there are orders related to it. "
             f"Related orders: {related_orders}",
+            title="Cannot delete object as other objects depend on it",
         )
     else:
-        return _api.text_response(200, f"Route (ID={route_id}) has been checked.")
+        return _api.text_response(f"Route (ID={route_id}) has been checked.")

@@ -16,10 +16,11 @@ def create_stop() -> _api.Response:
         response = _db_access.add(stop_db_model)
         if response.status_code == 200:
             _api.log_info(f"Stop (ID={response.body[0].id}, name='{stop.name}) has been created.")
-            return _api.json_response(200, _api.stop_from_db_model(response.body[0]))
+            return _api.json_response(_api.stop_from_db_model(response.body[0]))
         else:
-            return _api.text_response(
-                response.status_code, f"Stop (name='{stop.name}) could not be sent. {response.body}"
+            return _api.error(
+                response.status_code, f"Stop (name='{stop.name}) could not be created. {response.body['detail']}",
+                title=response.body['title']
             )
 
 
@@ -30,14 +31,15 @@ def delete_stop(stop_id: int) -> _api.Response:
     """
     routes_response = _get_routes_referencing_stop(stop_id)
     if routes_response.status_code != 200:
-        return _api.log_and_respond(routes_response.status_code, routes_response.body)
+        return _api.log_error_and_respond(routes_response.body["title"], routes_response.status_code, routes_response.body['title'])
     response = _db_access.delete(_db_models.StopDBModel, stop_id)
     if response.status_code == 200:
-        return _api.log_and_respond(200, f"Stop with ID={stop_id} has been deleted.")
+        return _api.log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _api.log_and_respond(
-            response.status_code, f"Could not delete stop with ID={stop_id}{note}. {response.body}"
+        return _api.error(
+            response.status_code, f"Could not delete stop with ID={stop_id}{note}. {response.body['detail']}",
+            response.body['title']
         )
 
 
@@ -48,7 +50,7 @@ def get_stop(stop_id: int) -> _api.Response:
     )
     stops = [_api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
-        return _api.log_and_respond(404, f"Stop with ID={stop_id} was not found.")
+        return _api.log_error_and_respond(f"Stop with ID={stop_id} was not found.", 404, title="Object not found")
     else:
         _api.log_info(f"Found {len(stops)} stop with ID={stop_id}")
         return _api.Response(body=stops[0], status_code=200, content_type="application/json")
@@ -61,7 +63,7 @@ def get_stops() -> _api.Response:
         _api.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
     _api.log_info(f"Found {len(stops)} stops.")
-    return _api.json_response(200, stops)
+    return _api.json_response(stops)
 
 
 def update_stop(stop: dict | _Stop) -> _api.Response:
@@ -74,21 +76,23 @@ def update_stop(stop: dict | _Stop) -> _api.Response:
         response = _db_access.update(stop_db_model)
         if response.status_code == 200:
             _api.log_info(f"Stop (ID={stop.id} has been succesfully updated.")
-            return _api.json_response(200, stop)
+            return _api.json_response(stop)
         else:
             note = " (not found)" if response.status_code == 404 else ""
-            return _api.log_and_respond(
+            return _api.log_error_and_respond(
+                f"Stop (ID={stop.id}) could not be updated {note}. {response.body['detail']}",
                 response.status_code,
-                f"Stop (ID={stop.id}) could not be updated {note}. {response.body}",
+                response.body['title']
             )
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _api.Response:
     route_db_models = [m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids]
     if len(route_db_models) > 0:
-        return _api.log_and_respond(
-            400,
+        return _api.log_error_and_respond(
             f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",
+            400,
+            title="Cannot delete object because it is referenced by other objects"
         )
     else:
-        return _api.log_and_respond(200, f"Stop with ID={stop_id} is not referenced by any route.")
+        return _api.log_info_and_respond(f"Stop with ID={stop_id} is not referenced by any route.")

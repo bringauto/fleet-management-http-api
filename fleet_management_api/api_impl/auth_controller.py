@@ -3,8 +3,7 @@ import sys
 sys.path.append("./server")
 from typing import Optional
 
-from connexion.lifecycle import ConnexionResponse  # type: ignore
-
+import fleet_management_api.api_impl as _api
 from fleet_management_api.api_impl.security import SecurityObj
 from flask import redirect
 from fleet_management_api.api_impl.api_logging import log_info, log_error
@@ -19,7 +18,7 @@ def init_security(
     _security.set_config(keycloak_url, client_id, secret_key, scope, realm, callback)
 
 
-def login() -> ConnexionResponse:
+def login() -> _api.Response:
     """login
 
     Redirect to keycloak login page. # noqa: E501
@@ -31,7 +30,7 @@ def login() -> ConnexionResponse:
     except:
         msg = "Problem reaching oAuth service."
         log_error(msg)
-        return ConnexionResponse(body=msg, status_code=500)
+        return _api.error(500, msg)
 
 
 def token_get(
@@ -39,7 +38,7 @@ def token_get(
     session_state: Optional[str] = None,
     iss: Optional[str] = None,
     code: Optional[str] = None,
-) -> ConnexionResponse:
+) -> _api.Response:
     """token_get
 
     Get token. Should only be used by keycloak. # noqa: E501
@@ -60,12 +59,12 @@ def token_get(
     except:
         msg = "Problem getting token from oAuth service."
         log_error(msg)
-        return ConnexionResponse(body=msg, status_code=500)
+        return _api.error(500, msg)
     log_info("Jwt token generated.")
-    return ConnexionResponse(body=token, status_code=200)
+    return _api.Response(body=token, status_code=200)
 
 
-def token_refresh(refresh_token: str) -> ConnexionResponse:
+def token_refresh(refresh_token: str) -> _api.Response:
     """token_refresh
 
     Generate a new token using the refresh token. # noqa: E501
@@ -80,6 +79,6 @@ def token_refresh(refresh_token: str) -> ConnexionResponse:
     except:
         msg = "Problem getting token from oAuth service."
         log_error(msg)
-        return ConnexionResponse(body=msg, status_code=500)
+        return _api.error(500, msg)
     log_info("Jwt token refreshed.")
-    return ConnexionResponse(body=token, status_code=200)
+    return _api.Response(body=token, status_code=200)
