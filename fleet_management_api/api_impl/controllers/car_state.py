@@ -39,15 +39,17 @@ def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
             code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
             _api.log_error(cleanup_error_msg)
             msg = msg + "\n" + cleanup_error_msg
+            title = "Could not remove old car states."
         else:
-            return _api.json_response(code, inserted_model)
+            return _api.json_response(inserted_model)
     else:
-        code, msg = (
+        code, msg, title = (
             response.status_code,
-            f"Car state could not be sent. {response.body}",
+            f"Car state could not be created. {response.body['detail']}",
+            response.body['title']
         )
         _api.log_error(msg)
-    return _api.text_response(code, msg)
+    return _api.error(code=code, msg=msg, title=title)
 
 
 def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
@@ -72,9 +74,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
         _api.car_state_from_db_model(car_state_db_model)
         for car_state_db_model in car_state_db_models
     ]
-    # then, reverse the list to get the oldest state to be the first in the list
-    car_states.reverse()  # type: ignore
-    return _api.json_response(200, car_states)
+    return _api.json_response(car_states)
 
 
 def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
@@ -88,24 +88,19 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     try:
-        car = _db_access.get_by_id(_db_models.CarDBModel, car_id)
-        if not car:
-            return _api.log_and_respond(404, f"Car with ID={car_id} not found.")
-        else:
-            car_state_db_models = _db_access.get(
-                base=_db_models.CarStateDBModel,
-                criteria={"car_id": lambda x: x==car_id, "timestamp": lambda x: x >= since},
-                wait=wait,
-                sort_result_by={"timestamp": "desc", "id": "desc"},
-                first_n=last_n
-            )
-            car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
-            car_states.reverse()  # type: ignore
-            return _api.json_response(200, car_states)
-    except _db_access._NoResultFound as e:
-        return _api.log_and_respond(404, f"Car with ID={car_id} not found. {e}")
+        car_state_db_models = _db_access.get_children(
+            parent_base=_db_models.CarDBModel,
+            parent_id=car_id,
+            children_col_name="states",
+            criteria={"timestamp": lambda x: x >= since},
+            wait=wait
+        )
+        car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
+        return _api.json_response(car_states)
+    except _db_access.ParentNotFound as e:
+        return _api.log_error_and_respond(f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found")
     except Exception as e:  # pragma: no cover
-        return _api.log_and_respond(500, f"Error: {e}")
+        return _api.log_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
 def _remove_old_states(car_id: int) -> _api.Response:
@@ -124,4 +119,4 @@ def _remove_old_states(car_id: int) -> _api.Response:
         )
         return response
     else:
-        return _api.text_response(200, "")
+        return _api.text_response("")

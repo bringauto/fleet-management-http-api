@@ -24,10 +24,12 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 
 class ParentNotFound(Exception):
+    """Raised when the parent object does not exist in the database."""
     pass
 
 
 class DatabaseRecordValueError(Exception):
+    """Raised when the value of the record in the database does not meet the condition."""
     pass
 
 
@@ -105,7 +107,7 @@ def add(
     """
     global _wait_mg
     if not added:
-        return _api.text_response(200, "Empty request body. Nothing to add to database.")
+        return _api.text_response("Empty request body. Nothing to add to database.")
     _check_common_base_for_all_objs(*added)
     source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session:
@@ -116,18 +118,18 @@ def add(
                         check_obj.check(session)
                     except _NoResultFound as e:
                         msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
-                        return _api.text_response(404, msg)
+                        return _api.error(404, msg, title="Cannot create object as some referenced objects do not exist")
             _set_id_to_none(added)
             session.add_all(added)
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
-            return _api.json_response(200, [obj.copy() for obj in added])
+            return _api.json_response([obj.copy() for obj in added])
         except DatabaseRecordValueError as e:
-            return _api.text_response(400, f"Nothing added to the database. {e}")
+            return _api.error(400, f"Nothing added to the database. {e}", title="Cannot create object due to unmet conditions on this or referenced object")
         except _sqaexc.IntegrityError as e:
-            return _api.text_response(400, f"Nothing added to the database. {e.orig}")
+            return _api.error(400, f"Nothing added to the database. {e.orig}", title="Cannot create object due to ID conflict in the database")
         except Exception as e:
-            return _api.text_response(500, f"Nothing added to the database. {e}")
+            return _api.error(500, f"Nothing added to the database. {e}", title="Cannot create object due to unexpected error")
 
 
 def delete(base: type[_Base], id_: Any) -> _Response:
@@ -138,15 +140,15 @@ def delete(base: type[_Base], id_: Any) -> _Response:
             inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _api.text_response(200, f"{base.model_name} (ID={id_}) was deleted.")
+            return _api.text_response(f"{base.model_name} (ID={id_}) has been deleted.")
         except _NoResultFound as e:
-            return _api.text_response(404, f"{base.model_name} (ID={id_}) not found. {e}")
+            return _api.error(404, f"{base.model_name} (ID={id_}) not found. {e}", title="Object to delete not found")
         except _sqaexc.IntegrityError as e:
-            return _api.text_response(
-                400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}"
+            return _api.error(
+                400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}", title="Cannot delete object due to integrity error"
             )
         except Exception as e:
-            return _api.text_response(500, f"Error: {e}")
+            return _api.error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
 
 
 def delete_n(
@@ -158,14 +160,14 @@ def delete_n(
 ) -> _Response:
     """Delete multiple instances of the `base`.
 
-    The `base` instances are first filtered by the `criteria` and sorted by values in a column with the `column_name`.
-    `n` objects with either `maximum` or `minimum` (defined by the `start_from`) value in the column are deleted.
+    The `base` instances are first filtered by the `criteria` and sorted by values in a column with
+    the `column_name`.
+    `n` objects with either `maximum` or `minimum` (defined by the `start_from`) value in the column
+    are deleted.
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _api.text_response(
-            500, f"Column {column_name} not found in table {base.__tablename__}."
-        )
+        return _api.error(500, f"Column {column_name} not found in table {base.__tablename__}.", title="Invalid request to the server' database")
     if criteria is None:
         criteria = {}
     table = base.__table__
@@ -183,7 +185,7 @@ def delete_n(
         query = query.limit(n)
         stmt = _sqa.delete(base).where(table.c.id.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
-        return _api.text_response(200, f"{n_of_deleted_items} objects deleted from the database.")
+        return _api.text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
 def get_by_id(
@@ -191,8 +193,8 @@ def get_by_id(
 ) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
-    - An optional `connection_source` may be specified to replace the otherwise used global connection source
-    (an sqlalchemy Engine object).
+    An optional `connection_source` may be specified to replace the otherwise used global connection
+    source (an sqlalchemy Engine object).
     """
     source = check_and_return_current_connection_source(conn_source)
     with _Session(source) as session, session.begin():
@@ -337,14 +339,14 @@ def update(updated: _Base) -> _Response:
         try:
             session.get_one(updated.__class__, updated.id)
             session.merge(updated)
-            return _api.text_response(200, "Succesfully updated record.")
+            return _api.text_response("Succesfully updated record.")
         except _sqaexc.IntegrityError as e:
-            return _api.text_response(400, str(e.orig))
+            return _api.error(400, str(e.orig), title="Cannot update object with invalid data")
         except _sqaexc.NoResultFound as e:
             msg = f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update."
-            return _api.text_response(404, msg)
+            return _api.error(404, msg, title="Cannot update nonexistent object")
         except Exception as e:
-            return _api.text_response(500, str(e))
+            return _api.error(500, str(e), title="Cannot update object due to unexpected error")
 
 
 def wait_for_new(
