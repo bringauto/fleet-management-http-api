@@ -30,11 +30,12 @@ def create_car() -> _api.Response:  # noqa: E501
             inserted_model = _api.car_from_db_model(response.body[0])
             _api.log_info(f"Car (ID={inserted_model.id}, name='{car.name}) has been created.")
             _create_default_car_state(inserted_model.id)
-            return _api.json_response(200, inserted_model)
+            return _api.json_response(inserted_model)
         else:
-            return _api.log_and_respond(
-                response.status_code,
-                f"Car (name='{car.name}) could not be created. {response.body}",
+            return _api.log_error_and_respond(
+                code=response.status_code,
+                msg=f"Car (name='{car.name}) could not be created. {response.body['detail']}",
+                title=response.body['title']
             )
 
 
@@ -46,10 +47,10 @@ def delete_car(car_id: int) -> _api.Response:
     response = _db_access.delete(_db_models.CarDBModel, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
-        return _api.log_and_respond(200, msg)
+        return _api.log_info_and_respond(msg)
     else:
-        msg = f"Car (ID={car_id}) could not be deleted. {response.body}"
-        return _api.log_and_respond(response.status_code, msg)
+        msg = f"Car (ID={car_id}) could not be deleted. {response.body['detail']}"
+        return _api.log_error_and_respond(msg, response.status_code, response.body['title'])
 
 
 def get_car(car_id: int) -> _api.Response:
@@ -60,10 +61,10 @@ def get_car(car_id: int) -> _api.Response:
         omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders],
     )
     if len(cars) == 0:
-        return _api.log_and_respond(404, f"Car with ID={car_id} was not found.")
+        return _api.log_error_and_respond(f"Car with ID={car_id} was not found.", 404, title="Object was not found")
     else:
         _api.log_info(f"Car with ID={car_id} was found.")
-        return _api.json_response(200, _api.car_from_db_model(cars[0]))
+        return _api.json_response(_api.car_from_db_model(cars[0]))
 
 
 def get_cars() -> _api.Response:  # noqa: E501
@@ -76,7 +77,7 @@ def get_cars() -> _api.Response:  # noqa: E501
         _api.log_info("Listing all cars: no cars found.")
     else:
         _api.log_info(f"Listing all cars: {len(cars)} cars found.")
-    return _api.json_response(200, [_api.car_from_db_model(c) for c in cars])
+    return _api.json_response([_api.car_from_db_model(c) for c in cars])
 
 
 def update_car(car: dict | _models.Car) -> _api.Response:
@@ -88,13 +89,13 @@ def update_car(car: dict | _models.Car) -> _api.Response:
         car = _models.Car.from_dict(connexion.request.get_json())  # noqa: E501
         car_db_model = _api.car_to_db_model(car)
         response = _db_access.update(updated=car_db_model)
-        if 200 <= response.status_code < 300:
-            return _api.log_and_respond(
-                response.status_code, f"Car (ID={car.id}) has been succesfully updated."
+        if response.status_code == 200:
+            return _api.log_info_and_respond(
+                f"Car (ID={car.id}) has been succesfully updated."
             )
         else:
-            msg = f"Car (ID={car.id}) could not be updated. {response.body}"
-            return _api.log_and_respond(response.status_code, msg)
+            msg = f"Car (ID={car.id}) could not be updated. {response.body['detail']}"
+            return _api.log_error_and_respond(msg, response.status_code, response.body['title'])
     else:
         return _api.log_invalid_request_body_format()
 

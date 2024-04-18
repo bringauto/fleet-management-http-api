@@ -15,7 +15,7 @@ def create_order() -> _api.Response:
         return _api.log_invalid_request_body_format()
     order = _models.Order.from_dict(connexion.request.get_json())
     if not _car_exist(order.car_id):
-        return _api.log_and_respond(404, f"Car with ID={order.car_id} does not exist.")
+        return _api.log_error_and_respond(f"Car with ID={order.car_id} does not exist.", 404, "Object not found")
     else:
         db_model = _api.order_to_db_model(order)
         response = _db_access.add(
@@ -43,10 +43,10 @@ def create_order() -> _api.Response:
                 order_id=inserted_model.id
             )
             _create_order_state_from_argument(order_state)
-            return _api.json_response(200, inserted_model)
+            return _api.json_response(inserted_model)
         else:
-            return _api.log_and_respond(
-                response.status_code, f"Error when sending order. {response.body}."
+            return _api.log_error_and_respond(
+                f"Error when sending order. {response.body['detail']}.", response.status_code, response.body['title']
             )
 
 
@@ -56,11 +56,11 @@ def delete_order(car_id: int, order_id: int) -> _api.Response:
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _api.log_info(msg)
-        return _api.text_response(200, f"Order (ID={order_id})has been succesfully deleted.")
+        return _api.text_response(f"Order (ID={order_id})has been succesfully deleted.")
     else:
-        msg = f"Order (ID={order_id}) could not be deleted. {response.body}"
+        msg = f"Order (ID={order_id}) could not be deleted. {response.body['detail']}"
         _api.log_error(msg)
-        return _api.text_response(response.status_code, msg)
+        return _api.error(response.status_code, msg, response.body['title'])
 
 
 def get_order(car_id: int, order_id: int, since: int = 0) -> _api.Response:
@@ -77,26 +77,26 @@ def get_order(car_id: int, order_id: int, since: int = 0) -> _api.Response:
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
         _api.log_error(msg)
-        return _api.text_response(404, msg)
+        return _api.error(404, msg, "Object not found")
     else:
         msg = f"Found order with ID={order_id} of car with ID={car_id}."
         _api.log_info(msg)
-        return _api.json_response(200, _api.order_from_db_model(order_db_models[0]))
+        return _api.json_response(_api.order_from_db_model(order_db_models[0]))  # type: ignore
 
 
 def get_car_orders(car_id: int, since: int = 0) -> _api.Response:
     """Get all orders for a given car."""
     if not _car_exist(car_id):
-        return _api.log_and_respond(404, f"Car with ID={car_id} does not exist.")
+        return _api.log_error_and_respond(f"Car with ID={car_id} does not exist.", 404, title="Object not found")
     order_db_models = _db_access.get_children(
         parent_base=_db_models.CarDBModel,
         parent_id=car_id,
         children_col_name="orders",
         criteria={"timestamp": lambda z: z >= since}
     )
-    orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]
+    orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]  # type: ignore
     _api.log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
-    return _api.json_response(200, orders)
+    return _api.json_response(orders)
 
 
 def get_orders(since: int = 0) -> _api.Response:
@@ -109,7 +109,7 @@ def get_orders(since: int = 0) -> _api.Response:
             criteria={"timestamp": lambda x: x >= since}
         )
     ]
-    return _api.json_response(200, body)
+    return _api.json_response(body)
 
 
 def _car_exist(car_id: int) -> bool:
