@@ -6,7 +6,12 @@ import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
-from fleet_management_api.api_impl.controllers.order import decrease_n_of_active_orders as _decrease_n_of_active_orders
+from fleet_management_api.api_impl.controllers.order import (
+    from_active_to_inactive_order as _from_active_to_inactive_order,
+    max_n_of_inactive_orders as _max_n_of_inactive_orders,
+    n_of_inactive_orders as _n_of_inactive_orders,
+    delete_oldest_inactive_order as _delete_oldest_inactive_order
+)
 
 
 OrderId = int
@@ -71,10 +76,13 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
         _remove_old_states(order_state.order_id)
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
         _save_last_status(order_state)
-
         if order_state.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
-            _decrease_n_of_active_orders(order_state.order_id)
-
+            car_id = _from_active_to_inactive_order(order_state.order_id)
+            max_n  = _max_n_of_inactive_orders()
+            if max_n is not None and car_id is not None:
+                n_of_inactive = _n_of_inactive_orders(car_id)
+                if n_of_inactive > max_n:
+                    _delete_oldest_inactive_order(car_id)
         return _api.json_response(inserted_model)
     else:
         return _api.log_error_and_respond(

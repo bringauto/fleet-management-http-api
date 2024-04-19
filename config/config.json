@@ -31,8 +31,8 @@
     },
     "data": {
         "orders": {
-            "max_active_orders": 10,
-            "max_inactive_orders": 20
+            "max_active_orders": 5,
+            "max_inactive_orders": 10
         }
     }
 }

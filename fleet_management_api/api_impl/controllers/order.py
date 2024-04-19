@@ -11,33 +11,69 @@ import fleet_management_api.api_impl.controllers.order_state as _order_state
 
 
 CarId = int
+OrderId = int
 
 
-_n_of_active_orders: dict[CarId, int] = defaultdict(int)
+_active_orders: dict[CarId, list[OrderId]] = defaultdict(list)
+_inactive_orders: dict[CarId, list[OrderId]] = defaultdict(list)
 _max_n_of_active_orders: Optional[int] = None
+_max_n_of_inactive_orders: Optional[int] = None
 
 
-def clear_n_of_active_orders(car_id: Optional[CarId] = None) -> None:
-    global _n_of_active_orders
-    if car_id is not None and car_id in _n_of_active_orders:
-        del _n_of_active_orders[car_id]
+FINAL_STATUSES = {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}
+
+
+
+def clear_active_orders(car_id: Optional[CarId] = None) -> None:
+    global _active_orders
+    if car_id is not None and car_id in _active_orders:
+        del _active_orders[car_id]
     else:
-        _n_of_active_orders.clear()
+        _active_orders.clear()
+
+
+def clear_inactive_orders(car_id: Optional[CarId] = None) -> None:
+    global _inactive_orders
+    if car_id is not None and car_id in _inactive_orders:
+        del _inactive_orders[car_id]
+    else:
+        _inactive_orders.clear()
 
 
 def n_of_active_orders(car_id: int) -> int:
-    global _n_of_active_orders
-    if car_id not in _n_of_active_orders:
-        car_orders = get_car_orders(car_id).body
-        _n_of_active_orders[car_id] = len(
-            {order for order in car_orders if order.last_state.status not in FINAL_STATUSES}
-        )
-    return _n_of_active_orders.get(car_id, -1)
+    global _active_orders
+    if car_id not in _active_orders:
+        response = get_car_orders(car_id)
+        if response.status_code != 200:
+            _active_orders[car_id] = list()
+        else:
+            _active_orders[car_id] = [
+                order.id for order in response.body if order.last_state.status not in FINAL_STATUSES
+            ]
+    return len(_active_orders[car_id])
 
 
-def max_n_of_active_orders() -> Optional[int]:
+def n_of_inactive_orders(car_id: int) -> int:
+    global _inactive_orders
+    if car_id not in _inactive_orders:
+        response = get_car_orders(car_id)
+        if response.status_code != 200:
+            _inactive_orders[car_id] = list()
+        else:
+            _inactive_orders[car_id] = [
+                order.id for order in response.body if order.last_state.status in FINAL_STATUSES
+            ]
+    return len(_inactive_orders[car_id])
+
+
+def max_n_of_active_orders() -> int | None:
     global _max_n_of_active_orders
     return _max_n_of_active_orders
+
+
+def max_n_of_inactive_orders() -> int | None:
+    global _max_n_of_inactive_orders
+    return _max_n_of_inactive_orders
 
 
 def set_max_n_of_active_orders(n: None | int) -> None:
@@ -45,19 +81,49 @@ def set_max_n_of_active_orders(n: None | int) -> None:
     _max_n_of_active_orders = n
 
 
-def decrease_n_of_active_orders(car_id: int) -> None:
-    global _n_of_active_orders
-    if car_id in _n_of_active_orders and _n_of_active_orders[car_id] > 0:
-        _n_of_active_orders[car_id] -= 1
+def set_max_n_of_inactive_orders(n: None | int) -> None:
+    global _max_n_of_inactive_orders
+    _max_n_of_inactive_orders = n
 
 
-def _increase_n_of_active_orders(car_id: int) -> None:
-    global _n_of_active_orders
-    if car_id in _n_of_active_orders:
-        _n_of_active_orders[car_id] += 1
+def _remove_active_order(car_id: CarId, order_id: OrderId) -> None:
+    global _active_orders
+    if order_id in _active_orders[car_id]:
+        _active_orders[car_id].remove(order_id)
 
 
-FINAL_STATUSES = {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}
+def from_active_to_inactive_order(order_id: OrderId) -> int | None:
+    global _active_orders, _inactive_orders
+    for car_id in _active_orders:
+        if order_id in _active_orders[car_id]:
+            _active_orders[car_id].remove(order_id)
+            add_inactive_order(car_id, order_id)
+            return car_id
+    return None
+
+
+def remove_order(car_id: CarId, order_id: OrderId) -> None:
+    _remove_active_order(car_id, order_id)
+    _remove_inactive_order(car_id, order_id)
+
+
+def _remove_inactive_order(car_id: CarId, order_id: OrderId) -> None:
+    global _inactive_orders
+    if car_id in _inactive_orders and order_id in _inactive_orders[car_id]:
+        _inactive_orders[car_id].remove(order_id)
+
+
+def _add_active_order(car_id: CarId, order_id: OrderId) -> None:
+    global _active_orders
+    if car_id in _active_orders and order_id in _active_orders[car_id]:
+        return
+    _active_orders[car_id].append(order_id)
+
+
+def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
+    global _inactive_orders
+    if car_id in _inactive_orders and order_id not in _inactive_orders[car_id]:
+        _inactive_orders[car_id].append(order_id)
 
 
 def create_order() -> _api.Response:
@@ -71,10 +137,9 @@ def create_order() -> _api.Response:
         return _api.log_error_and_respond(
             f"Car with ID={car_id} does not exist.", 404, "Object not found"
         )
-
     if _max_n_of_active_orders is not None:
         car_id = order.car_id
-        if _n_of_active_orders[car_id] >= _max_n_of_active_orders:
+        if n_of_active_orders(car_id) >= _max_n_of_active_orders:
             return _api.error(
                 403,
                 f"Maximum number {_db_models.OrderDBModel.max_n_of_active_orders()} of active orders has been reached.",
@@ -106,7 +171,7 @@ def create_order() -> _api.Response:
             status=_models.OrderStatus.TO_ACCEPT, order_id=inserted_model.id
         )
         _order_state.create_order_state_from_argument(order_state)
-        _increase_n_of_active_orders(car_id)
+        _add_active_order(car_id, inserted_model.id)
         return _api.json_response(inserted_model)
     else:
         return _api.log_error_and_respond(
@@ -122,12 +187,18 @@ def delete_order(car_id: int, order_id: int) -> _api.Response:
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _api.log_info(msg)
-        decrease_n_of_active_orders(car_id)
+        remove_order(car_id, order_id=order_id)
         return _api.text_response(f"Order (ID={order_id})has been succesfully deleted.")
     else:
         msg = f"Order (ID={order_id}) could not be deleted. {response.body['detail']}"
         _api.log_error(msg)
         return _api.error(response.status_code, msg, response.body["title"])
+
+
+def delete_oldest_inactive_order(car_id: int) -> _api.Response:
+    """Delete n oldest inactive orders."""
+    oldest_inactive_order_id = _inactive_orders[car_id].pop(0)
+    delete_order(car_id, oldest_inactive_order_id)
 
 
 def get_order(car_id: int, order_id: int, since: int = 0) -> _api.Response:
