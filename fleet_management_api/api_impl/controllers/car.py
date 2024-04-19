@@ -58,7 +58,7 @@ def get_car(car_id: int) -> _api.Response:
     cars = _db_access.get(
         _db_models.CarDBModel,
         criteria={"id": lambda x: x == car_id},
-        omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders],
+        omitted_relationships=[_db_models.CarDBModel.orders],
     )
     if len(cars) == 0:
         return _api.log_error_and_respond(f"Car with ID={car_id} was not found.", 404, title="Object was not found")
@@ -71,7 +71,7 @@ def get_cars() -> _api.Response:  # noqa: E501
     """List all cars."""
     cars = _db_access.get(
         _db_models.CarDBModel,
-        omitted_relationships=[_db_models.CarDBModel.states, _db_models.CarDBModel.orders],
+        omitted_relationships=[_db_models.CarDBModel.orders],
     )
     if len(cars) == 0:
         _api.log_info("Listing all cars: no cars found.")

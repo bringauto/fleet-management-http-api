@@ -22,6 +22,7 @@ def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
         car_admin_phone=_models.MobilePhone.from_dict(car_db_model.car_admin_phone),
         default_route_id=car_db_model.default_route_id,
         under_test=car_db_model.under_test,
+        last_state=car_db_model.states[-1] if car_db_model.states else None,
     )
 
 
