@@ -126,6 +126,7 @@ def _get_order_states(
         _api.order_state_from_db_model(order_state_db_model)
         for order_state_db_model in order_state_db_models
     ]
+    order_states.sort(key=lambda x: x.timestamp)
     return _api.json_response(order_states)
 
 
