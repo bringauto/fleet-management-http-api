@@ -6,6 +6,7 @@ import fleet_management_api.api_impl as _api
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.api_impl.controllers.order import decrease_n_of_active_orders as _decrease_n_of_active_orders
 
 
 OrderId = int
@@ -70,6 +71,10 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
         _remove_old_states(order_state.order_id)
         _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
         _save_last_status(order_state)
+
+        if order_state.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
+            _decrease_n_of_active_orders(order_state.order_id)
+
         return _api.json_response(inserted_model)
     else:
         return _api.log_error_and_respond(

@@ -93,6 +93,8 @@ class CarStateDBModel(Base):
 class OrderDBModel(Base):
     model_name = "Order"
     __tablename__ = "orders"
+    _max_n_of_active_orders: int = 0
+
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
@@ -118,6 +120,15 @@ class OrderDBModel(Base):
             f"car_ID={self.car_id}, target_stop_ID={self.target_stop_id}, "
             f"stop_route_ID={self.stop_route_id}, notification_phone={self.notification_phone})"
         )
+
+    @classmethod
+    def max_n_of_active_orders(cls) -> int:
+        return cls._max_n_of_active_orders
+
+    @classmethod
+    def set_max_n_of_active_orders(cls, n: int) -> None:
+        if n > 0:
+            cls._set_max_n_of_active_orders = n
 
 
 class OrderStateDBModel(Base):

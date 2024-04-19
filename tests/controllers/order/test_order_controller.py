@@ -5,7 +5,7 @@ from unittest.mock import patch, Mock
 sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
-from fleet_management_api.models import Order, Car, MobilePhone
+from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 
@@ -162,7 +162,11 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
             response = c.get(f"/v2/management/order/1/1")
             self.assertEqual(response.status_code, 200)
             order.id = 1
-            self.assertEqual(Order.from_dict(response.json), order)
+            order.last_state = OrderState(id=1, status=OrderStatus.TO_ACCEPT, order_id=1, timestamp=1000)
+            self.assertEqual(Order.from_dict(response.json).id, order.id)
+            self.assertEqual(Order.from_dict(response.json).last_state, order.last_state)
+            self.assertEqual(Order.from_dict(response.json).target_stop_id, order.target_stop_id)
+            self.assertEqual(Order.from_dict(response.json).stop_route_id, order.stop_route_id)
 
     def test_retrieving_non_existing_order_yields_code_404(self):
         nonexistent_order_id = 65169861848

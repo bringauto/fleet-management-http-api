@@ -9,6 +9,12 @@ import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBModel
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order_state import initialize_last_order_status_dict
+from fleet_management_api.api_impl.controllers.order import (
+    clear_n_of_active_orders,
+    max_n_of_active_orders,
+    n_of_active_orders,
+    set_max_n_of_active_orders
+)
 
 
 def get_app() -> connexion.FlaskApp:
