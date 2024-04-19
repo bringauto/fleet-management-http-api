@@ -63,21 +63,38 @@ def get_car(car_id: int) -> _api.Response:
     if len(cars) == 0:
         return _api.log_error_and_respond(f"Car with ID={car_id} was not found.", 404, title="Object was not found")
     else:
+        last_state = _db_access.get(
+            _db_models.CarStateDBModel,
+            criteria={"car_id": lambda x: x==car_id},
+            sort_result_by={"timestamp": "desc", "id": "desc"},
+            first_n=1
+        )[0]
+        car = _api.car_from_db_model(cars[0])
+        car.last_state = _api.car_state_from_db_model(last_state)
         _api.log_info(f"Car with ID={car_id} was found.")
-        return _api.json_response(_api.car_from_db_model(cars[0]))
+        return _api.json_response(car)
 
 
 def get_cars() -> _api.Response:  # noqa: E501
     """List all cars."""
-    cars = _db_access.get(
+    db_cars = _db_access.get(
         _db_models.CarDBModel,
         omitted_relationships=[_db_models.CarDBModel.orders],
     )
+    cars = [_api.car_from_db_model(c) for c in db_cars]
     if len(cars) == 0:
         _api.log_info("Listing all cars: no cars found.")
     else:
+        for car in cars:
+            last_state = _db_access.get(
+                _db_models.CarStateDBModel,
+                criteria={"car_id": lambda x: x==car.id},
+                sort_result_by={"timestamp": "desc", "id": "desc"},
+                first_n=1
+            )
+            car.last_state = _api.car_state_from_db_model(last_state[0])
         _api.log_info(f"Listing all cars: {len(cars)} cars found.")
-    return _api.json_response([_api.car_from_db_model(c) for c in cars])
+    return _api.json_response(cars)
 
 
 def update_car(car: dict | _models.Car) -> _api.Response:

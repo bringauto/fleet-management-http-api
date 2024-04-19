@@ -79,9 +79,17 @@ def get_order(car_id: int, order_id: int, since: int = 0) -> _api.Response:
         _api.log_error(msg)
         return _api.error(404, msg, "Object not found")
     else:
+        last_state = _db_access.get(
+            _db_models.OrderStateDBModel,
+            criteria={"order_id": lambda x: x == order_id},
+            sort_result_by={"timestamp": "desc", "id": "desc"},
+            first_n=1,
+        )[0]
         msg = f"Found order with ID={order_id} of car with ID={car_id}."
         _api.log_info(msg)
-        return _api.json_response(_api.order_from_db_model(order_db_models[0]))  # type: ignore
+        order = _api.order_from_db_model(order_db_models[0])
+        order.last_state = _api.order_state_from_db_model(last_state)
+        return _api.json_response(order)  # type: ignore
 
 
 def get_car_orders(car_id: int, since: int = 0) -> _api.Response:
@@ -95,6 +103,14 @@ def get_car_orders(car_id: int, since: int = 0) -> _api.Response:
         criteria={"timestamp": lambda z: z >= since}
     )
     orders = [_api.order_from_db_model(order_db_model) for order_db_model in order_db_models]  # type: ignore
+    for order in orders:
+        last_state = _db_access.get(
+            _db_models.OrderStateDBModel,
+            criteria={"order_id": lambda x: x == order.id},
+            sort_result_by={"timestamp": "desc", "id": "desc"},
+            first_n=1,
+        )[0]
+        order.last_state = _api.order_state_from_db_model(last_state)
     _api.log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
     return _api.json_response(orders)
 
@@ -102,14 +118,18 @@ def get_car_orders(car_id: int, since: int = 0) -> _api.Response:
 def get_orders(since: int = 0) -> _api.Response:
     """Get all existing orders."""
     _api.log_info("Listing all existing orders.")
-    body = [
-        _api.order_from_db_model(order_db_model)
-        for order_db_model in _db_access.get(
-            _db_models.OrderDBModel,
-            criteria={"timestamp": lambda x: x >= since}
-        )
-    ]
-    return _api.json_response(body)
+    db_orders = _db_access.get(_db_models.OrderDBModel, criteria={"timestamp": lambda x: x >= since})
+    orders = [_api.order_from_db_model(order) for order in db_orders]
+    for order in orders:
+        last_state = _db_access.get(
+            _db_models.OrderStateDBModel,
+            criteria={"order_id": lambda x: x == order.id},
+            sort_result_by={"timestamp": "desc", "id": "desc"},
+            first_n=1,
+        )[0]
+        order.last_state = _api.order_state_from_db_model(last_state)
+
+    return _api.json_response(orders)
 
 
 def _car_exist(car_id: int) -> bool:
