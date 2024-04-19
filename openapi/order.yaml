@@ -306,6 +306,8 @@ components:
           $ref: 'common_models.yaml#/components/schemas/Id'
         notificationPhone:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+        lastState:
+          $ref: '#/components/schemas/OrderState'
     OrderState:
       type: object
       description: Order state object structure.

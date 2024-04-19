@@ -16,7 +16,7 @@ class CarState(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, timestamp=None, status=None, fuel=0, car_id=None, speed=0.0, position=None):  # noqa: E501
+    def __init__(self, id=None, timestamp=None, status=None, fuel=0, car_id=None, speed=0.0, position=None, last_state=None):  # noqa: E501
         """CarState - a model defined in OpenAPI
 
         :param id: The id of this CarState.  # noqa: E501
@@ -33,6 +33,8 @@ class CarState(Model):
         :type speed: float
         :param position: The position of this CarState.  # noqa: E501
         :type position: GNSSPosition
+        :param last_state: The last_state of this CarState.  # noqa: E501
+        :type last_state: CarState
         """
         self.openapi_types = {
             'id': int,
@@ -41,7 +43,8 @@ class CarState(Model):
             'fuel': int,
             'car_id': int,
             'speed': float,
-            'position': GNSSPosition
+            'position': GNSSPosition,
+            'last_state': CarState
         }
 
         self.attribute_map = {
@@ -51,7 +54,8 @@ class CarState(Model):
             'fuel': 'fuel',
             'car_id': 'carId',
             'speed': 'speed',
-            'position': 'position'
+            'position': 'position',
+            'last_state': 'lastState'
         }
 
         self._id = id
@@ -61,6 +65,7 @@ class CarState(Model):
         self._car_id = car_id
         self._speed = speed
         self._position = position
+        self._last_state = last_state
 
     @classmethod
     def from_dict(cls, dikt) -> 'CarState':
@@ -225,3 +230,24 @@ class CarState(Model):
         """
 
         self._position = position
+
+    @property
+    def last_state(self) -> CarState:
+        """Gets the last_state of this CarState.
+
+
+        :return: The last_state of this CarState.
+        :rtype: CarState
+        """
+        return self._last_state
+
+    @last_state.setter
+    def last_state(self, last_state: CarState):
+        """Sets the last_state of this CarState.
+
+
+        :param last_state: The last_state of this CarState.
+        :type last_state: CarState
+        """
+
+        self._last_state = last_state

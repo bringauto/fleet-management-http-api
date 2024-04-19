@@ -4,10 +4,12 @@ from typing import List, Dict  # noqa: F401
 
 from fleet_management_api.models.base_model import Model
 from fleet_management_api.models.mobile_phone import MobilePhone
+from fleet_management_api.models.order_state import OrderState
 import re
 from fleet_management_api import util
 
 from fleet_management_api.models.mobile_phone import MobilePhone  # noqa: E501
+from fleet_management_api.models.order_state import OrderState  # noqa: E501
 import re  # noqa: E501
 
 class Order(Model):
@@ -16,7 +18,7 @@ class Order(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, priority='normal', user_id=None, timestamp=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None):  # noqa: E501
+    def __init__(self, id=None, priority='normal', user_id=None, timestamp=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None, last_state=None):  # noqa: E501
         """Order - a model defined in OpenAPI
 
         :param id: The id of this Order.  # noqa: E501
@@ -37,6 +39,8 @@ class Order(Model):
         :type stop_route_id: int
         :param notification_phone: The notification_phone of this Order.  # noqa: E501
         :type notification_phone: MobilePhone
+        :param last_state: The last_state of this Order.  # noqa: E501
+        :type last_state: OrderState
         """
         self.openapi_types = {
             'id': int,
@@ -47,7 +51,8 @@ class Order(Model):
             'notification': str,
             'target_stop_id': int,
             'stop_route_id': int,
-            'notification_phone': MobilePhone
+            'notification_phone': MobilePhone,
+            'last_state': OrderState
         }
 
         self.attribute_map = {
@@ -59,7 +64,8 @@ class Order(Model):
             'notification': 'notification',
             'target_stop_id': 'targetStopId',
             'stop_route_id': 'stopRouteId',
-            'notification_phone': 'notificationPhone'
+            'notification_phone': 'notificationPhone',
+            'last_state': 'lastState'
         }
 
         self._id = id
@@ -71,6 +77,7 @@ class Order(Model):
         self._target_stop_id = target_stop_id
         self._stop_route_id = stop_route_id
         self._notification_phone = notification_phone
+        self._last_state = last_state
 
     @classmethod
     def from_dict(cls, dikt) -> 'Order':
@@ -285,3 +292,24 @@ class Order(Model):
         """
 
         self._notification_phone = notification_phone
+
+    @property
+    def last_state(self) -> OrderState:
+        """Gets the last_state of this Order.
+
+
+        :return: The last_state of this Order.
+        :rtype: OrderState
+        """
+        return self._last_state
+
+    @last_state.setter
+    def last_state(self, last_state: OrderState):
+        """Sets the last_state of this Order.
+
+
+        :param last_state: The last_state of this Order.
+        :type last_state: OrderState
+        """
+
+        self._last_state = last_state

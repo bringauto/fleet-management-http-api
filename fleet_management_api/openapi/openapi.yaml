@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 2.2.0
+  version: 2.3.0
 servers:
 - url: /v2/management
 security:
@@ -2774,6 +2774,7 @@ components:
           altitude: 400.25
           latitude: 49.204117
           longitude: 16.606525
+        lastState: null
         speed: 20.5
         timestamp: 1616425275913
         status: idle
@@ -2812,6 +2813,8 @@ components:
           type: number
         position:
           $ref: '#/components/schemas/GNSSPosition'
+        lastState:
+          $ref: '#/components/schemas/CarState'
       required:
       - carId
       - status
@@ -2841,6 +2844,11 @@ components:
         targetStopId: 1
         id: 1
         priority: normal
+        lastState:
+          orderId: 1
+          id: 1
+          status: to_accept
+          timestamp: 1616425275913
         userId: 1
         timestamp: 1616425275913
         carId: 1
@@ -2889,6 +2897,8 @@ components:
           type: integer
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
+        lastState:
+          $ref: '#/components/schemas/OrderState'
       required:
       - carId
       - stopRouteId
