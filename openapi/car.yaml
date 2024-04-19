@@ -276,6 +276,8 @@ components:
           type: boolean
           default: true
           example: false
+        lastState:
+          $ref: '#/components/schemas/CarState'
     CarState:
       type: object
       description: Car State object structure
@@ -303,8 +305,6 @@ components:
           example: 20.5
         position:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
-        lastState:
-          $ref: '#/components/schemas/CarState'
     CarStatus:
       type: string
       description: Car Status enum

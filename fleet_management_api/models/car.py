@@ -3,9 +3,11 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from fleet_management_api.models.base_model import Model
+from fleet_management_api.models.car_state import CarState
 from fleet_management_api.models.mobile_phone import MobilePhone
 from fleet_management_api import util
 
+from fleet_management_api.models.car_state import CarState  # noqa: E501
 from fleet_management_api.models.mobile_phone import MobilePhone  # noqa: E501
 
 class Car(Model):
@@ -14,7 +16,7 @@ class Car(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, platform_hw_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=True):  # noqa: E501
+    def __init__(self, id=None, platform_hw_id=None, name=None, car_admin_phone=None, default_route_id=None, under_test=True, last_state=None):  # noqa: E501
         """Car - a model defined in OpenAPI
 
         :param id: The id of this Car.  # noqa: E501
@@ -29,6 +31,8 @@ class Car(Model):
         :type default_route_id: int
         :param under_test: The under_test of this Car.  # noqa: E501
         :type under_test: bool
+        :param last_state: The last_state of this Car.  # noqa: E501
+        :type last_state: CarState
         """
         self.openapi_types = {
             'id': int,
@@ -36,7 +40,8 @@ class Car(Model):
             'name': str,
             'car_admin_phone': MobilePhone,
             'default_route_id': int,
-            'under_test': bool
+            'under_test': bool,
+            'last_state': CarState
         }
 
         self.attribute_map = {
@@ -45,7 +50,8 @@ class Car(Model):
             'name': 'name',
             'car_admin_phone': 'carAdminPhone',
             'default_route_id': 'defaultRouteId',
-            'under_test': 'underTest'
+            'under_test': 'underTest',
+            'last_state': 'lastState'
         }
 
         self._id = id
@@ -54,6 +60,7 @@ class Car(Model):
         self._car_admin_phone = car_admin_phone
         self._default_route_id = default_route_id
         self._under_test = under_test
+        self._last_state = last_state
 
     @classmethod
     def from_dict(cls, dikt) -> 'Car':
@@ -197,3 +204,24 @@ class Car(Model):
         """
 
         self._under_test = under_test
+
+    @property
+    def last_state(self) -> CarState:
+        """Gets the last_state of this Car.
+
+
+        :return: The last_state of this Car.
+        :rtype: CarState
+        """
+        return self._last_state
+
+    @last_state.setter
+    def last_state(self, last_state: CarState):
+        """Sets the last_state of this Car.
+
+
+        :param last_state: The last_state of this Car.
+        :type last_state: CarState
+        """
+
+        self._last_state = last_state

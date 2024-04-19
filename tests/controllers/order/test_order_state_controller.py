@@ -489,6 +489,7 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
             response = c.get("/v2/management/orderstate?lastN=100000")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
+            print(response.json)
             self.assertEqual(response.json[0]["status"], "to_accept")
             self.assertEqual(response.json[1]["status"], "accepted")
             self.assertEqual(response.json[2]["status"], "in_progress")
@@ -569,4 +570,6 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main(buffer=True)  # pragma: no coverage
+    runner = unittest.TextTestRunner()
+    runner.run(Test_Returning_Last_N_Order_States("test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states"))
+    # unittest.main(buffer=True)  # pragma: no coverage
