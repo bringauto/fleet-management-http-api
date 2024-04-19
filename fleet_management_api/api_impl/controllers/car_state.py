@@ -52,11 +52,22 @@ def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
     return _api.error(code=code, msg=msg, title=title)
 
 
-def get_all_car_states(since: int = 0, wait: bool = False) -> _api.Response:
-    """Get all car states for all the cars."""
+def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
+    """Get all car states for all the cars.
+
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+        and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
+        Default value is 0.
+
+    :param wait: If True, wait for new states if there are no states yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
+    """
+    # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
         _db_models.CarStateDBModel,
         criteria={"timestamp": lambda x: x >= since},
+        sort_result_by={"timestamp": "desc", "id": "desc"},
+        first_n=last_n,
         wait=wait
     )
     car_states = [
@@ -66,8 +77,16 @@ def get_all_car_states(since: int = 0, wait: bool = False) -> _api.Response:
     return _api.json_response(car_states)
 
 
-def get_car_states(car_id: int, since: int = 0, wait: bool = False) -> _api.Response:
-    """Get all car states for a car idenfified by 'car_id' of an existing car."""
+def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
+    """Get car states for a car idenfified by 'car_id' of an existing car.
+
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+        and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
+        Default value is 0.
+
+    :param wait: If True, wait for new states if there are no states yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
+    """
     try:
         car_state_db_models = _db_access.get_children(
             parent_base=_db_models.CarDBModel,

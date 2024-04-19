@@ -77,37 +77,50 @@ def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Re
         )
 
 
-def get_all_order_states(wait: bool = False, since: int = 0) -> _api.Response:
-    """Get all order states for all the existing orders."""
-    _api.log_info("Getting all order states for all orders.")
-    return _get_order_states({}, wait, since)
+def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
+    """Get all order states for all the existing orders.
 
-
-def get_order_states(order_id: int, wait: bool = False, since: int = 0) -> _api.Response:
-    """Get all order states for an order identified by 'order_id' of an existing order.
-
-    :param order_id: Id of the order.
-
-    :param since: Only statuses with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
         and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
         Default value is 0.
 
     :param wait: If True, wait for new states if there are no states for the order yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
+    """
+    _api.log_info("Getting all order states for all orders.")
+    return _get_order_states({}, wait, since, last_n=last_n)
+
+
+def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
+    """Get all order states for an order identified by 'order_id' of an existing order.
+
+    :param order_id: Id of the order.
+
+    :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
+        and there are no states with timestamp greater or equal to 'since', the request will wait for new states.
+        Default value is 0.
+
+    :param wait: If True, wait for new states if there are no states for the order yet.
+    :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     if not _order_exists(order_id):
         _api.log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _api.json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
-        return _get_order_states(criteria, wait, since)
+        return _get_order_states(criteria, wait, since, last_n)
 
 
 def _get_order_states(
-    criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int
+    criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int, last_n: int = 0
 ) -> _api.Response:
     criteria["timestamp"] = lambda x: x >= since
     order_state_db_models = _db_access.get(
-        _db_models.OrderStateDBModel, wait=wait, criteria=criteria
+        _db_models.OrderStateDBModel,
+        wait=wait,
+        criteria=criteria,
+        first_n=last_n,
+        sort_result_by={"timestamp": "desc", "id": "desc"}
     )
     order_states = [
         _api.order_state_from_db_model(order_state_db_model)

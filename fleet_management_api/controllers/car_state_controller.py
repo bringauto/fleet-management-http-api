@@ -23,7 +23,7 @@ def add_car_state(car_state):  # noqa: E501
     return 'do some magic!'
 
 
-def get_all_car_states(wait=None, since=None):  # noqa: E501
+def get_all_car_states(wait=None, since=None, last_n=None):  # noqa: E501
     """Find one or all Car States for all existing Cars.
 
      # noqa: E501
@@ -32,13 +32,15 @@ def get_all_car_states(wait=None, since=None):  # noqa: E501
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
+    :param last_n: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \\ If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned. If value smaller than 1 is provided, this filtering is ignored.
+    :type last_n: int
 
     :rtype: Union[List[CarState], Tuple[List[CarState], int], Tuple[List[CarState], int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def get_car_states(car_id, wait=None, since=None):  # noqa: E501
+def get_car_states(car_id, wait=None, since=None, last_n=None):  # noqa: E501
     """Find one or all Car States for a Car with given ID.
 
      # noqa: E501
@@ -49,6 +51,8 @@ def get_car_states(car_id, wait=None, since=None):  # noqa: E501
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
+    :param last_n: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \\ If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned. If value smaller than 1 is provided, this filtering is ignored.
+    :type last_n: int
 
     :rtype: Union[List[CarState], Tuple[List[CarState], int], Tuple[List[CarState], int, Dict[str, str]]
     """

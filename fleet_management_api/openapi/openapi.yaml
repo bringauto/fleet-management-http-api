@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 2.1.0
+  version: 2.2.0
 servers:
 - url: /v2/management
 security:
@@ -451,6 +451,17 @@ paths:
         schema:
           format: int64
           type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
       responses:
         "200":
           content:
@@ -582,6 +593,17 @@ paths:
         schema:
           format: int64
           type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
       - description: ID of the Car for which to find the Car States.
         example: 1
         in: path
@@ -681,6 +703,7 @@ paths:
               - priority: normal
                 userId: 1
                 carId: 1
+                timestamp: 1713256508978
                 targetStopId: 1
                 notification: Order notification
                 stopRouteId: 1
@@ -1095,6 +1118,17 @@ paths:
         schema:
           format: int64
           type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
       responses:
         "200":
           content:
@@ -1250,6 +1284,17 @@ paths:
         name: since
         schema:
           format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
           type: integer
       responses:
         "200":
@@ -2562,6 +2607,17 @@ components:
       schema:
         format: int64
         type: integer
+    LastN:
+      description: "If specified, only the last N objects will be returned. If unspecified,\
+        \ all objects are returned. \\ If some states have identical timestamps and\
+        \ they all do not fit into the maximum N states, only those with higher IDs\
+        \ are returned. If value smaller than 1 is provided, this filtering is ignored."
+      in: query
+      name: lastN
+      schema:
+        default: 0
+        format: int32
+        type: integer
     RouteId:
       description: An ID a the Route
       example: 1
@@ -2719,7 +2775,7 @@ components:
           latitude: 49.204117
           longitude: 16.606525
         speed: 20.5
-        timestamp: 1616425200000
+        timestamp: 1616425275913
         status: idle
         carId: 1
       properties:
@@ -2731,7 +2787,7 @@ components:
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
-          example: 1616425200000
+          example: 1616425275913
           format: int64
           title: timestamp
           type: integer
@@ -2786,7 +2842,7 @@ components:
         id: 1
         priority: normal
         userId: 1
-        timestamp: 1616425200000
+        timestamp: 1616425275913
         carId: 1
       properties:
         id:
@@ -2808,7 +2864,7 @@ components:
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
-          example: 1616425200000
+          example: 1616425275913
           format: int64
           title: timestamp
           type: integer
@@ -2852,7 +2908,7 @@ components:
         orderId: 1
         id: 1
         status: to_accept
-        timestamp: 1616425200000
+        timestamp: 1616425275913
       properties:
         id:
           example: 1
@@ -2869,7 +2925,7 @@ components:
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
-          example: 1616425200000
+          example: 1616425275913
           format: int64
           title: timestamp
           type: integer
@@ -3048,7 +3104,7 @@ components:
     Timestamp:
       description: A Unix timestamp in milliseconds. The timestamp is used to determine
         the time of creation of an object.
-      example: 1616425200000
+      example: 1616425275913
       format: int64
       title: timestamp
       type: integer

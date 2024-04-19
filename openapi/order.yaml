@@ -214,6 +214,7 @@ paths:
       parameters:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
       responses:
         '200':
           description: Successfully found all Order States complying with the request parameters.
@@ -255,6 +256,7 @@ paths:
             format: int32
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
       responses:
         '200':
           description: Order States for the Order specified by its ID have been found, sorted by their creation timestamp \

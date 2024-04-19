@@ -211,8 +211,14 @@ def get_by_id(
             raise e
 
 
+Order = Literal["asc", "desc"]
+ColumnName = str
+
+
 def get(
     base: type[_Base],
+    first_n: int = 0,
+    sort_result_by: Optional[dict[ColumnName, Order]] = None,
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
@@ -236,6 +242,8 @@ def get(
     global _wait_mg
     if criteria is None:
         criteria = {}
+    if sort_result_by is None:
+        sort_result_by = {}
     table = base.__table__
     source = check_and_return_current_connection_source(connection_source)
     with _Session(source) as session, session.begin():
@@ -244,6 +252,15 @@ def get(
             for attr_label in criteria.keys()
         ]
         stmt = _sqa.select(base).where(*clauses)  # type: ignore
+        for attr_label, order,  in sort_result_by.items():
+            if attr_label in table.columns.keys():
+                if order == "desc":
+                    stmt = stmt.order_by(table.c.__getattr__(attr_label).desc())
+                if order == "asc":
+                    stmt = stmt.order_by(table.c.__getattr__(attr_label).asc())
+
+        if first_n > 0:
+            stmt = stmt.limit(first_n)
         if omitted_relationships is not None:
             for item in omitted_relationships:
                 stmt = stmt.options(_noload(item))
@@ -264,7 +281,9 @@ def get_children(
     connection_source: Optional[_sqa.Engine] = None,
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     wait: bool = False,
-    timeout_ms: int = 1000
+    timeout_ms: int = 1000,
+    sort_result_by: Optional[dict[str, Order]] = None,
+    first_n: int = 0
 ) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
