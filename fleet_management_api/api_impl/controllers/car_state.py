@@ -74,6 +74,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
         _api.car_state_from_db_model(car_state_db_model)
         for car_state_db_model in car_state_db_models
     ]
+    car_states.sort(key=lambda x: x.timestamp)
     return _api.json_response(car_states)
 
 
@@ -88,14 +89,17 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     try:
-        car_state_db_models = _db_access.get_children(
-            parent_base=_db_models.CarDBModel,
-            parent_id=car_id,
-            children_col_name="states",
-            criteria={"timestamp": lambda x: x >= since},
-            wait=wait
+        if not _db_access.get_by_id(_db_models.CarDBModel, car_id):
+            raise _db_access.ParentNotFound
+        car_state_db_models = _db_access.get(
+            base=_db_models.CarStateDBModel,
+            criteria={"car_id": lambda i: i==car_id, "timestamp": lambda x: x >= since},
+            wait=wait,
+            first_n=last_n,
+            sort_result_by={"timestamp": "desc", "id": "desc"}
         )
         car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
+        car_states.sort(key=lambda x: x.timestamp)
         return _api.json_response(car_states)
     except _db_access.ParentNotFound as e:
         return _api.log_error_and_respond(f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found")

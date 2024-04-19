@@ -441,6 +441,7 @@ class Test_Returning_Last_N_Car_States(unittest.TestCase):
             response = c.get("/v2/management/carstate?lastN=2")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
+            print(response.json)
             self.assertEqual(response.json[0]["status"], "idle")
             self.assertEqual(response.json[1]["status"], "charging")
 
