@@ -71,17 +71,26 @@ Required data:
 Data assigned by API:
 - id: unsigned integer
 - timestamp: unsigned integer
+- last state: [Car State](#car-state)
 
 Example:
 ```json
 {
-    "id": 12,
+    "id": 9,
     "timestamp": 1707805396152,
     "name": "Car 1",
-    "platform_hw_id": 1,
-    "car_admin_phone": "123456789",
-    "default_route_id": 1,
-    "under_test": false
+    "platformHwId": 1,
+    "carAdminPhone": "123456789",
+    "defaultRouteId": 1,
+    "underTest": false,
+    "lastState": {
+      "carId": 9,
+      "fuel": 56,
+      "id": 1,
+      "speed": 10.5,
+      "status": "driving",
+      "timestamp": 1713774431780
+    },
 }
 ```
 
@@ -101,7 +110,7 @@ Example:
 {
     "id": 12,
     "timestamp": 1707805396753,
-    "car_id": 1,
+    "carId": 1,
     "status": "idle",
     "fuel": 100,
     "speed": 0,
@@ -128,6 +137,7 @@ Required data:
 Data assigned by API:
 - id: unsigned integer
 - timestamp: unsigned integer (time of the order's creation)
+- last state: [Car State](#car-state)
 
 Example:
 ```json
@@ -135,11 +145,17 @@ Example:
     "id": 12,
     "priority": "normal",
     "timestamp": 1707805396456,
-    "user_id": 1,
+    "userId": 1,
     "notification": "Please deliver the package to the address",
-    "target_stop_id": 1,
-    "route_id": 1,
-    "notification_phone": "+420123456789"
+    "targetStopId": 1,
+    "routeId": 1,
+    "notificationPhone": "+420123456789",
+    "lastState": {
+      "id": 8,
+      "orderId": 12,
+      "status": "done",
+      "timestamp": 17090774556492
+    },
 }
 ```
 
@@ -158,8 +174,8 @@ Example:
 ```json
 {
     "id": 12,
-    "order_id": 1,
-    "order_status": "accepted",
+    "orderId": 1,
+    "orderStatus": "accepted",
     "timestamp": 1707805396123
 }
 ```
@@ -195,7 +211,7 @@ Example:
 {
     "id": 12,
     "name": "Route 1",
-    "stop_ids": {1, 2, 3}
+    "stopIds": {1, 2, 3}
 }
 ```
 
@@ -215,7 +231,7 @@ Example:
 ```json
 {
     "id": 12,
-    "route_id": 1,
+    "routeId": 1,
     "points": [
         {
             "latitude": 49.06143,
@@ -254,6 +270,6 @@ Example:
         "longitude": 16.93658,
         "altitude": 430
     },
-    "notification_phone": "+420123456789"
+    "notificationPhone": "+420123456789"
 }
 ```

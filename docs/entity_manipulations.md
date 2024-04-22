@@ -60,9 +60,14 @@ Result:
 
 Entity [description](definitions.md#order).
 
+Each order falls into one of the following categories:
+- **Inactive** - the order has the last [Order State](#order-state) with status DONE or CANCELED.
+- **Active** - otherwise.
+
 ### Post
 
 Requirements:
+- The current number of active orders is lower than specified maximum number.
 - [Target Stop](#stop) of the Order must exist.
 - [Route](#route) referenced by the Order must exist and must contain the Target Stop.
 - [Car](#car) referenced by the Order must exist.
@@ -100,6 +105,10 @@ Result:
 - An Order State is created IF there is no older Order State with a final status (DONE or CANCELED).
 - Oldest Order States might be deleted, so the number of states stored by the API for a particular [Order](#order) is not greater than $N_{order\,states}$.
 - All the Clients waiting for some new Order States of a particular [Order](#order) receive a response (for the order state GET method).
+- If the Order State has a final status (DONE or CANCELED) and the server already stores maximum allowed number of inactive [Orders](#order), the inactive Order with which has been first marked as inactive is deleted.
+
+
+the corresponding [Order](#order) is deleted.
 
 
 ## Platform HW
