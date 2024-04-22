@@ -12,7 +12,7 @@ from tests.utils.setup_utils import create_stops, create_platform_hws, create_ro
 
 class Test_Creating_And_Getting_Cars(unittest.TestCase):
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test.db")
         app = _app.get_test_app()
         create_platform_hws(app, 2)
         create_stops(app, 3)
@@ -118,10 +118,14 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             response = c.post("/v2/management/car", json=7)
             self.assertEqual(response.status_code, 400)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Retrieving_Single_Car(unittest.TestCase):
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test.db")
         platformhw = PlatformHW(name="Test Platform HW")
         app = _app.get_test_app()
         with app.app.test_client() as c:
@@ -145,10 +149,14 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
             response = c.get(f"/v2/management/car/{nonexistent_car_id}")
             self.assertEqual(response.status_code, 404)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 3)
@@ -191,10 +199,14 @@ class Test_Logging_Car_Creation(unittest.TestCase):
                 c.post("/v2/management/car", json=car, content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
+
 
 class Test_Updating_Car(unittest.TestCase):
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test_db.db")
         app = _app.get_test_app()
         create_platform_hws(app)
 
@@ -226,6 +238,10 @@ class Test_Updating_Car(unittest.TestCase):
             c.post("/v2/management/car", json=car)
             response = c.put("/v2/management/car", json={"id": 1}, content_type="application/json")
             self.assertEqual(response.status_code, 400)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
 
 
 class Test_Deleting_Car(unittest.TestCase):
@@ -276,7 +292,7 @@ class Test_Deleting_Car(unittest.TestCase):
 
 class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
     def setUp(self) -> None:
-        set_connection_source_test()
+        set_connection_source_test("test.db")
         app = _app.get_test_app()
         create_platform_hws(app)
 
@@ -290,6 +306,10 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             response = c.post("/v2/management/car", json=car_2, content_type="application/json")
             self.assertEqual(response.status_code, 400)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
 
 
 if __name__ == "__main__":  # pragma: no cover

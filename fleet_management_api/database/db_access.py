@@ -14,10 +14,14 @@ from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 from fleet_management_api.database.db_models import Base as _Base
 from fleet_management_api.database.connection import (
-    check_and_return_current_connection_source,
+    get_current_connection_source as _get_current_connection_source,
 )
 import fleet_management_api.database.wait as wait
-import fleet_management_api.api_impl as _api
+from fleet_management_api.api_impl.api_responses import (
+    json_response as _json_response,
+    text_response as _text_response,
+    error as _error,
+)
 
 
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
@@ -107,9 +111,9 @@ def add(
     """
     global _wait_mg
     if not added:
-        return _api.text_response("Empty request body. Nothing to add to database.")
+        return _text_response("Empty request body. Nothing to add to database.")
     _check_common_base_for_all_objs(*added)
-    source = check_and_return_current_connection_source(connection_source)
+    source = _get_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
             if checked is not None:
@@ -118,37 +122,37 @@ def add(
                         check_obj.check(session)
                     except _NoResultFound as e:
                         msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
-                        return _api.error(404, msg, title="Cannot create object as some referenced objects do not exist")
+                        return _error(404, msg, title="Cannot create object as some referenced objects do not exist")
             _set_id_to_none(added)
             session.add_all(added)
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
-            return _api.json_response([obj.copy() for obj in added])
+            return _json_response([obj.copy() for obj in added])
         except DatabaseRecordValueError as e:
-            return _api.error(400, f"Nothing added to the database. {e}", title="Cannot create object due to unmet conditions on this or referenced object")
+            return _error(400, f"Nothing added to the database. {e}", title="Cannot create object due to unmet conditions on this or referenced object")
         except _sqaexc.IntegrityError as e:
-            return _api.error(400, f"Nothing added to the database. {e.orig}", title="Cannot create object due to ID conflict in the database")
+            return _error(400, f"Nothing added to the database. {e.orig}", title="Cannot create object due to ID conflict in the database")
         except Exception as e:
-            return _api.error(500, f"Nothing added to the database. {e}", title="Cannot create object due to unexpected error")
+            return _error(500, f"Nothing added to the database. {e}", title="Cannot create object due to unexpected error")
 
 
 def delete(base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
-    source = check_and_return_current_connection_source()
+    source = _get_current_connection_source()
     with _Session(source) as session:
         try:
             inst = session.get_one(base, id_)
             session.delete(inst)
             session.commit()
-            return _api.text_response(f"{base.model_name} (ID={id_}) has been deleted.")
+            return _text_response(f"{base.model_name} (ID={id_}) has been deleted.")
         except _NoResultFound as e:
-            return _api.error(404, f"{base.model_name} (ID={id_}) not found. {e}", title="Object to delete not found")
+            return _error(404, f"{base.model_name} (ID={id_}) not found. {e}", title="Object to delete not found")
         except _sqaexc.IntegrityError as e:
-            return _api.error(
+            return _error(
                 400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}", title="Cannot delete object due to integrity error"
             )
         except Exception as e:
-            return _api.error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
+            return _error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
 
 
 def delete_n(
@@ -167,11 +171,11 @@ def delete_n(
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _api.error(500, f"Column {column_name} not found in table {base.__tablename__}.", title="Invalid request to the server' database")
+        return _error(500, f"Column {column_name} not found in table {base.__tablename__}.", title="Invalid request to the server' database")
     if criteria is None:
         criteria = {}
     table = base.__table__
-    source = check_and_return_current_connection_source()
+    source = _get_current_connection_source()
     with _Session(source) as session, session.begin():
         clauses = [
             criteria[attr_label](getattr(table.columns, attr_label))
@@ -185,7 +189,7 @@ def delete_n(
         query = query.limit(n)
         stmt = _sqa.delete(base).where(table.c.id.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
-        return _api.text_response(f"{n_of_deleted_items} objects deleted from the database.")
+        return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
 def get_by_id(
@@ -196,7 +200,7 @@ def get_by_id(
     An optional `connection_source` may be specified to replace the otherwise used global connection
     source (an sqlalchemy Engine object).
     """
-    source = check_and_return_current_connection_source(conn_source)
+    source = _get_current_connection_source(conn_source)
     with _Session(source) as session, session.begin():
         try:
             results = []
@@ -245,7 +249,7 @@ def get(
     if sort_result_by is None:
         sort_result_by = {}
     table = base.__table__
-    source = check_and_return_current_connection_source(connection_source)
+    source = _get_current_connection_source(connection_source)
     with _Session(source) as session, session.begin():
         clauses = [
             criteria[attr_label](getattr(table.columns, attr_label))
@@ -292,7 +296,7 @@ def get_children(
     - An optional `connection_source` may be specified to replace the otherwise used global connection source
     (an sqlalchemy Engine object).
     """
-    source = check_and_return_current_connection_source(connection_source)
+    source = _get_current_connection_source(connection_source)
     if criteria is None:
         criteria = {}
     child_base = getattr(parent_base, children_col_name).property.mapper.class_
@@ -334,19 +338,19 @@ def update(updated: _Base) -> _Response:
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
     """
-    source = check_and_return_current_connection_source()
+    source = _get_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
             session.get_one(updated.__class__, updated.id)
             session.merge(updated)
-            return _api.text_response("Succesfully updated record.")
+            return _text_response("Succesfully updated record.")
         except _sqaexc.IntegrityError as e:
-            return _api.error(400, str(e.orig), title="Cannot update object with invalid data")
+            return _error(400, str(e.orig), title="Cannot update object with invalid data")
         except _sqaexc.NoResultFound as e:
             msg = f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update."
-            return _api.error(404, msg, title="Cannot update nonexistent object")
+            return _error(404, msg, title="Cannot update nonexistent object")
         except Exception as e:
-            return _api.error(500, str(e), title="Cannot update object due to unexpected error")
+            return _error(500, str(e), title="Cannot update object due to unexpected error")
 
 
 def wait_for_new(

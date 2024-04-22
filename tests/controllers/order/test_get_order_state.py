@@ -10,7 +10,7 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone
-import fleet_management_api.database as database
+from fleet_management_api.database.db_access import set_content_timeout_ms
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
@@ -77,7 +77,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
-        database.set_content_timeout_ms(1000)
+        set_content_timeout_ms(1000)
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 1)
@@ -150,7 +150,7 @@ class Test_Timeouts(unittest.TestCase):
             c.post("/v2/management/order", json=order)
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        database.set_content_timeout_ms(150)
+        set_content_timeout_ms(150)
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate?&since=0")

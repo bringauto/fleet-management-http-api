@@ -1,5 +1,5 @@
 import fleet_management_api.database.connection as _connection
-from fleet_management_api.api_impl import (
+from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     text_response as _text_response,
     error as _error

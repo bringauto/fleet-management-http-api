@@ -1,6 +1,7 @@
 import unittest
 import sys
 from unittest.mock import patch, Mock
+import os
 
 sys.path.append(".")
 
@@ -8,11 +9,14 @@ import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from fleet_management_api.api_impl.controllers.order import clear_active_orders, clear_inactive_orders
 
 
 class Test_Sending_Order(unittest.TestCase):
     def setUp(self) -> None:
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
+        clear_active_orders()
+        clear_inactive_orders()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
@@ -81,10 +85,16 @@ class Test_Sending_Order(unittest.TestCase):
             response = c.post("/v2/management/order", json=incomplete_order_dict)
             self.assertEqual(response.status_code, 400)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
     def test_creating_order_from_example_in_spec(self):
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
+        clear_active_orders()
+        clear_inactive_orders()
         app = _app.get_test_app()
         create_platform_hws(app)
         create_stops(app, 1)
@@ -99,10 +109,14 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
             response = c.post("/v2/management/order", json=example)
             self.assertEqual(response.status_code, 200)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_All_Retrieving_Orders(unittest.TestCase):
     def setUp(self) -> None:
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
@@ -133,11 +147,15 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
                 Order.from_dict(response.json[0]).target_stop_id, order.target_stop_id
             )
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
@@ -174,10 +192,14 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
             response = c.get(f"/v2/management/order/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Deleting_Order(unittest.TestCase):
     def setUp(self):
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
         create_stops(self.app, 7)
@@ -207,13 +229,18 @@ class Test_Deleting_Order(unittest.TestCase):
             response = c.delete(f"/v2/management/order/1/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
+
 
 class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mock_timestamp: Mock) -> None:
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
+        mock_timestamp.return_value = 0
         create_platform_hws(self.app)
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1,2))
@@ -264,6 +291,10 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             assert response.json is not None
             self.assertEqual(len(response.json), 0)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
 
 
 if __name__ == "__main__":

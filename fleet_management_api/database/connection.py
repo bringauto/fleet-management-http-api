@@ -5,9 +5,17 @@ import sqlalchemy as _sqa
 from sqlalchemy import Engine as _Engine
 from sqlalchemy import create_engine as _create_engine
 
-import fleet_management_api.database.db_models as _db_models
-import fleet_management_api.script_args.configs as _configs
-import fleet_management_api.api_impl as _api
+# import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.database.db_models import (
+    Base as _Base,
+    CarStateDBModel as _CarStateDBModel,
+    OrderStateDBModel as _OrderStateDBModel
+)
+from fleet_management_api.script_args.configs import Database as _Database
+from fleet_management_api.api_impl.api_logging import (
+    log_info as _log_info,
+    log_error as _log_error
+)
 
 
 _db_connection: Optional[_Engine] = None
@@ -19,7 +27,7 @@ def current_connection_source() -> _Engine | None:
     return _db_connection
 
 
-def check_and_return_current_connection_source(
+def get_current_connection_source(
     conn_source: Optional[_Engine] = None,
 ) -> _sqa.engine.base.Engine:
     """Return the passed `conn_source` if it is not None.
@@ -122,11 +130,11 @@ def set_connection_source_test(db_file_path: str = "") -> str:
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
     _set_connection(url)
-    _api.log_info(f"Using sqlite database stored in file '{db_file_path}'.")
+    _log_info(f"Using sqlite database stored in file '{db_file_path}'.")
     return db_file_path
 
 
-def set_up_database(config: _configs.Database) -> None:
+def set_up_database(config: _Database) -> None:
     """Set up the database connection source (sqlalchemy Engine object) based on the given configuration.
 
     Set class attributes of the DB models.
@@ -144,21 +152,21 @@ def set_up_database(config: _configs.Database) -> None:
         )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _db_models.CarStateDBModel.set_max_n_of_stored_states(
+    _CarStateDBModel.set_max_n_of_stored_states(
         config.maximum_number_of_table_rows["car_states"]
     )
-    _db_models.OrderStateDBModel.set_max_n_of_stored_states(
+    _OrderStateDBModel.set_max_n_of_stored_states(
         config.maximum_number_of_table_rows["order_states"]
     )
     src = current_connection_source()
     if src is None:
         msg = "Database connection not set up."
-        _api.log_error(msg)
+        _log_error(msg)
         raise RuntimeError(msg)
     else:
         msg = f"\nConnected to PostgreSQL database (database url = '{src.url}').\n"
         print(msg)
-        _api.log_info(msg)
+        _log_info(msg)
 
 
 def unset_connection_source() -> None:
@@ -170,13 +178,13 @@ def unset_connection_source() -> None:
 def _set_connection(url: str) -> None:
     global _db_connection
     _db_connection = _new_connection(url)
-    _db_models.Base.metadata.create_all(_db_connection)
+    _Base.metadata.create_all(_db_connection)
 
 
 def _get_connection(url: str) -> _Engine:
     global _db_connection
     connection_src = _new_connection(url)
-    _db_models.Base.metadata.create_all(connection_src)
+    _Base.metadata.create_all(connection_src)
     return connection_src
 
 

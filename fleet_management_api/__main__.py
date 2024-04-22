@@ -2,7 +2,9 @@ import fleet_management_api.script_args as _args
 import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
 from fleet_management_api.controllers.security_controller import set_public_key
-from fleet_management_api.database import set_up_database, set_content_timeout_ms
+from fleet_management_api.database.db_access import set_content_timeout_ms
+from fleet_management_api.database.connection import set_up_database
+from fleet_management_api.api_impl.data_setup import set_up_data
 
 
 def _set_up_oauth(config: _args.Security) -> None:
@@ -29,8 +31,10 @@ if __name__ == "__main__":
     http_server_config = args.config.http_server
     security_config = args.config.security
     security_config.callback = args.config.http_server.base_uri
+    data_config = args.config.data
 
     set_up_database(db_config)
+    set_up_data(data_config)
     set_content_timeout_ms(api_config.request_for_data.timeout_in_seconds * 1000)
     _set_up_oauth(security_config)
 

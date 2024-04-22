@@ -1,7 +1,9 @@
 import unittest
 import sys
+import os
 
 sys.path.append(".")
+
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
@@ -15,7 +17,7 @@ POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
 class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
 
     def setUp(self) -> None:
-        _connection.set_connection_source_test()
+        _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
         create_stops(self.app, 2)
@@ -89,6 +91,10 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["lastState"]["status"], state_2.status)
             self.assertEqual(response.json[1]["lastState"]["status"], state_4.status)
+
+    def tearDown(self) -> None:
+        if os.path.isfile("test.db"):
+            os.remove("test.db")
 
 
 if __name__=='__main__':  # pragma: no cover
