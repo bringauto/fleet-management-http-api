@@ -212,7 +212,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
             os.remove("test_db.db")
 
 
-class Test_Automatic_Removal_Of_Inactive_Order(unittest.TestCase):
+class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
@@ -243,6 +243,26 @@ class Test_Automatic_Removal_Of_Inactive_Order(unittest.TestCase):
             self.assertEqual(n_of_inactive_orders(1), 2)
             self.assertNotIn(1, _order._inactive_orders[1])
             self.assertIn(3, _order._inactive_orders[1])
+
+    def test_starts_from_order_that_was_completed_first(self):
+        set_max_n_of_active_orders(None)
+        set_max_n_of_inactive_orders(2)
+        order_1 = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_2 = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_3 = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
+        car_id = 1
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/order", json=order_1)
+            c.post("/v2/management/order", json=order_2)
+            c.post("/v2/management/orderstate", json=OrderState(status=OrderStatus.DONE, order_id=2))
+            c.post("/v2/management/orderstate", json=OrderState(status=OrderStatus.DONE, order_id=1))
+            self.assertEqual(n_of_inactive_orders(car_id), 2)
+            c.post("/v2/management/order", json=order_3)
+            c.post("/v2/management/orderstate", json=OrderState(status=OrderStatus.DONE, order_id=3))
+            self.assertEqual(n_of_inactive_orders(car_id), 2)
+            # order 2 is removed as it was COMPLETED first, regardless of being CREATED after order 1
+            self.assertListEqual(_order._inactive_orders[car_id], [1, 3])
+
 
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
