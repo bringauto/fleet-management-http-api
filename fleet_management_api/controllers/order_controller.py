@@ -53,7 +53,7 @@ def get_car_orders(car_id, since=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_order(car_id, order_id, since=None):  # noqa: E501
+def get_order(car_id, order_id):  # noqa: E501
     """Find an existing Order by the car ID and the order ID and return it.
 
      # noqa: E501
@@ -62,8 +62,6 @@ def get_order(car_id, order_id, since=None):  # noqa: E501
     :type car_id: int
     :param order_id: ID of the Order to be returned.
     :type order_id: int
-    :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
-    :type since: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
     """

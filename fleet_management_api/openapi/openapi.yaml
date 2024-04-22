@@ -1022,14 +1022,6 @@ paths:
         schema:
           format: int32
           type: integer
-      - description: "A Unix timestamp in milliseconds. If specified, only objects\
-          \ created at the time or later will be returned. If unspecified, all objects\
-          \ are returned (since is set to 0 in that case)."
-        in: query
-        name: since
-        schema:
-          format: int64
-          type: integer
       responses:
         "200":
           content:

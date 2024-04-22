@@ -36,6 +36,7 @@ FINAL_STATUSES = {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}
 
 
 def clear_active_orders(car_id: Optional[CarId] = None) -> None:
+    """Remove cached active order IDs. If car_id is provided, remove only orders for that car."""
     global _active_orders
     if car_id is not None and car_id in _active_orders:
         del _active_orders[car_id]
@@ -44,6 +45,7 @@ def clear_active_orders(car_id: Optional[CarId] = None) -> None:
 
 
 def clear_inactive_orders(car_id: Optional[CarId] = None) -> None:
+    """Remove cached inactive order IDs. If car_id is provided, remove only orders for that car."""
     global _inactive_orders
     if car_id is not None and car_id in _inactive_orders:
         del _inactive_orders[car_id]
@@ -52,6 +54,7 @@ def clear_inactive_orders(car_id: Optional[CarId] = None) -> None:
 
 
 def n_of_active_orders(car_id: int) -> int:
+    """Return the current number of active orders for a given car."""
     global _active_orders
     if car_id not in _active_orders:
         response = get_car_orders(car_id)
@@ -65,6 +68,7 @@ def n_of_active_orders(car_id: int) -> int:
 
 
 def n_of_inactive_orders(car_id: int) -> int:
+    """Return the current number of inactive orders for a given car."""
     global _inactive_orders
     if car_id not in _inactive_orders:
         response = get_car_orders(car_id)
@@ -78,21 +82,25 @@ def n_of_inactive_orders(car_id: int) -> int:
 
 
 def max_n_of_active_orders() -> int | None:
+    """Return the maximum number of active orders that can be assigned to any car."""
     global _max_n_of_active_orders
     return _max_n_of_active_orders
 
 
 def max_n_of_inactive_orders() -> int | None:
+    """Return the maximum number of inactive orders that can be assigned to any car."""
     global _max_n_of_inactive_orders
     return _max_n_of_inactive_orders
 
 
 def set_max_n_of_active_orders(n: None | int) -> None:
+    """Set the maximum number of active orders that can be assigned to any car."""
     global _max_n_of_active_orders
     _max_n_of_active_orders = n
 
 
 def set_max_n_of_inactive_orders(n: None | int) -> None:
+    """Set the maximum number of inactive orders that can be assigned to any car."""
     global _max_n_of_inactive_orders
     _max_n_of_inactive_orders = n
 
@@ -104,6 +112,7 @@ def _remove_active_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 def from_active_to_inactive_order(order_id: OrderId) -> int | None:
+    """Move an order from active to inactive orders.  Return the car ID if the order was found, None otherwise."""
     global _active_orders, _inactive_orders
     for car_id in _active_orders:
         if order_id in _active_orders[car_id]:
@@ -114,6 +123,7 @@ def from_active_to_inactive_order(order_id: OrderId) -> int | None:
 
 
 def remove_order(car_id: CarId, order_id: OrderId) -> None:
+    """Remove an order from both active or inactive orders."""
     _remove_active_order(car_id, order_id)
     _remove_inactive_order(car_id, order_id)
 
@@ -125,6 +135,7 @@ def _remove_inactive_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 def _add_active_order(car_id: CarId, order_id: OrderId) -> None:
+    """Add an order to the list of active orders."""
     global _active_orders
     if car_id in _active_orders and order_id in _active_orders[car_id]:
         return
@@ -132,6 +143,7 @@ def _add_active_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
+    """Add an order to the list of inactive orders."""
     global _inactive_orders
     if car_id in _inactive_orders and order_id not in _inactive_orders[car_id]:
         _inactive_orders[car_id].append(order_id)
@@ -142,7 +154,9 @@ def create_order() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
 
-    order = _models.Order.from_dict(connexion.request.get_json())
+    order_dict = connexion.request.get_json()
+    order_dict["lastState"] = None
+    order = _models.Order.from_dict(order_dict)
     car_id = order.car_id
     if not _car_exist(car_id):
         return _log_error_and_respond(
@@ -181,8 +195,9 @@ def create_order() -> _Response:
         order_state = _models.OrderState(
             status=_models.OrderStatus.TO_ACCEPT, order_id=inserted_model.id
         )
-        _order_state.create_order_state_from_argument(order_state)
+        state = _order_state.create_order_state_from_argument(order_state).body
         _add_active_order(car_id, inserted_model.id)
+        inserted_model.last_state = state
         return _json_response(inserted_model)
     else:
         return _log_error_and_respond(
@@ -212,13 +227,13 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
     delete_order(car_id, oldest_inactive_order_id)
 
 
-def get_order(car_id: int, order_id: int, since: int = 0) -> _Response:
+def get_order(car_id: int, order_id: int) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get_children(
         parent_base=_db_models.CarDBModel,
         parent_id=car_id,
         children_col_name="orders",
-        criteria={"id": lambda x: x == order_id, "timestamp": lambda z: z >= since},
+        criteria={"id": lambda x: x == order_id},
     )
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."

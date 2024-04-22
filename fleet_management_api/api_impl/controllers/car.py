@@ -27,7 +27,9 @@ def create_car() -> _Response:  # noqa: E501
     if not connexion.request.is_json:
         _log_invalid_request_body_format()
     else:
-        car = _models.Car.from_dict(connexion.request.get_json())
+        car_dict = connexion.request.get_json()
+        car_dict["lastState"] = None
+        car = _models.Car.from_dict(car_dict)
         car_db_model = _obj_to_db.car_to_db_model(car)
         response = _db_access.add(
             car_db_model,
@@ -41,7 +43,8 @@ def create_car() -> _Response:  # noqa: E501
         if response.status_code == 200:
             inserted_model = _obj_to_db.car_from_db_model(response.body[0])
             _log_info(f"Car (ID={inserted_model.id}, name='{car.name}) has been created.")
-            _create_default_car_state(inserted_model.id)
+            state = _create_default_car_state(inserted_model.id).body
+            inserted_model.last_state = state
             return _json_response(inserted_model)
         else:
             return _log_error_and_respond(

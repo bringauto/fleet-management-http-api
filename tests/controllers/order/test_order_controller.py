@@ -40,7 +40,14 @@ class Test_Sending_Order(unittest.TestCase):
             response = c.post("/v2/management/order", json=order)
             self.assertEqual(response.status_code, 200)
             order.id = 1
-            self.assertEqual(Order.from_dict(response.json), order)
+            assert response.json is not None
+            self.assertEqual(response.json["id"], order.id)
+            self.assertEqual(response.json["timestamp"], order.timestamp)
+            self.assertEqual(response.json["carId"], order.car_id)
+            self.assertEqual(response.json["targetStopId"], order.target_stop_id)
+            self.assertEqual(response.json["stopRouteId"], order.stop_route_id)
+            self.assertEqual(response.json["notificationPhone"]["phone"], order.notification_phone.phone)
+            self.assertEqual(response.json["lastState"]["status"], "to_accept")
 
     def test_sending_order_to_non_exising_car_yields_code_404(self):
         nonexistent_car_id = 6546515

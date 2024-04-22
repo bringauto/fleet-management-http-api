@@ -128,8 +128,6 @@ paths:
       tags:
         - order
       summary: Find an existing Order by the car ID and the order ID and return it.
-      parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Since'
       responses:
         '200':
           description: The Order with the specified car ID and order ID has been found and returned.

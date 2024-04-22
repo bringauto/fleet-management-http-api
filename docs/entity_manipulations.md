@@ -108,9 +108,6 @@ Result:
 - If the Order State has a final status (DONE or CANCELED) and the server already stores maximum allowed number of inactive [Orders](#order), the inactive Order with which has been first marked as inactive is deleted.
 
 
-the corresponding [Order](#order) is deleted.
-
-
 ## Platform HW
 
 Entity [description](definitions.md#platform-hw).

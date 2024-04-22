@@ -97,7 +97,7 @@ Car State [description](definitions.md#car-state).
 
 More on endpoints [here](entity_manipulations.md#car-state).
 
-## /carstate[?since=<timestamp>&wait=<wait>]
+## /carstate
 
 ### POST
 
@@ -112,18 +112,27 @@ Response codes:
 
 ### GET
 
-Finds states of all cars with timestamp >= since.
-If the wait=True and no states would be returned, the request will wait for the next relevant state to be added.
-By default, wait=False, since=0.
+Finds states of all cars.
+
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
+- 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
+- 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
+
+Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
 Response codes:
 - 200: Returning all existing car states.
 
-## /carstate/{carId}[?since=<timestamp>&wait=<wait>]
+## /carstate/{carId}
 
 ### GET
 
-Finds car states for a car with given ID with timestamp >= since.
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
+- 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
+- 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
+
 Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
 Response codes:
@@ -137,7 +146,7 @@ Order [description](definitions.md#order).
 
 More on endpoints [here](entity_manipulations.md#order).
 
-## /order[?since=<timestamp>]
+## /order
 
 ### POST
 
@@ -150,23 +159,29 @@ Query parameters are ignored for this method.
 Response codes:
 - 200: Successfully created a new order.
 - 400: Bad request. The request body is not a valid Order.
+- 403: Cannot add order. Maximum number of [active orders](entity_manipulations.md#order) specified in the API configuration has been reached. After some of the existing orders are completed or canceled, new orders can be added.
 - 404: Not found. Some of the entities referenced by the Order do not exist.
 
 ### GET
 
-Finds all orders with timestamp >= since. By default, since=0.
-If no such orders are found, empty list is returned, along with response code 200.
+Finds all orders
+
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only orders with timestamp >= since.
 
 Response body format: JSON array of Order objects.
 
 Response codes:
 - 200: Returning all existing orders.
 
-## /order/{carId}[?since=<timestamp>]
+## /order/{carId}
 
 ### GET
 
-Finds all orders assigned to a car referenced by car ID with timestamp >= since. By default, since=0.
+Finds all orders assigned to a car referenced by car ID.
+
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only orders with timestamp >= since.
 
 Response body format: JSON array of Order objects.
 
@@ -202,7 +217,7 @@ Order State [description](definitions.md#order-state).
 
 More on endpoints [here](entity_manipulations.md#order-state).
 
-## /orderstate[?since=<timestamp>&wait=<wait>]
+## /orderstate
 
 ### POST
 
@@ -222,9 +237,14 @@ Response codes:
 
 Finds states of all Orders.
 
-Response body format: JSON array of OrderState objects.
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
+- 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
+- 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
 
 Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
+
+Response body format: JSON array of OrderState objects.
 
 Response codes:
 - 200: Returning all existing order states.
@@ -234,6 +254,13 @@ Response codes:
 ### GET
 
 Finds Order States by the Order ID.
+
+Query parameters:
+- 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
+- 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
+- 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
+
+Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
 Response format: JSON version of the Order State.
 
