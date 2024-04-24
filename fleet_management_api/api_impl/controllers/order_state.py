@@ -5,14 +5,14 @@ import connexion as _connexion  # type: ignore
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
-    text_response as _text_response
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
@@ -58,7 +58,9 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
     any other Order State is refused (i.e., 403 is returned).
     """
     if not _order_exists(order_state.order_id):
-        return _log_error_and_respond(f"Order with id='{order_state.order_id}' was not found.", 404, "Object not found")
+        return _log_error_and_respond(
+            f"Order with id='{order_state.order_id}' was not found.", 404, "Object not found"
+        )
 
     # order exists
     if _is_order_done(order_state):
@@ -66,14 +68,14 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
             f"Order with id='{order_state.order_id}' has already received status DONE."
             "No other Order State can be added.",
             403,
-            title="Could not create new object"
+            title="Could not create new object",
         )
     elif _is_order_canceled(order_state):
         return _log_error_and_respond(
             f"Order with id='{order_state.order_id}' has already received status CANCELED."
             "No other Order State can be added.",
             403,
-            title="Could not create new object"
+            title="Could not create new object",
         )
 
     order_state_db_model = _obj_to_db.order_state_to_db_model(order_state)
@@ -85,7 +87,7 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
         _save_last_status(order_state)
         if order_state.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
             car_id = _order.from_active_to_inactive_order(order_state.order_id)
-            max_n  = _order.max_n_of_inactive_orders()
+            max_n = _order.max_n_of_inactive_orders()
             if max_n is not None and car_id is not None:
                 n_of_inactive = _order.n_of_inactive_orders(car_id)
                 if n_of_inactive > max_n:
@@ -93,7 +95,9 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
         return _json_response(inserted_model)
     else:
         return _log_error_and_respond(
-            f"Order state could not be sent. {response.body['detail']}", response.status_code, title=response.body['title']
+            f"Order state could not be sent. {response.body['detail']}",
+            response.status_code,
+            title=response.body["title"],
         )
 
 
@@ -111,7 +115,9 @@ def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) ->
     return _get_order_states({}, wait, since, last_n=last_n)
 
 
-def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: int = 0) -> _Response:
+def get_order_states(
+    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0
+) -> _Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
     :param order_id: Id of the order.
@@ -140,7 +146,7 @@ def _get_order_states(
         wait=wait,
         criteria=criteria,
         first_n=last_n,
-        sort_result_by={"timestamp": "desc", "id": "desc"}
+        sort_result_by={"timestamp": "desc", "id": "desc"},
     )
     order_states = [
         _obj_to_db.order_state_from_db_model(order_state_db_model)
@@ -151,7 +157,9 @@ def _get_order_states(
 
 
 def _remove_old_states(order_id: int) -> _Response:
-    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id})
+    order_state_db_models = _db_access.get(
+        _db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id}
+    )
     delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
     if delta > 0:
         response = _db_access.delete_n(
@@ -192,7 +200,7 @@ def _load_last_status_from_db_if_missing(order_state: _models.OrderState) -> Non
         order_state_db_models: list[_db_models.OrderStateDBModel] = _db_access.get(
             _db_models.OrderStateDBModel,
             criteria={"order_id": lambda x: x == order_state.order_id},
-            wait=False
+            wait=False,
         )
         if order_state_db_models:
             _last_order_status[order_state.order_id] = order_state_db_models[-1].status

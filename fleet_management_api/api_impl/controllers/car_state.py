@@ -5,13 +5,13 @@ from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
     text_response as _text_response,
-    error as _error
+    error as _error,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
@@ -58,7 +58,7 @@ def create_car_state_from_argument_and_post(car_state: _models.CarState) -> _Res
         code, msg, title = (
             response.status_code,
             f"Car state could not be created. {response.body['detail']}",
-            response.body['title']
+            response.body["title"],
         )
         _log_error(msg)
     return _error(code=code, msg=msg, title=title)
@@ -80,7 +80,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=last_n,
-        wait=wait
+        wait=wait,
     )
     car_states = [
         _obj_to_db.car_state_from_db_model(car_state_db_model)
@@ -105,16 +105,18 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
             raise _db_access.ParentNotFound
         car_state_db_models = _db_access.get(
             base=_db_models.CarStateDBModel,
-            criteria={"car_id": lambda i: i==car_id, "timestamp": lambda x: x >= since},
+            criteria={"car_id": lambda i: i == car_id, "timestamp": lambda x: x >= since},
             wait=wait,
             first_n=last_n,
-            sort_result_by={"timestamp": "desc", "id": "desc"}
+            sort_result_by={"timestamp": "desc", "id": "desc"},
         )
         car_states = [_obj_to_db.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
         car_states.sort(key=lambda x: x.timestamp)
         return _json_response(car_states)
     except _db_access.ParentNotFound as e:
-        return _log_error_and_respond(f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found")
+        return _log_error_and_respond(
+            f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found"
+        )
     except Exception as e:  # pragma: no cover
         return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
 

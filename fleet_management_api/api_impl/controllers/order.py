@@ -7,13 +7,13 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
     json_response as _json_response,
     text_response as _text_response,
-    Response as _Response
+    Response as _Response,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
@@ -230,8 +230,8 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
 def get_order(car_id: int, order_id: int) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
-        base = _db_models.OrderDBModel,
-        criteria = {"id": lambda x: x == order_id, "car_id": lambda x: x == car_id}
+        base=_db_models.OrderDBModel,
+        criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
@@ -280,9 +280,9 @@ def get_orders(since: int = 0) -> _Response:
 def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order:
     db_last_state = _db_access.get(
         _db_models.OrderStateDBModel,
-        criteria={"order_id": lambda x: x==order_db_model.id},
+        criteria={"order_id": lambda x: x == order_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
-        first_n=1
+        first_n=1,
     )
     last_state = _obj_to_db.order_state_from_db_model(db_last_state[0])
     order = _obj_to_db.order_from_db_model(order_db_model, last_state)
@@ -294,9 +294,6 @@ def _car_exist(car_id: int) -> bool:
 
 
 def _post_default_order_state(order_id: int) -> _Response:
-    order_state = _models.OrderState(
-        order_id=order_id,
-        status=DEFAULT_STATUS
-    )
+    order_state = _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
     response = _order_state.create_order_state_from_argument_and_post(order_state)
     return response

@@ -8,12 +8,12 @@ from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
     error as _error,
-    text_response as _text_response
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 
 
@@ -23,7 +23,11 @@ def get_route_visualization(route_id: int) -> _Response:
         _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
-        return _error(404, f"Route visualization (route ID={route_id}) was not found.", title="Object not found")
+        return _error(
+            404,
+            f"Route visualization (route ID={route_id}) was not found.",
+            title="Object not found",
+        )
     else:
         rp = _obj_to_db.route_visualization_from_db_model(rp_db_models[0])
         _log_info(f"Found route visualization (route ID={route_id}).")
@@ -45,7 +49,9 @@ def redefine_route_visualization() -> _Response:
                 rp_db_model,
                 checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
             )
-            return _log_error_and_respond(response.body['detail'], response.status_code, response.body['title'])
+            return _log_error_and_respond(
+                response.body["detail"], response.status_code, response.body["title"]
+            )
         else:
             _db_access.delete(_db_models.RouteVisualizationDBModel, existing_visualization[0].id)
             response = _db_access.add(
@@ -56,6 +62,10 @@ def redefine_route_visualization() -> _Response:
                 _log_info(
                     f"Route visualization for route with ID={rp.route_id} has been redefined."
                 )
-                return _json_response(_obj_to_db.route_visualization_from_db_model(response.body[0]))
+                return _json_response(
+                    _obj_to_db.route_visualization_from_db_model(response.body[0])
+                )
             else:
-                return _log_error_and_respond(response.body["detail"], response.status_code, response.body["title"])
+                return _log_error_and_respond(
+                    response.body["detail"], response.status_code, response.body["title"]
+                )

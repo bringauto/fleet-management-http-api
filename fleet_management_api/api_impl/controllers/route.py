@@ -8,13 +8,13 @@ from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
     error as _error,
-    text_response as _text_response
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 
 
@@ -26,7 +26,11 @@ def create_route() -> _Response:
         route = _models.Route.from_dict(connexion.request.get_json())
         check_response = _check_route_model(route)
         if not check_response.status_code == 200:
-            return _log_error_and_respond(check_response.body['detail'], check_response.status_code, check_response.body['title'])
+            return _log_error_and_respond(
+                check_response.body["detail"],
+                check_response.status_code,
+                check_response.body["title"],
+            )
         route_db_model = _obj_to_db.route_to_db_model(route)
         response = _db_access.add(route_db_model)
         if response.status_code == 200:
@@ -40,7 +44,7 @@ def create_route() -> _Response:
             return _log_error_and_respond(
                 f"Route (name='{route.name}) could not be sent. {response.body['detail']}",
                 response.status_code,
-                response.body['title'],
+                response.body["title"],
             )
 
 
@@ -49,7 +53,9 @@ def delete_route(route_id: int) -> _Response:
     related_orders_response = _find_related_orders(route_id)
     if not related_orders_response.status_code == 200:
         return _log_error_and_respond(
-            related_orders_response.status_code, related_orders_response.status_code,  related_orders_response.body
+            related_orders_response.status_code,
+            related_orders_response.status_code,
+            related_orders_response.body,
         )
     response = _db_access.delete(_db_models.RouteDBModel, route_id)
     if not response.status_code == 200:
@@ -57,7 +63,7 @@ def delete_route(route_id: int) -> _Response:
         return _log_error_and_respond(
             f"Could not delete route with ID={route_id}{note}. {response.body['detail']}",
             response.status_code,
-            response.body['title']
+            response.body["title"],
         )
     else:
         route_deletion_msg = f"Route with ID={route_id} has been deleted."
@@ -71,7 +77,9 @@ def get_route(route_id: int) -> _models.Route:
     )
     routes = [_obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     if len(routes) == 0:
-        return _log_error_and_respond(f"Route with ID={route_id} was not found.", 404, title="Object not found")
+        return _log_error_and_respond(
+            f"Route with ID={route_id} was not found.", 404, title="Object not found"
+        )
     else:
         _log_info(f"Found {len(routes)} route with ID={route_id}")
         return _json_response(routes[0])
@@ -96,9 +104,7 @@ def update_route(route: dict | _models.Route) -> _Response:
         check_stops_response = _find_nonexistent_stops(route)
         if not check_stops_response.status_code == 200:
             return _log_error_and_respond(
-                check_stops_response.body,
-                check_stops_response.status_code,
-                "Object not found"
+                check_stops_response.body, check_stops_response.status_code, "Object not found"
             )
         route_db_model = _obj_to_db.route_to_db_model(route)
         response = _db_access.update(updated=route_db_model)
@@ -110,7 +116,7 @@ def update_route(route: dict | _models.Route) -> _Response:
             return _log_error_and_respond(
                 f"Route (ID={route.id}) could not be updated{note}. {response.body['detail']}",
                 404,
-                response.body['title']
+                response.body["title"],
             )
 
 
@@ -129,12 +135,10 @@ def _create_empty_route_visualization(route_id: int) -> _Response:
         return _error(
             response.status_code,
             f"Could not create route visualization for route with ID={route_id}. {response.body['detail']}",
-            response.body['title'],
+            response.body["title"],
         )
     else:
-        return _text_response(
-            f"Empty route visualization (route ID={route_id}) has been created."
-        )
+        return _text_response(f"Empty route visualization (route ID={route_id}) has been created.")
 
 
 def _find_nonexistent_stops(route: _models.Route) -> _Response:

@@ -32,7 +32,7 @@ def create_hw() -> _Response:
             return _log_error_and_respond(
                 f"Platform HW (name='{platform_hw.name}) could not be created. {response.body['detail']}",
                 response.status_code,
-                response.body['title']
+                response.body["title"],
             )
 
 
@@ -53,7 +53,9 @@ def get_hw(platform_hw_id: int) -> _Response:
     )
     platform_hws = [_obj_to_db.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(platform_hws) == 0:
-        return _log_error_and_respond(f"Platform HW  with ID={platform_hw_id} was not found.", 404, "Object not found")
+        return _log_error_and_respond(
+            f"Platform HW  with ID={platform_hw_id} was not found.", 404, "Object not found"
+        )
     else:
         _log_info(f"Found {len(platform_hws)} platform HWs with ID={platform_hw_id}")
         return _json_response(platform_hws[0])
@@ -68,7 +70,7 @@ def delete_hw(platform_hw_id: int) -> _Response:
         return _log_error_and_respond(
             f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",
             400,
-            title="Cannot delete object"
+            title="Cannot delete object",
         )
     response = _db_access.delete(_db_models.PlatformHWDBModel, platform_hw_id)
     if response.status_code == 200:
@@ -78,5 +80,5 @@ def delete_hw(platform_hw_id: int) -> _Response:
         return _log_error_and_respond(
             f"Could not delete platform HW with ID={platform_hw_id}{note}. {response.body['detail']}",
             response.status_code,
-            response.body['title']
+            response.body["title"],
         )

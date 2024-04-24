@@ -4,7 +4,7 @@ import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.controllers.car_state import (
-    create_car_state_from_argument_and_post as _create_car_state_from_argument_and_post
+    create_car_state_from_argument_and_post as _create_car_state_from_argument_and_post,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
@@ -14,7 +14,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 
@@ -34,9 +34,13 @@ def create_car() -> _Response:  # noqa: E501
         response = _db_access.add(
             car_db_model,
             checked=[
-                _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=posted_car.platform_hw_id),
                 _db_access.db_object_check(
-                    _db_models.RouteDBModel, id_=posted_car.default_route_id, allow_nonexistence=True
+                    _db_models.PlatformHWDBModel, id_=posted_car.platform_hw_id
+                ),
+                _db_access.db_object_check(
+                    _db_models.RouteDBModel,
+                    id_=posted_car.default_route_id,
+                    allow_nonexistence=True,
                 ),
             ],
         )
@@ -54,7 +58,7 @@ def create_car() -> _Response:  # noqa: E501
             return _log_error_and_respond(
                 code=response.status_code,
                 msg=f"Car (name='{posted_car.name}) could not be created. {response.body['detail']}",
-                title=response.body['title']
+                title=response.body["title"],
             )
 
 
@@ -69,7 +73,7 @@ def delete_car(car_id: int) -> _Response:
         return _log_info_and_respond(msg)
     else:
         msg = f"Car (ID={car_id}) could not be deleted. {response.body['detail']}"
-        return _log_error_and_respond(msg, response.status_code, response.body['title'])
+        return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
 def get_car(car_id: int) -> _Response:
@@ -80,7 +84,9 @@ def get_car(car_id: int) -> _Response:
         omitted_relationships=[_db_models.CarDBModel.orders],
     )
     if len(db_cars) == 0:
-        return _log_error_and_respond(f"Car with ID={car_id} was not found.", 404, title="Object was not found")
+        return _log_error_and_respond(
+            f"Car with ID={car_id} was not found.", 404, title="Object was not found"
+        )
     else:
         car = _get_car_with_last_state(db_cars[0])
         _log_info(f"Car with ID={car_id} was found.")
@@ -114,12 +120,10 @@ def update_car(car: dict | _models.Car) -> _Response:
         car_db_model = _obj_to_db.car_to_db_model(car)
         response = _db_access.update(updated=car_db_model)
         if response.status_code == 200:
-            return _log_info_and_respond(
-                f"Car (ID={car.id}) has been succesfully updated."
-            )
+            return _log_info_and_respond(f"Car (ID={car.id}) has been succesfully updated.")
         else:
             msg = f"Car (ID={car.id}) could not be updated. {response.body['detail']}"
-            return _log_error_and_respond(msg, response.status_code, response.body['title'])
+            return _log_error_and_respond(msg, response.status_code, response.body["title"])
     else:
         return _log_invalid_request_body_format()
 
@@ -127,9 +131,9 @@ def update_car(car: dict | _models.Car) -> _Response:
 def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car:
     db_last_states = _db_access.get(
         _db_models.CarStateDBModel,
-        criteria={"car_id": lambda x: x==car_db_model.id},
+        criteria={"car_id": lambda x: x == car_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
-        first_n=1
+        first_n=1,
     )
     last_state = _obj_to_db.car_state_from_db_model(db_last_states[0])
     car = _obj_to_db.car_from_db_model(car_db_model, last_state)
@@ -138,10 +142,7 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
 
 def _post_default_car_state(car_id: int) -> _Response:
     car_state = _models.CarState(
-        status=_models.CarStatus.OUT_OF_ORDER,
-        car_id=car_id,
-        fuel=0,
-        speed=0.0
+        status=_models.CarStatus.OUT_OF_ORDER, car_id=car_id, fuel=0, speed=0.0
     )
     response = _create_car_state_from_argument_and_post(car_state)
     return response
