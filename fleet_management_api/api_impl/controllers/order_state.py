@@ -48,10 +48,10 @@ def create_order_state() -> _Response:
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
     order_state = _models.OrderState.from_dict(_connexion.request.get_json())
-    return create_order_state_from_argument(order_state)
+    return create_order_state_from_argument_and_post(order_state)
 
 
-def create_order_state_from_argument(order_state: _models.OrderState) -> _Response:
+def create_order_state_from_argument_and_post(order_state: _models.OrderState) -> _Response:
     """Create a new state of an existing order. The Order State model is passed as an argument.
 
     If there already exists an Order State with final status (DONE or CANCELED),

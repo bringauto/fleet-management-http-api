@@ -74,7 +74,7 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
             response = c.put("/v2/management/route", json=route)
             self.assertEqual(response.status_code, 404)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -127,7 +127,7 @@ class Test_Deleting_Stops_Referenced_By_Route(unittest.TestCase):
             response = c.get(f"/v2/management/stop")
             self.assertEqual(len(response.json), 4)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 

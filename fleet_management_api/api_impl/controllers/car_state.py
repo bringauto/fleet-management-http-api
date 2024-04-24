@@ -33,10 +33,10 @@ def add_car_state() -> _Response:
         return _log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        return add_car_state_from_argument(car_state)
+        return create_car_state_from_argument_and_post(car_state)
 
 
-def add_car_state_from_argument(car_state: _models.CarState) -> _Response:
+def create_car_state_from_argument_and_post(car_state: _models.CarState) -> _Response:
     state_db_model = _obj_to_db.car_state_to_db_model(car_state)
     response = _db_access.add(
         state_db_model,
@@ -44,7 +44,7 @@ def add_car_state_from_argument(car_state: _models.CarState) -> _Response:
     )
     if response.status_code == 200:
         inserted_model = _obj_to_db.car_state_from_db_model(response.body[0])
-        code, msg = 200, f"Car stat (ID={inserted_model.id}) was succesfully created."
+        code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
         _log_info(msg)
         cleanup_response = _remove_old_states(car_state.car_id)
         if cleanup_response.status_code != 200:

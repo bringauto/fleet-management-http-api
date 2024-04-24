@@ -32,6 +32,7 @@ _max_n_of_active_orders: Optional[int] = None
 _max_n_of_inactive_orders: Optional[int] = None
 
 
+DEFAULT_STATUS = _models.OrderStatus.TO_ACCEPT
 FINAL_STATUSES = {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}
 
 
@@ -190,15 +191,14 @@ def create_order() -> _Response:
         ],
     )
     if response.status_code == 200:
-        inserted_model = _obj_to_db.order_from_db_model(response.body[0])
-        _log_info(f"Order (ID={inserted_model.id}) has been created.")
-        order_state = _models.OrderState(
-            status=_models.OrderStatus.TO_ACCEPT, order_id=inserted_model.id
-        )
-        state = _order_state.create_order_state_from_argument(order_state).body
-        _add_active_order(car_id, inserted_model.id)
-        inserted_model.last_state = state
-        return _json_response(inserted_model)
+        posted_db_model: _db_models.OrderDBModel = response.body[0]
+        assert posted_db_model.id is not None
+        db_state = _post_default_order_state(posted_db_model.id).body
+        state = _obj_to_db.order_state_from_db_model(db_state)
+        posted_order = _obj_to_db.order_from_db_model(posted_db_model, state)
+        _log_info(f"Order (ID={posted_order.id}) has been created.")
+        _add_active_order(order.car_id, posted_order.id)
+        return _json_response(posted_order)
     else:
         return _log_error_and_respond(
             f"Error when sending order. {response.body['detail']}.",
@@ -229,27 +229,18 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
 
 def get_order(car_id: int, order_id: int) -> _Response:
     """Get an existing order."""
-    order_db_models = _db_access.get_children(
-        parent_base=_db_models.CarDBModel,
-        parent_id=car_id,
-        children_col_name="orders",
-        criteria={"id": lambda x: x == order_id},
+    order_db_models = _db_access.get(
+        base = _db_models.OrderDBModel,
+        criteria = {"id": lambda x: x == order_id, "car_id": lambda x: x == car_id}
     )
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
         _log_error(msg)
         return _error(404, msg, "Object not found")
     else:
-        last_state = _db_access.get(
-            _db_models.OrderStateDBModel,
-            criteria={"order_id": lambda x: x == order_id},
-            sort_result_by={"timestamp": "desc", "id": "desc"},
-            first_n=1,
-        )[0]
-        msg = f"Found order with ID={order_id} of car with ID={car_id}."
-        _log_info(msg)
-        order = _obj_to_db.order_from_db_model(order_db_models[0])  # type: ignore
-        order.last_state = _obj_to_db.order_state_from_db_model(last_state)
+        db_order = order_db_models[0]
+        order = _get_order_with_last_state(db_order)
+        _log_info(f"Found order with ID={order_id} of car with ID={car_id}.")
         return _json_response(order)  # type: ignore
 
 
@@ -259,21 +250,16 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
         return _log_error_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title="Object not found"
         )
-    order_db_models = _db_access.get_children(
+    db_orders: list[_db_models.OrderDBModel] = _db_access.get_children(  # type: ignore
         parent_base=_db_models.CarDBModel,
         parent_id=car_id,
         children_col_name="orders",
         criteria={"timestamp": lambda z: z >= since},
     )
-    orders = [_obj_to_db.order_from_db_model(order_db_model) for order_db_model in order_db_models]  # type: ignore
-    for order in orders:
-        last_state = _db_access.get(
-            _db_models.OrderStateDBModel,
-            criteria={"order_id": lambda x: x == order.id},
-            sort_result_by={"timestamp": "desc", "id": "desc"},
-            first_n=1,
-        )[0]
-        order.last_state = _obj_to_db.order_state_from_db_model(last_state)
+    orders: list[_models.Order] = list()
+    for db_order in db_orders:
+        order = _get_order_with_last_state(db_order)
+        orders.append(order)
     _log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
     return _json_response(orders)
 
@@ -284,18 +270,33 @@ def get_orders(since: int = 0) -> _Response:
     db_orders = _db_access.get(
         _db_models.OrderDBModel, criteria={"timestamp": lambda x: x >= since}
     )
-    orders = [_obj_to_db.order_from_db_model(order) for order in db_orders]
-    for order in orders:
-        last_state = _db_access.get(
-            _db_models.OrderStateDBModel,
-            criteria={"order_id": lambda x: x == order.id},
-            sort_result_by={"timestamp": "desc", "id": "desc"},
-            first_n=1,
-        )[0]
-        order.last_state = _obj_to_db.order_state_from_db_model(last_state)
-
+    orders: list[_models.Order] = list()
+    for db_order in db_orders:
+        order = _get_order_with_last_state(db_order)
+        orders.append(order)
     return _json_response(orders)
+
+
+def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order:
+    db_last_state = _db_access.get(
+        _db_models.OrderStateDBModel,
+        criteria={"order_id": lambda x: x==order_db_model.id},
+        sort_result_by={"timestamp": "desc", "id": "desc"},
+        first_n=1
+    )
+    last_state = _obj_to_db.order_state_from_db_model(db_last_state[0])
+    order = _obj_to_db.order_from_db_model(order_db_model, last_state)
+    return order
 
 
 def _car_exist(car_id: int) -> bool:
     return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
+
+
+def _post_default_order_state(order_id: int) -> _Response:
+    order_state = _models.OrderState(
+        order_id=order_id,
+        status=DEFAULT_STATUS
+    )
+    response = _order_state.create_order_state_from_argument_and_post(order_state)
+    return response

@@ -79,7 +79,7 @@ class Test_Retrieving_Last_N_Records(unittest.TestCase):
         self.assertEqual(retrieved_objs[1].test_int, 100)
         self.assertEqual(retrieved_objs[1].id, 1)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("tests/database/test_get_last_n.db"):
             os.remove("tests/database/test_get_last_n.db")
 

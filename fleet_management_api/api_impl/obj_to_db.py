@@ -14,7 +14,7 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
     )
 
 
-def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
+def car_from_db_model(car_db_model: _db_models.CarDBModel, last_state: _models.CarState) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
         name=car_db_model.name,
@@ -22,7 +22,7 @@ def car_from_db_model(car_db_model: _db_models.CarDBModel) -> _models.Car:
         car_admin_phone=_models.MobilePhone.from_dict(car_db_model.car_admin_phone),
         default_route_id=car_db_model.default_route_id,
         under_test=car_db_model.under_test,
-        last_state=car_db_model.states[-1] if car_db_model.states else None,
+        last_state=last_state
     )
 
 
@@ -79,7 +79,7 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
     )
 
 
-def order_from_db_model(order_db_model: _db_models.OrderDBModel) -> _models.Order:
+def order_from_db_model(order_db_model: _db_models.OrderDBModel, last_state: _models.OrderState) -> _models.Order:
     if order_db_model.notification_phone is None:
         notification_phone = None
     else:
@@ -93,6 +93,7 @@ def order_from_db_model(order_db_model: _db_models.OrderDBModel) -> _models.Orde
         target_stop_id=order_db_model.target_stop_id,
         stop_route_id=order_db_model.stop_route_id,
         notification_phone=notification_phone,
+        last_state=last_state,
     )
 
 

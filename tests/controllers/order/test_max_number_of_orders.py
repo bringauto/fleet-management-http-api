@@ -83,7 +83,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
         with self.app.app.test_client() as c:
             self.assertEqual(n_of_active_orders(car_id=1), 2)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -133,7 +133,7 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
             response = c.post("/v2/management/order", json=order_4)
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -158,6 +158,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
         done_state = OrderState(status=OrderStatus.DONE, order_id=1)
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=order)
+            self.assertEqual(n_of_active_orders(1), 1)
             self.assertEqual(n_of_inactive_orders(1), 0)
             c.post("/v2/management/orderstate", json=done_state)
             self.assertEqual(n_of_inactive_orders(1), 1)
@@ -207,7 +208,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
         with self.app.app.test_client() as c:
             self.assertEqual(n_of_inactive_orders(car_id=1), 2)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
@@ -264,7 +265,7 @@ class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
             self.assertListEqual(_order._inactive_orders[car_id], [1, 3])
 
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 

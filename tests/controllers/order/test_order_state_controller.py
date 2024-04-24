@@ -50,7 +50,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
             response = c.post("/v2/management/orderstate", json={})
             self.assertEqual(response.status_code, 400)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -80,7 +80,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
             response = c.post("/v2/management/orderstate", json=example)
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -133,7 +133,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -185,7 +185,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
                 [state["status"] for state in response.json], ["to_accept", "to_accept", "canceled"]
             )
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -274,7 +274,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 100)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -327,7 +327,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -406,7 +406,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             response = c.post("/v2/management/orderstate", json=some_state)
             self.assertEqual(response.status_code, 403)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -461,7 +461,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -543,7 +543,7 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["status"], "canceled")
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
@@ -605,7 +605,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
             self.assertEqual(response.json[0]["status"], "accepted")
             self.assertEqual(response.json[1]["status"], "in_progress")
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
 
