@@ -89,7 +89,6 @@ def get_car(car_id: int) -> _Response:
         )
     else:
         car = _get_car_with_last_state(db_cars[0])
-        assert car.last_state is not None
         _log_info(f"Car with ID={car_id} was found.")
         return _json_response(car)
 
@@ -106,7 +105,6 @@ def get_cars() -> _Response:  # noqa: E501
     else:
         for db_car in db_cars:
             car = _get_car_with_last_state(db_car)
-            assert car.last_state is not None
             cars.append(car)
         _log_info(f"Listing all cars: {len(cars)} cars found.")
     return _json_response(cars)
@@ -138,7 +136,6 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
         first_n=1,
     )
     last_state = _obj_to_db.car_state_from_db_model(db_last_states[0])
-    assert last_state is not None
     car = _obj_to_db.car_from_db_model(car_db_model, last_state)
     return car
 
