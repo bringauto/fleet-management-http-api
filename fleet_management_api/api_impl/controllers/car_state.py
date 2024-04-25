@@ -1,13 +1,25 @@
 import connexion  # type: ignore
 
 
-import fleet_management_api.api_impl as _api
+from fleet_management_api.api_impl.api_responses import (
+    Response as _Response,
+    json_response as _json_response,
+    text_response as _text_response,
+    error as _error,
+)
+from fleet_management_api.api_impl.api_logging import (
+    log_info as _log_info,
+    log_error as _log_error,
+    log_error_and_respond as _log_error_and_respond,
+    log_invalid_request_body_format as _log_invalid_request_body_format,
+)
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
+import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 
 
-def add_car_state() -> _api.Response:
+def add_car_state() -> _Response:
     """Post new car state.
 
     :param car_state: Car state to be added.
@@ -18,41 +30,41 @@ def add_car_state() -> _api.Response:
     The car defined by 'car_id' must exist.
     """
     if not connexion.request.is_json:
-        return _api.log_invalid_request_body_format()
+        return _log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        return add_car_state_from_argument(car_state)
+        return create_car_state_from_argument_and_post(car_state)
 
 
-def add_car_state_from_argument(car_state: _models.CarState) -> _api.Response:
-    state_db_model = _api.car_state_to_db_model(car_state)
+def create_car_state_from_argument_and_post(car_state: _models.CarState) -> _Response:
+    state_db_model = _obj_to_db.car_state_to_db_model(car_state)
     response = _db_access.add(
         state_db_model,
         checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_state.car_id)],
     )
     if response.status_code == 200:
-        inserted_model = _api.car_state_from_db_model(response.body[0])
-        code, msg = 200, f"Car stat (ID={inserted_model.id}) was succesfully created."
-        _api.log_info(msg)
+        inserted_model = _obj_to_db.car_state_from_db_model(response.body[0])
+        code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
+        _log_info(msg)
         cleanup_response = _remove_old_states(car_state.car_id)
         if cleanup_response.status_code != 200:
             code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
-            _api.log_error(cleanup_error_msg)
+            _log_error(cleanup_error_msg)
             msg = msg + "\n" + cleanup_error_msg
             title = "Could not remove old car states."
         else:
-            return _api.json_response(inserted_model)
+            return _json_response(inserted_model)
     else:
         code, msg, title = (
             response.status_code,
             f"Car state could not be created. {response.body['detail']}",
-            response.body['title']
+            response.body["title"],
         )
-        _api.log_error(msg)
-    return _api.error(code=code, msg=msg, title=title)
+        _log_error(msg)
+    return _error(code=code, msg=msg, title=title)
 
 
-def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
+def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
     """Get all car states for all the cars.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -68,17 +80,17 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=last_n,
-        wait=wait
+        wait=wait,
     )
     car_states = [
-        _api.car_state_from_db_model(car_state_db_model)
+        _obj_to_db.car_state_from_db_model(car_state_db_model)
         for car_state_db_model in car_state_db_models
     ]
     car_states.sort(key=lambda x: x.timestamp)
-    return _api.json_response(car_states)
+    return _json_response(car_states)
 
 
-def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _api.Response:
+def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
     """Get car states for a car idenfified by 'car_id' of an existing car.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -93,21 +105,23 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
             raise _db_access.ParentNotFound
         car_state_db_models = _db_access.get(
             base=_db_models.CarStateDBModel,
-            criteria={"car_id": lambda i: i==car_id, "timestamp": lambda x: x >= since},
+            criteria={"car_id": lambda i: i == car_id, "timestamp": lambda x: x >= since},
             wait=wait,
             first_n=last_n,
-            sort_result_by={"timestamp": "desc", "id": "desc"}
+            sort_result_by={"timestamp": "desc", "id": "desc"},
         )
-        car_states = [_api.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
+        car_states = [_obj_to_db.car_state_from_db_model(car_state_db_model) for car_state_db_model in car_state_db_models]  # type: ignore
         car_states.sort(key=lambda x: x.timestamp)
-        return _api.json_response(car_states)
+        return _json_response(car_states)
     except _db_access.ParentNotFound as e:
-        return _api.log_error_and_respond(f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found")
+        return _log_error_and_respond(
+            f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found"
+        )
     except Exception as e:  # pragma: no cover
-        return _api.log_error_and_respond(str(e), 500, title="Unexpected internal error")
+        return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
-def _remove_old_states(car_id: int) -> _api.Response:
+def _remove_old_states(car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
         _db_models.CarStateDBModel, criteria={"car_id": lambda x: x == car_id}
     )
@@ -123,4 +137,4 @@ def _remove_old_states(car_id: int) -> _api.Response:
         )
         return response
     else:
-        return _api.text_response("")
+        return _text_response("")

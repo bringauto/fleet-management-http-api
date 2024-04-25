@@ -5,10 +5,14 @@ from flask.testing import FlaskClient as _FlaskClient  # type: ignore
 import connexion  # type: ignore
 
 from .encoder import JSONEncoder
-import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBModel
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order_state import initialize_last_order_status_dict
+from fleet_management_api.api_impl.controllers.order import (
+    clear_active_orders,
+    clear_inactive_orders
+)
+import fleet_management_api.database.db_access as _db_access
 
 
 def get_app() -> connexion.FlaskApp:
@@ -85,4 +89,6 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
             key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()
         ),
     )
+    clear_active_orders()
+    clear_inactive_orders()
     return _TestApp(predef_api_key)

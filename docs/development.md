@@ -4,9 +4,12 @@ The models used by the API include models with assigned states. Current examples
 - Car and Car State,
 - Order and Order State.
 
+## Entity State
 
 When such an Entity is created, make sure, that an Entity State is automatically created as well!!!
+
 For example, when a Car is created, a Car State with status `out_of_order` is created.
+In the case of new Order, an Order State with status `to_accept` is created.
 
 Every state must have (at least) the following attributes:
 - ID of the corresponding Entity
@@ -19,3 +22,7 @@ All GET methods returning object states must have the following filtering option
 For both of these, further filtering must be available:
 - return only those States inclusively newer than given timestamp,
 - return only up to last N States (with higher timestamp or, if timestamps are equal, with the higher IDs).
+
+### Last State
+
+Each Entity has an attribute "lastState", containing the newest State of the Entity (i.e., State with largest timestamp, or possibly, largest ID, if some states share the same timestamp).

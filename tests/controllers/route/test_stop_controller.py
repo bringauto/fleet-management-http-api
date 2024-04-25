@@ -266,7 +266,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
             response = c.delete("/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)
 
-    def tearDown(self) -> None:
+    def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 

@@ -9,6 +9,15 @@ class APIConfig(pydantic.BaseModel):
     database: Database
     security: Security
     api: API
+    data: Data
+
+
+class Data(pydantic.BaseModel):
+    orders: OrdersSetup
+
+    class OrdersSetup(pydantic.BaseModel):
+        max_active_orders: pydantic.PositiveInt
+        max_inactive_orders: pydantic.PositiveInt
 
 
 class HTTPServer(pydantic.BaseModel):

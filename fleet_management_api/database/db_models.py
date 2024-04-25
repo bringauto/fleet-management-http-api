@@ -72,7 +72,7 @@ class CarStateDBModel(Base):
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
-    car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="noload")
+    car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="select")
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -93,6 +93,7 @@ class CarStateDBModel(Base):
 class OrderDBModel(Base):
     model_name = "Order"
     __tablename__ = "orders"
+
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)

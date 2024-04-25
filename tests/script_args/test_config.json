@@ -28,5 +28,11 @@
         "request_for_data": {
             "timeout_in_seconds": 5
         }
+    },
+    "data": {
+        "orders": {
+            "max_active_orders": 5,
+            "max_inactive_orders": 10
+        }
     }
 }

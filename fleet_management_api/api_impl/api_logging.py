@@ -1,4 +1,5 @@
 import logging as _logging
+import connexion as _connexion  # type: ignore
 
 from .api_responses import (
     text_response as _text_response,
@@ -33,3 +34,8 @@ def log_info_and_respond(msg: str) -> _Response:
     log_info(msg)
     return _text_response(msg, 200)
 
+
+def log_invalid_request_body_format() -> _Response:
+    return log_error_and_respond(
+        f"Invalid request format: {_connexion.request.data}. JSON is required.", 400, title="Invalid request format"
+    )

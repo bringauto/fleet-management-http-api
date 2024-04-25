@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 2.2.0
+  version: 2.3.1
 servers:
 - url: /v2/management
 security:
@@ -1021,14 +1021,6 @@ paths:
         required: true
         schema:
           format: int32
-          type: integer
-      - description: "A Unix timestamp in milliseconds. If specified, only objects\
-          \ created at the time or later will be returned. If unspecified, all objects\
-          \ are returned (since is set to 0 in that case)."
-        in: query
-        name: since
-        schema:
-          format: int64
           type: integer
       responses:
         "200":
@@ -2731,17 +2723,28 @@ components:
         id: 1
         carAdminPhone:
           phone: "+420123456789"
+        lastState:
+          fuel: 80
+          id: 1
+          position:
+            altitude: 400.25
+            latitude: 49.204117
+            longitude: 16.606525
+          speed: 20.5
+          timestamp: 1616425275913
+          status: idle
+          carId: 1
         platformHwId: 1
       properties:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         platformHwId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         name:
           example: BAT-2022-01
@@ -2752,13 +2755,15 @@ components:
         defaultRouteId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         underTest:
           default: true
           example: false
           title: underTest
           type: boolean
+        lastState:
+          $ref: '#/components/schemas/CarState'
       required:
       - carAdminPhone
       - name
@@ -2782,14 +2787,14 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
           example: 1616425275913
           format: int64
-          title: timestamp
+          title: Timestamp
           type: integer
         status:
           $ref: '#/components/schemas/CarStatus'
@@ -2802,7 +2807,7 @@ components:
         carId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         speed:
           default: 0.0
@@ -2841,6 +2846,11 @@ components:
         targetStopId: 1
         id: 1
         priority: normal
+        lastState:
+          orderId: 1
+          id: 1
+          status: to_accept
+          timestamp: 1616425275913
         userId: 1
         timestamp: 1616425275913
         carId: 1
@@ -2848,7 +2858,7 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         priority:
           default: normal
@@ -2859,19 +2869,19 @@ components:
         userId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
           example: 1616425275913
           format: int64
-          title: timestamp
+          title: Timestamp
           type: integer
         carId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         notification:
           example: Order notification
@@ -2880,15 +2890,17 @@ components:
         targetStopId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         stopRouteId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         notificationPhone:
           $ref: '#/components/schemas/MobilePhone'
+        lastState:
+          $ref: '#/components/schemas/OrderState'
       required:
       - carId
       - stopRouteId
@@ -2913,21 +2925,21 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         status:
           $ref: '#/components/schemas/OrderStatus'
         orderId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
           example: 1616425275913
           format: int64
-          title: timestamp
+          title: Timestamp
           type: integer
       required:
       - orderId
@@ -2954,7 +2966,7 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         name:
           example: ABCD1234EF56
@@ -2978,7 +2990,7 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         name:
           example: Lužánky
@@ -3016,12 +3028,12 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         routeId:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         hexcolor:
           default: '#FF0000'
@@ -3070,7 +3082,7 @@ components:
         id:
           example: 1
           format: int32
-          title: id
+          title: Id
           type: integer
         name:
           example: Lidická
@@ -3088,7 +3100,7 @@ components:
     Id:
       example: 1
       format: int32
-      title: id
+      title: Id
       type: integer
     MobilePhone:
       description: MobilePhone Primitive structure.
@@ -3106,7 +3118,7 @@ components:
         the time of creation of an object.
       example: 1616425275913
       format: int64
-      title: timestamp
+      title: Timestamp
       type: integer
     GNSSPosition:
       description: GNSSPosition primitive structure.

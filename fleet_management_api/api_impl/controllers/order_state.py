@@ -2,10 +2,23 @@ from typing import Callable, Any
 
 import connexion as _connexion  # type: ignore
 
-import fleet_management_api.api_impl as _api
+from fleet_management_api.api_impl.api_responses import (
+    Response as _Response,
+    json_response as _json_response,
+    text_response as _text_response,
+)
+from fleet_management_api.api_impl.api_logging import (
+    log_info as _log_info,
+    log_info_and_respond as _log_info_and_respond,
+    log_error as _log_error,
+    log_error_and_respond as _log_error_and_respond,
+    log_invalid_request_body_format as _log_invalid_request_body_format,
+)
 import fleet_management_api.models as _models
+import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
+import fleet_management_api.api_impl.controllers.order as _order
 
 
 OrderId = int
@@ -26,58 +39,69 @@ def initialize_last_order_status_dict() -> None:
     _last_order_status = dict()
 
 
-def create_order_state() -> _api.Response:
+def create_order_state() -> _Response:
     """Post a new state of an existing order.
 
     If there already exists an Order State with final status (DONE or CANCELED),
     any other Order State is refused (i.e., 403 is returned).
     """
     if not _connexion.request.is_json:
-        return _api.log_invalid_request_body_format()
+        return _log_invalid_request_body_format()
     order_state = _models.OrderState.from_dict(_connexion.request.get_json())
-    return create_order_state_from_argument(order_state)
+    return create_order_state_from_argument_and_post(order_state)
 
 
-def create_order_state_from_argument(order_state: _models.OrderState) -> _api.Response:
+def create_order_state_from_argument_and_post(order_state: _models.OrderState) -> _Response:
     """Create a new state of an existing order. The Order State model is passed as an argument.
 
     If there already exists an Order State with final status (DONE or CANCELED),
     any other Order State is refused (i.e., 403 is returned).
     """
     if not _order_exists(order_state.order_id):
-        return _api.log_error_and_respond(f"Order with id='{order_state.order_id}' was not found.", 404, "Object not found")
+        return _log_error_and_respond(
+            f"Order with id='{order_state.order_id}' was not found.", 404, "Object not found"
+        )
 
     # order exists
     if _is_order_done(order_state):
-        return _api.log_error_and_respond(
+        return _log_error_and_respond(
             f"Order with id='{order_state.order_id}' has already received status DONE."
             "No other Order State can be added.",
             403,
-            title="Could not create new object"
+            title="Could not create new object",
         )
     elif _is_order_canceled(order_state):
-        return _api.log_error_and_respond(
+        return _log_error_and_respond(
             f"Order with id='{order_state.order_id}' has already received status CANCELED."
             "No other Order State can be added.",
             403,
-            title="Could not create new object"
+            title="Could not create new object",
         )
 
-    order_state_db_model = _api.order_state_to_db_model(order_state)
+    order_state_db_model = _obj_to_db.order_state_to_db_model(order_state)
     response = _db_access.add(order_state_db_model)
     if response.status_code == 200:
-        inserted_model = _api.order_state_from_db_model(response.body[0])
+        inserted_model = _obj_to_db.order_state_from_db_model(response.body[0])
         _remove_old_states(order_state.order_id)
-        _api.log_info(f"Order state (ID={inserted_model.id}) has been sent.")
+        _log_info(f"Order state (ID={inserted_model.id}) has been sent.")
         _save_last_status(order_state)
-        return _api.json_response(inserted_model)
+        if order_state.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
+            car_id = _order.from_active_to_inactive_order(order_state.order_id)
+            max_n = _order.max_n_of_inactive_orders()
+            if max_n is not None and car_id is not None:
+                n_of_inactive = _order.n_of_inactive_orders(car_id)
+                if n_of_inactive > max_n:
+                    _order.delete_oldest_inactive_order(car_id)
+        return _json_response(inserted_model)
     else:
-        return _api.log_error_and_respond(
-            f"Order state could not be sent. {response.body['detail']}", response.status_code, title=response.body['title']
+        return _log_error_and_respond(
+            f"Order state could not be sent. {response.body['detail']}",
+            response.status_code,
+            title=response.body["title"],
         )
 
 
-def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
+def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _Response:
     """Get all order states for all the existing orders.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -87,11 +111,13 @@ def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) ->
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    _api.log_info("Getting all order states for all orders.")
+    _log_info("Getting all order states for all orders.")
     return _get_order_states({}, wait, since, last_n=last_n)
 
 
-def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: int = 0) -> _api.Response:
+def get_order_states(
+    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0
+) -> _Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
     :param order_id: Id of the order.
@@ -104,8 +130,8 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: 
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     if not _order_exists(order_id):
-        _api.log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
-        return _api.json_response([], code=404)
+        _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
+        return _json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
         return _get_order_states(criteria, wait, since, last_n)
@@ -113,25 +139,27 @@ def get_order_states(order_id: int, wait: bool = False, since: int = 0, last_n: 
 
 def _get_order_states(
     criteria: dict[str, Callable[[Any], bool]], wait: bool, since: int, last_n: int = 0
-) -> _api.Response:
+) -> _Response:
     criteria["timestamp"] = lambda x: x >= since
     order_state_db_models = _db_access.get(
         _db_models.OrderStateDBModel,
         wait=wait,
         criteria=criteria,
         first_n=last_n,
-        sort_result_by={"timestamp": "desc", "id": "desc"}
+        sort_result_by={"timestamp": "desc", "id": "desc"},
     )
     order_states = [
-        _api.order_state_from_db_model(order_state_db_model)
+        _obj_to_db.order_state_from_db_model(order_state_db_model)
         for order_state_db_model in order_state_db_models
     ]
     order_states.sort(key=lambda x: x.timestamp)
-    return _api.json_response(order_states)
+    return _json_response(order_states)
 
 
-def _remove_old_states(order_id: int) -> _api.Response:
-    order_state_db_models = _db_access.get(_db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id})
+def _remove_old_states(order_id: int) -> _Response:
+    order_state_db_models = _db_access.get(
+        _db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id}
+    )
     delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
     if delta > 0:
         response = _db_access.delete_n(
@@ -141,9 +169,9 @@ def _remove_old_states(order_id: int) -> _api.Response:
             start_from="minimum",
             criteria={"order_id": lambda x: x == order_id},
         )
-        return _api.log_info_and_respond(response.body)
+        return _log_info_and_respond(response.body)
     else:
-        return _api.text_response("No old order states to remove.")
+        return _text_response("No old order states to remove.")
 
 
 def _order_exists(order_id: int) -> bool:
@@ -172,7 +200,7 @@ def _load_last_status_from_db_if_missing(order_state: _models.OrderState) -> Non
         order_state_db_models: list[_db_models.OrderStateDBModel] = _db_access.get(
             _db_models.OrderStateDBModel,
             criteria={"order_id": lambda x: x == order_state.order_id},
-            wait=False
+            wait=False,
         )
         if order_state_db_models:
             _last_order_status[order_state.order_id] = order_state_db_models[-1].status

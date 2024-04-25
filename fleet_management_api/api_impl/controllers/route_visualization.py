@@ -3,29 +3,44 @@ import connexion as _connexion  # type: ignore
 from fleet_management_api.models import RouteVisualization as _RouteVisualization
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
-import fleet_management_api.api_impl as _api
+from fleet_management_api.api_impl import obj_to_db as _obj_to_db
+from fleet_management_api.api_impl.api_responses import (
+    Response as _Response,
+    json_response as _json_response,
+    error as _error,
+    text_response as _text_response,
+)
+from fleet_management_api.api_impl.api_logging import (
+    log_error_and_respond as _log_error_and_respond,
+    log_info as _log_info,
+    log_invalid_request_body_format as _log_invalid_request_body_format,
+)
 
 
-def get_route_visualization(route_id: int) -> _api.Response:
+def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
         _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
-        return _api.error(404, f"Route visualization (route ID={route_id}) was not found.", title="Object not found")
+        return _error(
+            404,
+            f"Route visualization (route ID={route_id}) was not found.",
+            title="Object not found",
+        )
     else:
-        rp = _api.route_visualization_from_db_model(rp_db_models[0])
-        _api.log_info(f"Found route visualization (route ID={route_id}).")
-        return _api.json_response(rp)
+        rp = _obj_to_db.route_visualization_from_db_model(rp_db_models[0])
+        _log_info(f"Found route visualization (route ID={route_id}).")
+        return _json_response(rp)
 
 
-def redefine_route_visualization() -> _api.Response:
+def redefine_route_visualization() -> _Response:
     """Redefine route visualization for an existing route."""
     if not _connexion.request.is_json:
-        return _api.log_invalid_request_body_format()
+        return _log_invalid_request_body_format()
     else:
         rp = _RouteVisualization.from_dict(_connexion.request.get_json())
-        rp_db_model = _api.route_visualization_to_db_model(rp)
+        rp_db_model = _obj_to_db.route_visualization_to_db_model(rp)
         existing_visualization = _db_access.get(
             _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == rp.route_id}
         )
@@ -34,7 +49,9 @@ def redefine_route_visualization() -> _api.Response:
                 rp_db_model,
                 checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
             )
-            return _api.log_error_and_respond(response.body['detail'], response.status_code, response.body['title'])
+            return _log_error_and_respond(
+                response.body["detail"], response.status_code, response.body["title"]
+            )
         else:
             _db_access.delete(_db_models.RouteVisualizationDBModel, existing_visualization[0].id)
             response = _db_access.add(
@@ -42,9 +59,13 @@ def redefine_route_visualization() -> _api.Response:
                 checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
             )
             if response.status_code == 200:
-                _api.log_info(
+                _log_info(
                     f"Route visualization for route with ID={rp.route_id} has been redefined."
                 )
-                return _api.json_response(_api.route_visualization_from_db_model(response.body[0]))
+                return _json_response(
+                    _obj_to_db.route_visualization_from_db_model(response.body[0])
+                )
             else:
-                return _api.log_error_and_respond(response.body["detail"], response.status_code, response.body["title"])
+                return _log_error_and_respond(
+                    response.body["detail"], response.status_code, response.body["title"]
+                )

@@ -4,15 +4,30 @@ from unittest.mock import patch, Mock
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.models import (
     Car,
-    MobilePhone,
     CarState,
+    CarStatus,
     GNSSPosition,
+    MobilePhone,
     Order,
     OrderState,
+    OrderStatus,
     PlatformHW,
     Route,
     Stop,
     RouteVisualization,
+)
+
+
+LAST_CAR_STATE = CarState(
+    status=CarStatus.IDLE,
+    car_id=1,
+    speed=7,
+    fuel=8,
+    position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+)
+LAST_ORDER_STATE = OrderState(
+    status=OrderStatus.TO_ACCEPT,
+    order_id=1,
 )
 
 
@@ -46,7 +61,8 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
 
     def test_car_converted_to_db_model_and_back_is_unchanged(self):
         car_in = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in))
+        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE)
+        car_in.last_state = LAST_CAR_STATE
         self.assertEqual(car_out, car_in)
 
     def test_car_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(
@@ -58,7 +74,8 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             car_admin_phone=MobilePhone(phone="1234567890"),
             default_route_id=1,
         )
-        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in))
+        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE)
+        car_in.last_state = LAST_CAR_STATE
         self.assertEqual(car_out, car_in)
 
 
@@ -166,8 +183,9 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
 
     def test_order_converted_to_db_model_and_back_is_unchanged(self):
         order_in = Order(id=1, user_id=789, car_id=12, target_stop_id=7, stop_route_id=8)
-        order_out = _obj_to_db.order_from_db_model(_obj_to_db.order_to_db_model(order_in))
+        order_out = _obj_to_db.order_from_db_model(_obj_to_db.order_to_db_model(order_in), last_state=LAST_ORDER_STATE)
         order_in.id = order_out.id
+        order_in.last_state = LAST_ORDER_STATE
         order_in.timestamp = order_out.timestamp
         self.assertEqual(order_out, order_in)
 
@@ -183,8 +201,9 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
             notification_phone=MobilePhone(phone="1234567890"),
         )
         order_out = _obj_to_db.order_from_db_model(
-            _obj_to_db.order_to_db_model(order_in)
+            _obj_to_db.order_to_db_model(order_in), last_state=LAST_ORDER_STATE
         )
+        order_in.last_state = LAST_ORDER_STATE
         order_in.id = order_out.id
         order_in.timestamp = order_out.timestamp
         self.assertEqual(order_out, order_in)
