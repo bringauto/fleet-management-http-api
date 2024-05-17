@@ -1,0 +1,3114 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: fleet@bringauto.com
+    name: BringAuto s.r.o
+    url: https://bringauto.com
+  description: Specification for BringAuto fleet backend HTTP API
+  license:
+    name: AGPLv3
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  title: BringAuto Fleet Management v2 API
+  version: 2.3.1
+servers:
+- url: /v2/management
+security:
+- APIKeyAuth: []
+- oAuth2AuthCode: []
+tags:
+- description: API health check
+  name: api
+- description: Car related functions
+  name: car
+- description: Car state-related functions
+  name: carState
+- description: Order-related functions
+  name: order
+- description: Order state-related functions
+  name: orderState
+- description: Platform hardware-related functions
+  name: platformHW
+- description: Route state-related functions
+  name: route
+- description: Stop state-related functions
+  name: stop
+- description: Authentication-related functions
+  name: security
+paths:
+  /apialive:
+    head:
+      operationId: checkApiIsAlive
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The HTTP server has been reached successfully.
+        "503":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "503"
+                    message: Service unavailable
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Service unavailable
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Check HTTP server is running and accessible.
+      tags:
+      - api
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.api_check
+  /car:
+    get:
+      operationId: getCars
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                platformHWId: 5
+                name: BAT-2022-01
+                carAdminPhone:
+                  phone: "+420123456789"
+                defaultRouteId: 1
+                underTest: false
+              schema:
+                items:
+                  $ref: '#/components/schemas/Car'
+                type: array
+          description: All the currently existing Cars have been returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return all existing Cars.
+      tags:
+      - car
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
+    post:
+      operationId: createCar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+        description: A Car model in JSON format.
+        required: true
+        x-body-name: car
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+          description: The Car has been successfully created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new Car object.
+      tags:
+      - car
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
+    put:
+      operationId: updateCar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Car'
+        description: JSON representation of the updated Car.
+        required: true
+        x-body-name: car
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Car has been successfully updated.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Update already existing Car.
+      tags:
+      - car
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
+  /car/{carId}:
+    delete:
+      operationId: deleteCar
+      parameters:
+      - description: The ID of the Car to be deleted.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: 2 cars were successfully removed.
+          description: The Car has been successfully deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete a Car identified by its ID.
+      tags:
+      - car
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
+    get:
+      operationId: getCar
+      parameters:
+      - description: An ID of the Car to be returned.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+          description: The Car with the specified ID has been found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find a single Car by its ID.
+      tags:
+      - car
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
+  /carstate:
+    get:
+      operationId: getAllCarStates
+      parameters:
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
+          description: Successfully found all Car States complying with the request
+            parameters.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find one or all Car States for all existing Cars.
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+    post:
+      operationId: addCarState
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarState'
+        description: Car State model in JSON format.
+        required: true
+        x-body-name: carState
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The new Car State has been successfully added.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Add a new Car State.
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+  /carstate/{carId}:
+    get:
+      operationId: getCarStates
+      parameters:
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
+      - description: ID of the Car for which to find the Car States.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarState'
+                type: array
+          description: Successfully found all Car States complying with the request
+            parameters.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find one or all Car States for a Car with given ID.
+      tags:
+      - carState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
+  /order:
+    get:
+      operationId: getOrders
+      parameters:
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - priority: normal
+                userId: 1
+                carId: 1
+                timestamp: 1713256508978
+                targetStopId: 1
+                notification: Order notification
+                stopRouteId: 1
+                notificationPhone:
+                  phone: "+420123456789"
+              schema:
+                items:
+                  $ref: '#/components/schemas/Order'
+                type: array
+          description: All the currently existing Orders have been sorted by their
+            creation timestamp from the oldest to newest and returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find all currently existing Orders.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+    post:
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        description: Order model in JSON format.
+        required: true
+        x-body-name: order
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: The new Order has been successfully created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new Order.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+  /order/{carId}:
+    get:
+      operationId: getCarOrders
+      parameters:
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: ID of the Car for which Orders shall be returned.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Order'
+                type: array
+          description: "The Orders assigned to the Car with the given ID have been\
+            \ found, sorted by their creation timestamp from oldest to newest and\
+            \ returned."
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find existing Orders by the corresponding Car ID and return them.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+  /order/{carId}/{orderId}:
+    delete:
+      operationId: deleteOrder
+      parameters:
+      - description: ID of the Car to which the Order is assigned.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: ID of the Order to be returned.
+        example: 1
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Order with the specified ID has been successfully deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete an Order identified by its ID and ID of a car to which it is
+        assigned.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+    get:
+      operationId: getOrder
+      parameters:
+      - description: ID of the Car to which the Order is assigned.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: ID of the Order to be returned.
+        example: 1
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: The Order with the specified car ID and order ID has been found
+            and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find an existing Order by the car ID and the order ID and return it.
+      tags:
+      - order
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+  /orderstate:
+    get:
+      operationId: getAllOrderStates
+      parameters:
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - orderId: 1
+                status: accepted
+                carId: 1
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
+          description: Successfully found all Order States complying with the request
+            parameters.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find Order States for all existing Orders.
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+    post:
+      operationId: createOrderState
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderState'
+        description: Order State model in JSON format.
+        required: true
+        x-body-name: orderState
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderState'
+          description: The new Order State has been successfully posted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Add a new Order State.
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+  /orderstate/{orderId}:
+    get:
+      operationId: getOrderStates
+      parameters:
+      - description: ID of the Order for which to find the Order States.
+        example: 1
+        in: path
+        name: orderId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
+          description: "Order States for the Order specified by its ID have been found,\
+            \ sorted by their creation timestamp \\ from the oldest to the newest\
+            \ and returned."
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find all Order States for a particular Order specified by its ID.
+      tags:
+      - orderState
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
+  /platformhw:
+    get:
+      operationId: getHws
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: ABCD1234EF56
+              schema:
+                items:
+                  $ref: '#/components/schemas/PlatformHW'
+                type: array
+          description: All the currently existing Platform HW have been returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return all existing Platform HW.
+      tags:
+      - platformHW
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
+    post:
+      operationId: createHw
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlatformHW'
+        description: Platform HW model in JSON format.
+        required: true
+        x-body-name: platformHW
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformHW'
+          description: The Platform HW has been successfully created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new Platform HW object.
+      tags:
+      - platformHW
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
+  /platformhw/{platformHwId}:
+    delete:
+      operationId: deleteHw
+      parameters:
+      - description: ID of Platform HW to delete.
+        example: 1
+        in: path
+        name: platformHwId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Platform HW with the specified ID has been deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete Platform HW with the given ID.
+      tags:
+      - platformHW
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
+    get:
+      operationId: getHw
+      parameters:
+      - description: ID of the Platform HW to return.
+        example: 1
+        in: path
+        name: platformHwId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformHW'
+          description: The Platform HW with the specified ID has been found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find Platform HW with the given ID.
+      tags:
+      - platformHW
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
+  /route:
+    get:
+      operationId: getRoutes
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Lužánky
+                stopIds:
+                - 1
+                - 2
+                - 3
+                - 4
+              schema:
+                items:
+                  $ref: '#/components/schemas/Route'
+                type: array
+          description: All the currently existing Routes have been returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return all existing Routes.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+    post:
+      operationId: createRoute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+        description: Route model in JSON format.
+        required: true
+        x-body-name: route
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+          description: The Route has been successfully created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new Route.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+    put:
+      operationId: updateRoute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+        description: JSON representation of the updated Route.
+        required: true
+        x-body-name: route
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Route has been successfully updated.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Update already existing Route.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+  /route/{routeId}:
+    delete:
+      operationId: deleteRoute
+      parameters:
+      - description: An ID a the Route
+        example: 1
+        in: path
+        name: routeId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Route with the specified ID has been deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete a Route with the specified ID.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+    get:
+      operationId: getRoute
+      parameters:
+      - description: An ID a the Route
+        example: 1
+        in: path
+        name: routeId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+          description: The Route with the specified ID has been found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find a single Route with the specified ID.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
+  /route-visualization:
+    post:
+      operationId: redefineRouteVisualization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteVisualization'
+        description: Route Visualization model in JSON format.
+        required: true
+        x-body-name: RouteVisualization
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteVisualization'
+          description: The Route Visualization has been successfully redefined.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Redefine Route Visualization for an existing Route.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
+  /route-visualization/{routeId}:
+    get:
+      operationId: getRouteVisualization
+      parameters:
+      - description: An ID a the Route
+        example: 1
+        in: path
+        name: routeId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteVisualization'
+          description: The Route Visualization for the specified Route ID has been
+            found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find Route Visualization for a Route identified by the route's ID.
+      tags:
+      - route
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
+  /stop:
+    get:
+      operationId: getStops
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Lidická
+                position:
+                  latitude: 49.204117
+                  longitude: 16.606525
+                  altitude: 400.25
+                notificationPhone:
+                  phone: "+420123456789"
+              schema:
+                items:
+                  $ref: '#/components/schemas/Stop'
+                type: array
+          description: All the currently existing Stops have been returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return all existing Stops.
+      tags:
+      - stop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+    post:
+      operationId: createStop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Stop'
+        description: Stop model in JSON format.
+        required: true
+        x-body-name: stop
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+          description: The Stop has been successfully created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create a new Stop.
+      tags:
+      - stop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+    put:
+      operationId: updateStop
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Stop'
+        description: JSON representation of the updated Stop.
+        required: true
+        x-body-name: stop
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Stop has been successfully updated.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Update already existing Stop.
+      tags:
+      - stop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+  /stop/{stopId}:
+    delete:
+      operationId: deleteStop
+      parameters:
+      - description: ID of the Stop to be deleted.
+        example: 1
+        in: path
+        name: stopId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            text/plain: {}
+          description: The Stop with the specified ID has been deleted.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        "405":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "405"
+                    message: Method not allowed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Method not allowed
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Delete a Stop with the specified ID.
+      tags:
+      - stop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+    get:
+      operationId: getStop
+      parameters:
+      - description: ID of Stop to be returned.
+        example: 1
+        in: path
+        name: stopId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+          description: The Stop with the specified ID has been found and returned.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return a single Stop by its ID.
+      tags:
+      - stop
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
+  /login:
+    get:
+      description: Login using Keycloak.
+      operationId: login
+      responses:
+        "302":
+          description: Redirect to the Keycloak authentication.
+        "500":
+          description: The login failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+  /token_get:
+    get:
+      description: Callback endpoint for the Keycloak to receive JWT token.
+      operationId: token_get
+      parameters:
+      - description: State returned by the Keycloak authentication.
+        example: your_state_info
+        explode: true
+        in: query
+        name: state
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Session state returned by the Keycloak authentication.
+        example: 167e141d-2f55-4d...
+        explode: true
+        in: query
+        name: session_state
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Code issuer returned by the Keycloak authentication.
+        example: http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fmaster
+        explode: true
+        in: query
+        name: iss
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Code used for JWT token generation returned by Keycloak authentication.
+        example: 5dea27d2-4b2d-48...
+        explode: true
+        in: query
+        name: code
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Returns a standard Keycloak token.
+        "500":
+          description: The login failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+  /token_refresh:
+    get:
+      description: Endpoint to receive JWT token from refresh token.
+      operationId: token_refresh
+      parameters:
+      - description: Refresh token used for JWT token generation.
+        example: eyJhbGciOiJIUzI1NiIsI...
+        explode: true
+        in: query
+        name: refresh_token
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Returns a new standard Keycloak token.
+        "500":
+          description: Token refresh failed due to an internal server error.
+      security: []
+      tags:
+      - security
+      x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
+components:
+  parameters:
+    Wait:
+      description: "Applies to GET methods when no objects would be returned at the\
+        \ moment of request. If wait=true, \\ the request will wait for the next object\
+        \ to be created and then returns it. If wait=False or unspecified, the request\
+        \ will return \\ an empty list."
+      in: query
+      name: wait
+      schema:
+        default: false
+        type: boolean
+    Since:
+      description: "A Unix timestamp in milliseconds. If specified, only objects created\
+        \ at the time or later will be returned. If unspecified, all objects are returned\
+        \ (since is set to 0 in that case)."
+      in: query
+      name: since
+      schema:
+        format: int64
+        type: integer
+    LastN:
+      description: "If specified, only the last N objects will be returned. If unspecified,\
+        \ all objects are returned. \\ If some states have identical timestamps and\
+        \ they all do not fit into the maximum N states, only those with higher IDs\
+        \ are returned. If value smaller than 1 is provided, this filtering is ignored."
+      in: query
+      name: lastN
+      schema:
+        default: 0
+        format: int32
+        type: integer
+    RouteId:
+      description: An ID a the Route
+      example: 1
+      in: path
+      name: routeId
+      required: true
+      schema:
+        format: int32
+        type: integer
+  responses:
+    ServiceUnavailable:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "503"
+                message: Service unavailable
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Service unavailable
+    UnexpectedError:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "500"
+                message: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unexpected error
+    Unauthorized:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "401"
+                message: Unauthorized
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    Forbidden:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "403"
+                message: Request forbidden
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    BadRequest:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "400"
+                message: Bad request
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request
+    NotFound:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "404"
+                message: Resource not found
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not found
+    MethodNotAllowed:
+      content:
+        application/json:
+          examples:
+            error:
+              value:
+                code: "405"
+                message: Method not allowed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Method not allowed
+  schemas:
+    Error:
+      description: Error object structure.
+      example:
+        code: 404
+        message: Not found
+      properties:
+        code:
+          example: 404
+          type: integer
+        message:
+          example: Not found
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    Car:
+      description: Car model structure.
+      example:
+        underTest: false
+        name: BAT-2022-01
+        defaultRouteId: 1
+        id: 1
+        carAdminPhone:
+          phone: "+420123456789"
+        lastState:
+          fuel: 80
+          id: 1
+          position:
+            altitude: 400.25
+            latitude: 49.204117
+            longitude: 16.606525
+          speed: 20.5
+          timestamp: 1616425275913
+          status: idle
+          carId: 1
+        platformHwId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        platformHwId:
+          example: 1
+          format: int32
+          type: integer
+        name:
+          example: BAT-2022-01
+          type: string
+        carAdminPhone:
+          $ref: '#/components/schemas/MobilePhone'
+        defaultRouteId:
+          example: 1
+          format: int32
+          type: integer
+        underTest:
+          default: true
+          example: false
+          type: boolean
+        lastState:
+          $ref: '#/components/schemas/CarState'
+      required:
+      - carAdminPhone
+      - name
+      - platformHwId
+      type: object
+    CarState:
+      description: Car State object structure
+      example:
+        fuel: 80
+        id: 1
+        position:
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+        speed: 20.5
+        timestamp: 1616425275913
+        status: idle
+        carId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425275913
+          format: int64
+          type: integer
+        status:
+          $ref: '#/components/schemas/CarStatus'
+        fuel:
+          default: 0
+          example: 80
+          format: int32
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          type: integer
+        speed:
+          default: 0.0
+          example: 20.5
+          format: float
+          type: number
+        position:
+          $ref: '#/components/schemas/GNSSPosition'
+      required:
+      - carId
+      - status
+      type: object
+    CarStatus:
+      description: Car Status enum
+      enum:
+      - idle
+      - charging
+      - out_of_order
+      - driving
+      - in_stop
+      - paused_by_phone
+      - paused_by_obstacle
+      - paused_by_button
+      example: idle
+      type: string
+    Order:
+      description: Order object structure.
+      example:
+        notification: Order notification
+        stopRouteId: 1
+        notificationPhone:
+          phone: "+420123456789"
+        targetStopId: 1
+        id: 1
+        priority: normal
+        lastState:
+          orderId: 1
+          id: 1
+          status: to_accept
+          timestamp: 1616425275913
+        userId: 1
+        timestamp: 1616425275913
+        carId: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        priority:
+          default: normal
+          description: "Priority (low, normal, high)"
+          pattern: ^(low|normal|high)$
+          type: string
+        userId:
+          example: 1
+          format: int32
+          type: integer
+        timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425275913
+          format: int64
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          type: integer
+        notification:
+          example: Order notification
+          type: string
+        targetStopId:
+          example: 1
+          format: int32
+          type: integer
+        stopRouteId:
+          example: 1
+          format: int32
+          type: integer
+        notificationPhone:
+          $ref: '#/components/schemas/MobilePhone'
+        lastState:
+          $ref: '#/components/schemas/OrderState'
+      required:
+      - carId
+      - stopRouteId
+      - targetStopId
+      - userId
+      type: object
+    Priority:
+      default: normal
+      description: "Priority (low, normal, high)"
+      pattern: ^(low|normal|high)$
+      type: string
+    OrderState:
+      description: Order state object structure.
+      example:
+        orderId: 1
+        id: 1
+        status: to_accept
+        timestamp: 1616425275913
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        orderId:
+          example: 1
+          format: int32
+          type: integer
+        timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425275913
+          format: int64
+          type: integer
+      required:
+      - orderId
+      - status
+      type: object
+    OrderStatus:
+      description: "OrderStatus (to_accept, accepted, in_progress, done, canceled)."
+      enum:
+      - to_accept
+      - accepted
+      - in_progress
+      - done
+      - canceled
+      example: to_accept
+      type: string
+    PlatformHW:
+      description: PlatformHW object structure.
+      example:
+        name: ABCD1234EF56
+        id: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        name:
+          example: ABCD1234EF56
+          type: string
+      required:
+      - name
+      type: object
+    Route:
+      description: Route object structure.
+      example:
+        name: Lužánky
+        stopIds:
+        - 1
+        - 2
+        - 3
+        - 4
+        id: 1
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        name:
+          example: Lužánky
+          type: string
+        stopIds:
+          default: []
+          example:
+          - 1
+          - 2
+          - 3
+          - 4
+          items:
+            type: integer
+          type: array
+      required:
+      - name
+      type: object
+    RouteVisualization:
+      description: Route Visualization object structure.
+      example:
+        routeId: 1
+        hexcolor: '#FF0000'
+        id: 1
+        points:
+        - latitude: 49.204117
+          longitude: 16.606525
+          altitude: 400.25
+        - latitude: 49.70425
+          longitude: 16.65151
+          altitude: 400.78
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        routeId:
+          example: 1
+          format: int32
+          type: integer
+        hexcolor:
+          default: '#FF0000'
+          description: Color in hexadecimal format.
+          example: '#FF0000'
+          pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          type: string
+        points:
+          default: []
+          example:
+          - latitude: 49.204117
+            longitude: 16.606525
+            altitude: 400.25
+          - latitude: 49.70425
+            longitude: 16.65151
+            altitude: 400.78
+          items:
+            $ref: '#/components/schemas/GNSSPosition'
+          type: array
+      required:
+      - points
+      - routeId
+      type: object
+    Color:
+      default: '#FF0000'
+      description: Color in hexadecimal format.
+      example: '#FF0000'
+      pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+      type: string
+    Stop:
+      description: Stop object structure.
+      example:
+        notificationPhone:
+          phone: "+420123456789"
+        name: Lidická
+        id: 1
+        position:
+          altitude: 400.25
+          latitude: 49.204117
+          longitude: 16.606525
+      properties:
+        id:
+          example: 1
+          format: int32
+          type: integer
+        name:
+          example: Lidická
+          type: string
+        position:
+          $ref: '#/components/schemas/GNSSPosition'
+        notificationPhone:
+          $ref: '#/components/schemas/MobilePhone'
+      required:
+      - name
+      - position
+      type: object
+    Id:
+      example: 1
+      format: int32
+      type: integer
+    MobilePhone:
+      description: MobilePhone Primitive structure.
+      example:
+        phone: "+420123456789"
+      properties:
+        phone:
+          example: "+420123456789"
+          type: string
+      type: object
+    Timestamp:
+      description: A Unix timestamp in milliseconds. The timestamp is used to determine
+        the time of creation of an object.
+      example: 1616425275913
+      format: int64
+      type: integer
+    GNSSPosition:
+      description: GNSSPosition primitive structure.
+      example:
+        altitude: 400.25
+        latitude: 49.204117
+        longitude: 16.606525
+      properties:
+        latitude:
+          default: 0.0
+          example: 49.204117
+          format: float
+          type: number
+        longitude:
+          default: 0.0
+          example: 16.606525
+          format: float
+          type: number
+        altitude:
+          default: 0.0
+          example: 400.25
+          format: float
+          type: number
+      type: object
+  securitySchemes:
+    APIKeyAuth:
+      description: Authentication using an API key.
+      in: query
+      name: api_key
+      type: apiKey
+    oAuth2AuthCode:
+      description: oAuth2 authorization
+      flows:
+        authorizationCode:
+          authorizationUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/auth
+          refreshUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+          scopes: {}
+          tokenUrl: https://keycloak.bringauto.com/realms/bringauto/protocol/openid-connect/token
+      type: oauth2
+      x-tokenInfoFunc: fleet_management_api.controllers.security_controller.info_from_oAuth2AuthCode
+      x-scopeValidateFunc: fleet_management_api.controllers.security_controller.validate_scope_oAuth2AuthCode
