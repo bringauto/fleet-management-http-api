@@ -155,6 +155,7 @@ class Stop(Model):
     def is_auto_stop(self) -> bool:
         """Gets the is_auto_stop of this Stop.
 
+        If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.  # noqa: E501
 
         :return: The is_auto_stop of this Stop.
         :rtype: bool
@@ -165,6 +166,7 @@ class Stop(Model):
     def is_auto_stop(self, is_auto_stop: bool):
         """Sets the is_auto_stop of this Stop.
 
+        If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.  # noqa: E501
 
         :param is_auto_stop: The is_auto_stop of this Stop.
         :type is_auto_stop: bool

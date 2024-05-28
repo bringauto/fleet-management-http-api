@@ -179,5 +179,6 @@ components:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
         isAutoStop:
           type: boolean
+          description: If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.
           default: false
           example: false

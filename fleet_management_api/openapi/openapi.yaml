@@ -3095,6 +3095,8 @@ components:
           $ref: '#/components/schemas/MobilePhone'
         isAutoStop:
           default: false
+          description: "If set to true, an Order to this Stop is always automatically\
+            \ created when creating Orders for the Route containing this Stop."
           example: false
           title: isAutoStop
           type: boolean
