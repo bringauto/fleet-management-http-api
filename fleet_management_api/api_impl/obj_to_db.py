@@ -173,6 +173,7 @@ def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
         name=stop.name,
         position=stop.position.to_dict(),
         notification_phone=notification_phone,
+        is_auto_stop=stop.is_auto_stop
     )
 
 
@@ -186,4 +187,5 @@ def stop_from_db_model(stop_db_model: _db_models.StopDBModel) -> _models.Stop:
         name=stop_db_model.name,
         position=_models.GNSSPosition.from_dict(stop_db_model.position),
         notification_phone=notification_phone,
+        is_auto_stop=stop_db_model.is_auto_stop
     )

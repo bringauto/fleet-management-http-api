@@ -28,6 +28,7 @@ class Test_Creating_Stop(unittest.TestCase):
             name="stop_2",
             position=position,
             notification_phone=_models.MobilePhone(phone="123456789"),
+            is_auto_stop=True
         )
         with self.app.test_client() as c:
             response = c.post("/v2/management/stop", json=stop_1)

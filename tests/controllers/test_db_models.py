@@ -247,6 +247,7 @@ class Test_Creating_StopDBModel(unittest.TestCase):
             name="test_stop",
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             notification_phone=MobilePhone(phone="1234567890"),
+            is_auto_stop=True
         )
         stop_db_model = _obj_to_db.stop_to_db_model(stop)
         self.assertEqual(stop_db_model.name, stop.name)
@@ -260,6 +261,7 @@ class Test_Creating_StopDBModel(unittest.TestCase):
             name="test_stop",
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             notification_phone=MobilePhone(phone="1234567890"),
+            is_auto_stop=True
         )
         stop_out = _obj_to_db.stop_from_db_model(_obj_to_db.stop_to_db_model(stop_in))
         self.assertEqual(stop_out, stop_in)

@@ -151,6 +151,7 @@ class StopDBModel(Base):
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
+    is_auto_stop: _Mapped[bool] = _mapped_column(_sqa.Boolean)
 
     orders: _Mapped[list["OrderDBModel"]] = _relationship(
         "OrderDBModel", back_populates="target_stop"
