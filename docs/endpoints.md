@@ -241,6 +241,7 @@ Query parameters:
 - 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
 - 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
 - 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
+- 'carId' - integer or empty (empty by default). If set, the API returns only states for the Orders assigned to a Car with ID=carId. If the car does not exist, an empty list is returned.
 
 Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
