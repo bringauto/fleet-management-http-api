@@ -14,12 +14,12 @@ def create_order(order):  # noqa: E501
      # noqa: E501
 
     :param order: Order model in JSON format.
-    :type order: dict | bytes
+    :type order: list | bytes
 
-    :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
+    :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())  # noqa: E501
+        order = [Order.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

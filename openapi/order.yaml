@@ -12,7 +12,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
         required: true
       responses:
         '200':
@@ -20,7 +22,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -184,7 +188,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderState'
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderState'
         required: true
       responses:
         '200':

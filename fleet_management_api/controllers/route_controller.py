@@ -17,7 +17,7 @@ def create_route(route):  # noqa: E501
     :param route: Route model in JSON format.
     :type route: dict | bytes
 
-    :rtype: Union[Route, Tuple[Route, int], Tuple[Route, int, Dict[str, str]]
+    :rtype: Union[List[Route], Tuple[List[Route], int], Tuple[List[Route], int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route = Route.from_dict(connexion.request.get_json())  # noqa: E501
@@ -80,12 +80,12 @@ def redefine_route_visualization(route_visualization):  # noqa: E501
      # noqa: E501
 
     :param route_visualization: Route Visualization model in JSON format.
-    :type route_visualization: dict | bytes
+    :type route_visualization: list | bytes
 
     :rtype: Union[RouteVisualization, Tuple[RouteVisualization, int], Tuple[RouteVisualization, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        route_visualization = RouteVisualization.from_dict(connexion.request.get_json())  # noqa: E501
+        route_visualization = [RouteVisualization.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 
@@ -95,10 +95,10 @@ def update_route(route):  # noqa: E501
      # noqa: E501
 
     :param route: JSON representation of the updated Route.
-    :type route: dict | bytes
+    :type route: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        route = Route.from_dict(connexion.request.get_json())  # noqa: E501
+        route = [Route.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'

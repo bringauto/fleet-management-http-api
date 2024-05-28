@@ -14,12 +14,12 @@ def create_car(car):  # noqa: E501
      # noqa: E501
 
     :param car: A Car model in JSON format.
-    :type car: dict | bytes
+    :type car: list | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[List[Car], Tuple[List[Car], int], Tuple[List[Car], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+        car = [Car.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

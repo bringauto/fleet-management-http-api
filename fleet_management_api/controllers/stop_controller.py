@@ -14,12 +14,12 @@ def create_stop(stop):  # noqa: E501
      # noqa: E501
 
     :param stop: Stop model in JSON format.
-    :type stop: dict | bytes
+    :type stop: list | bytes
 
-    :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
+    :rtype: Union[List[Stop], Tuple[List[Stop], int], Tuple[List[Stop], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        stop = Stop.from_dict(connexion.request.get_json())  # noqa: E501
+        stop = [Stop.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 
@@ -66,10 +66,10 @@ def update_stop(stop):  # noqa: E501
      # noqa: E501
 
     :param stop: JSON representation of the updated Stop.
-    :type stop: dict | bytes
+    :type stop: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        stop = Stop.from_dict(connexion.request.get_json())  # noqa: E501
+        stop = [Stop.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'

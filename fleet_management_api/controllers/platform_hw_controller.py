@@ -14,12 +14,12 @@ def create_hw(platform_hw):  # noqa: E501
      # noqa: E501
 
     :param platform_hw: Platform HW model in JSON format.
-    :type platform_hw: dict | bytes
+    :type platform_hw: list | bytes
 
     :rtype: Union[PlatformHW, Tuple[PlatformHW, int], Tuple[PlatformHW, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        platform_hw = PlatformHW.from_dict(connexion.request.get_json())  # noqa: E501
+        platform_hw = [PlatformHW.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

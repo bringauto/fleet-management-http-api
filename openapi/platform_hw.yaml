@@ -12,7 +12,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlatformHW'
+              type: array
+              items:
+                $ref: '#/components/schemas/PlatformHW'
         required: true
       responses:
         '200':

@@ -132,7 +132,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Car'
+              items:
+                $ref: '#/components/schemas/Car'
+              type: array
         description: A Car model in JSON format.
         required: true
         x-body-name: car
@@ -141,7 +143,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Car'
+                items:
+                  $ref: '#/components/schemas/Car'
+                type: array
           description: The Car has been successfully created.
         "400":
           content:
@@ -758,7 +762,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              items:
+                $ref: '#/components/schemas/Order'
+              type: array
         description: Order model in JSON format.
         required: true
         x-body-name: order
@@ -767,7 +773,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                items:
+                  $ref: '#/components/schemas/Order'
+                type: array
           description: The new Order has been successfully created.
         "400":
           content:
@@ -1411,7 +1419,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlatformHW'
+              items:
+                $ref: '#/components/schemas/PlatformHW'
+              type: array
         description: Platform HW model in JSON format.
         required: true
         x-body-name: platformHW
@@ -1706,7 +1716,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                items:
+                  $ref: '#/components/schemas/Route'
+                type: array
           description: The Route has been successfully created.
         "400":
           content:
@@ -1762,7 +1774,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              items:
+                $ref: '#/components/schemas/Route'
+              type: array
         description: JSON representation of the updated Route.
         required: true
         x-body-name: route
@@ -1837,7 +1851,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RouteVisualization'
+              items:
+                $ref: '#/components/schemas/RouteVisualization'
+              type: array
         description: Route Visualization model in JSON format.
         required: true
         x-body-name: RouteVisualization
@@ -2214,7 +2230,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              items:
+                $ref: '#/components/schemas/Stop'
+              type: array
         description: Stop model in JSON format.
         required: true
         x-body-name: stop
@@ -2223,7 +2241,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Stop'
+                items:
+                  $ref: '#/components/schemas/Stop'
+                type: array
           description: The Stop has been successfully created.
         "400":
           content:
@@ -2279,7 +2299,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              items:
+                $ref: '#/components/schemas/Stop'
+              type: array
         description: JSON representation of the updated Stop.
         required: true
         x-body-name: stop

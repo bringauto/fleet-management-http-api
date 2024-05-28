@@ -20,7 +20,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -70,7 +72,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              type: array
+              items:
+                $ref: '#/components/schemas/Route'
         required: true
       responses:
         '200':
@@ -179,7 +183,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RouteVisualization'
+              type: array
+              items:
+                $ref: '#/components/schemas/RouteVisualization'
         required: true
       responses:
         '200':

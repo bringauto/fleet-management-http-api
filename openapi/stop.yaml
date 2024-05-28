@@ -12,7 +12,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              type: array
+              items:
+                $ref: '#/components/schemas/Stop'
         required: true
       responses:
         '200':
@@ -20,7 +22,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Stop'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -75,7 +79,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              type: array
+              items:
+                $ref: '#/components/schemas/Stop'
         required: true
       responses:
         '200':
