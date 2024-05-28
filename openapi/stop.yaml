@@ -177,3 +177,7 @@ components:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
         notificationPhone:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+        isAutoStop:
+          type: boolean
+          default: false
+          example: false
