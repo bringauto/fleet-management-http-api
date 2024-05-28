@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 
 import connexion as _connexion  # type: ignore
 
@@ -57,7 +57,8 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
     If there already exists an Order State with final status (DONE or CANCELED),
     any other Order State is refused (i.e., 403 is returned).
     """
-    if not _order_exists(order_state.order_id):
+    order = _existing_order(order_state.order_id)
+    if order is None:
         return _log_error_and_respond(
             f"Order with id='{order_state.order_id}' was not found.", 404, "Object not found"
         )
@@ -79,6 +80,7 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
         )
 
     order_state_db_model = _obj_to_db.order_state_to_db_model(order_state)
+    order_state_db_model.car_id = order.car_id
     response = _db_access.add(order_state_db_model)
     if response.status_code == 200:
         inserted_model = _obj_to_db.order_state_from_db_model(response.body[0])
@@ -101,7 +103,7 @@ def create_order_state_from_argument_and_post(order_state: _models.OrderState) -
         )
 
 
-def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) -> _Response:
+def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0, car_id: Optional[int] = None) -> _Response:
     """Get all order states for all the existing orders.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -110,9 +112,15 @@ def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0) ->
 
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
+    :param car_id: If not None, return only states of orders that are assigned to the car with 'car_id'.
+    If None, return states of all orders. If the car with the specified 'car_id' does not exist,
+    return empty list.
     """
     _log_info("Getting all order states for all orders.")
-    return _get_order_states({}, wait, since, last_n=last_n)
+    if car_id is not None:
+        return _get_order_states({"car_id": lambda x: x == car_id}, wait, since, last_n)
+    else:
+        return _get_order_states({}, wait, since, last_n=last_n)
 
 
 def get_order_states(
@@ -129,7 +137,7 @@ def get_order_states(
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    if not _order_exists(order_id):
+    if not _existing_order(order_id):
         _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
@@ -174,12 +182,14 @@ def _remove_old_states(order_id: int) -> _Response:
         return _text_response("No old order states to remove.")
 
 
-def _order_exists(order_id: int) -> bool:
+def _existing_order(order_id: int) -> _db_models.OrderDBModel | None:
     order_db_models = _db_access.get(
         _db_models.OrderDBModel, criteria={"id": lambda x: x == order_id}
     )
-    return len(order_db_models) > 0
-
+    if order_db_models:
+        return order_db_models[0]
+    else:
+        return None
 
 def _is_order_done(order_state: _models.OrderState) -> bool:
     _load_last_status_from_db_if_missing(order_state)

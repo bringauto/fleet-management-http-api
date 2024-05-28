@@ -213,6 +213,7 @@ paths:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
         - $ref: 'common_models.yaml#/components/parameters/LastN'
+        - $ref: 'common_models.yaml#/components/parameters/CarId'
       responses:
         '200':
           description: Successfully found all Order States complying with the request parameters.

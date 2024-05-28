@@ -64,3 +64,9 @@ components:
         type: integer
         format: int32
         default: 0
+    CarId:
+      name: carId
+      description: An optional parameter for filtering only objects related to a car with the specified ID.
+      in: query
+      schema:
+        $ref: '#/components/schemas/Id'

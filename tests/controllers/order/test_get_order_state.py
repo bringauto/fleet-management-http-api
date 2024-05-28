@@ -279,5 +279,101 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             os.remove("test_db.db")
 
 
+class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mock_timestamp_ms: Mock) -> None:
+        _connection.set_connection_source_test("test_db.db")
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 3)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
+        car_1 = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
+        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="1234567890"))
+        order_1 = Order(
+            priority="high",
+            user_id=1,
+            car_id=1,
+            target_stop_id=1,
+            stop_route_id=1,
+            notification_phone={},
+        )
+        order_2 = Order(
+            priority="high",
+            user_id=1,
+            car_id=2,
+            target_stop_id=1,
+            stop_route_id=1,
+            notification_phone={},
+        )
+        mock_timestamp_ms.return_value = 0
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=car_1)
+            c.post("/v2/management/car", json=car_2)
+            c.post("/v2/management/order", json=order_1)
+            response = c.post("/v2/management/order", json=order_2)
+            assert response.json is not None
+            tstamp = response.json["timestamp"]
+            assert isinstance(tstamp, int)
+            self.since = tstamp+1
+
+    def test_filtering_existing_order_states_by_car_id(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?carId=1")
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["orderId"], 1)
+            response = c.get("/v2/management/orderstate?carId=2")
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["orderId"], 2)
+
+    def test_getting_order_states_for_nonexistent_car_yields_empty_list(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/orderstate?carId=3")
+            self.assertEqual(response.json, [])
+
+    def test_waiting_for_order_states_for_given_car(self):
+        order_state_1 = OrderState(order_id=1, status="in_progress")
+        order_state_2 = OrderState(order_id=2, status="accepted")
+        with self.app.app.test_client() as c:
+            with ThreadPoolExecutor() as executor:
+                future_1 = executor.submit(c.get, f"/v2/management/orderstate?carId=2&wait=true&since={self.since}")
+                time.sleep(0.01)
+                executor.submit(c.post, "/v2/management/orderstate", json=order_state_1)
+                time.sleep(0.01)
+                executor.submit(c.post, "/v2/management/orderstate", json=order_state_2)
+                response = future_1.result()
+                self.assertEqual(len(response.json), 1)
+                self.assertEqual(response.json[0]["orderId"], 2)
+                self.assertEqual(response.json[0]["status"], "accepted")
+
+    def test_waiting_for_order_states_for_car_created_after_sending_request_for_states(self):
+        with self.app.app.test_client() as c:
+            with ThreadPoolExecutor() as executor:
+                future_1 = executor.submit(c.get, f"/v2/management/orderstate?carId=3&wait=true&since={self.since}")
+                time.sleep(0.01)
+
+                car_3 = Car(name="car3", platform_hw_id=3, car_admin_phone=MobilePhone(phone="1234567890"))
+                order = Order(
+                    priority="high",
+                    user_id=1,
+                    car_id=3,
+                    target_stop_id=1,
+                    stop_route_id=1,
+                    notification_phone={},
+                )
+                executor.submit(c.post, "/v2/management/car", json=car_3)
+                time.sleep(0.01)
+                executor.submit(c.post, "/v2/management/order", json=order)
+                response = future_1.result()
+                self.assertEqual(len(response.json), 1)
+                self.assertEqual(response.json[0]["orderId"], 3)
+                self.assertEqual(response.json[0]["status"], "to_accept")
+
+
+    def tearDown(self) -> None:  # pragma: no cover
+        if os.path.isfile("test_db.db"):
+            os.remove("test_db.db")
+
+
 if __name__ == "__main__":
     unittest.main(buffer=True)

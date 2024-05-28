@@ -1121,6 +1121,12 @@ paths:
           default: 0
           format: int32
           type: integer
+      - description: An optional parameter for filtering only objects related to a
+          car with the specified ID.
+        in: query
+        name: carId
+        schema:
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -2610,6 +2616,13 @@ components:
         default: 0
         format: int32
         type: integer
+    CarId:
+      description: An optional parameter for filtering only objects related to a car
+        with the specified ID.
+      in: query
+      name: carId
+      schema:
+        $ref: '#/components/schemas/Id'
     RouteId:
       description: An ID a the Route
       example: 1
@@ -2957,6 +2970,11 @@ components:
       example: to_accept
       title: OrderStatus
       type: string
+    Id:
+      example: 1
+      format: int32
+      title: Id
+      type: integer
     PlatformHW:
       description: PlatformHW object structure.
       example:
@@ -3105,11 +3123,6 @@ components:
       - position
       title: Stop
       type: object
-    Id:
-      example: 1
-      format: int32
-      title: Id
-      type: integer
     MobilePhone:
       description: MobilePhone Primitive structure.
       example:

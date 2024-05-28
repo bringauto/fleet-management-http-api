@@ -127,6 +127,7 @@ class OrderStateDBModel(Base):
     _max_n_of_states: int = 50
     status: _Mapped[str] = _mapped_column(_sqa.String)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+    car_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     order_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("orders.id"), nullable=False)
     order: _Mapped[OrderDBModel] = _relationship(
         "OrderDBModel", back_populates="states", lazy="noload"
