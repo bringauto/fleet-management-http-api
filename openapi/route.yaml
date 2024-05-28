@@ -1,7 +1,7 @@
 paths:
   /route:
     post:
-      operationId: createRoute
+      operationId: createRoutes
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
@@ -61,7 +61,7 @@ paths:
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
-      operationId: updateRoute
+      operationId: updateRoutes
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
@@ -172,7 +172,7 @@ paths:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
   /route-visualization:
     post:
-      operationId: redefineRouteVisualization
+      operationId: redefineRouteVisualizations
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
       tags:
         - route

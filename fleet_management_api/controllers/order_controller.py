@@ -8,7 +8,7 @@ from fleet_management_api.models.order import Order  # noqa: E501
 from fleet_management_api import util
 
 
-def create_order(order):  # noqa: E501
+def create_orders(order):  # noqa: E501
     """Create a new Order.
 
      # noqa: E501

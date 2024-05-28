@@ -8,7 +8,7 @@ from fleet_management_api.models.stop import Stop  # noqa: E501
 from fleet_management_api import util
 
 
-def create_stop(stop):  # noqa: E501
+def create_stops(stop):  # noqa: E501
     """Create a new Stop.
 
      # noqa: E501
@@ -60,7 +60,7 @@ def get_stops():  # noqa: E501
     return 'do some magic!'
 
 
-def update_stop(stop):  # noqa: E501
+def update_stops(stop):  # noqa: E501
     """Update already existing Stop.
 
      # noqa: E501

@@ -9,7 +9,7 @@ from fleet_management_api.models.route_visualization import RouteVisualization  
 from fleet_management_api import util
 
 
-def create_route(route):  # noqa: E501
+def create_routes(route):  # noqa: E501
     """Create a new Route.
 
      # noqa: E501
@@ -74,7 +74,7 @@ def get_routes():  # noqa: E501
     return 'do some magic!'
 
 
-def redefine_route_visualization(route_visualization):  # noqa: E501
+def redefine_route_visualizations(route_visualization):  # noqa: E501
     """Redefine Route Visualization for an existing Route.
 
      # noqa: E501
@@ -89,7 +89,7 @@ def redefine_route_visualization(route_visualization):  # noqa: E501
     return 'do some magic!'
 
 
-def update_route(route):  # noqa: E501
+def update_routes(route):  # noqa: E501
     """Update already existing Route.
 
      # noqa: E501

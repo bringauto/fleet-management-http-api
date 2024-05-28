@@ -18,7 +18,7 @@ from fleet_management_api.api_impl.api_logging import (
 )
 
 
-def create_route() -> _Response:
+def create_routes() -> _Response:
     """Post a new route. The route must have a unique id and all the stops identified by stop ids must exist."""
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
@@ -95,7 +95,7 @@ def get_routes() -> list[_models.Route]:
     return _json_response(route)
 
 
-def update_route(route: dict | _models.Route) -> _Response:
+def update_routes(route: dict | _models.Route) -> _Response:
     """Update an existing route identified by 'route_id'."""
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()

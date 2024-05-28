@@ -1,7 +1,7 @@
 paths:
   /car:
     post:
-      operationId: createCar
+      operationId: createCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
@@ -66,7 +66,7 @@ paths:
         default:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
     put:
-      operationId: updateCar
+      operationId: updateCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
@@ -166,7 +166,7 @@ paths:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
-      operationId: addCarState
+      operationId: addCarStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState

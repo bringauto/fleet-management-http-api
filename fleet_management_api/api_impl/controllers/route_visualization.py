@@ -7,8 +7,7 @@ from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
-    error as _error,
-    text_response as _text_response,
+    error as _error
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
@@ -34,7 +33,7 @@ def get_route_visualization(route_id: int) -> _Response:
         return _json_response(rp)
 
 
-def redefine_route_visualization() -> _Response:
+def redefine_route_visualizations() -> _Response:
     """Redefine route visualization for an existing route."""
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()

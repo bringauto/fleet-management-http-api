@@ -8,18 +8,18 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def add_car_state(car_state):  # noqa: E501
+def add_car_states(car_state):  # noqa: E501
     """Add a new Car State.
 
      # noqa: E501
 
     :param car_state: Car State model in JSON format.
-    :type car_state: dict | bytes
+    :type car_state: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        car_state = CarState.from_dict(connexion.request.get_json())  # noqa: E501
+        car_state = [CarState.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

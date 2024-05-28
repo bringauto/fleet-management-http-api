@@ -1,7 +1,7 @@
 paths:
   /platformhw:
     post:
-      operationId: createHw
+      operationId: createHws
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW

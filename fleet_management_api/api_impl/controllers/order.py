@@ -150,7 +150,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-def create_order() -> _Response:
+def create_orders() -> _Response:
     """Post a new order. The order must have a unique id and the car must exist."""
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
@@ -295,5 +295,5 @@ def _car_exist(car_id: int) -> bool:
 
 def _post_default_order_state(order_id: int) -> _Response:
     order_state = _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
-    response = _order_state.create_order_state_from_argument_and_post(order_state)
+    response = _order_state.create_order_states_from_argument_and_post(order_state)
     return response

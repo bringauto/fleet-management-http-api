@@ -17,7 +17,7 @@ from fleet_management_api.api_impl.api_logging import (
 )
 
 
-def create_stop() -> _Response:
+def create_stops() -> _Response:
     """Post a new stop. The stop must have a unique id."""
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
@@ -85,7 +85,7 @@ def get_stops() -> _Response:
     return _json_response(stops)
 
 
-def update_stop(stop: dict | _Stop) -> _Response:
+def update_stops(stop: dict | _Stop) -> _Response:
     """Update an existing stop."""
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()

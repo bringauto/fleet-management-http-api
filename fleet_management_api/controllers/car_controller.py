@@ -8,7 +8,7 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def create_car(car):  # noqa: E501
+def create_cars(car):  # noqa: E501
     """Create a new Car object.
 
      # noqa: E501
@@ -60,16 +60,16 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def update_car(car):  # noqa: E501
+def update_cars(car):  # noqa: E501
     """Update already existing Car.
 
      # noqa: E501
 
     :param car: JSON representation of the updated Car.
-    :type car: dict | bytes
+    :type car: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+        car = [Car.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'

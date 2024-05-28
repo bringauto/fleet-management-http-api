@@ -1,7 +1,7 @@
 paths:
   /order:
     post:
-      operationId: createOrder
+      operationId: createOrders
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
@@ -177,7 +177,7 @@ paths:
 
   /orderstate:
     post:
-      operationId: createOrderState
+      operationId: createOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState

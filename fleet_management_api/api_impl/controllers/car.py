@@ -4,7 +4,7 @@ import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.controllers.car_state import (
-    create_car_state_from_argument_and_post as _create_car_state_from_argument_and_post,
+    create_car_states_from_argument_and_post as _create_car_state_from_argument_and_post,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
@@ -19,7 +19,7 @@ from fleet_management_api.api_impl.api_logging import (
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 
 
-def create_car() -> _Response:  # noqa: E501
+def create_cars() -> _Response:  # noqa: E501
     """Create a new car.
 
     The car must have a unique ID and name.
@@ -110,7 +110,7 @@ def get_cars() -> _Response:  # noqa: E501
     return _json_response(cars)
 
 
-def update_car(car: dict | _models.Car) -> _Response:
+def update_cars(car: dict | _models.Car) -> _Response:
     """Update an existing car.
 
     :param car: Updated car object.

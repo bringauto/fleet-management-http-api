@@ -8,7 +8,7 @@ from fleet_management_api.models.platform_hw import PlatformHW  # noqa: E501
 from fleet_management_api import util
 
 
-def create_hw(platform_hw):  # noqa: E501
+def create_hws(platform_hw):  # noqa: E501
     """Create a new Platform HW object.
 
      # noqa: E501

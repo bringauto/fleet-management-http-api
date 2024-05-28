@@ -1,7 +1,7 @@
 paths:
   /stop:
     post:
-      operationId: createStop
+      operationId: createStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
@@ -68,7 +68,7 @@ paths:
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
-      operationId: updateStop
+      operationId: updateStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop

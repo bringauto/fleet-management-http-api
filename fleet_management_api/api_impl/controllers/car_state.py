@@ -19,7 +19,7 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 
 
-def add_car_state() -> _Response:
+def add_car_states() -> _Response:
     """Post new car state.
 
     :param car_state: Car state to be added.
@@ -33,10 +33,10 @@ def add_car_state() -> _Response:
         return _log_invalid_request_body_format()
     else:
         car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        return create_car_state_from_argument_and_post(car_state)
+        return create_car_states_from_argument_and_post(car_state)
 
 
-def create_car_state_from_argument_and_post(car_state: _models.CarState) -> _Response:
+def create_car_states_from_argument_and_post(car_state: _models.CarState) -> _Response:
     state_db_model = _obj_to_db.car_state_to_db_model(car_state)
     response = _db_access.add(
         state_db_model,

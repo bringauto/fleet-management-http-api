@@ -127,7 +127,7 @@ paths:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     post:
-      operationId: create_car
+      operationId: create_cars
       requestBody:
         content:
           application/json:
@@ -196,12 +196,14 @@ paths:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     put:
-      operationId: update_car
+      operationId: update_cars
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Car'
+              items:
+                $ref: '#/components/schemas/Car'
+              type: array
         description: JSON representation of the updated Car.
         required: true
         x-body-name: car
@@ -514,12 +516,14 @@ paths:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
-      operationId: add_car_state
+      operationId: add_car_states
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CarState'
+              items:
+                $ref: '#/components/schemas/CarState'
+              type: array
         description: Car State model in JSON format.
         required: true
         x-body-name: carState
@@ -757,7 +761,7 @@ paths:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     post:
-      operationId: create_order
+      operationId: create_orders
       requestBody:
         content:
           application/json:
@@ -1187,12 +1191,14 @@ paths:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
     post:
-      operationId: create_order_state
+      operationId: create_order_states
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderState'
+              items:
+                $ref: '#/components/schemas/OrderState'
+              type: array
         description: Order State model in JSON format.
         required: true
         x-body-name: orderState
@@ -1414,7 +1420,7 @@ paths:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     post:
-      operationId: create_hw
+      operationId: create_hws
       requestBody:
         content:
           application/json:
@@ -1702,7 +1708,7 @@ paths:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     post:
-      operationId: create_route
+      operationId: create_routes
       requestBody:
         content:
           application/json:
@@ -1769,7 +1775,7 @@ paths:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     put:
-      operationId: update_route
+      operationId: update_routes
       requestBody:
         content:
           application/json:
@@ -1846,7 +1852,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
   /route-visualization:
     post:
-      operationId: redefine_route_visualization
+      operationId: redefine_route_visualizations
       requestBody:
         content:
           application/json:
@@ -2225,7 +2231,7 @@ paths:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     post:
-      operationId: create_stop
+      operationId: create_stops
       requestBody:
         content:
           application/json:
@@ -2294,7 +2300,7 @@ paths:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     put:
-      operationId: update_stop
+      operationId: update_stops
       requestBody:
         content:
           application/json:
