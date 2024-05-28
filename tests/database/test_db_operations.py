@@ -8,6 +8,43 @@ import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 
 
+class Test_Creating_Records(unittest.TestCase):
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test()
+        models.initialize_test_tables(_connection.current_connection_source())
+
+    def test_adding_single_record_to_database_succesfully(self):
+        test_obj = models.TestBase(test_str="test_string", test_int=5)
+        _db_access.add(test_obj)
+        retrieved_obj = _db_access.get(models.TestBase)[0]
+        self.assertEqual(retrieved_obj.test_str, test_obj.test_str)
+        self.assertEqual(retrieved_obj.test_int, test_obj.test_int)
+
+    def test_adding_multiple_records_to_database_succesfully(self):
+        test_obj_1 = models.TestBase(test_str="test_string", test_int=5)
+        test_obj_2 = models.TestBase(test_str="test_string", test_int=8)
+        _db_access.add(test_obj_1, test_obj_2)
+        retrieved_objs = _db_access.get(models.TestBase)
+        self.assertEqual(retrieved_objs[0].test_int, test_obj_1.test_int)
+        self.assertEqual(retrieved_objs[1].test_int, test_obj_2.test_int)
+
+    def test_single_failure_prevents_all_records_from_uploading_to_database(self):
+        # failure is produced by the third record, having already taken ID
+        test_obj_1 = models.TestBase(test_str="test_string", test_int=5, id=0)
+        test_obj_2 = models.TestBase(test_str="test_string", test_int=8, id=1)
+        test_obj_3 = models.TestBase(test_str="test_string", test_int=9, id=1)
+        response =_db_access.add(
+            test_obj_1,
+            test_obj_2,
+            test_obj_3,
+            auto_id=False
+        )
+        self.assertEqual(response.status_code, 400)
+        records = _db_access.get(models.TestBase)
+        self.assertListEqual(records, [])
+
+
 class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
@@ -82,6 +119,27 @@ class Test_Updating_Records(unittest.TestCase):
         updated_obj = models.TestBase(id=2, test_str="updated_test_string", test_int=6)
         response = _db_access.update(updated_obj)
         self.assertEqual(response.status_code, 404)
+
+    def test_updating_multiple_records_succesfully(self):
+        test_obj_1 = models.TestBase(test_str="test_string", test_int=5)
+        test_obj_2 = models.TestBase(test_str="test_string", test_int=8)
+        _db_access.add(test_obj_1, test_obj_2)
+        updated_obj_1 = models.TestBase(id=1, test_str="updated_test_string", test_int=6)
+        updated_obj_2 = models.TestBase(id=2, test_str="updated_test_string", test_int=9)
+        _db_access.update(updated_obj_1, updated_obj_2)
+        retrieved_objs = _db_access.get(models.TestBase)
+        self.assertEqual(retrieved_objs, [updated_obj_1, updated_obj_2])
+
+    def test_updating_multiple_records_with_one_failure_prevents_all_records_from_updating(self):
+        obj_1 = models.TestBase(test_str="x", test_int=5)
+        obj_2 = models.TestBase(test_str="y", test_int=8)
+        _db_access.add(obj_1, obj_2)
+        updated_obj_1 = models.TestBase(id=1, test_str="xxx", test_int=6)
+        updated_obj_2 = models.TestBase(id=1651651213, test_str="yyy", test_int=9)
+        response = _db_access.update(updated_obj_1, updated_obj_2)
+        self.assertEqual(response.status_code, 404)
+        retrieved_objs = _db_access.get(models.TestBase)
+        self.assertEqual(retrieved_objs, [obj_1, obj_2])
 
 
 class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
