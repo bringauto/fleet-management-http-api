@@ -38,6 +38,46 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
             self.assertEqual(response.json["routeId"], 1)
             self.assertEqual(len(response.json["points"]), 2)
 
+    def test_post_route_visualizations_to_multiple_existing_routes(self):
+        points_1 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
+        points_2 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0), GNSSPosition(47.0, 23.0, 400.0)]
+        route_2 = Route(name="test_route_2")
+        vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
+        vis_2 = RouteVisualization(route_id=2, points=points_2, hexcolor="#FFEE00")
+        with self.app.test_client() as c:
+            response = c.post("/v2/management/route", json=[self.route, route_2])
+            self.assertEqual(response.status_code, 200)
+        with self.app.test_client() as c:
+            response = c.post("/v2/management/route-visualization", json=[vis_1, vis_2])
+            self.assertEqual(response.status_code, 200)
+            response = c.get("/v2/management/route-visualization/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["routeId"], 1)
+            self.assertEqual(len(response.json["points"]), 2)
+            self.assertEqual(response.json["hexcolor"], "#FF0000")
+            response = c.get("/v2/management/route-visualization/2")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["routeId"], 2)
+            self.assertEqual(len(response.json["points"]), 3)
+            self.assertEqual(response.json["hexcolor"], "#FFEE00")
+
+    def test_post_route_visualizations_to_multiple_existing_routes_with_one_nonexistent_yields_no_update(self):
+        points_1 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
+        points_2 = [GNSSPosition(49.0, 21.0, 300.0)]
+        vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
+        # route for the following visualization does not exist
+        vis_2 = RouteVisualization(route_id=25252, points=points_2, hexcolor="#FFEE00")
+        with self.app.test_client() as c:
+            response = c.post("/v2/management/route", json=[self.route])
+            self.assertEqual(response.status_code, 200)
+        with self.app.test_client() as c:
+            response = c.post("/v2/management/route-visualization", json=[vis_1, vis_2])
+            self.assertEqual(response.status_code, 404)
+            response = c.get("/v2/management/route-visualization/1")
+            self.assertEqual(response.status_code, 200)
+            # as no update occured, the number of points is still 0 instead of 2
+            self.assertEqual(len(response.json["points"]), 0)
+
     def test_route_visualization_accepts_only_hexadecimal_color_code(self):
         invalid_colors = ["#FF000", "#", "   ", "red"]
         with self.app.test_client() as c:

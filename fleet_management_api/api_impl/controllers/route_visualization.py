@@ -34,7 +34,15 @@ def get_route_visualization(route_id: int) -> _Response:
 
 
 def redefine_route_visualizations() -> _Response:
-    """Redefine route visualizations for existing routes."""
+    """Redefine route visualizations for existing routes.
+
+    If a route visualization for a route already exists, it will be replaced.
+
+    If any of the redefinitions fail, the whole operation will be rolled back.
+
+    The visualization can be redefined only if:
+    - the route exists.
+    """
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
@@ -42,34 +50,32 @@ def redefine_route_visualizations() -> _Response:
         if not request_json:
             return _log_invalid_request_body_format()
 
-        rp = _RouteVisualization.from_dict(request_json[0])
-        rp_db_model = _obj_to_db.route_visualization_to_db_model(rp)
-        existing_visualization: list[_db_models.RouteVisualizationDBModel] = _db_access.get(
-            _db_models.RouteVisualizationDBModel,
-            criteria={"route_id": lambda x: x == rp.route_id}
-        )
-        if len(existing_visualization) == 0:
-            response = _db_access.add(
-                rp_db_model,
-                checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
+        vis = [_RouteVisualization.from_dict(s) for s in request_json]
+        for v in vis:
+            if not _db_access.db_object_check(_db_models.RouteDBModel, v.route_id):
+                return _error(
+                    404,
+                    f"Route with ID={v.route_id} does not exist.",
+                    title="Object not found",
+                )
+
+        existing_vis: list[_db_models.RouteVisualizationDBModel] = \
+            _db_access.get(_db_models.RouteVisualizationDBModel)
+        existing_vis_dict: dict[int, _db_models.RouteVisualizationDBModel] = {v.route_id: v for v in existing_vis}
+
+        vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
+        for v_db in vis_db_models:
+            if v_db.route_id in existing_vis_dict:
+                id_ = existing_vis_dict[v_db.route_id].id
+                v_db.id = id_  # type: ignore
+        response = _db_access.update(*vis_db_models)
+        if response.status_code == 200:
+            _log_info("Route visualizations have been redefined.")
+            return _json_response(
+                [_obj_to_db.route_visualization_from_db_model(v) for v in response.body]
             )
+        else:
             return _log_error_and_respond(
                 response.body["detail"], response.status_code, response.body["title"]
             )
-        else:
-            _db_access.delete(_db_models.RouteVisualizationDBModel, existing_visualization[0].id)
-            response = _db_access.add(
-                rp_db_model,
-                checked=[_db_access.db_object_check(_db_models.RouteDBModel, rp.route_id)],
-            )
-            if response.status_code == 200:
-                _log_info(
-                    f"Route visualization for route with ID={rp.route_id} has been redefined."
-                )
-                return _json_response(
-                    _obj_to_db.route_visualization_from_db_model(response.body[0])
-                )
-            else:
-                return _log_error_and_respond(
-                    response.body["detail"], response.status_code, response.body["title"]
-                )
+
