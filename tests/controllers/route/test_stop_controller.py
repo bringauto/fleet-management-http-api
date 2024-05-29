@@ -28,7 +28,7 @@ class Test_Creating_Stop(unittest.TestCase):
             name="stop_2",
             position=position,
             notification_phone=_models.MobilePhone(phone="123456789"),
-            is_auto_stop=True
+            is_auto_stop=True,
         )
         with self.app.test_client() as c:
             response = c.post("/v2/management/stop", json=[stop_1])
@@ -72,9 +72,9 @@ class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         app = _app.get_test_app().app
         with app.test_client() as c:
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["Stop"]["example"]
+            example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Stop"][
+                "example"
+            ]
             response = c.post("/v2/management/stop", json=[example])
             self.assertEqual(response.status_code, 200)
 

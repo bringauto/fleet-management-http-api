@@ -40,7 +40,11 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
 
     def test_post_route_visualizations_to_multiple_existing_routes(self):
         points_1 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
-        points_2 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0), GNSSPosition(47.0, 23.0, 400.0)]
+        points_2 = [
+            GNSSPosition(49.0, 21.0, 300.0),
+            GNSSPosition(48.0, 22.0, 350.0),
+            GNSSPosition(47.0, 23.0, 400.0),
+        ]
         route_2 = Route(name="test_route_2")
         vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
         vis_2 = RouteVisualization(route_id=2, points=points_2, hexcolor="#FFEE00")
@@ -61,7 +65,9 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
             self.assertEqual(len(response.json["points"]), 3)
             self.assertEqual(response.json["hexcolor"], "#FFEE00")
 
-    def test_post_route_visualizations_to_multiple_existing_routes_with_one_nonexistent_yields_no_update(self):
+    def test_post_route_visualizations_to_multiple_existing_routes_with_one_nonexistent_yields_no_update(
+        self,
+    ):
         points_1 = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
         points_2 = [GNSSPosition(49.0, 21.0, 300.0)]
         vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
@@ -89,6 +95,7 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
                 print(response.json)
                 self.assertEqual(response.status_code, 400)
 
+
 class Updating_Route_Visualization(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
@@ -110,7 +117,7 @@ class Updating_Route_Visualization(unittest.TestCase):
 
             c.post(
                 "/v2/management/route-visualization",
-                json=[RouteVisualization(route_id=1, points=old_points)]
+                json=[RouteVisualization(route_id=1, points=old_points)],
             )
             response_1 = c.get("/v2/management/route-visualization/1")
             self.assertEqual(len(response_1.json["points"]), 3)

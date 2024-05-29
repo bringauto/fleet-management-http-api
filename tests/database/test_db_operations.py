@@ -34,12 +34,7 @@ class Test_Creating_Records(unittest.TestCase):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=5, id=0)
         test_obj_2 = models.TestBase(test_str="test_string", test_int=8, id=1)
         test_obj_3 = models.TestBase(test_str="test_string", test_int=9, id=1)
-        response =_db_access.add(
-            test_obj_1,
-            test_obj_2,
-            test_obj_3,
-            auto_id=False
-        )
+        response = _db_access.add(test_obj_1, test_obj_2, test_obj_3, auto_id=False)
         self.assertEqual(response.status_code, 400)
         records = _db_access.get(models.TestBase)
         self.assertListEqual(records, [])
@@ -68,22 +63,16 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=5)
         test_obj_2 = models.TestBase(test_str="test_string", test_int=8)
         _db_access.add(test_obj_1, test_obj_2)
-        objs_out = _db_access.get(
-            models.TestBase, criteria={"test_int": lambda x: x == 5}
-        )
+        objs_out = _db_access.get(models.TestBase, criteria={"test_int": lambda x: x == 5})
         self.assertEqual(objs_out[0].test_int, test_obj_1.test_int)
 
     def test_filter_records_using_attribute_criteria(self):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=5)
         test_obj_2 = models.TestBase(test_str="test_string", test_int=8)
         _db_access.add(test_obj_1, test_obj_2)
-        objs_out = _db_access.get(
-            models.TestBase, criteria={"test_int": lambda x: x < 6}
-        )
+        objs_out = _db_access.get(models.TestBase, criteria={"test_int": lambda x: x < 6})
         self.assertEqual(objs_out[0].test_int, test_obj_1.test_int)
-        objs_out = _db_access.get(
-            models.TestBase, criteria={"test_int": lambda x: x > 6}
-        )
+        objs_out = _db_access.get(models.TestBase, criteria={"test_int": lambda x: x > 6})
         self.assertEqual(objs_out[0].test_int, test_obj_2.test_int)
 
     def test_sending_no_object_to_database_has_no_effect(self):
@@ -172,9 +161,7 @@ class Test_Deleting_Database_Record(unittest.TestCase):
         test_obj = models.TestBase(id=7, test_str="test_string", test_int=5)
         _db_access.add(test_obj)
         _db_access.delete(base=models.TestBase, id_=7)
-        retrieved_obj = _db_access.get(
-            models.TestBase, criteria={"id": lambda x: x == 7}
-        )
+        retrieved_obj = _db_access.get(models.TestBase, criteria={"id": lambda x: x == 7})
         self.assertListEqual(retrieved_obj, [])
 
     def test_deleting_non_existing_record_yields_404_code(self):
@@ -194,9 +181,7 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_3 = models.TestBase(test_str="test_string", test_int=5)
         _db_access.add(test_obj_3, test_obj_1, test_obj_2)
 
-        _db_access.delete_n(
-            models.TestBase, n=2, column_name="id", start_from="minimum"
-        )
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         test_obj_2.id = 3
         self.assertListEqual(retrieved_objs, [test_obj_2])
@@ -206,9 +191,7 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=5)
         test_obj_3 = models.TestBase(id=4, test_str="test_string", test_int=5)
         _db_access.add(test_obj_3, test_obj_1, test_obj_2)
-        _db_access.delete_n(
-            models.TestBase, n=2, column_name="id", start_from="maximum"
-        )
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="maximum")
         retrieved_objs = _db_access.get(models.TestBase)
         test_obj_3.id = 1
         self.assertListEqual(retrieved_objs, [test_obj_3])
@@ -226,16 +209,12 @@ class Test_Deleting_N_Database_Records(unittest.TestCase):
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=5)
         _db_access.add(test_obj_1, test_obj_2)
 
-        _db_access.delete_n(
-            models.TestBase, n=3, column_name="id", start_from="minimum"
-        )
+        _db_access.delete_n(models.TestBase, n=3, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [])
 
     def test_removing_n_records_from_empty_table_has_no_effect(self):
-        _db_access.delete_n(
-            models.TestBase, n=2, column_name="id", start_from="minimum"
-        )
+        _db_access.delete_n(models.TestBase, n=2, column_name="id", start_from="minimum")
         retrieved_objs = _db_access.get(models.TestBase)
         self.assertListEqual(retrieved_objs, [])
 

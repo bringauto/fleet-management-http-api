@@ -194,8 +194,8 @@ def create_orders() -> _Response:
                         func=lambda x: order.target_stop_id in x,
                         fail_message=f"Route with ID={order.stop_route_id} does not contain "
                         f"stop with ID={order.target_stop_id}",
-                    )
-                )
+                    ),
+                ),
             ]
         )
         order_db_models.append(_obj_to_db.order_to_db_model(order))

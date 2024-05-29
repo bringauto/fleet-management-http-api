@@ -19,14 +19,10 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
+            platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
         )
         self.car_2 = Car(
-            platform_hw_id=2,
-            name="car2",
-            car_admin_phone=MobilePhone(phone="123456789")
+            platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
@@ -62,5 +58,5 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
             self.assertEqual(response.json[1]["lastState"]["status"], state_4.status)
 
 
-if __name__=='__main__':  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()

@@ -7,7 +7,7 @@ from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
-    error as _error
+    error as _error,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
@@ -59,9 +59,12 @@ def redefine_route_visualizations() -> _Response:
                     title="Object not found",
                 )
 
-        existing_vis: list[_db_models.RouteVisualizationDBModel] = \
-            _db_access.get(_db_models.RouteVisualizationDBModel)
-        existing_vis_dict: dict[int, _db_models.RouteVisualizationDBModel] = {v.route_id: v for v in existing_vis}
+        existing_vis: list[_db_models.RouteVisualizationDBModel] = _db_access.get(
+            _db_models.RouteVisualizationDBModel
+        )
+        existing_vis_dict: dict[int, _db_models.RouteVisualizationDBModel] = {
+            v.route_id: v for v in existing_vis
+        }
 
         vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
         for v_db in vis_db_models:
@@ -78,4 +81,3 @@ def redefine_route_visualizations() -> _Response:
             return _log_error_and_respond(
                 response.body["detail"], response.status_code, response.body["title"]
             )
-

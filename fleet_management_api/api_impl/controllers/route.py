@@ -43,9 +43,11 @@ def create_routes() -> _Response:
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
         visualizations: list[_db_models.RouteVisualizationDBModel] = []
         for m in route_db_models:
-            visualizations.append(_db_models.RouteVisualizationDBModel(
-                id=m.id, route_id=m.id, points=[], hexcolor="#00BCF2"
-            ))
+            visualizations.append(
+                _db_models.RouteVisualizationDBModel(
+                    id=m.id, route_id=m.id, points=[], hexcolor="#00BCF2"
+                )
+            )
         response = _db_access.add(*route_db_models)
         if response.status_code == 200:
             inserted_db_models: list[_db_models.RouteDBModel] = response.body

@@ -30,7 +30,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             name="Test Car",
             platform_hw_id=216465168,
             under_test=False,
-            car_admin_phone=MobilePhone(phone="123456789")
+            car_admin_phone=MobilePhone(phone="123456789"),
         )
         app = _app.get_test_app()
         with app.app.test_client() as c:
@@ -39,7 +39,12 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
     def test_car_with_default_route_id_pointing_to_nonexistent_route_yields_404_error_code(self):
         nonexistent_route_id = 165168486
-        car = Car(name="Test Car", platform_hw_id=1, default_route_id=nonexistent_route_id, car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(
+            name="Test Car",
+            platform_hw_id=1,
+            default_route_id=nonexistent_route_id,
+            car_admin_phone=MobilePhone(phone="123456789"),
+        )
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.post("/v2/management/car", json=[car], content_type="application/json")
@@ -50,7 +55,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             name="Test Car",
             platform_hw_id=1,
             default_route_id=1,
-            car_admin_phone=MobilePhone(phone="123456789")
+            car_admin_phone=MobilePhone(phone="123456789"),
         )
         app = _app.get_test_app()
         with app.app.test_client() as c:
@@ -86,8 +91,12 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.json[0]["carAdminPhone"]["phone"], car.car_admin_phone.phone)
 
     def test_creating_and_retrieving_two_cars(self):
-        car_1 = Car(name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        car_2 = Car(name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
+        car_1 = Car(
+            name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
+        car_2 = Car(
+            name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
+        )
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post("/v2/management/car", json=[car_1], content_type="application/json")
@@ -108,8 +117,12 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_with_already_existing_name_returns_400_error_code(self):
-        car_1 = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        car_2 = Car(name="Test Car", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
+        car_1 = Car(
+            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
+        car_2 = Car(
+            name="Test Car", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
+        )
         app = _app.get_test_app()
         with app.app.test_client() as c:
             c.post("/v2/management/car", json=[car_1], content_type="application/json")
@@ -187,7 +200,9 @@ class Test_Logging_Car_Creation(unittest.TestCase):
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs("werkzeug", level="INFO") as logs:
-            car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+            car = Car(
+                name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+            )
             app = _app.get_test_app()
             with app.app.test_client() as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
@@ -198,7 +213,9 @@ class Test_Logging_Car_Creation(unittest.TestCase):
         self,
     ):
         with self.assertLogs("werkzeug", level="ERROR") as logs:
-            car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+            car = Car(
+                name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+            )
             app = _app.get_test_app()
             with app.app.test_client() as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
@@ -231,7 +248,9 @@ class Test_Updating_Car(unittest.TestCase):
             self.assertEqual(response.json[0]["name"], "Updated Test Car")  # type: ignore
 
     def test_updating_nonexistent_car_yields_404_error(self) -> None:
-        car = Car(id=1, name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(
+            id=1, name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
         app = _app.get_test_app()
         with app.app.test_client() as c:
             response = c.put("/v2/management/car", json=[car], content_type="application/json")
@@ -305,8 +324,12 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
     def test_creating_car_using_platformhw_already_assigned_to_other_car_yields_code_400(
         self,
     ):
-        car_1 = Car(name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        car_2 = Car(name="Test Car 2", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        car_1 = Car(
+            name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
+        car_2 = Car(
+            name="Test Car 2", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
         with _app.get_test_app().app.test_client() as c:
             response = c.post("/v2/management/car", json=[car_1], content_type="application/json")
             self.assertEqual(response.status_code, 200)

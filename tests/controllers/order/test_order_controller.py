@@ -188,7 +188,10 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             notification_phone=MobilePhone(phone="1234567890"),
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/order", json=[self.order_1, self.order_1, self.order_2, self.order_2, self.order_2])
+            c.post(
+                "/v2/management/order",
+                json=[self.order_1, self.order_1, self.order_2, self.order_2, self.order_2],
+            )
 
     def test_retrieving_all_orders_when_some_orders_exist_yields_code_200_and_list_of_orders(self):
         with self.app.app.test_client() as c:

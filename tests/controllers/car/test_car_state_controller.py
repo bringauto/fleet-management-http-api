@@ -17,26 +17,22 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
-        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        self.car = Car(
+            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[self.car])
 
     def test_adding_state_to_existing_car(self):
-        gnss_position = GNSSPosition(
-            latitude=48.8606111, longitude=2.337644, altitude=50
-        )
-        car_state = CarState(
-            status="idle", car_id=1, speed=7, fuel=80, position=gnss_position
-        )
+        gnss_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+        car_state = CarState(status="idle", car_id=1, speed=7, fuel=80, position=gnss_position)
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/carstate", json=[car_state])
             self.assertEqual(response.status_code, 200)
 
     def test_adding_state_to_nonexisting_car_returns_code_404(self):
         nonexistent_car_id = 121651516
-        gnss_position = GNSSPosition(
-            latitude=48.8606111, longitude=2.337644, altitude=50
-        )
+        gnss_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
         car_state = CarState(
             status="idle",
             car_id=nonexistent_car_id,
@@ -59,12 +55,14 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
-        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        self.car = Car(
+            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[self.car])
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["CarState"]["example"]
+            example = c.get("/v2/management/openapi.json").json["components"]["schemas"][
+                "CarState"
+            ]["example"]
             response = c.post("/v2/management/carstate", json=[example])
             self.assertEqual(response.status_code, 200)
 
@@ -74,16 +72,8 @@ class Test_Getting_All_Car_States(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
-        car_1 = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
-        )
-        car_2 = Car(
-            platform_hw_id=2,
-            name="car2",
-            car_admin_phone=MobilePhone(phone="123456789")
-        )
+        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[car_1])
             c.post("/v2/management/car", json=[car_2])
@@ -201,9 +191,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
         self,
     ):
-        test_position = GNSSPosition(
-            latitude=48.8606111, longitude=2.337644, altitude=50
-        )
+        test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
         max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
         with self.app.app.test_client() as c:
             oldest_state = CarState(
@@ -252,9 +240,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def test_maximum_number_of_states_in_db_for_two_cars_is_double_of_max_n_of_states_for_single_car(
         self,
     ):
-        test_position = GNSSPosition(
-            latitude=48.8606111, longitude=2.337644, altitude=50
-        )
+        test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[car_2])
@@ -279,12 +265,8 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
                     position=test_position,
                 )
                 c.post("/v2/management/carstate", json=[car_state])
-            self.assertEqual(
-                len(c.get("/v2/management/carstate/1?since=0").json), max_n
-            )
-            self.assertEqual(
-                len(c.get("/v2/management/carstate/2?since=0").json), max_n
-            )
+            self.assertEqual(len(c.get("/v2/management/carstate/1?since=0").json), max_n)
+            self.assertEqual(len(c.get("/v2/management/carstate/2?since=0").json), max_n)
 
     def tearDown(self) -> None:
         if os.path.isfile("test_db.db"):
@@ -296,11 +278,7 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
-        car = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
-        )
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/car", json=[car])
             assert response.json is not None
@@ -327,16 +305,12 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
             response = c.get("/v2/management/carstate?since=0")
             self.assertEqual(len(response.json), 3)
             response = c.get("/v2/management/carstate/1?since=0")
-            self.assertEqual(
-                len(response.json), 3, "Assert car states have been created."
-            )
+            self.assertEqual(len(response.json), 3, "Assert car states have been created.")
             c.delete("/v2/management/car/1")
             response = c.get("/v2/management/car/1")
             self.assertEqual(response.status_code, 404, "Assert car has been deleted.")
             response = c.get("/v2/management/carstate?since=0")
-            self.assertEqual(
-                len(response.json), 0, "Assert car states have been deleted."
-            )
+            self.assertEqual(len(response.json), 0, "Assert car states have been deleted.")
             response = c.get("/v2/management/carstate/1")
             self.assertEqual(response.status_code, 404)
 
@@ -348,11 +322,7 @@ class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
-        car = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
-        )
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
             response = c.post("/v2/management/car", json=[car])
@@ -409,11 +379,7 @@ class Test_Returning_Last_N_Car_States(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
-        car = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
-        )
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
             response = c.post("/v2/management/car", json=[car])
@@ -445,7 +411,9 @@ class Test_Returning_Last_N_Car_States(unittest.TestCase):
             self.assertEqual(response.json[0]["status"], "idle")
             self.assertEqual(response.json[1]["status"], "charging")
 
-    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(self):
+    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(
+        self,
+    ):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/carstate?lastN=100000")
             self.assertEqual(response.status_code, 200)
@@ -461,7 +429,9 @@ class Test_Returning_Last_N_Car_States(unittest.TestCase):
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["status"], "charging")
 
-    def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(self):
+    def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(
+        self,
+    ):
         state_3 = CarState(status="out_of_order", car_id=1, position=POSITION)
         with self.app.app.test_client() as c:
             c.post("/v2/management/carstate", json=[state_3])
@@ -479,14 +449,10 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
+            platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
         )
         self.car_2 = Car(
-            platform_hw_id=2,
-            name="car2",
-            car_admin_phone=MobilePhone(phone="123456789")
+            platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0

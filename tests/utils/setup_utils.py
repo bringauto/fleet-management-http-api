@@ -20,8 +20,7 @@ def create_stops(app: _TestApp, count: int = 1) -> None:
             c.post("/v2/management/stop", json=[stop])
 
 
-def create_route(app: _TestApp, stop_ids: tuple[int,...]) -> None:
+def create_route(app: _TestApp, stop_ids: tuple[int, ...]) -> None:
     with app.app.test_client() as c:
         route = _models.Route(name=f"test_route_{timestamp_ms()}", stop_ids=stop_ids)
         c.post("/v2/management/route", json=[route])
-

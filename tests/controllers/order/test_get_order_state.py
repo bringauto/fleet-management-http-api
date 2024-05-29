@@ -315,7 +315,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
             assert response.json is not None
             tstamp = response.json[0]["timestamp"]
             assert isinstance(tstamp, int)
-            self.since = tstamp+1
+            self.since = tstamp + 1
 
     def test_filtering_existing_order_states_by_car_id(self):
         with self.app.app.test_client() as c:
@@ -336,7 +336,9 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
         order_state_2 = OrderState(order_id=2, status="accepted")
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor() as executor:
-                future_1 = executor.submit(c.get, f"/v2/management/orderstate?carId=2&wait=true&since={self.since}")
+                future_1 = executor.submit(
+                    c.get, f"/v2/management/orderstate?carId=2&wait=true&since={self.since}"
+                )
                 time.sleep(0.01)
                 executor.submit(c.post, "/v2/management/orderstate", json=[order_state_1])
                 time.sleep(0.01)
@@ -349,10 +351,14 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
     def test_waiting_for_order_states_for_car_created_after_sending_request_for_states(self):
         with self.app.app.test_client() as c:
             with ThreadPoolExecutor() as executor:
-                future_1 = executor.submit(c.get, f"/v2/management/orderstate?carId=3&wait=true&since={self.since}")
+                future_1 = executor.submit(
+                    c.get, f"/v2/management/orderstate?carId=3&wait=true&since={self.since}"
+                )
                 time.sleep(0.01)
 
-                car_3 = Car(name="car3", platform_hw_id=3, car_admin_phone=MobilePhone(phone="1234567890"))
+                car_3 = Car(
+                    name="car3", platform_hw_id=3, car_admin_phone=MobilePhone(phone="1234567890")
+                )
                 order = Order(
                     priority="high",
                     user_id=1,
@@ -368,7 +374,6 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
                 self.assertEqual(len(response.json), 1)
                 self.assertEqual(response.json[0]["orderId"], 3)
                 self.assertEqual(response.json[0]["status"], "to_accept")
-
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):

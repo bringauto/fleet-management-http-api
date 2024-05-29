@@ -29,7 +29,9 @@ def create_car_states() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        car_states = [_models.CarState.from_dict(s) for s in connexion.request.get_json()]  # noqa: E501
+        car_states = [
+            _models.CarState.from_dict(s) for s in connexion.request.get_json()
+        ]  # noqa: E501
         return create_car_states_from_argument_and_post(car_states)
 
 

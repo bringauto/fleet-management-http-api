@@ -6,7 +6,14 @@ import os
 sys.path.append(".")
 
 import fleet_management_api.app as _app
-from fleet_management_api.models import OrderState, Order, Car, OrderStatus, GNSSPosition, MobilePhone
+from fleet_management_api.models import (
+    OrderState,
+    Order,
+    Car,
+    OrderStatus,
+    GNSSPosition,
+    MobilePhone,
+)
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
@@ -364,14 +371,22 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             response = c.post("/v2/management/orderstate", json=[done_state])
             self.assertEqual(response.status_code, 200)
 
-            for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
+            for next_state in [
+                next_state_1,
+                next_state_2,
+                next_state_3,
+                next_state_4,
+                next_state_5,
+            ]:
                 response = c.post("/v2/management/orderstate", json=[next_state])
                 self.assertEqual(response.status_code, 403)
 
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
 
-    def test_sending_single_order_state_after_CANCELED_status_has_been_received_yield_403_code(self):
+    def test_sending_single_order_state_after_CANCELED_status_has_been_received_yield_403_code(
+        self,
+    ):
         canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
         next_state_1 = OrderState(status=OrderStatus.TO_ACCEPT, order_id=1)
         next_state_2 = OrderState(status=OrderStatus.ACCEPTED, order_id=1)
@@ -382,7 +397,13 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             response = c.post("/v2/management/orderstate", json=[canceled_state])
             self.assertEqual(response.status_code, 200)
 
-            for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
+            for next_state in [
+                next_state_1,
+                next_state_2,
+                next_state_3,
+                next_state_4,
+                next_state_5,
+            ]:
                 response = c.post("/v2/management/orderstate", json=[next_state])
                 self.assertEqual(response.status_code, 403)
 
@@ -517,7 +538,9 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
             self.assertEqual(response.json[0]["status"], "accepted")
             self.assertEqual(response.json[1]["status"], "in_progress")
 
-    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(self):
+    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(
+        self,
+    ):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate?lastN=100000")
             self.assertEqual(response.status_code, 200)
@@ -534,7 +557,9 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["status"], "in_progress")
 
-    def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(self):
+    def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(
+        self,
+    ):
         state_3 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
             c.post("/v2/management/orderstate", json=[state_3])

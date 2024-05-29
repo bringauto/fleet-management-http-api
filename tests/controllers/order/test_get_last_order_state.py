@@ -23,23 +23,21 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1, 2))
         self.car = Car(
-            platform_hw_id=1,
-            name="car1",
-            car_admin_phone=MobilePhone(phone="123456789")
+            platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
         )
         self.order_1 = Order(
             user_id=1,
             target_stop_id=1,
             stop_route_id=1,
             car_id=1,
-            notification_phone=MobilePhone(phone="123456789")
+            notification_phone=MobilePhone(phone="123456789"),
         )
         self.order_2 = Order(
             user_id=1,
             target_stop_id=2,
             stop_route_id=1,
             car_id=1,
-            notification_phone=MobilePhone(phone="123456789")
+            notification_phone=MobilePhone(phone="123456789"),
         )
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/car", json=[self.car])
@@ -95,5 +93,5 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
             os.remove("test.db")
 
 
-if __name__=='__main__':  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()

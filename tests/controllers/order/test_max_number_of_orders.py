@@ -7,14 +7,17 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 import fleet_management_api.api_impl.controllers.order as _order
-from fleet_management_api.api_impl.controllers.order import clear_active_orders, clear_inactive_orders
+from fleet_management_api.api_impl.controllers.order import (
+    clear_active_orders,
+    clear_inactive_orders,
+)
 from fleet_management_api.models import Car, MobilePhone, Order, OrderState, OrderStatus
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import (
     n_of_active_orders,
     n_of_inactive_orders,
     set_max_n_of_active_orders,
-    set_max_n_of_inactive_orders
+    set_max_n_of_inactive_orders,
 )
 
 
@@ -43,7 +46,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
     def test_is_decreased_when_order_is_done(self):
         order = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
-            order_id=c.post("/v2/management/order", json=[order]).json[0]["id"]
+            order_id = c.post("/v2/management/order", json=[order]).json[0]["id"]
             self.assertEqual(n_of_active_orders(1), 1)
 
         with self.app.app.test_client() as c:
@@ -55,7 +58,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
     def test_is_decreased_whenever_order_is_canceled(self):
         order = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
-            order_id=c.post("/v2/management/order", json=[order]).json[0]["id"]
+            order_id = c.post("/v2/management/order", json=[order]).json[0]["id"]
             self.assertEqual(n_of_active_orders(1), 1)
 
         with self.app.app.test_client() as c:
@@ -196,8 +199,12 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
         order = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=[order, order])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)])
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)]
+            )
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)]
+            )
             self.assertEqual(n_of_inactive_orders(car_id=1), 2)
         self.app = _app.get_test_app()
         clear_active_orders()
@@ -223,7 +230,9 @@ class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[car])
 
-    def test_when_new_order_is_marked_as_done_and_maximum_number_of_inactive_orders_is_already_reached(self):
+    def test_when_new_order_is_marked_as_done_and_maximum_number_of_inactive_orders_is_already_reached(
+        self,
+    ):
         set_max_n_of_active_orders(None)
         set_max_n_of_inactive_orders(2)
         order_1 = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
@@ -231,11 +240,17 @@ class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
         order_3 = Order(user_id=1, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=[order_1, order_2])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)])
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)]
+            )
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)]
+            )
             self.assertEqual(n_of_inactive_orders(1), 2)
             c.post("/v2/management/order", json=[order_3])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=3)])
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=3)]
+            )
             self.assertEqual(n_of_inactive_orders(1), 2)
             self.assertNotIn(1, _order._inactive_orders[1])
             self.assertIn(3, _order._inactive_orders[1])
@@ -249,20 +264,25 @@ class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
         car_id = 1
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=[order_1, order_2])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)])
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)]
+            )
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=1)]
+            )
             self.assertEqual(n_of_inactive_orders(car_id), 2)
             c.post("/v2/management/order", json=[order_3])
-            c.post("/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=3)])
+            c.post(
+                "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=3)]
+            )
             self.assertEqual(n_of_inactive_orders(car_id), 2)
             # order 2 is removed as it was COMPLETED first, regardless of being CREATED after order 1
             self.assertListEqual(_order._inactive_orders[car_id], [1, 3])
-
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(buffer=True)

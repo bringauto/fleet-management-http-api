@@ -47,15 +47,15 @@ def create_cars() -> _Response:  # noqa: E501
         for car in cars:
             car_db_models.append(_obj_to_db.car_to_db_model(car))
             checked.append(
+                _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=car.platform_hw_id)
+            )
+            checked.append(
                 _db_access.db_object_check(
-                    _db_models.PlatformHWDBModel, id_=car.platform_hw_id
+                    _db_models.RouteDBModel,
+                    id_=car.default_route_id,
+                    allow_nonexistence=True,
                 )
             )
-            checked.append(_db_access.db_object_check(
-                _db_models.RouteDBModel,
-                id_=car.default_route_id,
-                allow_nonexistence=True,
-            ))
 
         response = _db_access.add(*car_db_models, checked=checked)
         if response.status_code == 200:
@@ -144,7 +144,9 @@ def update_cars(car: dict | _models.Car) -> _Response:
         car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
         response = _db_access.update(*car_db_model)
         if response.status_code == 200:
-            return _log_info_and_respond(f"Cars with IDs {[c.id for c in cars]} has been succesfully updated.")
+            return _log_info_and_respond(
+                f"Cars with IDs {[c.id for c in cars]} has been succesfully updated."
+            )
         else:
             msg = f"Cars with IDs {[c.id for c in cars]} could not be updated. {response.body['detail']}"
             return _log_error_and_respond(msg, response.status_code, response.body["title"])

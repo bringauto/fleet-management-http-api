@@ -8,7 +8,7 @@ from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
     error as _error,
-    text_response as _text_response
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
@@ -113,7 +113,9 @@ def update_stops() -> _Response:
             updated_stops: list[_db_models.StopDBModel] = response.body
             for s in updated_stops:
                 _log_info(f"Stop (ID={s.id} has been succesfully updated.")
-            return _text_response(f"Stops {[s.name for s in updated_stops]} were succesfully updated.")
+            return _text_response(
+                f"Stops {[s.name for s in updated_stops]} were succesfully updated."
+            )
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _log_error_and_respond(

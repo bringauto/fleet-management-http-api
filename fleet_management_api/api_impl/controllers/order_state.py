@@ -118,7 +118,9 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
         )
 
 
-def get_all_order_states(wait: bool = False, since: int = 0, last_n: int = 0, car_id: Optional[int] = None) -> _Response:
+def get_all_order_states(
+    wait: bool = False, since: int = 0, last_n: int = 0, car_id: Optional[int] = None
+) -> _Response:
     """Get all order states for all the existing orders.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -209,6 +211,7 @@ def _existing_orders(*order_ids: int) -> dict[int, _db_models.OrderDBModel | Non
         else:
             models[id_] = None
     return models
+
 
 def _is_order_done(order_state: _models.OrderState) -> bool:
     _load_last_status_from_db_if_missing(order_state)

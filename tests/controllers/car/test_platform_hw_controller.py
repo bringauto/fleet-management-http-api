@@ -35,9 +35,9 @@ class Test_Adding_Platform_HW_Using_Example_From_Spec(unittest.TestCase):
         set_connection_source_test()
         self.app = _app.get_test_app().app
         with self.app.test_client() as c:
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["PlatformHW"]["example"]
+            example = c.get("/v2/management/openapi.json").json["components"]["schemas"][
+                "PlatformHW"
+            ]["example"]
             response = c.post("/v2/management/platformhw", json=[example])
             self.assertEqual(response.status_code, 200)
 

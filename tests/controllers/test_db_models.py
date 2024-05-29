@@ -23,7 +23,7 @@ LAST_CAR_STATE = CarState(
     car_id=1,
     speed=7,
     fuel=8,
-    position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
+    position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
 )
 LAST_ORDER_STATE = OrderState(
     status=OrderStatus.TO_ACCEPT,
@@ -60,8 +60,12 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
         self.assertEqual(car_db_model.default_route_id, car.default_route_id)
 
     def test_car_converted_to_db_model_and_back_is_unchanged(self):
-        car_in = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE)
+        car_in = Car(
+            name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
+        car_out = _obj_to_db.car_from_db_model(
+            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
+        )
         car_in.last_state = LAST_CAR_STATE
         self.assertEqual(car_out, car_in)
 
@@ -74,7 +78,9 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             car_admin_phone=MobilePhone(phone="1234567890"),
             default_route_id=1,
         )
-        car_out = _obj_to_db.car_from_db_model(_obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE)
+        car_out = _obj_to_db.car_from_db_model(
+            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
+        )
         car_in.last_state = LAST_CAR_STATE
         self.assertEqual(car_out, car_in)
 
@@ -110,7 +116,9 @@ class Test_Creating_Car_State_DB_Model(unittest.TestCase):
         self.assertEqual(car_state_db_model.position, car_state.position)
 
     @patch("fleet_management_api.database.timestamp._get_time_in_ms")
-    def test_car_state_converted_to_db_model_and_back_is_unchanged(self, mock_timestamp_in_ms: Mock):
+    def test_car_state_converted_to_db_model_and_back_is_unchanged(
+        self, mock_timestamp_in_ms: Mock
+    ):
         mock_timestamp_in_ms.return_value = 123456
         state_in = CarState(status="idle", car_id=1, timestamp=123456)
         state_out = _obj_to_db.car_state_from_db_model(_obj_to_db.car_state_to_db_model(state_in))
@@ -177,13 +185,13 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         self.assertEqual(order_db_model.car_id, order.car_id)
         self.assertEqual(order_db_model.target_stop_id, order.target_stop_id)
         self.assertEqual(order_db_model.stop_route_id, order.stop_route_id)
-        self.assertEqual(
-            order_db_model.notification_phone, order.notification_phone.to_dict()
-        )
+        self.assertEqual(order_db_model.notification_phone, order.notification_phone.to_dict())
 
     def test_order_converted_to_db_model_and_back_is_unchanged(self):
         order_in = Order(id=1, user_id=789, car_id=12, target_stop_id=7, stop_route_id=8)
-        order_out = _obj_to_db.order_from_db_model(_obj_to_db.order_to_db_model(order_in), last_state=LAST_ORDER_STATE)
+        order_out = _obj_to_db.order_from_db_model(
+            _obj_to_db.order_to_db_model(order_in), last_state=LAST_ORDER_STATE
+        )
         order_in.id = order_out.id
         order_in.last_state = LAST_ORDER_STATE
         order_in.timestamp = order_out.timestamp
@@ -235,9 +243,7 @@ class Test_Creating_RouteDBModel(unittest.TestCase):
 
     def test_route_converted_to_db_model_and_back_preserves_its_attributes(self):
         route_in = Route(name="test_route")
-        route_out = _obj_to_db.route_from_db_model(
-            _obj_to_db.route_to_db_model(route_in)
-        )
+        route_out = _obj_to_db.route_from_db_model(_obj_to_db.route_to_db_model(route_in))
         self.assertEqual(route_out, route_in)
 
 
@@ -247,21 +253,19 @@ class Test_Creating_StopDBModel(unittest.TestCase):
             name="test_stop",
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             notification_phone=MobilePhone(phone="1234567890"),
-            is_auto_stop=True
+            is_auto_stop=True,
         )
         stop_db_model = _obj_to_db.stop_to_db_model(stop)
         self.assertEqual(stop_db_model.name, stop.name)
         self.assertEqual(stop_db_model.position, stop.position.to_dict())
-        self.assertEqual(
-            stop_db_model.notification_phone, stop.notification_phone.to_dict()
-        )
+        self.assertEqual(stop_db_model.notification_phone, stop.notification_phone.to_dict())
 
     def test_stop_converted_to_db_model_and_back_preserves_its_attributes(self):
         stop_in = Stop(
             name="test_stop",
             position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
             notification_phone=MobilePhone(phone="1234567890"),
-            is_auto_stop=True
+            is_auto_stop=True,
         )
         stop_out = _obj_to_db.stop_from_db_model(_obj_to_db.stop_to_db_model(stop_in))
         self.assertEqual(stop_out, stop_in)
@@ -303,7 +307,9 @@ class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
             ],
             hexcolor="#ABCDEF",
         )
-        route_visualization_db_model = _obj_to_db.route_visualization_to_db_model(route_visualization)
+        route_visualization_db_model = _obj_to_db.route_visualization_to_db_model(
+            route_visualization
+        )
         self.assertEqual(route_visualization_db_model.route_id, route_visualization.route_id)
         self.assertEqual(route_visualization_db_model.points[0], route_visualization.points[0])
         self.assertEqual(route_visualization_db_model.points[1], route_visualization.points[1])
