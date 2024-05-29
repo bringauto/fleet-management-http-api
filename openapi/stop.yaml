@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Create a new Stop.
+      summary: Create new Stops.
       requestBody:
-        description: Stop model in JSON format.
+        description: A list of Stop models in JSON format.
         x-body-name: stop
         content:
           application/json:
@@ -18,7 +18,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Stop has been successfully created.
+          description: The Stops have been successfully created.
           content:
             application/json:
               schema:
@@ -72,9 +72,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Update already existing Stop.
+      summary: Update already existing Stops.
       requestBody:
-        description: JSON representation of the updated Stop.
+        description: JSON representation of a list of the Stops with updated data.
         x-body-name: stop
         content:
           application/json:
@@ -85,7 +85,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Stop has been successfully updated.
+          description: The Stops have been successfully updated.
           content:
             text/plain:
               type: string

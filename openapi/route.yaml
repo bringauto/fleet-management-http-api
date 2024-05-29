@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Create a new Route.
+      summary: Create new Routes.
       requestBody:
-        description: Route model in JSON format.
+        description: A list of Route models in JSON format.
         x-body-name: route
         content:
           application/json:
@@ -18,7 +18,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Route has been successfully created.
+          description: The Routes have been successfully created.
           content:
             application/json:
               schema:
@@ -67,9 +67,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
       tags:
         - route
-      summary: Update already existing Route.
+      summary: Update already existing Routes.
       requestBody:
-        description: JSON representation of the updated Route.
+        description: JSON representation of a list of the Routes with updated data.
         x-body-name: route
         content:
           application/json:
@@ -80,7 +80,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Route has been successfully updated.
+          description: The Routes have been successfully updated.
           content:
             text/plain:
               type: string
@@ -178,9 +178,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
       tags:
         - route
-      summary: Redefine Route Visualization for an existing Route.
+      summary: Redefine Route Visualizations for existing Routes.
       requestBody:
-        description: Route Visualization model in JSON format.
+        description: A list of Route Visualization models in JSON format.
         x-body-name: RouteVisualization
         content:
           application/json:
@@ -191,7 +191,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Route Visualization has been successfully redefined.
+          description: The Route Visualizations have been successfully redefined.
           content:
             application/json:
               schema:

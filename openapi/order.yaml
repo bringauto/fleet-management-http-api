@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Create a new Order.
+      summary: Create new Orders.
       requestBody:
-        description: Order model in JSON format.
+        description: A list of Order models in JSON format.
         x-body-name: order
         content:
           application/json:
@@ -18,7 +18,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The new Order has been successfully created.
+          description: The new Orders have been successfully created.
           content:
             application/json:
               schema:
@@ -181,9 +181,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Add a new Order State.
+      summary: Add new Order States.
       requestBody:
-        description: Order State model in JSON format.
+        description: A list of Order States model in JSON format.
         x-body-name: orderState
         content:
           application/json:

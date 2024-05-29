@@ -10,11 +10,11 @@ from fleet_management_api import util
 
 
 def create_routes(route):  # noqa: E501
-    """Create a new Route.
+    """Create new Routes.
 
      # noqa: E501
 
-    :param route: Route model in JSON format.
+    :param route: A list of Route models in JSON format.
     :type route: list | bytes
 
     :rtype: Union[List[Route], Tuple[List[Route], int], Tuple[List[Route], int, Dict[str, str]]
@@ -75,11 +75,11 @@ def get_routes():  # noqa: E501
 
 
 def redefine_route_visualizations(route_visualization):  # noqa: E501
-    """Redefine Route Visualization for an existing Route.
+    """Redefine Route Visualizations for existing Routes.
 
      # noqa: E501
 
-    :param route_visualization: Route Visualization model in JSON format.
+    :param route_visualization: A list of Route Visualization models in JSON format.
     :type route_visualization: list | bytes
 
     :rtype: Union[RouteVisualization, Tuple[RouteVisualization, int], Tuple[RouteVisualization, int, Dict[str, str]]
@@ -90,11 +90,11 @@ def redefine_route_visualizations(route_visualization):  # noqa: E501
 
 
 def update_routes(route):  # noqa: E501
-    """Update already existing Route.
+    """Update already existing Routes.
 
      # noqa: E501
 
-    :param route: JSON representation of the updated Route.
+    :param route: JSON representation of a list of the Routes with updated data.
     :type route: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]

@@ -5,10 +5,10 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Create a new Car object.
+      summary: Create new Car objects.
       requestBody:
         x-body-name: car
-        description: A Car model in JSON format.
+        description: A list of Car models in JSON format.
         content:
           application/json:
             schema:
@@ -18,7 +18,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Car has been successfully created.
+          description: The Cars have been successfully created.
           content:
             application/json:
               schema:
@@ -70,9 +70,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Update already existing Car.
+      summary: Update already existing Cars.
       requestBody:
-        description: JSON representation of the updated Car.
+        description: JSON representation of a list of the Cars with updated data.
         x-body-name: car
         content:
           application/json:
@@ -83,7 +83,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Car has been successfully updated.
+          description: The Cars have been successfully updated.
           content:
             text/plain:
               type: string
@@ -170,9 +170,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Add a new Car State.
+      summary: Add new Car States.
       requestBody:
-        description: Car State model in JSON format.
+        description: A list of Car State model in JSON format.
         x-body-name: carState
         content:
           application/json:
@@ -183,7 +183,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The new Car State has been successfully added.
+          description: The new Car States have been successfully added.
           content:
             text/plain:
               type: string

@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_orders(order):  # noqa: E501
-    """Create a new Order.
+    """Create new Orders.
 
      # noqa: E501
 
-    :param order: Order model in JSON format.
+    :param order: A list of Order models in JSON format.
     :type order: list | bytes
 
     :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]

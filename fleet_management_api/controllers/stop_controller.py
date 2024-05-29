@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_stops(stop):  # noqa: E501
-    """Create a new Stop.
+    """Create new Stops.
 
      # noqa: E501
 
-    :param stop: Stop model in JSON format.
+    :param stop: A list of Stop models in JSON format.
     :type stop: list | bytes
 
     :rtype: Union[List[Stop], Tuple[List[Stop], int], Tuple[List[Stop], int, Dict[str, str]]
@@ -61,11 +61,11 @@ def get_stops():  # noqa: E501
 
 
 def update_stops(stop):  # noqa: E501
-    """Update already existing Stop.
+    """Update already existing Stops.
 
      # noqa: E501
 
-    :param stop: JSON representation of the updated Stop.
+    :param stop: JSON representation of a list of the Stops with updated data.
     :type stop: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]

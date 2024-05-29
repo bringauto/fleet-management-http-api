@@ -135,7 +135,7 @@ paths:
               items:
                 $ref: '#/components/schemas/Car'
               type: array
-        description: A Car model in JSON format.
+        description: A list of Car models in JSON format.
         required: true
         x-body-name: car
       responses:
@@ -146,7 +146,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Car'
                 type: array
-          description: The Car has been successfully created.
+          description: The Cars have been successfully created.
         "400":
           content:
             application/json:
@@ -191,7 +191,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Car object.
+      summary: Create new Car objects.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -204,14 +204,14 @@ paths:
               items:
                 $ref: '#/components/schemas/Car'
               type: array
-        description: JSON representation of the updated Car.
+        description: JSON representation of a list of the Cars with updated data.
         required: true
         x-body-name: car
       responses:
         "200":
           content:
             text/plain: {}
-          description: The Car has been successfully updated.
+          description: The Cars have been successfully updated.
         "400":
           content:
             application/json:
@@ -267,7 +267,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update already existing Car.
+      summary: Update already existing Cars.
       tags:
       - car
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -524,14 +524,14 @@ paths:
               items:
                 $ref: '#/components/schemas/CarState'
               type: array
-        description: Car State model in JSON format.
+        description: A list of Car State model in JSON format.
         required: true
         x-body-name: carState
       responses:
         "200":
           content:
             text/plain: {}
-          description: The new Car State has been successfully added.
+          description: The new Car States have been successfully added.
         "400":
           content:
             application/json:
@@ -576,7 +576,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Add a new Car State.
+      summary: Add new Car States.
       tags:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
@@ -769,7 +769,7 @@ paths:
               items:
                 $ref: '#/components/schemas/Order'
               type: array
-        description: Order model in JSON format.
+        description: A list of Order models in JSON format.
         required: true
         x-body-name: order
       responses:
@@ -780,7 +780,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Order'
                 type: array
-          description: The new Order has been successfully created.
+          description: The new Orders have been successfully created.
         "400":
           content:
             application/json:
@@ -825,7 +825,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Order.
+      summary: Create new Orders.
       tags:
       - order
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
@@ -1199,7 +1199,7 @@ paths:
               items:
                 $ref: '#/components/schemas/OrderState'
               type: array
-        description: Order State model in JSON format.
+        description: A list of Order States model in JSON format.
         required: true
         x-body-name: orderState
       responses:
@@ -1264,7 +1264,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Add a new Order State.
+      summary: Add new Order States.
       tags:
       - orderState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -1716,7 +1716,7 @@ paths:
               items:
                 $ref: '#/components/schemas/Route'
               type: array
-        description: Route model in JSON format.
+        description: A list of Route models in JSON format.
         required: true
         x-body-name: route
       responses:
@@ -1727,7 +1727,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Route'
                 type: array
-          description: The Route has been successfully created.
+          description: The Routes have been successfully created.
         "400":
           content:
             application/json:
@@ -1772,7 +1772,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Route.
+      summary: Create new Routes.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1785,14 +1785,14 @@ paths:
               items:
                 $ref: '#/components/schemas/Route'
               type: array
-        description: JSON representation of the updated Route.
+        description: JSON representation of a list of the Routes with updated data.
         required: true
         x-body-name: route
       responses:
         "200":
           content:
             text/plain: {}
-          description: The Route has been successfully updated.
+          description: The Routes have been successfully updated.
         "400":
           content:
             application/json:
@@ -1848,7 +1848,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update already existing Route.
+      summary: Update already existing Routes.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -1862,7 +1862,7 @@ paths:
               items:
                 $ref: '#/components/schemas/RouteVisualization'
               type: array
-        description: Route Visualization model in JSON format.
+        description: A list of Route Visualization models in JSON format.
         required: true
         x-body-name: RouteVisualization
       responses:
@@ -1871,7 +1871,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RouteVisualization'
-          description: The Route Visualization has been successfully redefined.
+          description: The Route Visualizations have been successfully redefined.
         "400":
           content:
             application/json:
@@ -1927,7 +1927,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Redefine Route Visualization for an existing Route.
+      summary: Redefine Route Visualizations for existing Routes.
       tags:
       - route
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route_visualization
@@ -2241,7 +2241,7 @@ paths:
               items:
                 $ref: '#/components/schemas/Stop'
               type: array
-        description: Stop model in JSON format.
+        description: A list of Stop models in JSON format.
         required: true
         x-body-name: stop
       responses:
@@ -2252,7 +2252,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Stop'
                 type: array
-          description: The Stop has been successfully created.
+          description: The Stops have been successfully created.
         "400":
           content:
             application/json:
@@ -2297,7 +2297,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Stop.
+      summary: Create new Stops.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -2310,14 +2310,14 @@ paths:
               items:
                 $ref: '#/components/schemas/Stop'
               type: array
-        description: JSON representation of the updated Stop.
+        description: JSON representation of a list of the Stops with updated data.
         required: true
         x-body-name: stop
       responses:
         "200":
           content:
             text/plain: {}
-          description: The Stop has been successfully updated.
+          description: The Stops have been successfully updated.
         "400":
           content:
             application/json:
@@ -2373,7 +2373,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Update already existing Stop.
+      summary: Update already existing Stops.
       tags:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop

@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_car_states(car_state):  # noqa: E501
-    """Add a new Car State.
+    """Add new Car States.
 
      # noqa: E501
 
-    :param car_state: Car State model in JSON format.
+    :param car_state: A list of Car State model in JSON format.
     :type car_state: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]

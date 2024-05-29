@@ -9,11 +9,11 @@ from fleet_management_api import util
 
 
 def create_cars(car):  # noqa: E501
-    """Create a new Car object.
+    """Create new Car objects.
 
      # noqa: E501
 
-    :param car: A Car model in JSON format.
+    :param car: A list of Car models in JSON format.
     :type car: list | bytes
 
     :rtype: Union[List[Car], Tuple[List[Car], int], Tuple[List[Car], int, Dict[str, str]]
@@ -61,11 +61,11 @@ def get_cars():  # noqa: E501
 
 
 def update_cars(car):  # noqa: E501
-    """Update already existing Car.
+    """Update already existing Cars.
 
      # noqa: E501
 
-    :param car: JSON representation of the updated Car.
+    :param car: JSON representation of a list of the Cars with updated data.
     :type car: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
