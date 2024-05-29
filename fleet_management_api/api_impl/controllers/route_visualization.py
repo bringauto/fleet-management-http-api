@@ -66,11 +66,12 @@ def redefine_route_visualizations() -> _Response:
             v.route_id: v for v in existing_vis
         }
 
+        for v in vis:
+            if v.route_id in existing_vis_dict:
+                id_ = existing_vis_dict[v.route_id].id
+                v.id = id_  # type: ignore
+
         vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
-        for v_db in vis_db_models:
-            if v_db.route_id in existing_vis_dict:
-                id_ = existing_vis_dict[v_db.route_id].id
-                v_db.id = id_  # type: ignore
         response = _db_access.update(*vis_db_models)
         if response.status_code == 200:
             _log_info("Route visualizations have been redefined.")
