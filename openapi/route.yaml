@@ -195,7 +195,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouteVisualization'
+                type: array
+                items:
+                  $ref: '#/components/schemas/RouteVisualization'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

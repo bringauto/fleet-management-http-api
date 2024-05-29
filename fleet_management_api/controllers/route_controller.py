@@ -82,7 +82,7 @@ def redefine_route_visualizations(route_visualization):  # noqa: E501
     :param route_visualization: A list of Route Visualization models in JSON format.
     :type route_visualization: list | bytes
 
-    :rtype: Union[RouteVisualization, Tuple[RouteVisualization, int], Tuple[RouteVisualization, int, Dict[str, str]]
+    :rtype: Union[List[RouteVisualization], Tuple[List[RouteVisualization], int], Tuple[List[RouteVisualization], int, Dict[str, str]]
     """
     if connexion.request.is_json:
         route_visualization = [RouteVisualization.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501

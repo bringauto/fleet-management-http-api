@@ -1872,7 +1872,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouteVisualization'
+                items:
+                  $ref: '#/components/schemas/RouteVisualization'
+                type: array
           description: The Route Visualizations have been successfully redefined.
         "400":
           content:
