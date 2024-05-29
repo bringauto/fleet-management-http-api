@@ -5,9 +5,9 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Create a new Platform HW object.
+      summary: Create new Platform HW objects.
       requestBody:
-        description: Platform HW model in JSON format.
+        description: A list of Platform HW models in JSON format.
         x-body-name: platformHW
         content:
           application/json:
@@ -18,7 +18,7 @@ paths:
         required: true
       responses:
         '200':
-          description: The Platform HW has been successfully created.
+          description: The Platform HWs have been successfully created.
           content:
             application/json:
               schema:
@@ -39,7 +39,7 @@ paths:
       summary: Find and return all existing Platform HW.
       responses:
         '200':
-          description: All the currently existing Platform HW have been returned.
+          description: All the currently existing Platform HWs have been returned.
           content:
             application/json:
               schema:
