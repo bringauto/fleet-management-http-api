@@ -1,6 +1,5 @@
 import connexion  # type: ignore
 
-
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
@@ -32,28 +31,31 @@ def add_car_states() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        car_state = _models.CarState.from_dict(connexion.request.get_json())  # noqa: E501
-        return create_car_states_from_argument_and_post(car_state)
+        car_states = [_models.CarState.from_dict(s) for s in connexion.request.get_json()]  # noqa: E501
+        return create_car_states_from_argument_and_post(car_states)
 
 
-def create_car_states_from_argument_and_post(car_state: _models.CarState) -> _Response:
-    state_db_model = _obj_to_db.car_state_to_db_model(car_state)
+def create_car_states_from_argument_and_post(car_states: list[_models.CarState]) -> _Response:
+    if not car_states:
+        return _json_response([])
+    state_db_models = [_obj_to_db.car_state_to_db_model(s) for s in car_states]
     response = _db_access.add(
-        state_db_model,
-        checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_state.car_id)],
+        *state_db_models,
+        checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_states[0].car_id)],
     )
     if response.status_code == 200:
-        inserted_model = _obj_to_db.car_state_from_db_model(response.body[0])
-        code, msg = 200, f"Car state (ID={inserted_model.id}) was succesfully created."
-        _log_info(msg)
-        cleanup_response = _remove_old_states(car_state.car_id)
+        inserted_models = [_obj_to_db.car_state_from_db_model(s) for s in response.body]
+        for model in inserted_models:
+            code, msg = 200, f"Car state (ID={model.id}) was succesfully created."
+            _log_info(msg)
+            cleanup_response = _remove_old_states(model.car_id)
         if cleanup_response.status_code != 200:
             code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
             _log_error(cleanup_error_msg)
             msg = msg + "\n" + cleanup_error_msg
             title = "Could not remove old car states."
         else:
-            return _json_response(inserted_model)
+            return _json_response(inserted_models)
     else:
         code, msg, title = (
             response.status_code,

@@ -4,11 +4,12 @@ import fleet_management_api.database.timestamp as _tstamp
 
 
 def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
+    car_admin_phone = car.car_admin_phone.to_dict() if car.car_admin_phone is not None else None
     return _db_models.CarDBModel(
         id=car.id,
         name=car.name,
         platform_hw_id=car.platform_hw_id,
-        car_admin_phone=car.car_admin_phone.to_dict(),
+        car_admin_phone=car_admin_phone,
         default_route_id=car.default_route_id,
         under_test=car.under_test,
     )
@@ -168,10 +169,11 @@ def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
         notification_phone = None
     else:
         notification_phone = stop.notification_phone.to_dict()
+    position = stop.position.to_dict() if stop.position is not None else None
     return _db_models.StopDBModel(
         id=stop.id,
         name=stop.name,
-        position=stop.position.to_dict(),
+        position=position,
         notification_phone=notification_phone,
         is_auto_stop=stop.is_auto_stop
     )

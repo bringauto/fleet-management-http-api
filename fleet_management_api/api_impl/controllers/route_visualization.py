@@ -38,10 +38,15 @@ def redefine_route_visualizations() -> _Response:
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        rp = _RouteVisualization.from_dict(_connexion.request.get_json())
+        request_json = _connexion.request.get_json()
+        if not request_json:
+            return _log_invalid_request_body_format()
+
+        rp = _RouteVisualization.from_dict(request_json[0])
         rp_db_model = _obj_to_db.route_visualization_to_db_model(rp)
-        existing_visualization = _db_access.get(
-            _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == rp.route_id}
+        existing_visualization: list[_db_models.RouteVisualizationDBModel] = _db_access.get(
+            _db_models.RouteVisualizationDBModel,
+            criteria={"route_id": lambda x: x == rp.route_id}
         )
         if len(existing_visualization) == 0:
             response = _db_access.add(

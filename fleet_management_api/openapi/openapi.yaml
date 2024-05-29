@@ -1713,7 +1713,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              items:
+                $ref: '#/components/schemas/Route'
+              type: array
         description: Route model in JSON format.
         required: true
         x-body-name: route

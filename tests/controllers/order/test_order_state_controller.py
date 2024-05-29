@@ -30,24 +30,24 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
 
     def test_adding_state_to_existing_order(self):
         order_state = OrderState(id=1, status="to_accept", order_id=1)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json=order_state)
+            response = c.post("/v2/management/orderstate", json=[order_state])
             self.assertEqual(response.status_code, 200)
 
     def test_adding_state_to_none_existing_order_returns_code_404(self):
         order_state = OrderState(id=1, status="to_accept", order_id=4651684651)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json=order_state)
+            response = c.post("/v2/management/orderstate", json=[order_state])
             self.assertEqual(response.status_code, 404)
 
     def test_sending_incomplete_state_returns_code_400(self):
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json={})
+            response = c.post("/v2/management/orderstate", json=[{}])
             self.assertEqual(response.status_code, 400)
 
     def tearDown(self) -> None:  # pragma: no cover
@@ -74,10 +74,10 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
                 stop_route_id=1,
                 notification_phone={},
             )
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
 
-            response = c.post("/v2/management/orderstate", json=example)
+            response = c.post("/v2/management/orderstate", json=[example])
             self.assertEqual(response.status_code, 200)
 
     def tearDown(self) -> None:  # pragma: no cover
@@ -102,8 +102,8 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
 
     def test_a_single_order_state_is_automatically_created_when_order_is_created_with_to_accept_status(
         self,
@@ -117,8 +117,8 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         order_state_1 = OrderState(status="to_accept", order_id=1)
         order_state_2 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=order_state_1)
-            c.post("/v2/management/orderstate", json=order_state_2)
+            c.post("/v2/management/orderstate", json=[order_state_1])
+            c.post("/v2/management/orderstate", json=[order_state_2])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
@@ -127,8 +127,8 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         order_state_1 = OrderState(status="to_accept", order_id=1)
         order_state_2 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=order_state_1)
-            c.post("/v2/management/orderstate", json=order_state_2)
+            c.post("/v2/management/orderstate", json=[order_state_1])
+            c.post("/v2/management/orderstate", json=[order_state_2])
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
@@ -163,9 +163,9 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order_1)
-            c.post("/v2/management/order", json=order_2)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order_1])
+            c.post("/v2/management/order", json=[order_2])
 
     def test_getting_order_state_for_nonexisting_order_returns_code_404(self):
         with self.app.app.test_client() as c:
@@ -176,8 +176,8 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         order_state_1 = OrderState(status="to_accept", order_id=1)
         order_state_2 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=order_state_1)
-            c.post("/v2/management/orderstate", json=order_state_2)
+            c.post("/v2/management/orderstate", json=[order_state_1])
+            c.post("/v2/management/orderstate", json=[order_state_2])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
@@ -215,9 +215,9 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order_1)
-            c.post("/v2/management/order", json=order_2)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order_1])
+            c.post("/v2/management/order", json=[order_2])
         self.max_n = _db_models.OrderStateDBModel.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
@@ -225,22 +225,22 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     ):
         with self.app.app.test_client() as c:
             oldest_state = OrderState(status="to_accept", order_id=1)
-            c.post("/v2/management/orderstate", json=oldest_state)
+            c.post("/v2/management/orderstate", json=[oldest_state])
             for i in range(1, self.max_n - 2):
                 order_state = OrderState(status="to_accept", order_id=1)
-                c.post("/v2/management/orderstate", json=order_state)
+                c.post("/v2/management/orderstate", json=[order_state])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n - 1)
 
             order_state = OrderState(status="to_accept", order_id=1)
-            c.post("/v2/management/orderstate", json=order_state)
+            c.post("/v2/management/orderstate", json=[order_state])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
 
             newest_state = OrderState(id=self.max_n + 1, status="to_accept", order_id=1)
-            c.post("/v2/management/orderstate", json=newest_state)
+            c.post("/v2/management/orderstate", json=[newest_state])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n)
@@ -257,10 +257,10 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         with self.app.app.test_client() as c:
             order_state_1 = OrderState(status="to_accept", order_id=1)
             for _ in range(100):
-                c.post("/v2/management/orderstate", json=order_state_1)
+                c.post("/v2/management/orderstate", json=[order_state_1])
             order_state_2 = OrderState(status="to_accept", order_id=2)
             for _ in range(100):
-                c.post("/v2/management/orderstate", json=order_state_2)
+                c.post("/v2/management/orderstate", json=[order_state_2])
 
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
@@ -304,18 +304,18 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
-            c.post("/v2/management/order", json=other_order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
+            c.post("/v2/management/order", json=[other_order])
 
     def test_deleting_order_deletes_all_its_states(self):
         order_state_1 = OrderState(status="to_accept", order_id=1)
         order_state_2 = OrderState(status="canceled", order_id=1)
         other_order_state = OrderState(status="canceled", order_id=2)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=order_state_1)
-            c.post("/v2/management/orderstate", json=order_state_2)
-            c.post("/v2/management/orderstate", json=other_order_state)
+            c.post("/v2/management/orderstate", json=[order_state_1])
+            c.post("/v2/management/orderstate", json=[order_state_2])
+            c.post("/v2/management/orderstate", json=[other_order_state])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(len(response.json), 3)
 
@@ -350,8 +350,8 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             notification_phone={},
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
 
     def test_sending_single_order_state_after_DONE_status_has_been_received_yield_403_code(self):
         done_state = OrderState(status=OrderStatus.DONE, order_id=1)
@@ -361,11 +361,11 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
         next_state_4 = OrderState(status=OrderStatus.CANCELED, order_id=1)
         next_state_5 = OrderState(status=OrderStatus.DONE, order_id=1)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json=done_state)
+            response = c.post("/v2/management/orderstate", json=[done_state])
             self.assertEqual(response.status_code, 200)
 
             for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
-                response = c.post("/v2/management/orderstate", json=next_state)
+                response = c.post("/v2/management/orderstate", json=[next_state])
                 self.assertEqual(response.status_code, 403)
 
             response = c.get("/v2/management/orderstate/1")
@@ -379,11 +379,11 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
         next_state_4 = OrderState(status=OrderStatus.DONE, order_id=1)
         next_state_5 = OrderState(status=OrderStatus.CANCELED, order_id=1)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json=canceled_state)
+            response = c.post("/v2/management/orderstate", json=[canceled_state])
             self.assertEqual(response.status_code, 200)
 
             for next_state in [next_state_1, next_state_2, next_state_3, next_state_4, next_state_5]:
-                response = c.post("/v2/management/orderstate", json=next_state)
+                response = c.post("/v2/management/orderstate", json=[next_state])
                 self.assertEqual(response.status_code, 403)
 
             response = c.get("/v2/management/orderstate/1")
@@ -394,16 +394,16 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
         _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
         with self.app.app.test_client() as c:
             for _ in range(60):
-                response = c.post("/v2/management/orderstate", json=some_state)
+                response = c.post("/v2/management/orderstate", json=[some_state])
                 self.assertEqual(response.status_code, 200)
 
         done_state = OrderState(status=OrderStatus.DONE, order_id=1)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/orderstate", json=done_state)
+            response = c.post("/v2/management/orderstate", json=[done_state])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
-            response = c.post("/v2/management/orderstate", json=some_state)
+            response = c.post("/v2/management/orderstate", json=[some_state])
             self.assertEqual(response.status_code, 403)
 
     def tearDown(self) -> None:  # pragma: no cover
@@ -424,15 +424,15 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
         done_state = OrderState(status=OrderStatus.DONE, order_id=1)
         next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
-            c.post("/v2/management/orderstate", json=done_state)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
+            c.post("/v2/management/orderstate", json=[done_state])
 
         self.app = _app.get_test_app()
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
-            response = c.post("/v2/management/orderstate", json=next_state)
+            response = c.post("/v2/management/orderstate", json=[next_state])
             self.assertEqual(response.status_code, 403)
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
@@ -448,15 +448,15 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
         canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
         next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
-            c.post("/v2/management/orderstate", json=canceled_state)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
+            c.post("/v2/management/orderstate", json=[canceled_state])
 
         self.app = _app.get_test_app()
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
-            response = c.post("/v2/management/orderstate", json=next_state)
+            response = c.post("/v2/management/orderstate", json=[next_state])
             self.assertEqual(response.status_code, 403)
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
@@ -485,22 +485,22 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
         )
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
-            response = c.post("/v2/management/car", json=car)
+            response = c.post("/v2/management/car", json=[car])
             assert response.json is not None
-            car_id = response.json["id"]
+            car_id = response.json[0]["id"]
             order.car_id = car_id
-            response = c.post("/v2/management/order", json=order)
+            response = c.post("/v2/management/order", json=[order])
             assert response.json is not None
-            order_id = response.json["id"]
+            order_id = response.json[0]["id"]
 
         state_1 = OrderState(status="accepted", order_id=order_id)
         state_2 = OrderState(status="in_progress", order_id=order_id)
 
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 1000
-            c.post("/v2/management/orderstate", json=state_1)
+            c.post("/v2/management/orderstate", json=[state_1])
             mocked_timestamp.return_value = 2000
-            c.post("/v2/management/orderstate", json=state_2)
+            c.post("/v2/management/orderstate", json=[state_2])
 
     def test_returning_last_1_state(self):
         with self.app.app.test_client() as c:
@@ -537,7 +537,7 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
     def test_returning_last_timestamp_with_identical_timestamps_returns_the_one_with_higher_id(self):
         state_3 = OrderState(status="canceled", order_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=state_3)
+            c.post("/v2/management/orderstate", json=[state_3])
             response = c.get("/v2/management/orderstate?lastN=1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
@@ -567,9 +567,9 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
-            c.post("/v2/management/car", json=car_1)
-            c.post("/v2/management/order", json=self.order_1)
-            c.post("/v2/management/order", json=self.order_2)
+            c.post("/v2/management/car", json=[car_1])
+            c.post("/v2/management/order", json=[self.order_1])
+            c.post("/v2/management/order", json=[self.order_2])
 
         state_1 = OrderState(status="accepted", order_id=1)
         state_2 = OrderState(status="in_progress", order_id=1)
@@ -578,11 +578,11 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 1000
-            c.post("/v2/management/orderstate", json=state_1)
-            c.post("/v2/management/orderstate", json=state_3)
+            c.post("/v2/management/orderstate", json=[state_1])
+            c.post("/v2/management/orderstate", json=[state_3])
             mocked_timestamp.return_value = 2000
-            c.post("/v2/management/orderstate", json=state_2)
-            c.post("/v2/management/orderstate", json=state_4)
+            c.post("/v2/management/orderstate", json=[state_2])
+            c.post("/v2/management/orderstate", json=[state_4])
 
     def test_returning_last_1_state_for_given_car(self):
         with self.app.app.test_client() as c:

@@ -34,7 +34,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         )
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=car, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 404)
 
     def test_car_with_default_route_id_pointing_to_nonexistent_route_yields_404_error_code(self):
@@ -42,14 +42,19 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         car = Car(name="Test Car", platform_hw_id=1, default_route_id=nonexistent_route_id, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=car, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 404)
 
     def test_deleting_cars_default_route_sets_the_default_route_id_of_the_car_to_none(self):
-        car = Car(name="Test Car", platform_hw_id=1, default_route_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(
+            name="Test Car",
+            platform_hw_id=1,
+            default_route_id=1,
+            car_admin_phone=MobilePhone(phone="123456789")
+        )
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car, content_type="application/json")
+            c.post("/v2/management/car", json=[car], content_type="application/json")
 
             response = c.get("/v2/management/car/1")
             self.assertEqual(response.json["defaultRouteId"], 1)
@@ -68,7 +73,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         )
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=car, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
@@ -85,8 +90,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         car_2 = Car(name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car_1, content_type="application/json")
-            c.post("/v2/management/car", json=car_2, content_type="application/json")
+            c.post("/v2/management/car", json=[car_1], content_type="application/json")
+            c.post("/v2/management/car", json=[car_2], content_type="application/json")
             response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -107,8 +112,8 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
         car_2 = Car(name="Test Car", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car_1, content_type="application/json")
-            response = c.post("/v2/management/car", json=car_2, content_type="application/json")
+            c.post("/v2/management/car", json=[car_1], content_type="application/json")
+            response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
             print(response)
             self.assertEqual(response.status_code, 400)
 
@@ -129,13 +134,14 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
         platformhw = PlatformHW(name="Test Platform HW")
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/platformhw", json=platformhw)
+            c.post("/v2/management/platformhw", json=[platformhw])
 
     def test_retrieving_single_existing_car(self):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car], content_type="application/json")
+            print(response)
             response = c.get(f"/v2/management/car/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["name"], car.name)
@@ -145,7 +151,7 @@ class Test_Retrieving_Single_Car(unittest.TestCase):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car, content_type="application/json")
+            c.post("/v2/management/car", json=[car], content_type="application/json")
             response = c.get(f"/v2/management/car/{nonexistent_car_id}")
             self.assertEqual(response.status_code, 404)
 
@@ -167,7 +173,7 @@ class Test_Creating_Car_Using_Example_From_Specification(unittest.TestCase):
             example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Car"][
                 "example"
             ]
-            c.post("/v2/management/car", json=example, content_type="application/json")
+            c.post("/v2/management/car", json=[example], content_type="application/json")
             response = c.get(f"/v2/management/car/{example['id']}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["name"], example["name"])
@@ -184,7 +190,7 @@ class Test_Logging_Car_Creation(unittest.TestCase):
             car = Car(name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
             app = _app.get_test_app()
             with app.app.test_client() as c:
-                c.post("/v2/management/car", json=car, content_type="application/json")
+                c.post("/v2/management/car", json=[car], content_type="application/json")
                 self.assertEqual(len(logs.output), 2)
                 self.assertIn(str(car.name), logs.output[-1])
 
@@ -195,8 +201,8 @@ class Test_Logging_Car_Creation(unittest.TestCase):
             car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
             app = _app.get_test_app()
             with app.app.test_client() as c:
-                c.post("/v2/management/car", json=car, content_type="application/json")
-                c.post("/v2/management/car", json=car, content_type="application/json")
+                c.post("/v2/management/car", json=[car], content_type="application/json")
+                c.post("/v2/management/car", json=[car], content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
 
     def tearDown(self) -> None:  # pragma: no cover
@@ -214,10 +220,10 @@ class Test_Updating_Car(unittest.TestCase):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=car, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car], content_type="application/json")
             car.name = "Updated Test Car"
             car.id = 1
-            response = c.put("/v2/management/car", json=car, content_type="application/json")
+            response = c.put("/v2/management/car", json=[car], content_type="application/json")
 
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/car")
@@ -228,14 +234,14 @@ class Test_Updating_Car(unittest.TestCase):
         car = Car(id=1, name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            response = c.put("/v2/management/car", json=car, content_type="application/json")
+            response = c.put("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 404)
 
     def test_passing_other_object_when_updating_car_yields_400_error(self) -> None:
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app()
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/car", json=[car])
             response = c.put("/v2/management/car", json={"id": 1}, content_type="application/json")
             self.assertEqual(response.status_code, 400)
 
@@ -256,7 +262,7 @@ class Test_Deleting_Car(unittest.TestCase):
         app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/car", json=[car])
             response = c.delete("/v2/management/car/1")
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/car")
@@ -280,8 +286,8 @@ class Test_Deleting_Car(unittest.TestCase):
         app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
-            c.post("/v2/management/order", json=order)
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/order", json=[order])
             response = c.delete("/v2/management/car/1")
             self.assertEqual(response.status_code, 400)
 
@@ -302,9 +308,9 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(unittest.TestCase):
         car_1 = Car(name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         car_2 = Car(name="Test Car 2", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with _app.get_test_app().app.test_client() as c:
-            response = c.post("/v2/management/car", json=car_1, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car_1], content_type="application/json")
             self.assertEqual(response.status_code, 200)
-            response = c.post("/v2/management/car", json=car_2, content_type="application/json")
+            response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
             self.assertEqual(response.status_code, 400)
 
     def tearDown(self) -> None:  # pragma: no cover

@@ -29,15 +29,17 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
             car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
-            self.car_1 = Car.from_dict(c.post("/v2/management/car", json=self.car_1).json)
-            self.car_2 = Car.from_dict(c.post("/v2/management/car", json=self.car_2).json)
+            response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
+            assert response.json is not None
+            self.car_1 = Car.from_dict(response.json[0])
+            self.car_2 = Car.from_dict(response.json[1])
 
     def test_car_is_returned_with_its_last_state(self):
         state_1 = CarState(status="idle", car_id=self.car_1.id)
         state_2 = CarState(status="driving", car_id=self.car_1.id)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/carstate", json=state_1)
-            c.post("/v2/management/carstate", json=state_2)
+            c.post("/v2/management/carstate", json=[state_1])
+            c.post("/v2/management/carstate", json=[state_2])
 
         with self.app.app.test_client() as c:
             response = c.get(f"/v2/management/car/{self.car_1.id}")
@@ -50,10 +52,10 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
         state_3 = CarState(status="idle", car_id=self.car_2.id)
         state_4 = CarState(status="in_stop", car_id=self.car_2.id)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/carstate", json=state_1)
-            c.post("/v2/management/carstate", json=state_2)
-            c.post("/v2/management/carstate", json=state_3)
-            c.post("/v2/management/carstate", json=state_4)
+            c.post("/v2/management/carstate", json=[state_1])
+            c.post("/v2/management/carstate", json=[state_2])
+            c.post("/v2/management/carstate", json=[state_3])
+            c.post("/v2/management/carstate", json=[state_4])
 
         with self.app.app.test_client() as c:
             response = c.get(f"/v2/management/car")

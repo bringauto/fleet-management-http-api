@@ -348,7 +348,7 @@ def update(*updated: _Base) -> _Response:
             for item in updated:
                 session.get_one(item.__class__, item.id)
                 session.merge(item)
-            return _text_response("Succesfully updated record.")
+            return _json_response(updated)
         except _sqaexc.IntegrityError as e:
             session.rollback()
             return _error(400, str(e.orig), title="Cannot update object with invalid data")

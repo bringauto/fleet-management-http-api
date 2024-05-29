@@ -15,12 +15,12 @@ def create_routes(route):  # noqa: E501
      # noqa: E501
 
     :param route: Route model in JSON format.
-    :type route: dict | bytes
+    :type route: list | bytes
 
     :rtype: Union[List[Route], Tuple[List[Route], int], Tuple[List[Route], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        route = Route.from_dict(connexion.request.get_json())  # noqa: E501
+        route = [Route.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

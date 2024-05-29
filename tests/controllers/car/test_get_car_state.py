@@ -21,7 +21,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
         create_platform_hws(self.app)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/car", json=[car])
 
     def test_requesting_car_state_without_wait_mechanism_enabled_immediatelly_returns_empty_list_even_if_no_state_was_sent_yet(
         self,
@@ -40,7 +40,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 time.sleep(0.01)
-                executor.submit(c.post, "/v2/management/carstate", json=car_state)
+                executor.submit(c.post, "/v2/management/carstate", json=[car_state])
                 response = future.result()
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(len(response.json), 1)
@@ -53,7 +53,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
                 future_2 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 future_3 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 time.sleep(0.01)
-                executor.submit(c.post, "/v2/management/carstate", json=car_state)
+                executor.submit(c.post, "/v2/management/carstate", json=[car_state])
                 for fut in [future_1, future_2, future_3]:
                     response = fut.result()
                     self.assertEqual(len(response.json), 1)
@@ -77,8 +77,8 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
         )
 
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=car_1)
-            response = c.post("/v2/management/car", json=car_2)
+            response = c.post("/v2/management/car", json=[car_1])
+            response = c.post("/v2/management/car", json=[car_2])
             self.assertEqual(response.status_code, 200)
 
     def test_waiting_for_car_state_for_given_car(self):
@@ -89,7 +89,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
                 future_1 = executor.submit(c.get, "/v2/management/carstate/1?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/carstate/2?wait=true&since=0")
                 time.sleep(0.01)
-                executor.submit(c.post, "/v2/management/carstate", json=car_state)
+                executor.submit(c.post, "/v2/management/carstate", json=[car_state])
 
                 response = future.result()
                 self.assertEqual(len(response.json), 2)
@@ -112,7 +112,7 @@ class Test_Timeouts(unittest.TestCase):
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car)
+            c.post("/v2/management/car", json=[car])
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
         set_content_timeout_ms(150)
@@ -134,7 +134,7 @@ class Test_Timeouts(unittest.TestCase):
                 time.sleep(0.1)
                 # this thread posts the state. It is expected that the first waiting thread already exceeded timeout at this point
                 # and the second waiting thread gets the state
-                executor.submit(c.post, "/v2/management/carstate", json=car_state)
+                executor.submit(c.post, "/v2/management/carstate", json=[car_state])
                 # first request times out and gets empty list
                 response = future_1.result()
                 self.assertEqual(len(response.json), 0)
@@ -157,8 +157,8 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="9876543210"))
         mock_timestamp_ms.return_value = 0
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=car_1)
-            c.post("/v2/management/car", json=car_2)
+            c.post("/v2/management/car", json=[car_1])
+            c.post("/v2/management/car", json=[car_2])
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_filtering_car_states_by_since_parameter(self, mock_timestamp_ms: Mock):
@@ -166,9 +166,9 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
         car_state_2 = CarState(car_id=1, status="driving")
         with self.app.app.test_client() as c:
             mock_timestamp_ms.return_value = 50
-            c.post("/v2/management/carstate", json=car_state_1)
+            c.post("/v2/management/carstate", json=[car_state_1])
             mock_timestamp_ms.return_value = 100
-            c.post("/v2/management/carstate", json=car_state_2)
+            c.post("/v2/management/carstate", json=[car_state_2])
             response = c.get("/v2/management/carstate?since=0")
             self.assertEqual(len(response.json), 4)  # type: ignore
             response = c.get("/v2/management/carstate?since=60")
@@ -187,11 +187,11 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
         car_state_3 = CarState(car_id=2, status="out_of_order")
         with self.app.app.test_client() as c:
             mock_timestamp_ms.return_value = 50
-            c.post("/v2/management/carstate", json=car_state_1)
+            c.post("/v2/management/carstate", json=[car_state_1])
             mock_timestamp_ms.return_value = 100
-            c.post("/v2/management/carstate", json=car_state_2)
+            c.post("/v2/management/carstate", json=[car_state_2])
             mock_timestamp_ms.return_value = 150
-            c.post("/v2/management/carstate", json=car_state_3)
+            c.post("/v2/management/carstate", json=[car_state_3])
 
             response = c.get("/v2/management/carstate/1?since=110")
             self.assertEqual(len(response.json), 0)  # type: ignore
@@ -214,9 +214,9 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
 
             self.assertEqual(len(response.json), 1)  # type: ignore
             mock_timestamp_ms.return_value = 50
-            c.post("/v2/management/carstate", json=car_state_1)
+            c.post("/v2/management/carstate", json=[car_state_1])
             mock_timestamp_ms.return_value = 100
-            c.post("/v2/management/carstate", json=car_state_2)
+            c.post("/v2/management/carstate", json=[car_state_2])
 
             states: list[dict] = c.get("/v2/management/carstate/1").json  # type: ignore
             self.assertEqual(len(states), 3)

@@ -155,50 +155,55 @@ def create_orders() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
 
-    order_dict = connexion.request.get_json()
-    order_dict["lastState"] = None
-    order = _models.Order.from_dict(order_dict)
-    car_id = order.car_id
-    if not _car_exist(car_id):
-        return _log_error_and_respond(
-            f"Car with ID={car_id} does not exist.", 404, "Object not found"
-        )
-    if _max_n_of_active_orders is not None:
+    order_db_models: list[_db_models.OrderDBModel] = []
+    checked: list[_db_access.CheckBeforeAdd] = []
+    for o in connexion.request.get_json():
+        order = _models.Order.from_dict(o)
+        order.last_state = None
         car_id = order.car_id
-        if n_of_active_orders(car_id) >= _max_n_of_active_orders:
-            return _error(
-                403,
-                f"Maximum number {max_n_of_active_orders()} of active orders has been reached.",
-                "Too many orders",
+        if not _car_exist(car_id):
+            return _log_error_and_respond(
+                f"Car with ID={car_id} does not exist.", 404, "Object not found"
             )
+        if _max_n_of_active_orders is not None:
+            car_id = order.car_id
+            if n_of_active_orders(car_id) >= _max_n_of_active_orders:
+                return _error(
+                    403,
+                    f"Maximum number {max_n_of_active_orders()} of active orders has been reached.",
+                    "Too many orders",
+                )
+        checked.extend(
+            [
+                _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
+                _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.db_object_check(
+                    _db_models.RouteDBModel,
+                    order.stop_route_id,
+                    _db_access.db_obj_condition(
+                        attribute_name="stop_ids",
+                        func=lambda x: order.target_stop_id in x,
+                        fail_message=f"Route with ID={order.stop_route_id} does not contain "
+                        f"stop with ID={order.target_stop_id}",
+                    )
+                )
+            ]
+        )
+        order_db_models.append(_obj_to_db.order_to_db_model(order))
+    response = _db_access.add(*order_db_models, checked=checked)
 
-    db_model = _obj_to_db.order_to_db_model(order)
-    response = _db_access.add(
-        db_model,
-        checked=[
-            _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
-            _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
-            _db_access.db_object_check(
-                _db_models.RouteDBModel,
-                order.stop_route_id,
-                _db_access.db_obj_condition(
-                    attribute_name="stop_ids",
-                    func=lambda x: order.target_stop_id in x,
-                    fail_message=f"Route with ID={order.stop_route_id} does not contain "
-                    f"stop with ID={order.target_stop_id}",
-                ),
-            ),
-        ],
-    )
     if response.status_code == 200:
-        posted_db_model: _db_models.OrderDBModel = response.body[0]
-        assert posted_db_model.id is not None
-        db_state = _post_default_order_state(posted_db_model.id).body
-        state = _obj_to_db.order_state_from_db_model(db_state)
-        posted_order = _obj_to_db.order_from_db_model(posted_db_model, state)
-        _log_info(f"Order (ID={posted_order.id}) has been created.")
-        _add_active_order(order.car_id, posted_order.id)
-        return _json_response(posted_order)
+        posted_db_models: list[_db_models.OrderDBModel] = response.body
+        posted_orders: list[_models.Order] = []
+        for model in posted_db_models:
+            assert model.id is not None
+            db_state = _post_default_order_state(model.id).body[0]
+            state = _obj_to_db.order_state_from_db_model(db_state)
+            posted_order = _obj_to_db.order_from_db_model(model, state)
+            _log_info(f"Order (ID={posted_order.id}) has been created.")
+            _add_active_order(order.car_id, posted_order.id)
+            posted_orders.append(posted_order)
+        return _json_response(posted_orders)
     else:
         return _log_error_and_respond(
             f"Error when sending order. {response.body['detail']}.",
@@ -295,5 +300,5 @@ def _car_exist(car_id: int) -> bool:
 
 def _post_default_order_state(order_id: int) -> _Response:
     order_state = _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
-    response = _order_state.create_order_states_from_argument_and_post(order_state)
+    response = _order_state.create_order_states_from_argument_and_post([order_state])
     return response

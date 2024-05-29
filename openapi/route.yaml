@@ -12,7 +12,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              type: array
+              items:
+                $ref: '#/components/schemas/Route'
         required: true
       responses:
         '200':

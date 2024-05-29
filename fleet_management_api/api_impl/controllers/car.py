@@ -20,44 +20,55 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 
 
 def create_cars() -> _Response:  # noqa: E501
-    """Create a new car.
+    """Create new cars.
 
-    The car must have a unique ID and name.
+    Each car must have a unique ID and name.
     """
     if not connexion.request.is_json:
         _log_invalid_request_body_format()
+    request = connexion.request.get_json()
+    if not request:
+        return _json_response([])
     else:
-        car_dict = connexion.request.get_json()
-        car_dict["lastState"] = None
-        posted_car = _models.Car.from_dict(car_dict)
-        car_db_model = _obj_to_db.car_to_db_model(posted_car)
-        response = _db_access.add(
-            car_db_model,
-            checked=[
+        cars: list[_models.Car] = []
+        for car_dict in connexion.request.get_json():
+            car_dict["lastState"] = None
+            car = _models.Car.from_dict(car_dict)
+            cars.append(car)
+
+        car_db_models = []
+        checked = []
+        for car in cars:
+            car_db_models.append(_obj_to_db.car_to_db_model(car))
+            checked.append(
                 _db_access.db_object_check(
-                    _db_models.PlatformHWDBModel, id_=posted_car.platform_hw_id
-                ),
-                _db_access.db_object_check(
-                    _db_models.RouteDBModel,
-                    id_=posted_car.default_route_id,
-                    allow_nonexistence=True,
-                ),
-            ],
-        )
+                    _db_models.PlatformHWDBModel, id_=car.platform_hw_id
+                )
+            )
+            checked.append(_db_access.db_object_check(
+                _db_models.RouteDBModel,
+                id_=car.default_route_id,
+                allow_nonexistence=True,
+            ))
+
+        response = _db_access.add(*car_db_models, checked=checked)
         if response.status_code == 200:
-            posted_db_model: _db_models.CarDBModel = response.body[0]
-            assert posted_db_model.id is not None
-            db_state = _post_default_car_state(posted_db_model.id).body
-            state = _obj_to_db.car_state_from_db_model(db_state)
-            posted_car = _obj_to_db.car_from_db_model(posted_db_model, state)
-            msg = f"Car (ID={posted_car.id}, name='{posted_car.name}') has been created."
-            print(msg)
-            _log_info(f"Car (ID={posted_car.id}, name='{posted_car.name}) has been created.")
-            return _json_response(posted_car)
+            posted_db_models: list[_db_models.CarDBModel] = response.body
+            posted_cars = []
+            for posted_db_model in posted_db_models:
+                assert posted_db_model.id is not None
+                db_state = _post_default_car_state(posted_db_model.id).body[0]
+                state = _obj_to_db.car_state_from_db_model(db_state)
+                posted_car = _obj_to_db.car_from_db_model(posted_db_model, state)
+                msg = f"Car (ID={posted_car.id}, name='{posted_car.name}') has been created."
+                print(msg)
+                _log_info(f"Car (ID={posted_car.id}, name='{posted_car.name}) has been created.")
+                posted_cars.append(posted_car)
+            return _json_response(posted_cars)
         else:
             return _log_error_and_respond(
                 code=response.status_code,
-                msg=f"Car (name='{posted_car.name}) could not be created. {response.body['detail']}",
+                msg=f"Cars could not be created. {response.body['detail']}",
                 title=response.body["title"],
             )
 
@@ -116,13 +127,13 @@ def update_cars(car: dict | _models.Car) -> _Response:
     :param car: Updated car object.
     """
     if connexion.request.is_json:
-        car = _models.Car.from_dict(connexion.request.get_json())  # noqa: E501
-        car_db_model = _obj_to_db.car_to_db_model(car)
-        response = _db_access.update(updated=car_db_model)
+        cars = [_models.Car.from_dict(item) for item in connexion.request.get_json()]  # noqa: E501
+        car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
+        response = _db_access.update(*car_db_model)
         if response.status_code == 200:
-            return _log_info_and_respond(f"Car (ID={car.id}) has been succesfully updated.")
+            return _log_info_and_respond(f"Cars with IDs {[c.id for c in cars]} has been succesfully updated.")
         else:
-            msg = f"Car (ID={car.id}) could not be updated. {response.body['detail']}"
+            msg = f"Cars with IDs {[c.id for c in cars]} could not be updated. {response.body['detail']}"
             return _log_error_and_respond(msg, response.status_code, response.body["title"])
     else:
         return _log_invalid_request_body_format()
@@ -144,5 +155,5 @@ def _post_default_car_state(car_id: int) -> _Response:
     car_state = _models.CarState(
         status=_models.CarStatus.OUT_OF_ORDER, car_id=car_id, fuel=0, speed=0.0
     )
-    response = _create_car_state_from_argument_and_post(car_state)
+    response = _create_car_state_from_argument_and_post([car_state])
     return response
