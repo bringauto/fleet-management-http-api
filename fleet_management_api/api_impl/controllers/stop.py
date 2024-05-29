@@ -36,7 +36,8 @@ def create_stops() -> _Response:
             posted_db_models: list[_db_models.StopDBModel] = response.body
             for stop in posted_db_models:
                 _log_info(f"Stop (name='{stop.name}) has been created.")
-            return _json_response(_obj_to_db.stop_from_db_model(response.body[0]))
+            models = [_obj_to_db.stop_from_db_model(m) for m in posted_db_models]
+            return _json_response(models)
         else:
             return _error(
                 response.status_code,
