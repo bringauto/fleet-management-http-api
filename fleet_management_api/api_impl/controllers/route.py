@@ -41,13 +41,6 @@ def create_routes() -> _Response:
                 )
 
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
-        visualizations: list[_db_models.RouteVisualizationDBModel] = []
-        for m in route_db_models:
-            visualizations.append(
-                _db_models.RouteVisualizationDBModel(
-                    id=m.id, route_id=m.id, points=[], hexcolor="#00BCF2"
-                )
-            )
         response = _db_access.add(*route_db_models)
         if response.status_code == 200:
             inserted_db_models: list[_db_models.RouteDBModel] = response.body
@@ -55,7 +48,6 @@ def create_routes() -> _Response:
                 assert route.id is not None
                 _create_empty_route_visualization(route.id)
                 _log_info(f"Route (name='{route.name}) has been created.")
-            _db_access.add(*visualizations)
             return _json_response([_obj_to_db.route_from_db_model(m) for m in inserted_db_models])
         else:
             return _log_error_and_respond(
@@ -155,7 +147,7 @@ def _check_route_model(route: _models.Route) -> _Response:
 
 def _create_empty_route_visualization(route_id: int) -> _Response:
     response = _db_access.add(
-        _db_models.RouteVisualizationDBModel(id=route_id, route_id=route_id, points=[]),
+        _db_models.RouteVisualizationDBModel(id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"),
     )
     if not response.status_code == 200:
         return _error(

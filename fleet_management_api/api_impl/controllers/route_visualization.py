@@ -70,14 +70,21 @@ def redefine_route_visualizations() -> _Response:
             if v.route_id in existing_vis_dict:
                 id_ = existing_vis_dict[v.route_id].id
                 v.id = id_  # type: ignore
+            else:
+                return _log_error_and_respond(
+                    f"Route visualization for route with ID={v.route_id} does not exist. Cannot redefine visualizations.",
+                    404,
+                    title="Object not found",
+                )
 
         vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
         response = _db_access.update(*vis_db_models)
         if response.status_code == 200:
-            _log_info("Route visualizations have been redefined.")
-            return _json_response(
-                [_obj_to_db.route_visualization_from_db_model(v) for v in response.body]
-            )
+            inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
+            for v in inserted_vis:
+                assert v.id is not None
+                _log_info(f"Route visualization (ID={v.id}) has been succesfully redefined.")
+            return _json_response(inserted_vis)
         else:
             return _log_error_and_respond(
                 response.body["detail"], response.status_code, response.body["title"]
