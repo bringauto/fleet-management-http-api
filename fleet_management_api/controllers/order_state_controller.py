@@ -13,7 +13,7 @@ def create_order_states(order_state):  # noqa: E501
 
      # noqa: E501
 
-    :param order_state: A list of Order States model in JSON format.
+    :param order_state: A list of Order State models in JSON format.
     :type order_state: list | bytes
 
     :rtype: Union[OrderState, Tuple[OrderState, int], Tuple[OrderState, int, Dict[str, str]]

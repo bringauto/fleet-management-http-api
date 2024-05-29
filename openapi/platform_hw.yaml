@@ -22,7 +22,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformHW'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformHW'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':

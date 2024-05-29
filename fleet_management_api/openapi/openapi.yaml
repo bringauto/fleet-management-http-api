@@ -1199,7 +1199,7 @@ paths:
               items:
                 $ref: '#/components/schemas/OrderState'
               type: array
-        description: A list of Order States model in JSON format.
+        description: A list of Order State models in JSON format.
         required: true
         x-body-name: orderState
       responses:
@@ -1208,7 +1208,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderState'
-          description: The new Order State has been successfully posted.
+          description: The new Order States have been successfully posted.
         "400":
           content:
             application/json:
@@ -1381,7 +1381,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/PlatformHW'
                 type: array
-          description: All the currently existing Platform HW have been returned.
+          description: All the currently existing Platform HWs have been returned.
         "401":
           content:
             application/json:
@@ -1428,7 +1428,7 @@ paths:
               items:
                 $ref: '#/components/schemas/PlatformHW'
               type: array
-        description: Platform HW model in JSON format.
+        description: A list of Platform HW models in JSON format.
         required: true
         x-body-name: platformHW
       responses:
@@ -1436,8 +1436,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformHW'
-          description: The Platform HW has been successfully created.
+                items:
+                  $ref: '#/components/schemas/PlatformHW'
+                type: array
+          description: The Platform HWs have been successfully created.
         "400":
           content:
             application/json:
@@ -1482,7 +1484,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Platform HW object.
+      summary: Create new Platform HW objects.
       tags:
       - platformHW
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
