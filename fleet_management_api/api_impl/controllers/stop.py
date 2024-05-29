@@ -95,7 +95,14 @@ def get_stops() -> _Response:
 
 
 def update_stops() -> _Response:
-    """Update an existing stop."""
+    """Update an existing stop.
+
+    If some of the stops' update fails, no stops are updated.
+
+    The stop update can succeed only if:
+    - all stops exist,
+    - there is no stop with the same name.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
