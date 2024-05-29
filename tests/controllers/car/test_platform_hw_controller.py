@@ -51,8 +51,7 @@ class Test_Retrieving_Platform_HW(unittest.TestCase):
         platform_hw_1 = PlatformHW(name="test_platform_1")
         platform_hw_2 = PlatformHW(name="test_platform_2")
         with self.app.test_client() as c:
-            response = c.post("/v2/management/platformhw", json=[platform_hw_1])
-            response = c.post("/v2/management/platformhw", json=[platform_hw_2])
+            response = c.post("/v2/management/platformhw", json=[platform_hw_1, platform_hw_2])
             response = c.get("/v2/management/platformhw")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -74,8 +73,7 @@ class Test_Getting_Single_Platform_HW(unittest.TestCase):
         platform_hw_1 = PlatformHW(name="test_platform_y")
         platform_hw_2 = PlatformHW(name="test_platform_z")
         with self.app.test_client() as c:
-            c.post("/v2/management/platformhw", json=[platform_hw_1])
-            c.post("/v2/management/platformhw", json=[platform_hw_2])
+            c.post("/v2/management/platformhw", json=[platform_hw_1, platform_hw_2])
 
             response = c.get("/v2/management/platformhw/1")
             self.assertEqual(response.status_code, 200)

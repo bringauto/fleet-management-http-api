@@ -77,8 +77,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
         )
 
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=[car_1])
-            response = c.post("/v2/management/car", json=[car_2])
+            response = c.post("/v2/management/car", json=[car_1, car_2])
             self.assertEqual(response.status_code, 200)
 
     def test_waiting_for_car_state_for_given_car(self):
@@ -157,8 +156,7 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="9876543210"))
         mock_timestamp_ms.return_value = 0
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=[car_1])
-            c.post("/v2/management/car", json=[car_2])
+            c.post("/v2/management/car", json=[car_1, car_2])
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_filtering_car_states_by_since_parameter(self, mock_timestamp_ms: Mock):

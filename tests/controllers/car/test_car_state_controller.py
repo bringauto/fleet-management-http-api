@@ -502,11 +502,9 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 1000
-            c.post("/v2/management/carstate", json=[state_1])
-            c.post("/v2/management/carstate", json=[state_3])
+            c.post("/v2/management/carstate", json=[state_1, state_3])
             mocked_timestamp.return_value = 2000
-            c.post("/v2/management/carstate", json=[state_2])
-            c.post("/v2/management/carstate", json=[state_4])
+            c.post("/v2/management/carstate", json=[state_2, state_4])
 
     def test_returning_last_1_state_for_given_car(self):
         with self.app.app.test_client() as c:

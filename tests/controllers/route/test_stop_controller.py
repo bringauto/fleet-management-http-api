@@ -105,8 +105,7 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=[stop_1])
-            c.post("/v2/management/stop", json=[stop_2])
+            c.post("/v2/management/stop", json=[stop_1, stop_2])
             response = c.get("/v2/management/stop")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -130,8 +129,7 @@ class Test_Retrieving_Single_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=[stop_1])
-            c.post("/v2/management/stop", json=[stop_2])
+            c.post("/v2/management/stop", json=[stop_1, stop_2])
 
             response = c.get("/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)

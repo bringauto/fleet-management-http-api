@@ -66,9 +66,7 @@ class Test_Getting_All_Routes(unittest.TestCase):
         route_1 = Route(name="test_route_1")
         route_2 = Route(name="test_route_2")
         with self.app.app.test_client() as c:
-            c.post("/v2/management/route", json=[route_1])
-            c.post("/v2/management/route", json=[route_2])
-
+            c.post("/v2/management/route", json=[route_1, route_2])
             response = c.get("/v2/management/route")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -87,8 +85,7 @@ class Test_Getting_Single_Route(unittest.TestCase):
         self.route_1 = Route(name="test_route_1")
         self.route_2 = Route(name="test_route_2")
         with self.app.app.test_client() as c:
-            c.post("/v2/management/route", json=[self.route_1])
-            c.post("/v2/management/route", json=[self.route_2])
+            c.post("/v2/management/route", json=[self.route_1, self.route_2])
 
     def test_retrieving_existing_route(self):
         with self.app.app.test_client() as c:
@@ -116,12 +113,8 @@ class Test_Retrieving_Route_Stops(unittest.TestCase):
         self.route_1 = Route(name="test_route_1", stop_ids=[1, 2])
         self.route_2 = Route(name="test_route_2", stop_ids=[2, 3])
         with self.app.app.test_client() as c:
-            c.post("/v2/management/stop", json=[stop_1])
-            c.post("/v2/management/stop", json=[stop_2])
-            c.post("/v2/management/stop", json=[stop_3])
-
-            c.post("/v2/management/route", json=[self.route_1])
-            c.post("/v2/management/route", json=[self.route_2])
+            c.post("/v2/management/stop", json=[stop_1, stop_2, stop_3])
+            c.post("/v2/management/route", json=[self.route_1, self.route_2])
 
     def test_retrieving_existing_route_stops(self):
         with self.app.app.test_client() as c:

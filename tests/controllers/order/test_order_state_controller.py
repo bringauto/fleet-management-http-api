@@ -568,8 +568,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
             c.post("/v2/management/car", json=[car_1])
-            c.post("/v2/management/order", json=[self.order_1])
-            c.post("/v2/management/order", json=[self.order_2])
+            c.post("/v2/management/order", json=[self.order_1, self.order_2])
 
         state_1 = OrderState(status="accepted", order_id=1)
         state_2 = OrderState(status="in_progress", order_id=1)
@@ -578,11 +577,9 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 1000
-            c.post("/v2/management/orderstate", json=[state_1])
-            c.post("/v2/management/orderstate", json=[state_3])
+            c.post("/v2/management/orderstate", json=[state_1, state_3])
             mocked_timestamp.return_value = 2000
-            c.post("/v2/management/orderstate", json=[state_2])
-            c.post("/v2/management/orderstate", json=[state_4])
+            c.post("/v2/management/orderstate", json=[state_2, state_4])
 
     def test_returning_last_1_state_for_given_car(self):
         with self.app.app.test_client() as c:

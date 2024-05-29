@@ -68,10 +68,7 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
         state_3 = OrderState(status="accepted", order_id=self.order_2.id)
         state_4 = OrderState(status="in_progress", order_id=self.order_2.id)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=[state_1])
-            c.post("/v2/management/orderstate", json=[state_2])
-            c.post("/v2/management/orderstate", json=[state_3])
-            c.post("/v2/management/orderstate", json=[state_4])
+            c.post("/v2/management/orderstate", json=[state_1, state_2, state_3, state_4])
         with self.app.app.test_client() as c:
             response = c.get(f"/v2/management/order/{self.car.id}")
             self.assertEqual(200, response.status_code)
@@ -85,10 +82,7 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
         state_3 = OrderState(status="accepted", order_id=self.order_2.id)
         state_4 = OrderState(status="in_progress", order_id=self.order_2.id)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/orderstate", json=[state_1])
-            c.post("/v2/management/orderstate", json=[state_2])
-            c.post("/v2/management/orderstate", json=[state_3])
-            c.post("/v2/management/orderstate", json=[state_4])
+            c.post("/v2/management/orderstate", json=[state_1, state_2, state_3, state_4])
         with self.app.app.test_client() as c:
             response = c.get(f"/v2/management/order")
             self.assertEqual(200, response.status_code)
