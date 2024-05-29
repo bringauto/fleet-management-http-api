@@ -18,15 +18,13 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 
 
-def add_car_states() -> _Response:
-    """Post new car state.
+def create_car_states() -> _Response:
+    """Post new car states.
 
-    :param car_state: Car state to be added.
+    If some of the car states' creation fails, no car states are added to the server.
 
-    :rtype: CarState
-
-    The state must have a unique Id.
-    The car defined by 'car_id' must exist.
+    The car state creation can succeed only if:
+    - the car exists.
     """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
@@ -36,6 +34,13 @@ def add_car_states() -> _Response:
 
 
 def create_car_states_from_argument_and_post(car_states: list[_models.CarState]) -> _Response:
+    """Post new car states using list passed as argument.
+
+    If some of the car states' creation fails, no car states are added to the server.
+
+    The car state creation can succeed only if:
+    - the car exists.
+    """
     if not car_states:
         return _json_response([])
     state_db_models = [_obj_to_db.car_state_to_db_model(s) for s in car_states]

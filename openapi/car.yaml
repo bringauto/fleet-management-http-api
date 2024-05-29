@@ -166,7 +166,7 @@ paths:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
-      operationId: addCarStates
+      operationId: createCarStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState

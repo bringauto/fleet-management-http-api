@@ -8,7 +8,7 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def add_car_states(car_state):  # noqa: E501
+def create_car_states(car_state):  # noqa: E501
     """Add a new Car State.
 
      # noqa: E501

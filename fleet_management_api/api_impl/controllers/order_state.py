@@ -40,10 +40,13 @@ def initialize_last_order_status_dict() -> None:
 
 
 def create_order_states() -> _Response:
-    """Post a new state of an existing order.
+    """Post new states of existing orders.
 
-    If there already exists an Order State with final status (DONE or CANCELED),
-    any other Order State is refused (i.e., 403 is returned).
+    If some of the order states's creation fails, no states are added to the server.
+
+    Order State creation can succeed only if:
+    - the order exists,
+    - there is no Order State with final status (DONE or CANCELED) for the order.
     """
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
@@ -52,10 +55,11 @@ def create_order_states() -> _Response:
 
 
 def create_order_states_from_argument_and_post(order_states: list[_models.OrderState]) -> _Response:
-    """Create a new states of an existing orders. The Order State models are passed as an argument.
+    """Create new states of  existing orders. The Order State models are passed as an argument.
 
-    If there already exists an Order State with final status (DONE or CANCELED),
-    any other Order State is refused (i.e., 403 is returned).
+    Order State creation can succeed only if:
+    - the order exists,
+    - there is no Order State with final status (DONE or CANCELED) for the order.
     """
     order_ids = [order_state.order_id for order_state in order_states]
     orders: dict[int, _db_models.OrderDBModel | None] = _existing_orders(*order_ids)

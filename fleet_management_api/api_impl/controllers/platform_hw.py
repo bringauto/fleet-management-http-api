@@ -17,7 +17,13 @@ from fleet_management_api.api_impl.api_responses import (
 
 
 def create_hws() -> _Response:
-    """Post a new platform HW. The platform HW must have a unique id."""
+    """Create new platform HWs.
+
+    If some of the HWs' creation fails, no objects are added to the server.
+
+    The HW creation can succeed only if:
+    - there is no HW with the same name.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:

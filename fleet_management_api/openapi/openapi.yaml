@@ -516,7 +516,7 @@ paths:
       - carState
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
-      operationId: add_car_states
+      operationId: create_car_states
       requestBody:
         content:
           application/json:

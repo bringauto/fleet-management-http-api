@@ -22,7 +22,13 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 def create_cars() -> _Response:  # noqa: E501
     """Create new cars.
 
-    Each car must have a unique ID and name.
+    If some of the cars' creation fails, no cars are added to the server.
+
+    The car creation can succeed only if:
+    - the platform HW exists,
+    - the default route exists, if it is specified,
+    - the car name is unique.
+    - the platform HW is not referenced by any existing car.
     """
     if not connexion.request.is_json:
         _log_invalid_request_body_format()
@@ -122,9 +128,16 @@ def get_cars() -> _Response:  # noqa: E501
 
 
 def update_cars(car: dict | _models.Car) -> _Response:
-    """Update an existing car.
+    """Update existing cars.
 
-    :param car: Updated car object.
+    If any of the cars' update fails, no cars are updated on the server.
+
+    The car update can succeed only if:
+    - the car already exists,
+    - the platform HW exists,
+    - the default route exists, if it is specified,
+    - the car name is unique.
+    - the platform HW is not referenced by any other existing car.
     """
     if connexion.request.is_json:
         cars = [_models.Car.from_dict(item) for item in connexion.request.get_json()]  # noqa: E501

@@ -34,7 +34,7 @@ def get_route_visualization(route_id: int) -> _Response:
 
 
 def redefine_route_visualizations() -> _Response:
-    """Redefine route visualization for an existing route."""
+    """Redefine route visualizations for existing routes."""
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:

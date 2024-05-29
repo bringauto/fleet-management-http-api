@@ -19,7 +19,13 @@ from fleet_management_api.api_impl.api_logging import (
 
 
 def create_stops() -> _Response:
-    """Post a new stops. Each stop must have a unique ID."""
+    """Create new stops.
+
+    If some of the stops' creation fails, no stops are added to the server.
+
+    The stop creation can succeed only if:
+    - there is no stop with the same name.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:

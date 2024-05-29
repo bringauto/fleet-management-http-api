@@ -151,7 +151,16 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 def create_orders() -> _Response:
-    """Post a new order. The order must have a unique id and the car must exist."""
+    """Post new orders.
+
+    If some of the orders' creation fails, no orders are added to the server.
+
+    The order creation can succeed only if:
+    - the car exists,
+    - the target stop exists,
+    - the route exists and contains the target stop,
+    - the maximum number of active orders has not been reached.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
 

@@ -19,7 +19,14 @@ from fleet_management_api.api_impl.api_logging import (
 
 
 def create_routes() -> _Response:
-    """Post a new route. The route must have a unique id and all the stops identified by stop ids must exist."""
+    """Post a new route.
+
+    If some of the routes' creation fails, no routes are added to the server.
+
+    The route creation can succeed only if:
+    - all stops exist,
+    - there is not a route with the same name.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
@@ -98,7 +105,14 @@ def get_routes() -> list[_models.Route]:
 
 
 def update_routes() -> _Response:
-    """Update an existing route identified by 'route_id'."""
+    """Update an existing route identified by 'route_ids' array.
+
+    If some of the routes' update fails, no routes are updated on the server.
+
+    The route update can succeed only if:
+    - all stops exist,
+    - all route IDs exist.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
@@ -118,7 +132,7 @@ def update_routes() -> _Response:
         else:
             note = " (not found)" if response.status_code == 404 else ""
             return _log_error_and_respond(
-                f"Routes {[r.name for r in routes]} could not be updated{note}. {response.body['detail']}",
+                f"Routes {[r.name for r in routes]} could not be updated {note}. {response.body['detail']}",
                 404,
                 response.body["title"],
             )
