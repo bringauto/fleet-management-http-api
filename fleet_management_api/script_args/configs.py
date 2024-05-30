@@ -54,7 +54,6 @@ class Security(pydantic.BaseModel):
     client_secret_key: str
     scope: str
     realm: str
-    keycloak_public_key_file: pydantic.FilePath | Literal[""]
     callback: pydantic.AnyUrl = pydantic.Field(Optional)
 
 

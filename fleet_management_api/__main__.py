@@ -1,10 +1,21 @@
+import requests
 import fleet_management_api.script_args as _args
 import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
-from fleet_management_api.controllers.security_controller import set_public_key
+from fleet_management_api.controllers.security_controller import set_auth_params
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from fleet_management_api.database.connection import set_up_database
 from fleet_management_api.api_impl.data_setup import set_up_data
+
+
+def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
+    """Retrieve the public key from the Keycloak server."""
+    try:
+        response = requests.get(keycloak_url + "/realms/" + realm)
+        response.raise_for_status()
+    except:
+        return ""
+    return response.json()["public_key"]
 
 
 def _set_up_oauth(config: _args.Security) -> None:
@@ -16,8 +27,13 @@ def _set_up_oauth(config: _args.Security) -> None:
         realm=config.realm,
         callback=str(config.callback),
     )
-    with open(config.keycloak_public_key_file, "r") as public_key_file:
-        set_public_key(public_key_file.read())
+    set_auth_params(
+        public_key=_retrieve_keycloak_public_key(
+            keycloak_url=str(config.keycloak_url),
+            realm=config.realm,
+        ),
+        client_id=config.client_id,
+    )
 
 
 if __name__ == "__main__":
