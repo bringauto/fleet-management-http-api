@@ -46,11 +46,7 @@ def redefine_route_visualizations() -> _Response:
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        request_json = _connexion.request.get_json()
-        if not request_json:
-            return _log_invalid_request_body_format()
-
-        vis = [_RouteVisualization.from_dict(s) for s in request_json]
+        vis = [_RouteVisualization.from_dict(s) for s in _connexion.request.get_json()]
         for v in vis:
             if not _db_access.db_object_check(_db_models.RouteDBModel, v.route_id):
                 return _error(
