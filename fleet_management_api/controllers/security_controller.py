@@ -5,9 +5,12 @@ from fleet_management_api.api_impl.api_keys import verify_key_and_return_key_inf
 
 
 _public_key: str
-def set_public_key(public_key: str) -> None:
+_client_id: str
+def set_auth_params(public_key: str, client_id: str) -> None:
     global _public_key
     _public_key = public_key
+    global _client_id
+    _client_id = client_id
 
 
 def info_from_oAuth2AuthCode(token):
@@ -27,15 +30,11 @@ def info_from_oAuth2AuthCode(token):
     except:
         return None
 
-    #TODO temporary until keycloak configuration is decided
-    #roles = decoded_token["realm_access"]["roles"]
+    for origin in decoded_token["allowed-origins"]:
+        if origin == _client_id:
+            return {'scopes': {}, 'uid': ''}
 
-    #for role in roles:
-    #    if role == "test_role":
-    #        return {'scopes': {}, 'uid': ''}
-
-    return {'scopes': {}, 'uid': ''}
-    #return None # type: ignore
+    return None # type: ignore
 
 
 def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
