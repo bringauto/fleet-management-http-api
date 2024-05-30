@@ -1,26 +1,30 @@
 paths:
   /stop:
     post:
-      operationId: createStop
+      operationId: createStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Create a new Stop.
+      summary: Create new Stops.
       requestBody:
-        description: Stop model in JSON format.
-        x-body-name: stop
+        description: A list of Stop models in JSON format.
+        x-body-name: stops
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              type: array
+              items:
+                $ref: '#/components/schemas/Stop'
         required: true
       responses:
         '200':
-          description: The Stop has been successfully created.
+          description: The Stops have been successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Stop'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -64,22 +68,24 @@ paths:
         default:
           $ref: 'errors.yaml#/components/responses/UnexpectedError'
     put:
-      operationId: updateStop
+      operationId: updateStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
       tags:
         - stop
-      summary: Update already existing Stop.
+      summary: Update already existing Stops.
       requestBody:
-        description: JSON representation of the updated Stop.
-        x-body-name: stop
+        description: JSON representation of a list of the Stops with updated data.
+        x-body-name: stops
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Stop'
+              type: array
+              items:
+                $ref: '#/components/schemas/Stop'
         required: true
       responses:
         '200':
-          description: The Stop has been successfully updated.
+          description: The Stops have been successfully updated.
           content:
             text/plain:
               type: string
@@ -177,3 +183,8 @@ components:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
         notificationPhone:
           $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+        isAutoStop:
+          type: boolean
+          description: If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.
+          default: false
+          example: false

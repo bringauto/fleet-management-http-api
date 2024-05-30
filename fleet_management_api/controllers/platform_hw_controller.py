@@ -8,18 +8,18 @@ from fleet_management_api.models.platform_hw import PlatformHW  # noqa: E501
 from fleet_management_api import util
 
 
-def create_hw(platform_hw):  # noqa: E501
-    """Create a new Platform HW object.
+def create_hws(platform_hw):  # noqa: E501
+    """Create new Platform HW objects.
 
      # noqa: E501
 
-    :param platform_hw: Platform HW model in JSON format.
-    :type platform_hw: dict | bytes
+    :param platform_hw: A list of Platform HW models in JSON format.
+    :type platform_hw: list | bytes
 
-    :rtype: Union[PlatformHW, Tuple[PlatformHW, int], Tuple[PlatformHW, int, Dict[str, str]]
+    :rtype: Union[List[PlatformHW], Tuple[List[PlatformHW], int], Tuple[List[PlatformHW], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        platform_hw = PlatformHW.from_dict(connexion.request.get_json())  # noqa: E501
+        platform_hw = [PlatformHW.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

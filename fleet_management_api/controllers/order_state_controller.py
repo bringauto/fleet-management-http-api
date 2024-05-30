@@ -8,22 +8,22 @@ from fleet_management_api.models.order_state import OrderState  # noqa: E501
 from fleet_management_api import util
 
 
-def create_order_state(order_state):  # noqa: E501
-    """Add a new Order State.
+def create_order_states(order_state):  # noqa: E501
+    """Add new Order States.
 
      # noqa: E501
 
-    :param order_state: Order State model in JSON format.
-    :type order_state: dict | bytes
+    :param order_state: A list of Order State models in JSON format.
+    :type order_state: list | bytes
 
     :rtype: Union[OrderState, Tuple[OrderState, int], Tuple[OrderState, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        order_state = OrderState.from_dict(connexion.request.get_json())  # noqa: E501
+        order_state = [OrderState.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 
-def get_all_order_states(wait=None, since=None, last_n=None):  # noqa: E501
+def get_all_order_states(wait=None, since=None, last_n=None, car_id=None):  # noqa: E501
     """Find Order States for all existing Orders.
 
      # noqa: E501
@@ -34,6 +34,8 @@ def get_all_order_states(wait=None, since=None, last_n=None):  # noqa: E501
     :type since: int
     :param last_n: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \\ If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned. If value smaller than 1 is provided, this filtering is ignored.
     :type last_n: int
+    :param car_id: An optional parameter for filtering only objects related to a car with the specified ID.
+    :type car_id: int
 
     :rtype: Union[List[OrderState], Tuple[List[OrderState], int], Tuple[List[OrderState], int, Dict[str, str]]
     """

@@ -57,7 +57,7 @@ class _AttributeCondition:
             raise DatabaseRecordValueError(self.fail_message)
 
 
-class _CheckBeforeAdd:
+class CheckBeforeAdd:
     """An instance of this class binds together the following:
     - a class related to a table in database,
     - an ID of an object in the table,
@@ -97,8 +97,9 @@ class _CheckBeforeAdd:
 
 def add(
     *added: _Base,
-    checked: Optional[Iterable[_CheckBeforeAdd]] = None,
+    checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
+    auto_id: bool = True
 ) -> _Response:
     """Adds a objects to the database.
 
@@ -123,7 +124,8 @@ def add(
                     except _NoResultFound as e:
                         msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
                         return _error(404, msg, title="Cannot create object as some referenced objects do not exist")
-            _set_id_to_none(added)
+            if auto_id:
+                _set_id_to_none(added)
             session.add_all(added)
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
@@ -333,23 +335,29 @@ def _return_awaited_result(
     )
 
 
-def update(updated: _Base) -> _Response:
+def update(*updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
     """
+    if not updated:
+        return _text_response("Empty request body. Nothing to update in the database.")
     source = _get_current_connection_source()
     with _Session(source) as session, session.begin():
         try:
-            session.get_one(updated.__class__, updated.id)
-            session.merge(updated)
-            return _text_response("Succesfully updated record.")
+            for item in updated:
+                session.get_one(item.__class__, item.id)
+                session.merge(item)
+            return _json_response(updated)
         except _sqaexc.IntegrityError as e:
+            session.rollback()
             return _error(400, str(e.orig), title="Cannot update object with invalid data")
         except _sqaexc.NoResultFound as e:
-            msg = f"{updated.model_name} (ID={updated.id}) was not found. Nothing to update."
+            session.rollback()
+            msg = f"{item.model_name} (ID={item.id}) was not found. Nothing to update."
             return _error(404, msg, title="Cannot update nonexistent object")
         except Exception as e:
+            session.rollback()
             return _error(500, str(e), title="Cannot update object due to unexpected error")
 
 
@@ -375,7 +383,7 @@ def wait_for_new(
 
 def db_object_check(
     base: type[_Base], id_: int, *conditions: _AttributeCondition, allow_nonexistence: bool = False
-) -> _CheckBeforeAdd:
+) -> CheckBeforeAdd:
     """Return an instance of object binding together:
     - a ORM mapped class related to a table in database,
     - an ID of an object in the table,
@@ -388,7 +396,7 @@ def db_object_check(
     `allow_nonexistence` is a flag that indicates that object non-existence is allowed (no exception is raised and
     checking of conditions is skipped).
     """
-    return _CheckBeforeAdd(base, id_, *conditions, nullable=allow_nonexistence)
+    return CheckBeforeAdd(base, id_, *conditions, nullable=allow_nonexistence)
 
 
 def db_obj_condition(

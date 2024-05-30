@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column
 
 class Base(DeclarativeBase):
     model_name: str = "Base"
+
     def copy(self) -> Base:
         return self.__class__(
             **{col.name: getattr(self, col.name) for col in self.__table__.columns}

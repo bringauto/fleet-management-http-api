@@ -8,7 +8,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
@@ -16,21 +16,31 @@ from fleet_management_api.api_impl.api_responses import (
 )
 
 
-def create_hw() -> _Response:
-    """Post a new platform HW. The platform HW must have a unique id."""
+def create_hws() -> _Response:
+    """Create new platform HWs.
+
+    If some of the HWs' creation fails, no objects are added to the server.
+
+    The HW creation can succeed only if:
+    - there is no HW with the same name.
+    """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        platform_hw = _PlatformHW.from_dict(connexion.request.get_json())
-        platform_hw_db_model = _obj_to_db.platform_hw_to_db_model(platform_hw)
-        response = _db_access.add(platform_hw_db_model)
+        platform_hws = [_PlatformHW.from_dict(p) for p in connexion.request.get_json()]
+        platform_hw_db_model = [_obj_to_db.platform_hw_to_db_model(p) for p in platform_hws]
+        response = _db_access.add(*platform_hw_db_model)
         if response.status_code == 200:
-            _log_info(f"Platform HW (name='{platform_hw.name}) has been created.")
-            inserted_model = _obj_to_db.platform_hw_from_db_model(response.body[0])
-            return _json_response(inserted_model)
+            inserted_models: list[_PlatformHW] = [
+                _obj_to_db.platform_hw_from_db_model(item) for item in response.body
+            ]
+            for p in inserted_models:
+                assert p.id is not None
+                _log_info(f"Platform HW (name='{p.name}) has been created.")
+            return _json_response(inserted_models)
         else:
             return _log_error_and_respond(
-                f"Platform HW (name='{platform_hw.name}) could not be created. {response.body['detail']}",
+                f"Platform HW (names='{[p.name for p in platform_hws]}) could not be created. {response.body['detail']}",
                 response.status_code,
                 response.body["title"],
             )

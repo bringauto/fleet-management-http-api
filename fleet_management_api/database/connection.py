@@ -190,7 +190,7 @@ def _get_connection(url: str) -> _Engine:
 
 def _new_connection(url: str) -> _Engine:
     try:
-        engine = _create_engine(url)
+        engine = _create_engine(url, pool_size=100)
         if engine is None:
             raise InvalidConnectionArguments(
                 f"Could not create new connection source (url='{url}')."

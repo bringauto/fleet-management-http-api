@@ -16,7 +16,7 @@ class Stop(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, name=None, position=None, notification_phone=None):  # noqa: E501
+    def __init__(self, id=None, name=None, position=None, notification_phone=None, is_auto_stop=False):  # noqa: E501
         """Stop - a model defined in OpenAPI
 
         :param id: The id of this Stop.  # noqa: E501
@@ -27,25 +27,30 @@ class Stop(Model):
         :type position: GNSSPosition
         :param notification_phone: The notification_phone of this Stop.  # noqa: E501
         :type notification_phone: MobilePhone
+        :param is_auto_stop: The is_auto_stop of this Stop.  # noqa: E501
+        :type is_auto_stop: bool
         """
         self.openapi_types = {
             'id': int,
             'name': str,
             'position': GNSSPosition,
-            'notification_phone': MobilePhone
+            'notification_phone': MobilePhone,
+            'is_auto_stop': bool
         }
 
         self.attribute_map = {
             'id': 'id',
             'name': 'name',
             'position': 'position',
-            'notification_phone': 'notificationPhone'
+            'notification_phone': 'notificationPhone',
+            'is_auto_stop': 'isAutoStop'
         }
 
         self._id = id
         self._name = name
         self._position = position
         self._notification_phone = notification_phone
+        self._is_auto_stop = is_auto_stop
 
     @classmethod
     def from_dict(cls, dikt) -> 'Stop':
@@ -145,3 +150,26 @@ class Stop(Model):
         """
 
         self._notification_phone = notification_phone
+
+    @property
+    def is_auto_stop(self) -> bool:
+        """Gets the is_auto_stop of this Stop.
+
+        If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.  # noqa: E501
+
+        :return: The is_auto_stop of this Stop.
+        :rtype: bool
+        """
+        return self._is_auto_stop
+
+    @is_auto_stop.setter
+    def is_auto_stop(self, is_auto_stop: bool):
+        """Sets the is_auto_stop of this Stop.
+
+        If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.  # noqa: E501
+
+        :param is_auto_stop: The is_auto_stop of this Stop.
+        :type is_auto_stop: bool
+        """
+
+        self._is_auto_stop = is_auto_stop

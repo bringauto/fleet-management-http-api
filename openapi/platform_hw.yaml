@@ -1,26 +1,30 @@
 paths:
   /platformhw:
     post:
-      operationId: createHw
+      operationId: createHws
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
       tags:
         - platformHW
-      summary: Create a new Platform HW object.
+      summary: Create new Platform HW objects.
       requestBody:
-        description: Platform HW model in JSON format.
-        x-body-name: platformHW
+        description: A list of Platform HW models in JSON format.
+        x-body-name: platformHWs
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlatformHW'
+              type: array
+              items:
+                $ref: '#/components/schemas/PlatformHW'
         required: true
       responses:
         '200':
-          description: The Platform HW has been successfully created.
+          description: The Platform HWs have been successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformHW'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlatformHW'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -37,7 +41,7 @@ paths:
       summary: Find and return all existing Platform HW.
       responses:
         '200':
-          description: All the currently existing Platform HW have been returned.
+          description: All the currently existing Platform HWs have been returned.
           content:
             application/json:
               schema:
