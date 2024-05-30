@@ -8,7 +8,7 @@ paths:
       summary: Create new Platform HW objects.
       requestBody:
         description: A list of Platform HW models in JSON format.
-        x-body-name: platformHW
+        x-body-name: platformHWs
         content:
           application/json:
             schema:

@@ -8,7 +8,7 @@ paths:
       summary: Create new Routes.
       requestBody:
         description: A list of Route models in JSON format.
-        x-body-name: route
+        x-body-name: routes
         content:
           application/json:
             schema:
@@ -70,7 +70,7 @@ paths:
       summary: Update already existing Routes.
       requestBody:
         description: JSON representation of a list of the Routes with updated data.
-        x-body-name: route
+        x-body-name: routes
         content:
           application/json:
             schema:
@@ -181,7 +181,7 @@ paths:
       summary: Redefine Route Visualizations for existing Routes.
       requestBody:
         description: A list of Route Visualization models in JSON format.
-        x-body-name: RouteVisualization
+        x-body-name: RouteVisualizations
         content:
           application/json:
             schema:

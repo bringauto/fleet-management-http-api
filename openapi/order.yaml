@@ -8,7 +8,7 @@ paths:
       summary: Create new Orders.
       requestBody:
         description: A list of Order models in JSON format.
-        x-body-name: order
+        x-body-name: orders
         content:
           application/json:
             schema:
@@ -184,7 +184,7 @@ paths:
       summary: Add new Order States.
       requestBody:
         description: A list of Order State models in JSON format.
-        x-body-name: orderState
+        x-body-name: orderStates
         content:
           application/json:
             schema:

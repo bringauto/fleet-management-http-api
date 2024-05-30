@@ -7,7 +7,7 @@ paths:
         - car
       summary: Create new Car objects.
       requestBody:
-        x-body-name: car
+        x-body-name: cars
         description: A list of Car models in JSON format.
         content:
           application/json:
@@ -73,7 +73,7 @@ paths:
       summary: Update already existing Cars.
       requestBody:
         description: JSON representation of a list of the Cars with updated data.
-        x-body-name: car
+        x-body-name: cars
         content:
           application/json:
             schema:
@@ -173,7 +173,7 @@ paths:
       summary: Add new Car States.
       requestBody:
         description: A list of Car State model in JSON format.
-        x-body-name: carState
+        x-body-name: carStates
         content:
           application/json:
             schema:

@@ -137,7 +137,7 @@ paths:
               type: array
         description: A list of Car models in JSON format.
         required: true
-        x-body-name: car
+        x-body-name: cars
       responses:
         "200":
           content:
@@ -206,7 +206,7 @@ paths:
               type: array
         description: JSON representation of a list of the Cars with updated data.
         required: true
-        x-body-name: car
+        x-body-name: cars
       responses:
         "200":
           content:
@@ -526,7 +526,7 @@ paths:
               type: array
         description: A list of Car State model in JSON format.
         required: true
-        x-body-name: carState
+        x-body-name: carStates
       responses:
         "200":
           content:
@@ -771,7 +771,7 @@ paths:
               type: array
         description: A list of Order models in JSON format.
         required: true
-        x-body-name: order
+        x-body-name: orders
       responses:
         "200":
           content:
@@ -1201,7 +1201,7 @@ paths:
               type: array
         description: A list of Order State models in JSON format.
         required: true
-        x-body-name: orderState
+        x-body-name: orderStates
       responses:
         "200":
           content:
@@ -1430,7 +1430,7 @@ paths:
               type: array
         description: A list of Platform HW models in JSON format.
         required: true
-        x-body-name: platformHW
+        x-body-name: platformHWs
       responses:
         "200":
           content:
@@ -1720,7 +1720,7 @@ paths:
               type: array
         description: A list of Route models in JSON format.
         required: true
-        x-body-name: route
+        x-body-name: routes
       responses:
         "200":
           content:
@@ -1789,7 +1789,7 @@ paths:
               type: array
         description: JSON representation of a list of the Routes with updated data.
         required: true
-        x-body-name: route
+        x-body-name: routes
       responses:
         "200":
           content:
@@ -1866,7 +1866,7 @@ paths:
               type: array
         description: A list of Route Visualization models in JSON format.
         required: true
-        x-body-name: RouteVisualization
+        x-body-name: RouteVisualizations
       responses:
         "200":
           content:
@@ -2247,7 +2247,7 @@ paths:
               type: array
         description: A list of Stop models in JSON format.
         required: true
-        x-body-name: stop
+        x-body-name: stops
       responses:
         "200":
           content:
@@ -2316,7 +2316,7 @@ paths:
               type: array
         description: JSON representation of a list of the Stops with updated data.
         required: true
-        x-body-name: stop
+        x-body-name: stops
       responses:
         "200":
           content:

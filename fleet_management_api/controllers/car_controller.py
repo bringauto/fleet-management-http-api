@@ -60,7 +60,7 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def update_cars(car):  # noqa: E501
+def update_cars():  # noqa: E501
     """Update already existing Cars.
 
      # noqa: E501

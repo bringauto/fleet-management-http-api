@@ -127,7 +127,7 @@ def get_cars() -> _Response:  # noqa: E501
     return _json_response(cars)
 
 
-def update_cars(car: dict | _models.Car) -> _Response:
+def update_cars() -> _Response:
     """Update existing cars.
 
     If any of the cars' update fails, no cars are updated on the server.
