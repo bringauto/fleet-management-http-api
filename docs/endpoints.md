@@ -40,14 +40,14 @@ More on endpoints [here](entity_manipulations.md#car).
 
 ### POST
 
-Create a new car.
+Create new cars.
 
-Request body format: JSON version of the Car.
+Request body format: JSON version of the list of Cars.
 
 Response codes:
-- 200: Successfully created a new car.
-- 400: Bad request. The request body is not a valid Car.
-- 404: Not found. Some of the entities referenced by the Car do not exist.
+- 200: Successfully created new cars.
+- 400: Bad request. The request body is not valid list of Cars.
+- 404: Not found. Some of the entities referenced by a Car do not exist.
 
 
 ### GET
@@ -60,14 +60,14 @@ Response codes:
 
 ### PUT
 
-Update an existing Car indentified by ID. In contrast to the POST method, the ID of the Car is required.
+Update existing Cars. In contrast to the POST method.
 
-Request body format: JSON version of the Car.
+Request body format: JSON version of a list of Cars to be updated.
 
 Response codes:
-- 200: Successful car update.
-- 400: Bad request. The request body is not a valid Car.
-- 404: Not found. The Car with the given ID does not exist.
+- 200: Successful cars' update.
+- 400: Bad request. The request body is not a valid list of Car.
+- 404: Not found. Some of the cars to be updated do not exist.
 
 ## /car/{carId}:
 
@@ -101,14 +101,14 @@ More on endpoints [here](entity_manipulations.md#car-state).
 
 ### POST
 
-Add a new state for a car by ID. Query parameters are ignored for this method.
+Add new car states (not necessarily for a single car). Query parameters are ignored for this method.
 
-Request body format: JSON containing a Car State data.
+Request body format: JSON containing a list of Car States data.
 
 Response codes:
-- 200: Successfully added new Car State.
-- 400: Bad request. The request body is not a valid Car State.
-- 404: Not found. The Car with the given ID does not exist.
+- 200: Successfully added new Car States.
+- 400: Bad request. The request body is not a valid list of Car States.
+- 404: Not found. Some of the Cars do not exist.
 
 ### GET
 
@@ -150,21 +150,21 @@ More on endpoints [here](entity_manipulations.md#order).
 
 ### POST
 
-Create a new order.
+Create new orders.
 
-Request body format: JSON version of the Order.
+Request body format: JSON version of the list of Orders.
 
 Query parameters are ignored for this method.
 
 Response codes:
-- 200: Successfully created a new order.
-- 400: Bad request. The request body is not a valid Order.
-- 403: Cannot add order. Maximum number of [active orders](entity_manipulations.md#order) specified in the API configuration has been reached. After some of the existing orders are completed or canceled, new orders can be added.
-- 404: Not found. Some of the entities referenced by the Order do not exist.
+- 200: Successfully created new orders.
+- 400: Bad request. The request body is not a valid list of Orders.
+- 403: Cannot add orders. Maximum number of [active orders](entity_manipulations.md#order) specified in the API configuration has been reached. After some of the existing orders are completed or canceled, new orders can be added.
+- 404: Not found. Some of the entities referenced by the Orders do not exist.
 
 ### GET
 
-Finds all orders
+Finds all orders.
 
 Query parameters:
 - 'since' - timestamp in milliseconds (default=0). API returns only orders with timestamp >= since.
@@ -221,17 +221,17 @@ More on endpoints [here](entity_manipulations.md#order-state).
 
 ### POST
 
-Create a new order state.
+Create new order states.
 
-Request body format: JSON version of the OrderState.
+Request body format: JSON version of a list of Order States.
 
 Query parameters are ignored for this method.
 
 Response codes:
-- 200: Successfully added new order state.
-- 400: Bad request. The request body is not a valid Order State.
-- 403: Forbidden. The Order State cannot be accepted by the API, because the Order has already received State with status DONE or CANCELED.
-- 404: Not found. The Order with the given ID does not exist.
+- 200: Successfully added new order states.
+- 400: Bad request. The request body is not a valid list of Order States.
+- 403: Forbidden. The Order States cannot be accepted by the API, because some of the Orders has already received Order State with status DONE or CANCELED.
+- 404: Not found. Some of the Orders do not exist.
 
 ### GET
 
@@ -241,6 +241,7 @@ Query parameters:
 - 'since' - timestamp in milliseconds (default=0). API returns only states with timestamp >= since.
 - 'wait' - boolean (default=False). If True and no states would be returned, the request will wait for the next relevant state to be added.
 - 'lastN' - integer (default=0). Limits the number of returned states. If the number of states is greater than the specified limit, the server returns N states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned states is NOT limited.
+- 'carId' - integer or empty (empty by default). If set, the API returns only states for the Orders assigned to a Car with ID=carId. If the car does not exist, an empty list is returned.
 
 Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
 
@@ -280,14 +281,14 @@ More on endpoints [here](entity_manipulations.md#platform-hw).
 
 ### POST
 
-Create a new platform HW.
+Create new platform HWs.
 
-Request body format: JSON version of the PlatformHW.
+Request body format: JSON version of the list of PlatformHWs.
 
 Response codes:
-- 200: Successfully created a new platform HW.
-- 400: Bad request. The request body is not a valid Platform HW.
-- 404: Not found. Some of the entities referenced by the Platform HW do not exist.
+- 200: Successfully created new platform HWs.
+- 400: Bad request. The request body is not a valid list of Platform HW.
+- 404: Not found. Some of the entities referenced by some of the Platform HWs do not exist.
 
 ### GET
 
@@ -296,7 +297,7 @@ Finds all platform HW.
 Response body format: JSON array of PlatformHW objects.
 
 Response codes:
-- 200: Returning all existing platform HW.
+- 200: Returning all existing platform HWs.
 
 ## /platformhw/{platformHwId}
 
@@ -331,14 +332,14 @@ More on endpoints [here](entity_manipulations.md#route).
 
 ### POST
 
-Create a new route.
+Create new routes.
 
-Request body format: JSON version of the Route.
+Request body format: JSON version of the list of Routes.
 
 Response codes:
-- 200: Successfully created a new route.
-- 400: Bad request. The request body is not a valid Route.
-- 404: Not found. Some of the entities referenced by the Route do not exist.
+- 200: Successfully created new routes.
+- 400: Bad request. The request body is not a valid list of Routes.
+- 404: Not found. Some of the entities referenced by some of the Routes do not exist.
 
 ### GET
 
@@ -351,14 +352,14 @@ Response codes:
 
 ### PUT
 
-Update an existing route by ID.
+Update existing routes.
 
-Request body format: JSON version of the Route.
+Request body format: JSON version of the list of Routes to be updated.
 
 Response codes:
-- 200: Successful route update.
-- 400: Bad request. The request body is not a valid Route.
-- 404: Not found. The Route with the given ID does not exist.
+- 200: Successful routes' update.
+- 400: Bad request. The request body is not a valid list of Routes.
+- 404: Not found. Some of the Routes do not exist.
 
 ## /route/{routeId}
 
@@ -403,14 +404,14 @@ Response codes:
 
 ### POST
 
-Redefine route visualization for the given route identified by the route's ID.
+Redefine route visualizations for the given routes identified by the routes' IDs.
 
-Request body format: JSON version of the RouteVisualization.
+Request body format: JSON version of the list of RouteVisualization to be updated.
 
 Response codes:
-- 200: Successfully found route visualization.
-- 400: Bad request. The request body is not a valid Route Visualization.
-- 404: Not found. The Route with the given ID does not exist.
+- 200: Successfully updated route visualizations.
+- 400: Bad request. The request body is not a valid list of Route Visualizations.
+- 404: Not found. Some of the Routes do not exist.
 
 # Stop endpoints
 
@@ -422,14 +423,14 @@ More on endpoints [here](entity_manipulations.md#stop).
 
 ### POST
 
-Create a new stop.
+Create new stops.
 
-Request body format: JSON version of the Stop.
+Request body format: JSON version of the list of Stop.
 
 Response codes:
-- 200: Successfully created a new stop.
-- 400: Bad request. The request body is not a valid Stop.
-- 404: Not found. Some of the entities referenced by the Stop do not exist.
+- 200: Successfully created new stops.
+- 400: Bad request. The request body is not a valid list of Stops.
+- 404: Not found. Some of the entities referenced by some of the Stops do not exist.
 
 ### GET
 
@@ -442,14 +443,14 @@ Response codes:
 
 ### PUT
 
-Update an existing stop by ID.
+Update existing stops.
 
-Request body format: JSON version of the Stop.
+Request body format: JSON version of the list of Stops to be updated.
 
 Response codes:
-- 200: Successful stop update.
-- 400: Bad request. The request body is not a valid Stop.
-- 404: Not found. The Stop with the given ID does not exist.
+- 200: Successful stops' update.
+- 400: Bad request. The request body is not a valid list of Stop.
+- 404: Not found. Some of the Stops do not exist.
 
 ## /stop/{stopId}
 

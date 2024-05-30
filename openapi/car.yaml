@@ -1,26 +1,30 @@
 paths:
   /car:
     post:
-      operationId: createCar
+      operationId: createCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Create a new Car object.
+      summary: Create new Car objects.
       requestBody:
-        x-body-name: car
-        description: A Car model in JSON format.
+        x-body-name: cars
+        description: A list of Car models in JSON format.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Car'
+              type: array
+              items:
+                $ref: '#/components/schemas/Car'
         required: true
       responses:
         '200':
-          description: The Car has been successfully created.
+          description: The Cars have been successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Car'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -62,22 +66,24 @@ paths:
         default:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
     put:
-      operationId: updateCar
+      operationId: updateCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
       tags:
         - car
-      summary: Update already existing Car.
+      summary: Update already existing Cars.
       requestBody:
-        description: JSON representation of the updated Car.
-        x-body-name: car
+        description: JSON representation of a list of the Cars with updated data.
+        x-body-name: cars
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Car'
+              type: array
+              items:
+                $ref: '#/components/schemas/Car'
         required: true
       responses:
         '200':
-          description: The Car has been successfully updated.
+          description: The Cars have been successfully updated.
           content:
             text/plain:
               type: string
@@ -160,22 +166,24 @@ paths:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
   /carstate:
     post:
-      operationId: addCarState
+      operationId: createCarStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
-      summary: Add a new Car State.
+      summary: Add new Car States.
       requestBody:
-        description: Car State model in JSON format.
-        x-body-name: carState
+        description: A list of Car State model in JSON format.
+        x-body-name: carStates
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CarState'
+              type: array
+              items:
+                $ref: '#/components/schemas/CarState'
         required: true
       responses:
         '200':
-          description: The new Car State has been successfully added.
+          description: The new Car States have been successfully added.
           content:
             text/plain:
               type: string

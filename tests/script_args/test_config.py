@@ -12,9 +12,7 @@ _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Whole_Config(unittest.TestCase):
     def setUp(self) -> None:
-        self.config_dict = load_config_file(
-            os.path.join(_CURRENT_DIR, "./test_config.json")
-        )
+        self.config_dict = load_config_file(os.path.join(_CURRENT_DIR, "./test_config.json"))
 
     def test_loading_config_dict_with_all_required_fields(self):
         _configs.APIConfig(**self.config_dict)
@@ -53,9 +51,7 @@ class Test_Database_Config(unittest.TestCase):
 
     def test_loading_database_config(self):
         config_obj = _configs.Database(**self.config_dict)
-        self.assertEqual(
-            config_obj.connection.model_dump(), self.config_dict["connection"]
-        )
+        self.assertEqual(config_obj.connection.model_dump(), self.config_dict["connection"])
         self.assertEqual(
             config_obj.maximum_number_of_table_rows,
             self.config_dict["maximum_number_of_table_rows"],
@@ -100,9 +96,7 @@ class Test_Security_Config(unittest.TestCase):
         config_obj = _configs.Security(**self.config_dict)
         self.assertEqual(str(config_obj.keycloak_url), self.config_dict["keycloak_url"])
         self.assertEqual(config_obj.client_id, self.config_dict["client_id"])
-        self.assertEqual(
-            config_obj.client_secret_key, self.config_dict["client_secret_key"]
-        )
+        self.assertEqual(config_obj.client_secret_key, self.config_dict["client_secret_key"])
         self.assertEqual(config_obj.scope, self.config_dict["scope"])
         self.assertEqual(config_obj.realm, self.config_dict["realm"])
         self.assertEqual(

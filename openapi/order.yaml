@@ -1,26 +1,30 @@
 paths:
   /order:
     post:
-      operationId: createOrder
+      operationId: createOrders
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
-      summary: Create a new Order.
+      summary: Create new Orders.
       requestBody:
-        description: Order model in JSON format.
-        x-body-name: order
+        description: A list of Order models in JSON format.
+        x-body-name: orders
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Order'
+              type: array
+              items:
+                $ref: '#/components/schemas/Order'
         required: true
       responses:
         '200':
-          description: The new Order has been successfully created.
+          description: The new Orders have been successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
         '400':
           $ref: 'errors.yaml#/components/responses/BadRequest'
         '401':
@@ -173,22 +177,24 @@ paths:
 
   /orderstate:
     post:
-      operationId: createOrderState
+      operationId: createOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
       tags:
         - orderState
-      summary: Add a new Order State.
+      summary: Add new Order States.
       requestBody:
-        description: Order State model in JSON format.
-        x-body-name: orderState
+        description: A list of Order State models in JSON format.
+        x-body-name: orderStates
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderState'
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderState'
         required: true
       responses:
         '200':
-          description: The new Order State has been successfully posted.
+          description: The new Order States have been successfully posted.
           content:
             application/json:
               schema:
@@ -213,6 +219,7 @@ paths:
         - $ref: 'common_models.yaml#/components/parameters/Wait'
         - $ref: 'common_models.yaml#/components/parameters/Since'
         - $ref: 'common_models.yaml#/components/parameters/LastN'
+        - $ref: 'common_models.yaml#/components/parameters/CarId'
       responses:
         '200':
           description: Successfully found all Order States complying with the request parameters.

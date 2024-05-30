@@ -8,18 +8,18 @@ from fleet_management_api.models.order import Order  # noqa: E501
 from fleet_management_api import util
 
 
-def create_order(order):  # noqa: E501
-    """Create a new Order.
+def create_orders(order):  # noqa: E501
+    """Create new Orders.
 
      # noqa: E501
 
-    :param order: Order model in JSON format.
-    :type order: dict | bytes
+    :param order: A list of Order models in JSON format.
+    :type order: list | bytes
 
-    :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
+    :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        order = Order.from_dict(connexion.request.get_json())  # noqa: E501
+        order = [Order.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 

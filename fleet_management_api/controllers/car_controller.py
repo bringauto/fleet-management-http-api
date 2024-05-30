@@ -8,18 +8,18 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def create_car(car):  # noqa: E501
-    """Create a new Car object.
+def create_cars(car):  # noqa: E501
+    """Create new Car objects.
 
      # noqa: E501
 
-    :param car: A Car model in JSON format.
-    :type car: dict | bytes
+    :param car: A list of Car models in JSON format.
+    :type car: list | bytes
 
-    :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]
+    :rtype: Union[List[Car], Tuple[List[Car], int], Tuple[List[Car], int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+        car = [Car.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'
 
 
@@ -60,16 +60,16 @@ def get_cars():  # noqa: E501
     return 'do some magic!'
 
 
-def update_car(car):  # noqa: E501
-    """Update already existing Car.
+def update_cars(car):  # noqa: E501
+    """Update already existing Cars.
 
      # noqa: E501
 
-    :param car: JSON representation of the updated Car.
-    :type car: dict | bytes
+    :param car: JSON representation of a list of the Cars with updated data.
+    :type car: list | bytes
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     if connexion.request.is_json:
-        car = Car.from_dict(connexion.request.get_json())  # noqa: E501
+        car = [Car.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
     return 'do some magic!'

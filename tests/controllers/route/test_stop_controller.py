@@ -28,11 +28,12 @@ class Test_Creating_Stop(unittest.TestCase):
             name="stop_2",
             position=position,
             notification_phone=_models.MobilePhone(phone="123456789"),
+            is_auto_stop=True,
         )
         with self.app.test_client() as c:
-            response = c.post("/v2/management/stop", json=stop_1)
+            response = c.post("/v2/management/stop", json=[stop_1])
             self.assertEqual(response.status_code, 200)
-            response = c.post("/v2/management/stop", json=stop_2)
+            response = c.post("/v2/management/stop", json=[stop_2])
             self.assertEqual(response.status_code, 200)
 
     def test_creating_stop_with_identical_name_yields_code_400(self):
@@ -48,9 +49,9 @@ class Test_Creating_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            response = c.post("/v2/management/stop", json=stop_1)
+            response = c.post("/v2/management/stop", json=[stop_1])
             self.assertEqual(response.status_code, 200)
-            response = c.post("/v2/management/stop", json=stop_2)
+            response = c.post("/v2/management/stop", json=[stop_2])
             self.assertEqual(response.status_code, 400)
 
     def test_creating_stop_with_invalid_json_yields_code_400(self):
@@ -71,10 +72,10 @@ class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         app = _app.get_test_app().app
         with app.test_client() as c:
-            example = c.get("/v2/management/openapi.json").json["components"][
-                "schemas"
-            ]["Stop"]["example"]
-            response = c.post("/v2/management/stop", json=example)
+            example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Stop"][
+                "example"
+            ]
+            response = c.post("/v2/management/stop", json=[example])
             self.assertEqual(response.status_code, 200)
 
 
@@ -104,8 +105,7 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=stop_1)
-            c.post("/v2/management/stop", json=stop_2)
+            c.post("/v2/management/stop", json=[stop_1, stop_2])
             response = c.get("/v2/management/stop")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -129,8 +129,7 @@ class Test_Retrieving_Single_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=stop_1)
-            c.post("/v2/management/stop", json=stop_2)
+            c.post("/v2/management/stop", json=[stop_1, stop_2])
 
             response = c.get("/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)
@@ -159,7 +158,7 @@ class Test_Deleting_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=stop)
+            c.post("/v2/management/stop", json=[stop])
             response = c.get("/v2/management/stop")
 
             self.assertEqual(len(response.json), 1)
@@ -189,10 +188,10 @@ class Test_Updating_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=stop)
+            c.post("/v2/management/stop", json=[stop])
             stop.name = "stop_Y"
             stop.id = 1
-            response = c.put("/v2/management/stop", json=stop)
+            response = c.put("/v2/management/stop", json=[stop])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/stop/1")
             self.assertEqual(response.json["name"], "stop_Y")
@@ -206,7 +205,7 @@ class Test_Updating_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            response = c.put("/v2/management/stop", json=stop)
+            response = c.put("/v2/management/stop", json=[stop])
             self.assertEqual(response.status_code, 404)
 
     def test_updating_stop_with_incomplete_data_yields_code_400(self):
@@ -217,9 +216,9 @@ class Test_Updating_Stop(unittest.TestCase):
             notification_phone=_models.MobilePhone(phone="123456789"),
         )
         with self.app.test_client() as c:
-            c.post("/v2/management/stop", json=stop)
+            c.post("/v2/management/stop", json=[stop])
 
-            response = c.put("/v2/management/stop", json={"name": "stop_Y"})
+            response = c.put("/v2/management/stop", json=[{"name": "stop_Y"}])
             self.assertEqual(response.status_code, 400)
 
 
@@ -251,12 +250,12 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
             stop_route_id=1,
         )
         with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=self.car)
-            c.post("/v2/management/order", json=self.order)
+            c.post("/v2/management/car", json=[self.car])
+            c.post("/v2/management/order", json=[self.order])
 
     def test_stop_cannot_be_deleted_if_referenced_by_some_order(self):
         with self.app.app.test_client() as c:
-            c.post("/v2/management/stop", json=self.stop)
+            c.post("/v2/management/stop", json=[self.stop])
 
             response = c.delete("/v2/management/stop/1")
             self.assertEqual(response.status_code, 400)
