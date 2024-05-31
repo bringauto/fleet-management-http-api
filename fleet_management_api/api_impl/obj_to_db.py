@@ -71,12 +71,11 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
         id=order.id,
         timestamp=_tstamp.timestamp_ms(),
         priority=order.priority,
-        user_id=order.user_id,
         car_id=order.car_id,
         target_stop_id=order.target_stop_id,
         stop_route_id=order.stop_route_id,
         notification_phone=notification_phone,
-        updated=True,
+        is_visible=order.is_visible
     )
 
 
@@ -89,12 +88,12 @@ def order_from_db_model(order_db_model: _db_models.OrderDBModel, last_state: _mo
         id=order_db_model.id,
         timestamp=order_db_model.timestamp,
         priority=order_db_model.priority,
-        user_id=order_db_model.user_id,
         car_id=order_db_model.car_id,
         target_stop_id=order_db_model.target_stop_id,
         stop_route_id=order_db_model.stop_route_id,
         notification_phone=notification_phone,
         last_state=last_state,
+        is_visible=order_db_model.is_visible
     )
 
 

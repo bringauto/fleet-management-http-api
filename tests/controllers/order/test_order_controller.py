@@ -35,7 +35,7 @@ class Test_Sending_Order(unittest.TestCase):
     def test_sending_order_to_exising_car(self, mock_timestamp: Mock):
         mock_timestamp.return_value = 1000
         order = Order(
-            user_id=789,
+            is_visible=True,
             timestamp=1000,
             car_id=1,
             target_stop_id=2,
@@ -60,7 +60,7 @@ class Test_Sending_Order(unittest.TestCase):
     def test_sending_order_to_non_exising_car_yields_code_404(self):
         nonexistent_car_id = 6546515
         order = Order(
-            user_id=789,
+            is_visible=True,
             car_id=nonexistent_car_id,
             target_stop_id=2,
             stop_route_id=1,
@@ -72,7 +72,7 @@ class Test_Sending_Order(unittest.TestCase):
 
     def test_sending_order_referencing_nonexistent_stop_yields_code_404(self):
         order = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=16316516,
             stop_route_id=1,
@@ -84,7 +84,7 @@ class Test_Sending_Order(unittest.TestCase):
 
     def test_specifying_route_not_containing_the_target_stop_yields_code_400(self):
         order = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=3,
             stop_route_id=1,
@@ -174,14 +174,14 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             self.car_2.id = response.json[0]["id"]
 
         self.order_1 = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=2,
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         self.order_2 = Order(
-            user_id=789,
+            is_visible=True,
             car_id=2,
             target_stop_id=2,
             stop_route_id=1,
@@ -224,7 +224,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 
     def test_retrieving_all_orders_when_some_orders_exist_yields_code_200(self):
         order = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=2,
             stop_route_id=1,
@@ -259,7 +259,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
     def test_retrieving_existing_order(self, mock_timestamp: Mock):
         mock_timestamp.return_value = 1000
         order = Order(
-            user_id=789,
+            is_visible=True,
             timestamp=1000,
             car_id=1,
             target_stop_id=4,
@@ -303,7 +303,7 @@ class Test_Deleting_Order(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[self.car])
             self.order = Order(
-                user_id=789,
+                is_visible=True,
                 car_id=1,
                 target_stop_id=6,
                 stop_route_id=1,
@@ -346,14 +346,14 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
             c.post("/v2/management/car", json=[self.car])
 
         self.order_1 = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
         self.order_2 = Order(
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=2,
             stop_route_id=1,

@@ -95,13 +95,12 @@ class OrderDBModel(Base):
     __tablename__ = "orders"
 
     priority: _Mapped[str] = _mapped_column(_sqa.String)
-    user_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
     target_stop_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("stops.id"), nullable=False)
     stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    updated: _Mapped[bool] = _mapped_column(_sqa.Boolean)
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
+    is_visible: _Mapped[bool] = _mapped_column(_sqa.Boolean)
 
     states: _Mapped[list["OrderStateDBModel"]] = _relationship(
         "OrderStateDBModel",
@@ -115,7 +114,7 @@ class OrderDBModel(Base):
 
     def __repr__(self) -> str:
         return (
-            f"Order(ID={self.id}, priority={self.priority}, user_ID={self.user_id}, "
+            f"Order(ID={self.id}, priority={self.priority}, is_visible={self.is_visible}, "
             f"car_ID={self.car_id}, target_stop_ID={self.target_stop_id}, "
             f"stop_route_ID={self.stop_route_id}, notification_phone={self.notification_phone})"
         )

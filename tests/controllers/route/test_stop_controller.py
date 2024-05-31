@@ -244,7 +244,7 @@ class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
         self.order = _models.Order(
             id=1,
             priority="normal",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,

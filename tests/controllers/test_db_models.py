@@ -159,21 +159,22 @@ class Test_Creating_Car_State_DB_Model(unittest.TestCase):
 
 class Test_Creating_Order_DB_Model(unittest.TestCase):
     def test_creating_db_model_from_order_preserves_attribute_values(self):
-        order = Order(user_id=789, car_id=12, target_stop_id=7, stop_route_id=8)
+        order = Order(car_id=12, target_stop_id=7, stop_route_id=8, is_visible=False)
         order_db_model = _obj_to_db.order_to_db_model(order)
         self.assertEqual(order_db_model.priority, order.priority)
-        self.assertEqual(order_db_model.user_id, order.user_id)
+        self.assertEqual(order_db_model.is_visible, order.is_visible)
         self.assertEqual(order_db_model.car_id, order.car_id)
         self.assertEqual(order_db_model.target_stop_id, order.target_stop_id)
         self.assertEqual(order_db_model.stop_route_id, order.stop_route_id)
         self.assertEqual(order_db_model.notification_phone, order.notification_phone)
+        self.assertEqual(order_db_model.is_visible, order.is_visible)
 
     def test_creating_db_model_from_order_with_only_required_attributes_specified_preserves_attribute_values(
         self,
     ):
         order = Order(
             priority="normal",
-            user_id=789,
+            is_visible=False,
             car_id=12,
             target_stop_id=7,
             stop_route_id=8,
@@ -181,14 +182,15 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
         )
         order_db_model = _obj_to_db.order_to_db_model(order)
         self.assertEqual(order_db_model.priority, order.priority)
-        self.assertEqual(order_db_model.user_id, order.user_id)
+        self.assertEqual(order_db_model.is_visible, order.is_visible)
         self.assertEqual(order_db_model.car_id, order.car_id)
         self.assertEqual(order_db_model.target_stop_id, order.target_stop_id)
         self.assertEqual(order_db_model.stop_route_id, order.stop_route_id)
         self.assertEqual(order_db_model.notification_phone, order.notification_phone.to_dict())
+        self.assertEqual(order_db_model.is_visible, order.is_visible)
 
     def test_order_converted_to_db_model_and_back_is_unchanged(self):
-        order_in = Order(id=1, user_id=789, car_id=12, target_stop_id=7, stop_route_id=8)
+        order_in = Order(id=1, is_visible=False, car_id=12, target_stop_id=7, stop_route_id=8)
         order_out = _obj_to_db.order_from_db_model(
             _obj_to_db.order_to_db_model(order_in), last_state=LAST_ORDER_STATE
         )
@@ -202,7 +204,7 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
     ):
         order_in = Order(
             priority="high",
-            user_id=789,
+            is_visible=True,
             car_id=12,
             target_stop_id=7,
             stop_route_id=8,

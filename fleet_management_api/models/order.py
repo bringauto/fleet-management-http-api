@@ -18,15 +18,13 @@ class Order(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, priority='normal', user_id=None, timestamp=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None, last_state=None):  # noqa: E501
+    def __init__(self, id=None, priority='normal', timestamp=None, car_id=None, notification=None, target_stop_id=None, stop_route_id=None, notification_phone=None, last_state=None, is_visible=True):  # noqa: E501
         """Order - a model defined in OpenAPI
 
         :param id: The id of this Order.  # noqa: E501
         :type id: int
         :param priority: The priority of this Order.  # noqa: E501
         :type priority: str
-        :param user_id: The user_id of this Order.  # noqa: E501
-        :type user_id: int
         :param timestamp: The timestamp of this Order.  # noqa: E501
         :type timestamp: int
         :param car_id: The car_id of this Order.  # noqa: E501
@@ -41,36 +39,37 @@ class Order(Model):
         :type notification_phone: MobilePhone
         :param last_state: The last_state of this Order.  # noqa: E501
         :type last_state: OrderState
+        :param is_visible: The is_visible of this Order.  # noqa: E501
+        :type is_visible: bool
         """
         self.openapi_types = {
             'id': int,
             'priority': str,
-            'user_id': int,
             'timestamp': int,
             'car_id': int,
             'notification': str,
             'target_stop_id': int,
             'stop_route_id': int,
             'notification_phone': MobilePhone,
-            'last_state': OrderState
+            'last_state': OrderState,
+            'is_visible': bool
         }
 
         self.attribute_map = {
             'id': 'id',
             'priority': 'priority',
-            'user_id': 'userId',
             'timestamp': 'timestamp',
             'car_id': 'carId',
             'notification': 'notification',
             'target_stop_id': 'targetStopId',
             'stop_route_id': 'stopRouteId',
             'notification_phone': 'notificationPhone',
-            'last_state': 'lastState'
+            'last_state': 'lastState',
+            'is_visible': 'isVisible'
         }
 
         self._id = id
         self._priority = priority
-        self._user_id = user_id
         self._timestamp = timestamp
         self._car_id = car_id
         self._notification = notification
@@ -78,6 +77,7 @@ class Order(Model):
         self._stop_route_id = stop_route_id
         self._notification_phone = notification_phone
         self._last_state = last_state
+        self._is_visible = is_visible
 
     @classmethod
     def from_dict(cls, dikt) -> 'Order':
@@ -135,29 +135,6 @@ class Order(Model):
             raise ValueError("Invalid value for `priority`, must be a follow pattern or equal to `/^(low|normal|high)$/`")  # noqa: E501
 
         self._priority = priority
-
-    @property
-    def user_id(self) -> int:
-        """Gets the user_id of this Order.
-
-
-        :return: The user_id of this Order.
-        :rtype: int
-        """
-        return self._user_id
-
-    @user_id.setter
-    def user_id(self, user_id: int):
-        """Sets the user_id of this Order.
-
-
-        :param user_id: The user_id of this Order.
-        :type user_id: int
-        """
-        if user_id is None:
-            raise ValueError("Invalid value for `user_id`, must not be `None`")  # noqa: E501
-
-        self._user_id = user_id
 
     @property
     def timestamp(self) -> int:
@@ -313,3 +290,24 @@ class Order(Model):
         """
 
         self._last_state = last_state
+
+    @property
+    def is_visible(self) -> bool:
+        """Gets the is_visible of this Order.
+
+
+        :return: The is_visible of this Order.
+        :rtype: bool
+        """
+        return self._is_visible
+
+    @is_visible.setter
+    def is_visible(self, is_visible: bool):
+        """Sets the is_visible of this Order.
+
+
+        :param is_visible: The is_visible of this Order.
+        :type is_visible: bool
+        """
+
+        self._is_visible = is_visible
