@@ -1207,7 +1207,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderState'
+                items:
+                  $ref: '#/components/schemas/OrderState'
+                type: array
           description: The new Order States have been successfully posted.
         "400":
           content:
