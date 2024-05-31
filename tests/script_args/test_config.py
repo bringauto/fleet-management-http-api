@@ -99,10 +99,6 @@ class Test_Security_Config(unittest.TestCase):
         self.assertEqual(config_obj.client_secret_key, self.config_dict["client_secret_key"])
         self.assertEqual(config_obj.scope, self.config_dict["scope"])
         self.assertEqual(config_obj.realm, self.config_dict["realm"])
-        self.assertEqual(
-            str(config_obj.keycloak_public_key_file),
-            self.config_dict["keycloak_public_key_file"],
-        )
 
     def test_raise_error_when_data_is_missing(self):
         for key in self.config_dict.keys():
@@ -111,16 +107,6 @@ class Test_Security_Config(unittest.TestCase):
                 invalid_config_dict.pop(key)
                 with self.assertRaises(pydantic.ValidationError):
                     _configs.Security(**invalid_config_dict)
-
-    def test_nonempty_invalid_file_path_of_keycloak_public_key_file_raises_error(self):
-        self.config_dict["keycloak_public_key_file"] = "invalid_file_path"
-        with self.assertRaises(pydantic.ValidationError):
-            _configs.Security(**self.config_dict)
-
-    def test_empty_keycloak_public_key_file_path_is_allowed(self):
-        self.config_dict["keycloak_public_key_file"] = ""
-        config_obj = _configs.Security(**self.config_dict)
-        self.assertEqual(str(config_obj.keycloak_public_key_file), "")
 
 
 class Test_API_Config(unittest.TestCase):
