@@ -30,7 +30,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
         order = Order(
             id=12,
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -75,7 +75,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
             example = spec["components"]["schemas"]["OrderState"]["example"]
             order = Order(
                 priority="high",
-                user_id=1,
+                is_visible=True,
                 car_id=1,
                 target_stop_id=1,
                 stop_route_id=1,
@@ -102,7 +102,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
         car = Car(id=1, name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -155,7 +155,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -163,7 +163,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
         )
         order_2 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -207,7 +207,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order_1 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -215,7 +215,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
         )
         order_2 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -296,7 +296,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -304,7 +304,7 @@ class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
         )
         other_order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -350,7 +350,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
         order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -441,7 +441,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
-        order = Order(user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        order = Order(is_visible=True, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         done_state = OrderState(status=OrderStatus.DONE, order_id=1)
         next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
         with self.app.app.test_client() as c:
@@ -465,7 +465,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone={})
-        order = Order(user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
+        order = Order(is_visible=True, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone={})
         canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
         next_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
         with self.app.app.test_client() as c:
@@ -502,7 +502,7 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
         create_route(self.app, stop_ids=(1,))
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
         order = Order(
-            user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
+            is_visible=True, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
         )
         with self.app.app.test_client() as c:
             mocked_timestamp.return_value = 0
@@ -584,10 +584,10 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
         create_route(self.app, stop_ids=(1, 2))
         car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
         self.order_1 = Order(
-            user_id=1, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
+            is_visible=True, car_id=1, target_stop_id=1, stop_route_id=1, notification_phone=PHONE
         )
         self.order_2 = Order(
-            user_id=1, car_id=1, target_stop_id=2, stop_route_id=1, notification_phone=PHONE
+            is_visible=True, car_id=1, target_stop_id=2, stop_route_id=1, notification_phone=PHONE
         )
 
         with self.app.app.test_client() as c:

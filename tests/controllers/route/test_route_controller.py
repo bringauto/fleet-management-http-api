@@ -151,7 +151,7 @@ class Test_Deleting_Route(unittest.TestCase):
             platform_hw_id=1,
             car_admin_phone=MobilePhone(phone="123456789"),
         )
-        order = Order(id=1, stop_route_id=1, target_stop_id=1, user_id=1, car_id=1)
+        order = Order(id=1, stop_route_id=1, target_stop_id=1, is_visible=True, car_id=1)
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/platformhw", json=[platform_hw])
             c.post("/v2/management/car", json=[car])

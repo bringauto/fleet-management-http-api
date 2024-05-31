@@ -297,7 +297,7 @@ class Test_Deleting_Car(unittest.TestCase):
     def test_car_with_assigned_order_cannot_be_deleted(self):
         order = Order(
             id=1,
-            user_id=789,
+            is_visible=True,
             car_id=1,
             target_stop_id=2,
             stop_route_id=1,

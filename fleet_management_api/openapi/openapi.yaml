@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 3.0.1
+  version: 3.1.0
 servers:
 - url: /v2/management
 security:
@@ -709,7 +709,6 @@ paths:
             application/json:
               example:
               - priority: normal
-                userId: 1
                 carId: 1
                 timestamp: 1713256508978
                 targetStopId: 1
@@ -717,6 +716,7 @@ paths:
                 stopRouteId: 1
                 notificationPhone:
                   phone: "+420123456789"
+                isVisible: true
               schema:
                 items:
                   $ref: '#/components/schemas/Order'
@@ -2892,13 +2892,13 @@ components:
           phone: "+420123456789"
         targetStopId: 1
         id: 1
+        isVisible: true
         priority: normal
         lastState:
           orderId: 1
           id: 1
           status: to_accept
           timestamp: 1616425275913
-        userId: 1
         timestamp: 1616425275913
         carId: 1
       properties:
@@ -2913,11 +2913,6 @@ components:
           pattern: ^(low|normal|high)$
           title: priority
           type: string
-        userId:
-          example: 1
-          format: int32
-          title: Id
-          type: integer
         timestamp:
           description: A Unix timestamp in milliseconds. The timestamp is used to
             determine the time of creation of an object.
@@ -2948,11 +2943,14 @@ components:
           $ref: '#/components/schemas/MobilePhone'
         lastState:
           $ref: '#/components/schemas/OrderState'
+        isVisible:
+          default: true
+          title: isVisible
+          type: boolean
       required:
       - carId
       - stopRouteId
       - targetStopId
-      - userId
       title: Order
       type: object
     Priority:

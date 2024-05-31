@@ -26,14 +26,14 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
             platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
         )
         self.order_1 = Order(
-            user_id=1,
+            is_visible=True,
             target_stop_id=1,
             stop_route_id=1,
             car_id=1,
             notification_phone=MobilePhone(phone="123456789"),
         )
         self.order_2 = Order(
-            user_id=1,
+            is_visible=True,
             target_stop_id=2,
             stop_route_id=1,
             car_id=1,

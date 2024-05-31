@@ -24,7 +24,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -87,14 +87,14 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         )
         order_1 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
             notification_phone={},
         )
         order_2 = Order(
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -139,7 +139,7 @@ class Test_Timeouts(unittest.TestCase):
         )
         order = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -193,7 +193,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -201,7 +201,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
         )
         order_2 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -292,7 +292,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=1,
             target_stop_id=1,
             stop_route_id=1,
@@ -300,7 +300,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
         )
         order_2 = Order(
             priority="high",
-            user_id=1,
+            is_visible=True,
             car_id=2,
             target_stop_id=1,
             stop_route_id=1,
@@ -361,7 +361,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
                 )
                 order = Order(
                     priority="high",
-                    user_id=1,
+                    is_visible=True,
                     car_id=3,
                     target_stop_id=1,
                     stop_route_id=1,
