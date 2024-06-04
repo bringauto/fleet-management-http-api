@@ -159,29 +159,32 @@ def create_orders() -> _Response:
     - the car exists,
     - the target stop exists,
     - the route exists and contains the target stop,
-    - the maximum number of active orders has not been reached.
+    - the maximum number of active orders for any referenced car has not been reached.
     """
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
 
     order_db_models: list[_db_models.OrderDBModel] = []
     checked: list[_db_access.CheckBeforeAdd] = []
-    for o in connexion.request.get_json():
-        order = _models.Order.from_dict(o)
+    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in connexion.request.get_json()]
+    orders_per_car = _group_new_orders_by_car(orders)
+
+    if _max_n_of_active_orders is not None:
+        for car_id in orders_per_car:
+            if len(orders_per_car[car_id]) > _max_n_of_active_orders - n_of_active_orders(car_id):
+                return _error(
+                    403,
+                    f"Maximum number {_max_n_of_active_orders} of active orders has been reached.",
+                    "Too many orders",
+                )
+
+    for order in orders:
         order.last_state = None
         car_id = order.car_id
         if not _car_exist(car_id):
             return _log_error_and_respond(
                 f"Car with ID={car_id} does not exist.", 404, "Object not found"
             )
-        if _max_n_of_active_orders is not None:
-            car_id = order.car_id
-            if n_of_active_orders(car_id) >= _max_n_of_active_orders:
-                return _error(
-                    403,
-                    f"Maximum number {max_n_of_active_orders()} of active orders has been reached.",
-                    "Too many orders",
-                )
         checked.extend(
             [
                 _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
@@ -291,6 +294,10 @@ def get_orders(since: int = 0) -> _Response:
     return _json_response(orders)
 
 
+def _car_exist(car_id: int) -> bool:
+    return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
+
+
 def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order:
     db_last_state = _db_access.get(
         _db_models.OrderStateDBModel,
@@ -303,11 +310,16 @@ def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _mode
     return order
 
 
-def _car_exist(car_id: int) -> bool:
-    return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
+def _group_new_orders_by_car(orders: list[_models.Order]) -> dict[CarId, list[_models.Order]]:
+    orders_by_car: dict[CarId, list[_models.Order]] = defaultdict(list)
+    for order in orders:
+        orders_by_car[order.car_id].append(order)
+    return orders_by_car
 
 
 def _post_default_order_state(order_id: int) -> _Response:
     order_state = _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
     response = _order_state.create_order_states_from_argument_and_post([order_state])
     return response
+
+

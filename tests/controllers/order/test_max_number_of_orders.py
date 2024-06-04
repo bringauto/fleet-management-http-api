@@ -109,16 +109,31 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
         order_2 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
         order_3 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
-            c.post("/v2/management/order", json=[order_1])
-            c.post("/v2/management/order", json=[order_2])
-            response = c.post("/v2/management/order", json=[order_3])
+            response = c.post("/v2/management/order", json=[order_1, order_2, order_3])
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(n_of_active_orders(1), 3)
+            self.assertEqual(n_of_active_orders(car_id=1), 3)
 
         order_4 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/order", json=[order_4])
             self.assertEqual(response.status_code, 403)
+            self.assertEqual(n_of_active_orders(car_id=1), 3)
+
+        order_5 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=2)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/order", json=[order_5])
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(n_of_active_orders(car_id=2), 1)
+
+    def test_exceeding_max_number_of_orders_in_a_single_request_does_not_add_any_order(self):
+        set_max_n_of_active_orders(2)
+        order_1 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_2 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_3 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/order", json=[order_1, order_2, order_3])
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(n_of_active_orders(1), 0)
 
     def test_max_number_of_orders_is_checked_separately_for_each_car(self):
         set_max_n_of_active_orders(2)
@@ -132,6 +147,19 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
             self.assertEqual(response.status_code, 403)
             response = c.post("/v2/management/order", json=[order_4])
             self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(c.get("/v2/management/order/1").json), 2)
+
+    def test_sending_orders_in_single_request_when_exceeding_max_number_for_at_least_one_car_does_not_create_any_order(self):
+        set_max_n_of_active_orders(2)
+        order_1 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_2 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_3 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=1)
+        order_4 = Order(is_visible=True, target_stop_id=1, stop_route_id=1, car_id=2)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/order", json=[order_1, order_2, order_3, order_4])
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(c.get("/v2/management/order").json, [])
+
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
