@@ -69,6 +69,9 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
                 f"Order with id='{id_}' was not found.", 404, "Object not found"
             )
 
+    if not order_states:
+        return _json_response([], code=200)
+
     # order exists
     for state in order_states:
         if _is_order_done(state):
@@ -97,19 +100,22 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
 
     response = _db_access.add(*db_models)
     if response.status_code == 200:
-        inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]
-        for model in inserted_models:
-            _remove_old_states(model.order_id)
-            _log_info(f"Order state (ID={model.id}) has been sent.")
-            _save_last_status(model)
-            if model.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
-                car_id = _order.from_active_to_inactive_order(model.order_id)
-                max_n = _order.max_n_of_inactive_orders()
-                if max_n is not None and car_id is not None:
-                    n_of_inactive = _order.n_of_inactive_orders(car_id)
-                    if n_of_inactive > max_n:
-                        _order.delete_oldest_inactive_order(car_id)
-        return _json_response(inserted_models)
+        try:
+            inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]
+            for model in inserted_models:
+                _remove_old_states(model.order_id)
+                _log_info(f"Order state (ID={model.id}) has been sent.")
+                _save_last_status(model)
+                if model.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
+                    car_id = _order.from_active_to_inactive_order(model.order_id)
+                    max_n = _order.max_n_of_inactive_orders()
+                    if max_n is not None and car_id is not None:
+                        n_of_inactive = _order.n_of_inactive_orders(car_id)
+                        if n_of_inactive > max_n:
+                            _order.delete_oldest_inactive_order(car_id)
+            return _json_response(inserted_models)
+        except Exception as e:
+            _log_error(f"Error while converting Order State DB models to Order State models: {e}.\n Response body is {response.body}.")
     else:
         return _log_error_and_respond(
             f"Order state could not be sent. {response.body['detail']}",
