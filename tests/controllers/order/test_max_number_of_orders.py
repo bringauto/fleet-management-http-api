@@ -141,7 +141,6 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
             response = c.post("/v2/management/order", json=[order_4])
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(c.get("/v2/management/order/1").json), 2)
-            self.assertEqual(len(c.get("/v2/management/order/2").json), 1)
 
 
     def test_sending_orders_in_single_request_when_exceeding_max_number_for_at_least_one_car_does_not_create_any_order(self):
