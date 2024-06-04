@@ -179,7 +179,7 @@ def create_orders() -> _Response:
                 )
 
     for order in orders:
-        order.last_state = None
+        order.last_state = None  # type: ignore
         car_id = order.car_id
         if not _car_exist(car_id):
             return _log_error_and_respond(
@@ -202,19 +202,27 @@ def create_orders() -> _Response:
             ]
         )
         order_db_models.append(_obj_to_db.order_to_db_model(order))
+
     response = _db_access.add(*order_db_models, checked=checked)
 
     if response.status_code == 200:
+        # orders are created in the database, now log them
         posted_db_models: list[_db_models.OrderDBModel] = response.body
-        posted_orders: list[_models.Order] = []
+        ids: list[int] = []
         for model in posted_db_models:
             assert model.id is not None
-            db_state = _post_default_order_state(model.id).body[0]
-            state = _obj_to_db.order_state_from_db_model(db_state)
+            ids.append(model.id)
+            _log_info(f"Order (ID={model.id}) has been created.")
+
+        db_states = _post_default_order_states(ids).body
+        states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
+
+        posted_orders: list[_models.Order] = []
+        for model, state in zip(posted_db_models, states):
             posted_order = _obj_to_db.order_from_db_model(model, state)
-            _log_info(f"Order (ID={posted_order.id}) has been created.")
             _add_active_order(order.car_id, posted_order.id)
             posted_orders.append(posted_order)
+
         return _json_response(posted_orders)
     else:
         return _log_error_and_respond(
@@ -317,9 +325,9 @@ def _group_new_orders_by_car(orders: list[_models.Order]) -> dict[CarId, list[_m
     return orders_by_car
 
 
-def _post_default_order_state(order_id: int) -> _Response:
-    order_state = _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
-    response = _order_state.create_order_states_from_argument_and_post([order_state])
+def _post_default_order_states(order_ids: list[int]) -> _Response:
+    order_states = [_models.OrderState(order_id=id_, status=DEFAULT_STATUS) for id_ in order_ids]
+    response = _order_state.create_order_states_from_argument_and_post(order_states)
     return response
 
 

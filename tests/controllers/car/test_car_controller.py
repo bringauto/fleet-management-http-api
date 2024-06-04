@@ -207,7 +207,7 @@ class Test_Logging_Car_Creation(unittest.TestCase):
             with app.app.test_client() as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 self.assertEqual(len(logs.output), 2)
-                self.assertIn(str(car.name), logs.output[-1])
+                self.assertIn(str(car.name), logs.output[0])
 
     def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(
         self,

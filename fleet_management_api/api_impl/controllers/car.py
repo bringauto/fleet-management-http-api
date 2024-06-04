@@ -2,6 +2,10 @@ import connexion  # type: ignore
 
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.models import (
+    CarState as _CarState,
+    Car as _Car,
+)
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.controllers.car_state import (
     create_car_states_from_argument_and_post as _create_car_state_from_argument_and_post,
@@ -60,15 +64,18 @@ def create_cars() -> _Response:  # noqa: E501
         response = _db_access.add(*car_db_models, checked=checked)
         if response.status_code == 200:
             posted_db_models: list[_db_models.CarDBModel] = response.body
-            posted_cars = []
-            for posted_db_model in posted_db_models:
-                assert posted_db_model.id is not None
-                db_state = _post_default_car_state(posted_db_model.id).body[0]
-                state = _obj_to_db.car_state_from_db_model(db_state)
-                posted_car = _obj_to_db.car_from_db_model(posted_db_model, state)
-                msg = f"Car (ID={posted_car.id}, name='{posted_car.name}') has been created."
-                print(msg)
-                _log_info(f"Car (ID={posted_car.id}, name='{posted_car.name}) has been created.")
+            ids: list[int] = []
+            for model in posted_db_models:
+                assert model.id is not None
+                ids.append(model.id)
+                _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
+
+            db_states = _post_default_car_state(ids)
+            states = [_obj_to_db.car_state_from_db_model(s) for s in db_states.body]
+
+            posted_cars: list[_Car] = []
+            for model, state in zip(posted_db_models, states):
+                posted_car = _obj_to_db.car_from_db_model(model, state)
                 posted_cars.append(posted_car)
             return _json_response(posted_cars)
         else:
@@ -166,9 +173,8 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
     return car
 
 
-def _post_default_car_state(car_id: int) -> _Response:
-    car_state = _models.CarState(
-        status=_models.CarStatus.OUT_OF_ORDER, car_id=car_id, fuel=0, speed=0.0
-    )
-    response = _create_car_state_from_argument_and_post([car_state])
+def _post_default_car_state(car_ids: list[int]) -> _Response:
+    car_states = \
+        [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
+    response = _create_car_state_from_argument_and_post(car_states)
     return response
