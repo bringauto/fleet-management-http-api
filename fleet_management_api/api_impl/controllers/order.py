@@ -208,7 +208,6 @@ def create_orders() -> _Response:
     if response.status_code == 200:
         # orders are created in the database, now log them
         posted_db_models: list[_db_models.OrderDBModel] = response.body
-        posted_orders: list[_models.Order] = []
         ids: list[int] = []
         for model in posted_db_models:
             assert model.id is not None
@@ -218,9 +217,9 @@ def create_orders() -> _Response:
         db_states = _post_default_order_states(ids).body
         states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
 
+        posted_orders: list[_models.Order] = []
         for model, state in zip(posted_db_models, states):
             posted_order = _obj_to_db.order_from_db_model(model, state)
-            _log_info(f"Order (ID={posted_order.id}) has been created.")
             _add_active_order(order.car_id, posted_order.id)
             posted_orders.append(posted_order)
 
