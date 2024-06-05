@@ -6,6 +6,9 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 import time
 
+import sqlalchemy as sqa
+from sqlalchemy.pool.impl import QueuePool
+
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
@@ -155,6 +158,40 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile(_TEST_DB_FILE_PATH):
             os.remove(_TEST_DB_FILE_PATH)
+
+
+class Test_Waiting_Mechanism_Releases_Connection_To_Pool(unittest.TestCase):
+    """There is a maximum number of active connections that can be opened at the same time.
+
+    To reduce the number of connections, the waiting mechanism should release the connection
+    if there are no data available. This test checks if the connection is released back to the
+    connection pool.
+
+    This releasing of a connection is possible, because the waiting request on the HTTP server
+    waits for data coming from other request to the server and does not read them from the database.
+    """
+
+    def setUp(self) -> None:
+        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
+        models.initialize_test_tables(_connection.current_connection_source())
+
+    def test_single_connection_is_reused_by_every_request_and_then_checked_in_into_pool(self):
+        test_obj = models.TestBase(test_str="test", test_int=123)
+        src = _connection.current_connection_source()
+        assert isinstance(src.pool, QueuePool)
+        def get_and_count_connections():
+            _db_access.get(models.TestBase, wait=True)
+
+        with ThreadPoolExecutor() as executor:
+            executor.submit(get_and_count_connections)
+            time.sleep(0.01)
+            executor.submit(get_and_count_connections)
+            time.sleep(0.01)
+            executor.submit(get_and_count_connections)
+            time.sleep(0.01)
+            executor.submit(_db_access.add, test_obj)
+            time.sleep(0.02)
+            self.assertEqual(src.pool.checkedin(), 1)
 
 
 if __name__ == "__main__":

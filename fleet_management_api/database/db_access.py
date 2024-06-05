@@ -194,16 +194,15 @@ def delete_n(
         return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
-def get_by_id(
-    base: type[_Base], *ids: int, conn_source: Optional[_sqa.Engine] = None
+def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
 ) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     An optional `connection_source` may be specified to replace the otherwise used global connection
     source (an sqlalchemy Engine object).
     """
-    source = _get_current_connection_source(conn_source)
-    with _Session(source) as session, session.begin():
+    engine = _get_current_connection_source(engine)
+    with _Session(engine) as session, session.begin():
         try:
             results = []
             for id_value in ids:
@@ -252,6 +251,7 @@ def get(
         sort_result_by = {}
     table = base.__table__
     source = _get_current_connection_source(connection_source)
+    result = []
     with _Session(source) as session, session.begin():
         clauses = [
             criteria[attr_label](getattr(table.columns, attr_label))
@@ -271,13 +271,14 @@ def get(
             for item in omitted_relationships:
                 stmt = stmt.options(_noload(item))
         result = [item.copy() for item in session.scalars(stmt).all()]
-        if not result and wait:
-            result = _wait_mg.wait_for_content(
-                base.__tablename__,
-                timeout_ms,
-                validation=_functools.partial(_is_awaited_result_valid, criteria),
-            )
-        return result
+
+    if not result and wait:
+        result = _wait_mg.wait_for_content(
+            base.__tablename__,
+            timeout_ms,
+            validation=_functools.partial(_is_awaited_result_valid, criteria),
+        )
+    return result
 
 
 def get_children(
@@ -286,10 +287,6 @@ def get_children(
     children_col_name: str,
     connection_source: Optional[_sqa.Engine] = None,
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
-    wait: bool = False,
-    timeout_ms: int = 1000,
-    sort_result_by: Optional[dict[str, Order]] = None,
-    first_n: int = 0
 ) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
@@ -301,18 +298,10 @@ def get_children(
     source = _get_current_connection_source(connection_source)
     if criteria is None:
         criteria = {}
-    child_base = getattr(parent_base, children_col_name).property.mapper.class_
     with _Session(source) as session:
         try:
             raw_chilren = getattr(session.get_one(parent_base, parent_id), children_col_name)
             children = [child for child in raw_chilren if all(crit(getattr(child, attr)) for attr,crit in criteria.items())]
-            if not children and wait:
-                updated_criteria = {**criteria, parent_base.__tablename__: lambda x: x == parent_id}
-                children = _return_awaited_result(
-                    child_base,
-                    timeout_ms=timeout_ms,
-                    criteria=updated_criteria
-                )
             return children
         except _NoResultFound as e:
             raise ParentNotFound(
@@ -320,19 +309,6 @@ def get_children(
             )
         except Exception as e:
             raise e
-
-
-def _return_awaited_result(
-    base: type[_Base],
-    timeout_ms: int,
-    criteria: Optional[dict[str, Callable[[Any], bool]]] = None
-) -> list[Any]:
-
-    return _wait_mg.wait_for_content(
-        base.__tablename__,
-        timeout_ms,
-        validation=_functools.partial(_is_awaited_result_valid, criteria),
-    )
 
 
 def update(*updated: _Base) -> _Response:
