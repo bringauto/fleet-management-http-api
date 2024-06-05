@@ -252,6 +252,7 @@ def get(
         sort_result_by = {}
     table = base.__table__
     source = _get_current_connection_source(connection_source)
+    result = []
     with _Session(source) as session, session.begin():
         clauses = [
             criteria[attr_label](getattr(table.columns, attr_label))
@@ -271,13 +272,14 @@ def get(
             for item in omitted_relationships:
                 stmt = stmt.options(_noload(item))
         result = [item.copy() for item in session.scalars(stmt).all()]
-        if not result and wait:
-            result = _wait_mg.wait_for_content(
-                base.__tablename__,
-                timeout_ms,
-                validation=_functools.partial(_is_awaited_result_valid, criteria),
-            )
-        return result
+
+    if not result and wait:
+        result = _wait_mg.wait_for_content(
+            base.__tablename__,
+            timeout_ms,
+            validation=_functools.partial(_is_awaited_result_valid, criteria),
+        )
+    return result
 
 
 def get_children(
