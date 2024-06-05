@@ -195,6 +195,4 @@ class Test_Waiting_Mechanism_Releases_Connection_To_Pool(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # runner = unittest.TextTestRunner(verbosity=2)
-    # runner.run(unittest.makeSuite(Test_Waiting_Mechanism_Releases_Connection_To_Pool))
     unittest.main(verbosity=2, buffer=True)  # pragma: no covers
