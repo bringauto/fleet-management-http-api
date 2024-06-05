@@ -98,6 +98,8 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
         db_model.car_id = order.car_id
         db_models.append(db_model)
 
+    assert len(db_models) > 0
+
     response = _db_access.add(*db_models)
     if response.status_code == 200:
         try:
