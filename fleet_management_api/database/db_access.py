@@ -112,7 +112,8 @@ def add(
     """
     global _wait_mg
     if not added:
-        return _text_response("Empty request body. Nothing to add to database.")
+        return _json_response([])
+
     _check_common_base_for_all_objs(*added)
     source = _get_current_connection_source(connection_source)
     with _Session(source) as session:
