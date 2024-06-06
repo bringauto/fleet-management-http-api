@@ -327,7 +327,7 @@ def _group_new_orders_by_car(orders: list[_models.Order]) -> dict[CarId, list[_m
 
 def _post_default_order_states(order_ids: list[int]) -> _Response:
     order_states = [_models.OrderState(order_id=id_, status=DEFAULT_STATUS) for id_ in order_ids]
-    response = _order_state.create_order_states_from_argument_and_post(order_states)
+    response = _order_state.create_order_states_from_argument_and_post(order_states, check_final_state=False)
     return response
 
 

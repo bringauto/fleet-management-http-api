@@ -39,7 +39,10 @@ def create_order_states() -> _Response:
     return create_order_states_from_argument_and_post(order_states)
 
 
-def create_order_states_from_argument_and_post(order_states: list[_models.OrderState]) -> _Response:
+def create_order_states_from_argument_and_post(
+    order_states: list[_models.OrderState],
+    check_final_state: bool = True
+) -> _Response:
     """Create new states of  existing orders. The Order State models are passed as an argument.
 
     Order State creation can succeed only if:
@@ -54,28 +57,29 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
                 f"Order with id='{id_}' was not found.", 404, "Object not found"
             )
         assert order is not None
-        last_states: list[_db_models.OrderStateDBModel] = _db_access.get(
-            _db_models.OrderStateDBModel,
-            criteria={"order_id": lambda x: x == order.id},
-            sort_result_by={"timestamp": "desc", "id": "desc"},
-            first_n=1,
-        )
-        if last_states:
-            last_state = last_states[0]
-            if last_state.status == _models.OrderStatus.DONE:
-                return _log_error_and_respond(
-                    f"Order with id='{last_state.order_id}' has already received status DONE."
-                    "No other Order State can be added.",
-                    403,
-                    title="Could not create new object",
-                )
-            elif last_state.status == _models.OrderStatus.CANCELED:
-                return _log_error_and_respond(
-                    f"Order with id='{last_state.order_id}' has already received status CANCELED."
-                    "No other Order State can be added.",
-                    403,
-                    title="Could not create new object",
-                )
+        if check_final_state:
+            last_states: list[_db_models.OrderStateDBModel] = _db_access.get(
+                _db_models.OrderStateDBModel,
+                criteria={"order_id": lambda x: x == order.id},
+                sort_result_by={"timestamp": "desc", "id": "desc"},
+                first_n=1,
+            )
+            if last_states:
+                last_state = last_states[0]
+                if last_state.status == _models.OrderStatus.DONE:
+                    return _log_error_and_respond(
+                        f"Order with id='{last_state.order_id}' has already received status DONE."
+                        "No other Order State can be added.",
+                        403,
+                        title="Could not create new object",
+                    )
+                elif last_state.status == _models.OrderStatus.CANCELED:
+                    return _log_error_and_respond(
+                        f"Order with id='{last_state.order_id}' has already received status CANCELED."
+                        "No other Order State can be added.",
+                        403,
+                        title="Could not create new object",
+                    )
 
     if not order_states:
         return _json_response([], code=200)
