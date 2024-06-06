@@ -54,6 +54,19 @@ def create_order_states() -> _Response:
     return create_order_states_from_argument_and_post(order_states)
 
 
+def _trim_states_after_done_or_canceled(states: list[_models.OrderState]) -> list[_models.OrderState]:
+    done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
+    filtered_states: list[_models.OrderState] = []
+    received_states = states.copy()
+    for state in received_states:
+        if done_or_canceled_states.get(state.order_id) is not None:
+            states.remove(state)
+        else:
+            if state.status == _models.OrderStatus.DONE or state.status == _models.OrderStatus.CANCELED:
+                done_or_canceled_states[state.order_id] = state
+            filtered_states.append(state)
+    return filtered_states
+
 def create_order_states_from_argument_and_post(order_states: list[_models.OrderState]) -> _Response:
     """Create new states of  existing orders. The Order State models are passed as an argument.
 
@@ -88,6 +101,17 @@ def create_order_states_from_argument_and_post(order_states: list[_models.OrderS
                 403,
                 title="Could not create new object",
             )
+
+    order_states = _trim_states_after_done_or_canceled(order_states)
+
+    done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
+    received_states = order_states.copy()
+    for state in received_states:
+        if done_or_canceled_states.get(state.order_id) is None:
+            done_or_canceled_states[state.order_id] = state
+        elif done_or_canceled_states[state.order_id].status == _models.OrderStatus.DONE \
+        or done_or_canceled_states[state.order_id].status == _models.OrderStatus.CANCELED:
+            order_states.remove(state)
 
     db_models: list[_db_models.OrderStateDBModel] = []
 
