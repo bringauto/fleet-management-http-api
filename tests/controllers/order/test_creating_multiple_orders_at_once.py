@@ -86,7 +86,7 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             for o in response.json:
                 state = Order.from_dict(o).last_state
-                self.assertTrue(isinstance(state, OrderState) or state is None)
+                self.assertTrue(isinstance(state, OrderState))
 
 
     def tearDown(self) -> None:  # pragma: no cover
