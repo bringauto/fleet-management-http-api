@@ -318,7 +318,8 @@ def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _mode
     if order_db_model.id is None:
         return None
     if not states:
-        last_state = _default_order_state(order_db_model.id)
+        _log_info(f"No order states for order with ID={order_db_model.id}.")
+        last_state = None
     else:
         last_state = _obj_to_db.order_state_from_db_model(states[0])
     order = _obj_to_db.order_from_db_model(order_db_model, last_state)
