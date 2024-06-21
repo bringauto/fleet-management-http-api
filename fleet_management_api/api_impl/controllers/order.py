@@ -284,7 +284,8 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
     orders: list[_models.Order] = list()
     for db_order in db_orders:
         order = _get_order_with_last_state(db_order)
-        orders.append(order)
+        if order is not None:
+            orders.append(order)
     _log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
     return _json_response(orders)
 
@@ -298,7 +299,8 @@ def get_orders(since: int = 0) -> _Response:
     orders: list[_models.Order] = list()
     for db_order in db_orders:
         order = _get_order_with_last_state(db_order)
-        orders.append(order)
+        if order is not None:
+            orders.append(order)
     return _json_response(orders)
 
 
@@ -306,14 +308,20 @@ def _car_exist(car_id: int) -> bool:
     return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
 
 
-def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order:
-    db_last_state = _db_access.get(
+def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order | None:
+    states = _db_access.get(
         _db_models.OrderStateDBModel,
         criteria={"order_id": lambda x: x == order_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,
     )
-    last_state = _obj_to_db.order_state_from_db_model(db_last_state[0])
+    if order_db_model.id is None:
+        return None
+    if not states:
+        # The only way no order state exists is the order is in the process of deletion
+        _log_info(f"No order states for order with ID={order_db_model.id}.")
+        return None
+    last_state = _obj_to_db.order_state_from_db_model(states[0])
     order = _obj_to_db.order_from_db_model(order_db_model, last_state)
     return order
 
@@ -325,8 +333,12 @@ def _group_new_orders_by_car(orders: list[_models.Order]) -> dict[CarId, list[_m
     return orders_by_car
 
 
+def _default_order_state(order_id: int) -> _models.OrderState:
+    return _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
+
+
 def _post_default_order_states(order_ids: list[int]) -> _Response:
-    order_states = [_models.OrderState(order_id=id_, status=DEFAULT_STATUS) for id_ in order_ids]
+    order_states = [_default_order_state(id_) for id_ in order_ids]
     response = _order_state.create_order_states_from_argument_and_post(order_states, check_final_state=False)
     return response
 

@@ -43,7 +43,7 @@ def create_order_states_from_argument_and_post(
     order_states: list[_models.OrderState],
     check_final_state: bool = True
 ) -> _Response:
-    """Create new states of  existing orders. The Order State models are passed as an argument.
+    """Create new states of existing orders. The Order State models are passed as an argument.
 
     Order State creation can succeed only if:
     - the order exists,

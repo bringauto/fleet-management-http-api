@@ -79,7 +79,11 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
     )
 
 
-def order_from_db_model(order_db_model: _db_models.OrderDBModel, last_state: _models.OrderState) -> _models.Order:
+def order_from_db_model(
+    order_db_model: _db_models.OrderDBModel,
+    last_state: _models.OrderState | None
+) -> _models.Order:
+
     if order_db_model.notification_phone is None:
         notification_phone = None
     else:
