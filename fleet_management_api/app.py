@@ -12,6 +12,7 @@ from fleet_management_api.api_impl.controllers.order import (
     clear_inactive_orders
 )
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.logs import clear_logs as _clear_logs
 
 
 def get_app() -> connexion.FlaskApp:
@@ -74,7 +75,7 @@ class _TestApp:
                 return uri + f"?api_key={self._key}"
 
 
-def get_test_app(predef_api_key: str = "") -> _TestApp:
+def get_test_app(predef_api_key: str = "", clear_logs: bool = True) -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 
     It enables to surpass the API key verification by providing a predefined API key.
@@ -87,6 +88,7 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
             key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()
         ),
     )
+    _clear_logs()
     clear_active_orders()
     clear_inactive_orders()
     return _TestApp(predef_api_key)

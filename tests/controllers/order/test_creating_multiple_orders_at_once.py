@@ -10,13 +10,15 @@ import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
 from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
-from fleet_management_api.api_impl.controllers.order import set_max_n_of_inactive_orders, set_max_n_of_active_orders
+from fleet_management_api.api_impl.controllers.order import set_max_n_of_inactive_orders
 from fleet_management_api.database.timestamp import timestamp_ms
+from fleet_management_api.logs import clear_logs
 
 
 class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -30,7 +32,6 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
 
         self.orders = [Order(car_id=1, target_stop_id=1, stop_route_id=1) for _ in range(30)]
 
-    @unittest.skip("This test is not working as expected")
     def test_waiting_request_for_new_orders_returns_all_just_created_orders_with_their_default_states(self):
         def get_order_updates():
             with self.app.app.test_client() as c:
@@ -46,7 +47,6 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
             for order in orders:
                 self.assertEqual(order["lastState"]["status"], "to_accept")
 
-    @unittest.skip("This test is not working as expected")
     def test_returning_orders_after_some_were_canceled(self):
         set_max_n_of_inactive_orders(5)
         with self.app.app.test_client() as c:
@@ -60,7 +60,6 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
             self.assertEqual(len(orders), 5)
             for order in orders:
                 self.assertEqual(order["lastState"]["status"], "canceled")
-
 
     def test_waiting_for_order_updatea_and_marking_ordera_as_done_at_the_same_time_either_yields_orders_with_last_state_or_with_last_state_being_none(self):
         set_max_n_of_inactive_orders(1)

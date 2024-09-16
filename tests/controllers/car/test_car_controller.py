@@ -143,6 +143,7 @@ class Test_Creating_And_Getting_Cars(unittest.TestCase):
 
 class Test_Retrieving_Single_Car(unittest.TestCase):
     def setUp(self) -> None:
+
         set_connection_source_test("test.db")
         platformhw = PlatformHW(name="Test Platform HW")
         app = _app.get_test_app()

@@ -69,6 +69,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
 class Test_Getting_All_Car_States(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -103,6 +104,7 @@ class Test_Getting_All_Car_States(unittest.TestCase):
 
 class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -181,6 +183,7 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -275,6 +278,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 
 class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
@@ -319,6 +323,7 @@ class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
@@ -376,6 +381,7 @@ class Test_Returning_Last_N_Car_States(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
@@ -445,6 +451,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
+
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)

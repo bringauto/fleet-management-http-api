@@ -21,6 +21,7 @@ from tests.utils.setup_utils import create_platform_hws, create_stops, create_ro
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)

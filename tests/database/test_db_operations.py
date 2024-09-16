@@ -6,11 +6,13 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
+from fleet_management_api.logs import clear_logs
 
 
 class Test_Creating_Records(unittest.TestCase):
 
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 
@@ -42,6 +44,7 @@ class Test_Creating_Records(unittest.TestCase):
 
 class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 
@@ -93,6 +96,7 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
 
 class Test_Updating_Records(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 
@@ -133,6 +137,7 @@ class Test_Updating_Records(unittest.TestCase):
 
 class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 
@@ -154,6 +159,7 @@ class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
 
 class Test_Deleting_Database_Record(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 
@@ -172,6 +178,7 @@ class Test_Deleting_Database_Record(unittest.TestCase):
 
 class Test_Deleting_N_Database_Records(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test()
         models.initialize_test_tables(_connection.current_connection_source())
 

@@ -6,13 +6,13 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-import sqlalchemy as sqa
 from sqlalchemy.pool.impl import QueuePool
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
+from fleet_management_api.logs import clear_logs
 
 
 _TEST_DB_FILE_PATH = "test_db_file.db"
@@ -113,6 +113,7 @@ class Test_Waiting_For_Content(unittest.TestCase):
 
 class Test_Waiting_For_Specific_Content(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
         models.initialize_test_tables(_connection.current_connection_source())
 

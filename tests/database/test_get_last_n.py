@@ -7,10 +7,12 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
+from fleet_management_api.logs import clear_logs
 
 
 class Test_Retrieving_Last_N_Records(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         _connection.set_connection_source_test(db_file_path="tests/database/test_get_last_n.db")
         models.initialize_test_tables(_connection.current_connection_source())
 

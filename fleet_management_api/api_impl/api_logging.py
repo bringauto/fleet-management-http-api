@@ -6,20 +6,23 @@ from .api_responses import (
     error as _error,
     Response as _Response
 )
+from ..logs import configure_logging
+
+
+configure_logging("config/logging.json")
 
 
 _API_LOGGER_NAME = "werkzeug"
+logger = _logging.getLogger(_API_LOGGER_NAME)
 
 
 def log_info(message: str) -> None:
     """Pass a custom info message to the API logger."""
-    logger = _logging.getLogger(_API_LOGGER_NAME)
     logger.info(message)
 
 
 def log_error(message: str) -> None:
     """Pass a custom error message to the API logger."""
-    logger = _logging.getLogger(_API_LOGGER_NAME)
     logger.error(message)
 
 

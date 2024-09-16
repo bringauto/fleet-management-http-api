@@ -11,9 +11,13 @@ import fleet_management_api.script_args as _args
 import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestBase as _TestBase  # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
+from fleet_management_api.logs import clear_logs
 
 
 class Test_Creating_Database_URL(unittest.TestCase):
+    def setUp(self) -> None:
+        clear_logs()
+
     def test_production_database_url_with_specified_port_username_and_password(self):
         url = _connection.db_url("test_user", "test_password", "localhost", 5432, "test_db")
         self.assertEqual(url, "postgresql+psycopg://test_user:test_password@localhost:5432/test_db")
@@ -52,6 +56,7 @@ class Test_Creating_Database_URL(unittest.TestCase):
 
 class Test_Creating_A_Test_Database(unittest.TestCase):
     def setUp(self) -> None:  # pragma: no cover
+        clear_logs()
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
 
@@ -83,6 +88,7 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
 
 class Test_Initializing_Tables(unittest.TestCase):
     def test_initializing_tables_without_connection_being_set_raises_exception(self):
+        clear_logs()
         _connection.unset_connection_source()
         with self.assertRaises(RuntimeError):
             _initialize_test_tables(_connection.current_connection_source())
@@ -90,6 +96,7 @@ class Test_Initializing_Tables(unittest.TestCase):
 
 class Test_Setting_Up_Database(unittest.TestCase):
     def setUp(self) -> None:
+        clear_logs()
         self._orig_connection_source = _connection.current_connection_source()
         _connection.set_connection_source_test("test_db_file.db")
 
@@ -140,6 +147,7 @@ class Test_Setting_Up_Database(unittest.TestCase):
 
 class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):
     def test_calling_add_method_without_setting_connection_raises_runtime_error(self):
+        clear_logs()
         _connection.unset_connection_source()
         self.assertTrue(_connection.current_connection_source() is None)
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
@@ -166,6 +174,7 @@ class Test_Failed_Connection(unittest.TestCase):
     @patch("fleet_management_api.database.db_models.Base.metadata.create_all")
     @patch("fleet_management_api.database.connection._test_new_connection")
     def test_invalid_connection_source(self, mock_test_new_connection: Mock, create_all: Mock):
+        clear_logs()
         _connection.set_connection_source(
             db_location="localhost",
             port=1111,
