@@ -1,6 +1,7 @@
 # Fleet Management v2 HTTP API
 
 This API provides communication between end-users and the fleet management system. It enables a user to do the following:
+
 - register and manage existing cars,
 - define new stops and routes and make changes,
 - send orders to the cars and review and manage them.
@@ -19,11 +20,13 @@ A list of the files created by the OpenAPI Generator can be found in the `.opena
 The only exception is the `fleet_management_api/controllers/security_controller.py` file, containing methods related to OAuth and API keys, that could not be moved to a manually maintained`fleet_management_api/api_impl` directory.
 
 # Requirements
+
 Python 3.10.12+
 
 # Usage
 
 ## Server re-generation
+
 You must have the OpenAPI Generator installed (see [link](https://openapi-generator.tech/docs/installation/)). Before the server generation, the server must be STOPPED.
 
 To regenerate the server, run the `regen.sh` script in the root directory:
@@ -31,16 +34,18 @@ To regenerate the server, run the `regen.sh` script in the root directory:
 If you have trouble with running the generator, visit [docs](https://openapi-generator.tech/docs/installation/).
 
 ## Configuration
+
 The server settings can be found in the `config/config.json`, including the database logging information and parameters for the database cleanup.
 
 The main parts of the configuration file are the following:
+
 - `http_server`. Contains the server's URI and port.
 - `security`. Described [here](#configuring-oauth2).
 - `database`. This contains the database connection configuration and the tables' parameters (e.g., the maximum number of stored records).
 - `api`. This sets up the behavior of the API (e.g., timeout of waiting for initially unavailable content).
 
-
 ## Starting the server locally
+
 To run the server, please execute the following from the root directory:
 
 ```bash
@@ -50,15 +55,14 @@ python -m fleet_management_api <path-to-config-file> [OPTIONS]
 
 The server automatically connects to the PostgreSQL database using data from the config file. If you want to override these values, start the server with some of the following options:
 
-|Option|Short|Description|
-|------------|-----|--|
-|`--username`|`-usr`|Username for the PostgreSQL database|
-|`--password`|`-pwd`|Password for the PostgreSQL database|
-|`--location`|`-l`  |Location of the database (e.g., `localhost`)|
-|`--port`    |`-p`  |Port number (e.g., `5430`)|
-|`--database-name`|`-db`|Database name|
-|`--test`|`-t`|Valid path to file of testing database. Ignores previous options and use sqlite database instead.
-
+| Option            | Short  | Description                                                                                       |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `--username`      | `-usr` | Username for the PostgreSQL database                                                              |
+| `--password`      | `-pwd` | Password for the PostgreSQL database                                                              |
+| `--location`      | `-l`   | Location of the database (e.g., `localhost`)                                                      |
+| `--port`          | `-p`   | Port number (e.g., `5430`)                                                                        |
+| `--database-name` | `-db`  | Database name                                                                                     |
+| `--test`          | `-t`   | Valid path to file of testing database. Ignores previous options and use sqlite database instead. |
 
 To visualize the API of the running server, go to `http://localhost:8080/v2/management/ui`.
 
@@ -67,6 +71,7 @@ Your OpenAPI definition lives here: `http://localhost:8080/v2/management/openapi
 ## Starting in a Docker container
 
 To rebuild and start the server in a Docker container, use
+
 ```bash
 docker compose up --build
 ```
@@ -74,12 +79,15 @@ docker compose up --build
 # Installing as a package
 
 In the root folder, run
+
 ```bash
 pip install [-e] .
 ```
+
 where `-e` flag stands for editable installation.
 
 You can uninstall the package using `pip` by running
+
 ```bash
 pip uninstall fleet_management_api
 ```
@@ -89,16 +97,20 @@ pip uninstall fleet_management_api
 You have to have the project installed in your (virtual) environment as a package.
 
 In the root folder, run the following
+
 ```bash
 python -m tests [-h] [PATH1] [PATH2] ...
 ```
+
 Each PATH is specified relative to the `tests` folder. If no PATH is specified, all the tests will run. Otherwise
+
 - when PATH is a directory, the script will run all tests in this directory (and subdirectories),
 - when PATH is a Python file, the script will run all tests in the file.
 
 The `-h` flag makes the script display tests' coverage in an HTML format, for example in your web browser.
 
 ### Example
+
 ```bash
 python -m tests database controllers/test_car_controller.py
 ```
@@ -108,19 +120,19 @@ python -m tests database controllers/test_car_controller.py
 ## Adding a new API key
 
 To generate a new API key (passed as a query parameter "api_key") run the following in the root directory:
+
 ```bash
 python scripts/add_api_key.py <api-key-name> <path-to-config-file> [OPTIONS].
 ```
 
-|Option|Short|Description|
-|------------|-----|--|
-|`--username`|`-usr`|Username for the PostgreSQL database|
-|`--password`|`-pwd`|Password for the PostgreSQL database|
-|`--location`|`-l`  |Location of the database (e.g., `localhost`)|
-|`--port`    |`-p`  |Port number (e.g., `5430`)|
-|`--database-name`|`-db`|Database name|
-|`--test`|`-t`|Valid path to file of testing database. Ignores previous options and use sqlite database instead.
-
+| Option            | Short  | Description                                                                                       |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `--username`      | `-usr` | Username for the PostgreSQL database                                                              |
+| `--password`      | `-pwd` | Password for the PostgreSQL database                                                              |
+| `--location`      | `-l`   | Location of the database (e.g., `localhost`)                                                      |
+| `--port`          | `-p`   | Port number (e.g., `5430`)                                                                        |
+| `--database-name` | `-db`  | Database name                                                                                     |
+| `--test`          | `-t`   | Valid path to file of testing database. Ignores previous options and use sqlite database instead. |
 
 ### Example
 

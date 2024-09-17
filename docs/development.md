@@ -1,6 +1,7 @@
 # Entities with assigned States
 
 The models used by the API include models with assigned states. Current examples are
+
 - Car and Car State,
 - Order and Order State.
 
@@ -12,14 +13,17 @@ For example, when a Car is created, a Car State with status `out_of_order` is cr
 In the case of new Order, an Order State with status `to_accept` is created.
 
 Every state must have (at least) the following attributes:
+
 - ID of the corresponding Entity
 - timestamp
 
 All GET methods returning object states must have the following filtering options in terms of their corresponding Entity:
+
 - returning all States for all the existing Entities,
 - returning all States for the particular Entity,
 
 For both of these, further filtering must be available:
+
 - return only those States inclusively newer than given timestamp,
 - return only up to last N States (with higher timestamp or, if timestamps are equal, with the higher IDs).
 
