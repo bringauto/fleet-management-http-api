@@ -8,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY log /home/bringauto/log
 COPY config /home/bringauto/config
-COPY config/config.json /home/bringauto/config/config.json
 
 COPY . /home/bringauto
 
