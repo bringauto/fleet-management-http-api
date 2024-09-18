@@ -11,6 +11,8 @@ services:
       - postgresql-database
     ports:
       - 8080:8080
+    volumes:
+      - ./log:/home/bringauto/log/
     networks:
       - api-network
     entrypoint:

@@ -8,6 +8,10 @@ from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBMo
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 import fleet_management_api.database.connection as _connection
+import logging
+
+
+logger = logging.getLogger("werkzeug")
 
 
 _KEY_LENGTH = 30
@@ -47,6 +51,7 @@ def verify_key_and_return_key_info(
     if connection_source is None:
         connection_source = _connection.current_connection_source()
 
+    logger.debug(f"Verifying key: {api_key}")
     _key_db_models = _db_access.get(
         _ApiKeyDBModel,
         criteria={"key": lambda x: x == api_key},
