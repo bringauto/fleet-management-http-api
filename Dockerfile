@@ -1,6 +1,5 @@
 FROM python:3.10-alpine
 
-RUN mkdir -p /home/bringauto
 WORKDIR /home/bringauto
 
 COPY ./requirements.txt /home/bringauto/
