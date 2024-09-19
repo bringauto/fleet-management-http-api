@@ -7,10 +7,7 @@ from fleet_management_api.controllers.security_controller import set_auth_params
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from fleet_management_api.database.connection import set_up_database
 from fleet_management_api.api_impl.data_setup import set_up_data
-from fleet_management_api.logs import configure_logging
-
-
-LOGGING_CONFIG_PATH = "config/logging.json"
+from fleet_management_api.logs import configure_logging, LOGGING_CONFIG_PATH
 
 
 def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
