@@ -29,4 +29,4 @@ For both of these, further filtering must be available:
 
 ### Last State
 
-Each Entity has an attribute "lastState", containing the newest State of the Entity (i.e., State with largest timestamp, or possibly, largest ID, if some states share the same timestamp).
+Each Entity has an attribute "lastState", containing the newest State of the Entity (i.e., State with the largest timestamp, or possibly, largest ID, if some states share the same timestamp).
