@@ -3,7 +3,6 @@ import sys
 
 sys.path.append(".")
 
-import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 import tests.utils.api_test as api_test

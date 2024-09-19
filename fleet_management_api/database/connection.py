@@ -100,6 +100,18 @@ def set_connection_source(
     _set_connection(url)
 
 
+def restart_connection_source() -> None:
+    if _db_connection is None:
+        _log_error("Cannot reset connection source if its not currently set.")
+    else:
+        url_obj = _db_connection.url
+        host = url_obj.host if url_obj.host is not None else ""
+        database = url_obj.database if url_obj.database is not None else ""
+        password = url_obj.password if url_obj.password is not None else ""
+        username = url_obj.username if url_obj.username is not None else ""
+        set_connection_source(host, url_obj.port, database, username, password)
+
+
 def get_connection_source(
     db_location: str,
     port: Optional[int] = None,

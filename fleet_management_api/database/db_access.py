@@ -1,6 +1,7 @@
 import dataclasses
 from typing import Any, Optional, Literal, Callable, Iterable
 import functools as _functools
+import logging as _logging
 
 import sqlalchemy as _sqa
 import sqlalchemy.exc as _sqaexc
@@ -15,6 +16,7 @@ from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 from fleet_management_api.database.db_models import Base as _Base
 from fleet_management_api.database.connection import (
     get_current_connection_source as _get_current_connection_source,
+    restart_connection_source as _restart_connection_source,
 )
 import fleet_management_api.database.wait as wait
 from fleet_management_api.api_impl.api_responses import (
@@ -23,17 +25,26 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
 )
 
+from ..logs import LOGGER_NAME
 
+
+logger = _logging.getLogger(LOGGER_NAME)
 _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
+
+
+Order = Literal["asc", "desc"]
+ColumnName = str
 
 
 class ParentNotFound(Exception):
     """Raised when the parent object does not exist in the database."""
+
     pass
 
 
 class DatabaseRecordValueError(Exception):
     """Raised when the value of the record in the database does not meet the condition."""
+
     pass
 
 
@@ -95,11 +106,28 @@ class CheckBeforeAdd:
                     condition.check(result)
 
 
+def _restart_connection_on_error(func: Callable) -> Callable:
+    """Decorator for the function that restarts the database connection source in case of operational error."""
+    @_functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            response = func(*args, **kwargs)
+            if response.status_code == 500:
+                raise Exception(response.body)
+            return response
+        except:
+            _logging.warning("Restarting connection source due to a propably restared database.")
+            _restart_connection_source()
+            return func(*args, **kwargs)
+    return wrapper
+
+
+@_restart_connection_on_error
 def add(
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
-    auto_id: bool = True
+    auto_id: bool = True,
 ) -> _Response:
     """Adds a objects to the database.
 
@@ -113,7 +141,6 @@ def add(
     global _wait_mg
     if not added:
         return _json_response([])
-
     _check_common_base_for_all_objs(*added)
     source = _get_current_connection_source(connection_source)
     with _Session(source) as session:
@@ -124,7 +151,11 @@ def add(
                         check_obj.check(session)
                     except _NoResultFound as e:
                         msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
-                        return _error(404, msg, title="Cannot create object as some referenced objects do not exist")
+                        return _error(
+                            404,
+                            msg,
+                            title="Cannot create object as some referenced objects do not exist",
+                        )
             if auto_id:
                 _set_id_to_none(added)
             session.add_all(added)
@@ -132,13 +163,26 @@ def add(
             _wait_mg.notify_about_content(added[0].__tablename__, added)
             return _json_response([obj.copy() for obj in added])
         except DatabaseRecordValueError as e:
-            return _error(400, f"Nothing added to the database. {e}", title="Cannot create object due to unmet conditions on this or referenced object")
+            return _error(
+                400,
+                f"Nothing added to the database. {e}",
+                title="Cannot create object due to unmet conditions on this or referenced object",
+            )
         except _sqaexc.IntegrityError as e:
-            return _error(400, f"Nothing added to the database. {e.orig}", title="Cannot create object due to ID conflict in the database")
+            return _error(
+                400,
+                f"Nothing added to the database. {e.orig}",
+                title="Cannot create object due to ID conflict in the database",
+            )
         except Exception as e:
-            return _error(500, f"Nothing added to the database. {e}", title="Cannot create object due to unexpected error")
+            return _error(
+                500,
+                f"Nothing added to the database. {e}",
+                title="Cannot create object due to unexpected error",
+            )
 
 
+@_restart_connection_on_error
 def delete(base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
@@ -149,15 +193,22 @@ def delete(base: type[_Base], id_: Any) -> _Response:
             session.commit()
             return _text_response(f"{base.model_name} (ID={id_}) has been deleted.")
         except _NoResultFound as e:
-            return _error(404, f"{base.model_name} (ID={id_}) not found. {e}", title="Object to delete not found")
+            return _error(
+                404,
+                f"{base.model_name} (ID={id_}) not found. {e}",
+                title="Object to delete not found",
+            )
         except _sqaexc.IntegrityError as e:
             return _error(
-                400, f"Could not delete {base.model_name} (ID={id_}). {e.orig}", title="Cannot delete object due to integrity error"
+                400,
+                f"Could not delete {base.model_name} (ID={id_}). {e.orig}",
+                title="Cannot delete object due to integrity error",
             )
         except Exception as e:
             return _error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
 
 
+@_restart_connection_on_error
 def delete_n(
     base: type[_Base],
     n: int,
@@ -174,7 +225,11 @@ def delete_n(
     """
 
     if not column_name in base.__table__.columns.keys():
-        return _error(500, f"Column {column_name} not found in table {base.__tablename__}.", title="Invalid request to the server' database")
+        return _error(
+            500,
+            f"Column {column_name} not found in table {base.__tablename__}.",
+            title="Invalid request to the server' database",
+        )
     if criteria is None:
         criteria = {}
     table = base.__table__
@@ -195,8 +250,8 @@ def delete_n(
         return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
-def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
-) -> list[_Base]:
+@_restart_connection_on_error
+def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     An optional `connection_source` may be specified to replace the otherwise used global connection
@@ -217,10 +272,7 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
             raise e
 
 
-Order = Literal["asc", "desc"]
-ColumnName = str
-
-
+@_restart_connection_on_error
 def get(
     base: type[_Base],
     first_n: int = 0,
@@ -231,7 +283,6 @@ def get(
     omitted_relationships: Optional[list[_InstrumentedAttribute]] = None,
     connection_source: Optional[_sqa.Engine] = None,
 ) -> list[Any]:
-
     """Get instances of the `base`.
 
     The objects can be filtered by the `criteria`.
@@ -259,7 +310,10 @@ def get(
             for attr_label in criteria.keys()
         ]
         stmt = _sqa.select(base).where(*clauses)  # type: ignore
-        for attr_label, order,  in sort_result_by.items():
+        for (
+            attr_label,
+            order,
+        ) in sort_result_by.items():
             if attr_label in table.columns.keys():
                 if order == "desc":
                     stmt = stmt.order_by(table.c.__getattr__(attr_label).desc())
@@ -302,7 +356,11 @@ def get_children(
     with _Session(source) as session:
         try:
             raw_chilren = getattr(session.get_one(parent_base, parent_id), children_col_name)
-            children = [child for child in raw_chilren if all(crit(getattr(child, attr)) for attr,crit in criteria.items())]
+            children = [
+                child
+                for child in raw_chilren
+                if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
+            ]
             return children
         except _NoResultFound as e:
             raise ParentNotFound(
@@ -312,6 +370,7 @@ def get_children(
             raise e
 
 
+@_restart_connection_on_error
 def update(*updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 

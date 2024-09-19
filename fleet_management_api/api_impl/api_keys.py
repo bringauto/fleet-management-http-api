@@ -52,11 +52,15 @@ def verify_key_and_return_key_info(
         connection_source = _connection.current_connection_source()
 
     logger.debug(f"Verifying key: {api_key}")
-    _key_db_models = _db_access.get(
-        _ApiKeyDBModel,
-        criteria={"key": lambda x: x == api_key},
-        connection_source=connection_source,
-    )
+    try:
+        _key_db_models = _db_access.get(
+            _ApiKeyDBModel,
+            criteria={"key": lambda x: x == api_key},
+            connection_source=connection_source,
+        )
+    except Exception as e:
+        logger.error(f"Error while verifying key: {e}")
+        return 500, "Internal server error."
     if len(_key_db_models) == 0:
         return 401, f"Invalid API key used."
     else:
