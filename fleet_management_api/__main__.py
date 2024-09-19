@@ -10,6 +10,9 @@ from fleet_management_api.api_impl.data_setup import set_up_data
 from fleet_management_api.logs import configure_logging
 
 
+LOGGING_CONFIG_PATH = "config/logging.json"
+
+
 def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
     """Retrieve the public key from the Keycloak server."""
     try:
@@ -39,7 +42,7 @@ def _set_up_oauth(config: _args.Security) -> None:
 
 
 if __name__ == "__main__":
-    configure_logging("config/logging.json")
+    configure_logging(LOGGING_CONFIG_PATH)
     application = app.get_app()
     args = _args.request_and_get_script_arguments(
         "Run the Fleet Management v2 HTTP API server."

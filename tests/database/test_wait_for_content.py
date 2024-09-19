@@ -2,7 +2,6 @@ import unittest
 import sys
 
 sys.path.append(".")
-import os
 from concurrent.futures import ThreadPoolExecutor
 import time
 
@@ -12,10 +11,7 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
-from fleet_management_api.logs import clear_logs
-
-
-_TEST_DB_FILE_PATH = "test_db_file.db"
+import tests.utils.api_test as api_test
 
 
 class Test_Wait_Objects(unittest.TestCase):
@@ -62,10 +58,7 @@ class Test_Wait_Objects(unittest.TestCase):
             wait_manager._remove_wait_obj("nonexistent key", wait_obj)
 
 
-class Test_Waiting_For_Content(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Waiting_For_Content(api_test.TestCase):
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
@@ -106,16 +99,8 @@ class Test_Waiting_For_Content(unittest.TestCase):
             self.assertEqual(retrieved_objs1[0].test_str, test_obj.test_str)
             self.assertEqual(retrieved_objs2[0].test_str, test_obj.test_str)
 
-    def tearDown(self) -> None:  # pragma: no cover
-        if os.path.isfile(_TEST_DB_FILE_PATH):
-            os.remove(_TEST_DB_FILE_PATH)
 
-
-class Test_Waiting_For_Specific_Content(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Waiting_For_Specific_Content(api_test.TestCase):
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
         test_obj = models.TestBase(id=5, test_str="test", test_int=123)
@@ -133,15 +118,8 @@ class Test_Waiting_For_Specific_Content(unittest.TestCase):
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
-    def tearDown(self) -> None:  # pragma: no cover
-        if os.path.isfile(_TEST_DB_FILE_PATH):
-            os.remove(_TEST_DB_FILE_PATH)
 
-
-class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Waiting_For_New_Content_To_Be_Sent(api_test.TestCase):
 
     def test_waiting_for_new_record_to_be_sent_to_database(self):
         old_record = models.TestBase(id=111, test_str="test_1", test_int=123)
@@ -156,12 +134,8 @@ class Test_Waiting_For_New_Content_To_Be_Sent(unittest.TestCase):
             self.assertEqual(len(retrieved_objs), 1)
             self.assertEqual(retrieved_objs[0].test_str, new_record.test_str)
 
-    def tearDown(self) -> None:  # pragma: no cover
-        if os.path.isfile(_TEST_DB_FILE_PATH):
-            os.remove(_TEST_DB_FILE_PATH)
 
-
-class Test_Waiting_Mechanism_Releases_Connection_To_Pool(unittest.TestCase):
+class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
     """There is a maximum number of active connections that can be opened at the same time.
 
     To reduce the number of connections, the waiting mechanism should release the connection
@@ -171,10 +145,6 @@ class Test_Waiting_Mechanism_Releases_Connection_To_Pool(unittest.TestCase):
     This releasing of a connection is possible, because the waiting request on the HTTP server
     waits for data coming from other request to the server and does not read them from the database.
     """
-
-    def setUp(self) -> None:
-        _connection.set_connection_source_test(_TEST_DB_FILE_PATH)
-        models.initialize_test_tables(_connection.current_connection_source())
 
     def test_single_connection_is_reused_by_every_request_and_then_checked_in_into_pool(self):
         test_obj = models.TestBase(test_str="test", test_int=123)

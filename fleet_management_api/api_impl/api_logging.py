@@ -6,14 +6,10 @@ from .api_responses import (
     error as _error,
     Response as _Response
 )
-from ..logs import configure_logging
+from ..logs import LOGGER_NAME
 
 
-configure_logging("config/logging.json")
-
-
-_API_LOGGER_NAME = "werkzeug"
-logger = _logging.getLogger(_API_LOGGER_NAME)
+logger = _logging.getLogger(LOGGER_NAME)
 
 
 def log_info(message: str) -> None:

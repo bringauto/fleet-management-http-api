@@ -10,6 +10,7 @@ T = TypeVar("T", bound=Mapping)
 
 
 LOG_FILE_NAME = "fleet_management_http_api.log"
+LOGGER_NAME = "werkzeug"
 
 
 def clear_logs() -> None:
@@ -23,7 +24,7 @@ def configure_logging(config_path: str) -> None:
         with open(config_path) as f:
             logging.config.dictConfig(json.load(f))
     except Exception:
-        logger = logging.getLogger("werkzeug")
+        logger = logging.getLogger(LOGGER_NAME)
         logger.warning(
             f"Fleet Protocol HTTP API: Could not find a logging configuration file (entered path: {config_path}. Using default logging configuration."
         )
