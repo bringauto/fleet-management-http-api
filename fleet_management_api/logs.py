@@ -40,7 +40,7 @@ def configure_logging(config_path: str) -> None:
     except Exception:
         logger = logging.getLogger(LOGGER_NAME)
         logger.warning(
-            f"Fleet Protocol HTTP API: Could not find a logging configuration file (entered path: {config_path}. Using default logging configuration."
+            f"Fleet Management HTTP API: Could not find a logging configuration file (entered path: {config_path}. Using default logging configuration."
         )
         default_log_path = os.path.join(DEFAULT_LOG_DIR, LOG_FILE_NAME)
         if not os.path.isfile(default_log_path):
