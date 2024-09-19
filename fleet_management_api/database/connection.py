@@ -103,6 +103,8 @@ def set_connection_source(
 def restart_connection_source() -> None:
     if _db_connection is None:
         _log_error("Cannot reset connection source if its not currently set.")
+    elif _db_connection.url.drivername == "sqlite":
+        _log_info("Using sqlite database stored in memory. No need to reset connection source.")
     else:
         url_obj = _db_connection.url
         host = url_obj.host if url_obj.host is not None else ""

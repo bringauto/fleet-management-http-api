@@ -112,11 +112,13 @@ def _restart_connection_on_error(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
-            if response.status_code == 500:
+            if hasattr(response, "status_code") and response.status_code == 500:
                 raise Exception(response.body)
             return response
-        except:
-            _logging.warning("Restarting connection source due to a propably restared database.")
+        except Exception as e:
+            _logging.warning(
+                f"Restarting connection source due to a probable deletion of database tables. Error: {e}"
+            )
             _restart_connection_source()
             return func(*args, **kwargs)
     return wrapper
