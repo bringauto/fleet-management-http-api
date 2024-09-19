@@ -6,15 +6,10 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
-from fleet_management_api.logs import clear_logs
+import tests.utils.api_test as api_test
 
 
-class Test_Creating_Records(unittest.TestCase):
-
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Creating_Records(api_test.TestCase):
 
     def test_adding_single_record_to_database_succesfully(self):
         test_obj = models.TestBase(test_str="test_string", test_int=5)
@@ -42,11 +37,7 @@ class Test_Creating_Records(unittest.TestCase):
         self.assertListEqual(records, [])
 
 
-class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Sending_And_Retrieving_From_Database(api_test.TestCase):
 
     def test_table_is_initially_empty(self):
         objs_out = _db_access.get(models.TestBase)
@@ -94,11 +85,7 @@ class Test_Sending_And_Retrieving_From_Database(unittest.TestCase):
             _db_access.add(base_type, db_obj)
 
 
-class Test_Updating_Records(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Updating_Records(api_test.TestCase):
 
     def test_updating_an_existing_record(self):
         test_obj = models.TestBase(test_str="test_string", test_int=5)
@@ -135,11 +122,7 @@ class Test_Updating_Records(unittest.TestCase):
         self.assertEqual(retrieved_objs, [obj_1, obj_2])
 
 
-class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Retrieving_Multiple_Records_By_Ids(api_test.TestCase):
 
     def test_getting_items_by_id(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=5)
@@ -157,11 +140,7 @@ class Test_Retrieving_Multiple_Records_By_Ids(unittest.TestCase):
         self.assertListEqual(_db_access.get_by_id(models.TestBase, 4, 5), [])
 
 
-class Test_Deleting_Database_Record(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Deleting_Database_Record(api_test.TestCase):
 
     def test_deleting_an_existing_record(self):
         test_obj = models.TestBase(id=7, test_str="test_string", test_int=5)
@@ -176,11 +155,7 @@ class Test_Deleting_Database_Record(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class Test_Deleting_N_Database_Records(unittest.TestCase):
-    def setUp(self) -> None:
-        clear_logs()
-        _connection.set_connection_source_test()
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Deleting_N_Database_Records(api_test.TestCase):
 
     def test_deleting_n_records_with_least_ids(self):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=5)
