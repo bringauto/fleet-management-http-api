@@ -25,7 +25,7 @@
     "werkzeug": {
       "level": "DEBUG",
       "handlers": ["console", "file"],
-      "propagate": "no"
+      "propagate": false
     }
   },
   "root": {
