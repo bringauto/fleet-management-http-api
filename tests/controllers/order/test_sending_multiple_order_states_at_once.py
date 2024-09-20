@@ -6,7 +6,7 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order_state import _trim_states_after_done_or_canceled
 from fleet_management_api.api_impl.controllers.order import set_max_n_of_active_orders, set_max_n_of_inactive_orders
 

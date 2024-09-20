@@ -9,10 +9,10 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import set_max_n_of_inactive_orders
 from fleet_management_api.database.timestamp import timestamp_ms
-from fleet_management_api.logs import clear_logs
+from tests._utils.logs import clear_logs
 
 
 class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):

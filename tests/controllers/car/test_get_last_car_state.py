@@ -6,7 +6,7 @@ sys.path.append(".")
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, MobilePhone, GNSSPosition
-from tests.utils.setup_utils import create_platform_hws
+from tests._utils.setup_utils import create_platform_hws
 
 
 POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)

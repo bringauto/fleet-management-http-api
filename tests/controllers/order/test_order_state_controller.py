@@ -16,7 +16,7 @@ from fleet_management_api.models import (
 )
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):

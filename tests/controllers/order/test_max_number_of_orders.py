@@ -12,7 +12,7 @@ from fleet_management_api.api_impl.controllers.order import (
     clear_inactive_orders,
 )
 from fleet_management_api.models import Car, MobilePhone, Order, OrderState, OrderStatus
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import (
     n_of_active_orders,
     n_of_inactive_orders,

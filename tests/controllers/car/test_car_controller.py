@@ -5,8 +5,8 @@ sys.path.append(".")
 
 from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_stops, create_platform_hws, create_route
-import tests.utils.api_test as api_test
+from tests._utils.setup_utils import create_stops, create_platform_hws, create_route
+import tests._utils.api_test as api_test
 from fleet_management_api.logs import LOGGER_NAME
 
 

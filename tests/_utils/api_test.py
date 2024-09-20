@@ -1,7 +1,10 @@
 import unittest
 import os
+import sys
 
-from fleet_management_api.logs import clear_logs
+sys.path.append(".")
+
+from tests._utils.logs import clear_logs
 import fleet_management_api.database.connection as _connection
 import tests.database.models as models
 

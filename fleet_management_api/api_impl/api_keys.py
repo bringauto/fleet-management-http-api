@@ -51,7 +51,7 @@ def verify_key_and_return_key_info(
     if connection_source is None:
         connection_source = _connection.current_connection_source()
 
-    logger.debug(f"Verifying key: {api_key}")
+    logger.debug(f"Verifying entered API key.")
     try:
         _key_db_models = _db_access.get(
             _ApiKeyDBModel,
