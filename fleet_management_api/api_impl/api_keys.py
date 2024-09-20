@@ -45,13 +45,10 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
 def verify_key_and_return_key_info(
     api_key: str, connection_source: Optional[_Engine] = None
 ) -> tuple[int, str | _ApiKeyDBModel]:
-
     """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
-
-    logger.debug(f"Verifying entered API key.")
     try:
         _key_db_models = _db_access.get(
             _ApiKeyDBModel,
