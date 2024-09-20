@@ -14,7 +14,7 @@ from fleet_management_api.models import (
     GNSSPosition,
     MobilePhone,
 )
-from tests.utils.setup_utils import create_stops, create_route
+from tests._utils.setup_utils import create_stops, create_route
 
 
 class Test_Creating_Route(unittest.TestCase):

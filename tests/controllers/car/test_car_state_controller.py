@@ -9,8 +9,8 @@ import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, GNSSPosition, MobilePhone
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hws
-import tests.utils.api_test as api_test
+from tests._utils.setup_utils import create_platform_hws
+import tests._utils.api_test as api_test
 
 
 class Test_Adding_State_Of_Existing_Car(api_test.TestCase):

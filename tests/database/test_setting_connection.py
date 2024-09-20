@@ -11,7 +11,7 @@ import fleet_management_api.script_args as _args
 import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestBase as _TestBase  # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
-from fleet_management_api.logs import clear_logs
+from tests._utils.logs import clear_logs
 
 
 class Test_Creating_Database_URL(unittest.TestCase):

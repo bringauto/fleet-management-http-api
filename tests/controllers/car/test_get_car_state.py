@@ -11,7 +11,7 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms
-from tests.utils.setup_utils import create_platform_hws
+from tests._utils.setup_utils import create_platform_hws
 
 
 class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
