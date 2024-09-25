@@ -363,11 +363,11 @@ def get_children(
         criteria = {}
     with _Session(source) as session:
         try:
-            raw_chilren = getattr(session.get_one(parent_base, parent_id), children_col_name)
+            raw_children = getattr(session.get_one(parent_base, parent_id), children_col_name)
             children = [
                 child
                 for child in raw_children
-                if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
+                    if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
             ]
             return children
         except _NoResultFound as e:
