@@ -106,13 +106,13 @@ class CheckBeforeAdd:
                     condition.check(result)
 
 
-def _restart_connection_on_error(func: Callable) -> Callable:
+def db_access_method(func: Callable) -> Callable:
     """Decorator for the function that restarts the database connection source in case of operational error."""
     @_functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
-            if hasattr(response, "status_code") and response.status_code == 500:
+            if hasattr(response, "status_code") and (response.status_code==503 or response.status_code == 500):
                 raise Exception(response.body)
             return response
         except Exception as e:
@@ -124,7 +124,7 @@ def _restart_connection_on_error(func: Callable) -> Callable:
     return wrapper
 
 
-@_restart_connection_on_error
+@db_access_method
 def add(
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
@@ -184,7 +184,7 @@ def add(
             )
 
 
-@_restart_connection_on_error
+@db_access_method
 def delete(base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
@@ -210,7 +210,7 @@ def delete(base: type[_Base], id_: Any) -> _Response:
             return _error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
 
 
-@_restart_connection_on_error
+@db_access_method
 def delete_n(
     base: type[_Base],
     n: int,
@@ -252,7 +252,7 @@ def delete_n(
         return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
-@_restart_connection_on_error
+@db_access_method
 def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
@@ -274,7 +274,7 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
             raise e
 
 
-@_restart_connection_on_error
+@db_access_method
 def get(
     base: type[_Base],
     first_n: int = 0,
@@ -372,7 +372,7 @@ def get_children(
             raise e
 
 
-@_restart_connection_on_error
+@db_access_method
 def update(*updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
