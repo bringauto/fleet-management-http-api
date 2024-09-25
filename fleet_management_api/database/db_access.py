@@ -366,7 +366,7 @@ def get_children(
             raw_chilren = getattr(session.get_one(parent_base, parent_id), children_col_name)
             children = [
                 child
-                for child in raw_chilren
+                for child in raw_children
                 if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
             ]
             return children
