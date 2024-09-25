@@ -11,8 +11,7 @@ import tests.database.models as models
 
 class TestCase(unittest.TestCase):
 
-    DEFAULT_TEST_DB_PATH = "test_db_file.db"
-
+    DEFAULT_TEST_DB_PATH = "test_db.db"
     def setUp(self, test_db_path: str = "") -> None:
         if not test_db_path:
             test_db_path = self.DEFAULT_TEST_DB_PATH
@@ -25,6 +24,8 @@ class TestCase(unittest.TestCase):
         try:
             if os.path.isfile(self._test_path):
                 os.remove(self._test_path)
-        except:
-            if os.path.isfile(self.DEFAULT_TEST_DB_PATH):
-                os.remove(self.DEFAULT_TEST_DB_PATH)
+        except FileNotFoundError:
+            print("Cannot delete the test database file. It does not exist.")
+        except Exception as e:
+            print(f"Error in tearDown method: {e}")
+
