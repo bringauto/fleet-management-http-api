@@ -113,11 +113,17 @@ def db_access_method(func: Callable) -> Callable:
         try:
             response = func(*args, **kwargs)
             if hasattr(response, "status_code") and (response.status_code==503 or response.status_code == 500):
-                raise Exception(response.body)
+                raise RuntimeError(response.body)
             return response
-        except Exception as e:
+        except _sqaexc.OperationalError as e:
             _logging.warning(
                 f"Restarting connection source due to a probable deletion of database tables. Error: {e}"
+            )
+            _restart_connection_source()
+            return func(*args, **kwargs)
+        except Exception as e:
+            _logging.warning(
+                f"Restarting connection source due to an database error. Error: {e}"
             )
             _restart_connection_source()
             return func(*args, **kwargs)
