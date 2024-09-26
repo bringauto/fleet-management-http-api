@@ -24,9 +24,9 @@ def configure_logging(component_name: str, config: dict) -> None:
     The logging configuration is read from a JSON file. If the file is not found, a default configuration is used.
     """
     try:
-        config["general-settings"]
+        config["logging"]
         logger = logging.getLogger(LOGGER_NAME)
-        verbose: bool = config["general-settings"]["verbose"]
+        verbose: bool = config["logging"]["verbose"]
         logger.setLevel(log_level_by_verbosity[verbose])
 
         # create formatter
@@ -34,7 +34,7 @@ def configure_logging(component_name: str, config: dict) -> None:
 
         # file handler
         file_path = os.path.join(
-            config["general-settings"]["log-path"], _log_file_name(component_name) + ".log"
+            config["logging"]["log-path"], _log_file_name(component_name) + ".log"
         )
         file_handler = logging.handlers.RotatingFileHandler(
             file_path, maxBytes=10485760, backupCount=5
