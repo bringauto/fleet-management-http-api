@@ -25,20 +25,13 @@ Python 3.10.12+
 
 # Usage
 
-## Server re-generation
-
-You must have the OpenAPI Generator installed (see [link](https://openapi-generator.tech/docs/installation/)). Before the server generation, the server must be STOPPED.
-
-To regenerate the server, run the `regen.sh` script in the root directory:
-
-If you have trouble with running the generator, visit [docs](https://openapi-generator.tech/docs/installation/).
-
 ## Configuration
 
 The server settings can be found in the `config/config.json`, including the database logging information and parameters for the database cleanup.
 
 The main parts of the configuration file are the following:
 
+- `logging`. Contains the logging configuration.
 - `http_server`. Contains the server's URI and port.
 - `security`. Described [here](#configuring-oauth2).
 - `database`. This contains the database connection configuration and the tables' parameters (e.g., the maximum number of stored records).
@@ -46,10 +39,17 @@ The main parts of the configuration file are the following:
 
 ## Starting the server locally
 
-To run the server, please execute the following from the root directory:
+Activate virtual environment and install dependencies.
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip3 install -r requirements.txt
+```
+
+Run the server:
+
+```bash
 python -m fleet_management_api <path-to-config-file> [OPTIONS]
 ```
 
@@ -75,6 +75,14 @@ To rebuild and start the server in a Docker container, use
 ```bash
 docker compose up --build
 ```
+
+## Server re-generation
+
+You must have the OpenAPI Generator installed (see [link](https://openapi-generator.tech/docs/installation/)). Before the server generation, the server must be STOPPED.
+
+To regenerate the server, run the `regen.sh` script in the root directory:
+
+If you have trouble with running the generator, visit [docs](https://openapi-generator.tech/docs/installation/).
 
 # Installing as a package
 
