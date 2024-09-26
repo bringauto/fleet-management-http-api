@@ -20,7 +20,6 @@ OMITTED_FILES = [
 HTML_REPORT_FLAG = "-h"
 
 
-from fleet_management_api.logs import configure_logging
 
 
 def _report_coverage(cov: coverage.Coverage, html) -> None:
