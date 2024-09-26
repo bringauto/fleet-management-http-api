@@ -117,7 +117,7 @@ Each PATH is specified relative to the `tests` folder. If no PATH is specified, 
 
 The `-h` flag makes the script display tests' coverage in an HTML format, for example in your web browser.
 
-### Example
+## Example
 
 ```bash
 python -m tests database controllers/test_car_controller.py
