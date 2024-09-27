@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Optional, Literal
+from typing import Optional, Any
 
 import pydantic
 
 
 class APIConfig(pydantic.BaseModel):
+    logging: dict[str, Any]
     http_server: HTTPServer
     database: Database
     security: Security

@@ -9,11 +9,11 @@ from typing import TypeVar, Mapping
 T = TypeVar("T", bound=Mapping)
 
 
-LOGGER_NAME = "werkzeug"
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+LOGGER_NAME = "werkzeug"
 
 
-log_level_by_verbosity = {False: logging.WARNING, True: logging.DEBUG}
+_log_level_by_verbosity = {False: logging.WARNING, True: logging.DEBUG}
 
 
 def configure_logging(component_name: str, config: dict) -> None:
@@ -24,18 +24,24 @@ def configure_logging(component_name: str, config: dict) -> None:
     The logging configuration is read from a JSON file. If the file is not found, a default configuration is used.
     """
     try:
-        config["logging"]
+        log_config = config.get("logging", {})
+        if not log_config:
+            raise ValueError("No logging configuration found")
         logger = logging.getLogger(LOGGER_NAME)
-        verbose: bool = config["logging"]["verbose"]
-        logger.setLevel(log_level_by_verbosity[verbose])
+        verbose: bool = log_config.get("verbose", None)
+        if verbose is None:
+            raise ValueError("No verbosity level found in logging configuration")
+
+        logger.setLevel(_log_level_by_verbosity[verbose])
 
         # create formatter
         formatter = logging.Formatter(_log_format(component_name), datefmt=_DATE_FORMAT)
 
         # file handler
-        file_path = os.path.join(
-            config["logging"]["log-path"], _log_file_name(component_name) + ".log"
-        )
+        log_dir_path = log_config.get("log-path", None)
+        if log_dir_path is None:
+            raise ValueError("No log directory path found in logging configuration")
+        file_path = os.path.join(log_config["log-path"], _log_file_name(component_name) + ".log")
         file_handler = logging.handlers.RotatingFileHandler(
             file_path, maxBytes=10485760, backupCount=5
         )
@@ -48,8 +54,12 @@ def configure_logging(component_name: str, config: dict) -> None:
             console_handler.setFormatter(formatter)
             logger.addHandler(console_handler)
 
+    except ValueError as ve:
+        logging.error(f"{component_name}: Configuration error: {ve}")
+        raise
     except Exception as e:
-        logging.error(f"{component_name}: Could not configure logging. {e}")
+        logging.error(f"{component_name}: Unexpected error when configuring logging: {e}")
+        raise
 
 
 def _log_format(component_name: str) -> str:
@@ -59,3 +69,4 @@ def _log_format(component_name: str) -> str:
 
 def _log_file_name(component_name: str) -> str:
     return "_".join(component_name.lower().split())
+
