@@ -35,13 +35,14 @@ def create_order_states() -> _Response:
     """
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
-    order_states = [_models.OrderState.from_dict(item) for item in _connexion.request.get_json()]
+    order_states = [
+        _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
+    ]
     return create_order_states_from_argument_and_post(order_states)
 
 
 def create_order_states_from_argument_and_post(
-    order_states: list[_models.OrderState],
-    check_final_state: bool = True
+    order_states: list[_models.OrderState], check_final_state: bool = True
 ) -> _Response:
     """Create new states of existing orders. The Order State models are passed as an argument.
 
@@ -84,7 +85,6 @@ def create_order_states_from_argument_and_post(
     if not order_states:
         return _json_response([], code=200)
 
-
     order_states = _trim_states_after_done_or_canceled(order_states)
 
     done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
@@ -92,8 +92,11 @@ def create_order_states_from_argument_and_post(
     for state in received_states:
         if done_or_canceled_states.get(state.order_id) is None:
             done_or_canceled_states[state.order_id] = state
-        elif done_or_canceled_states[state.order_id].status == _models.OrderStatus.DONE \
-        or done_or_canceled_states[state.order_id].status == _models.OrderStatus.CANCELED:
+        elif (
+            done_or_canceled_states[state.order_id].status == _models.OrderStatus.DONE
+            or done_or_canceled_states[state.order_id].status
+            == _models.OrderStatus.CANCELED
+        ):
             order_states.remove(state)
 
     db_models: list[_db_models.OrderStateDBModel] = []
@@ -110,11 +113,16 @@ def create_order_states_from_argument_and_post(
     response = _db_access.add(*db_models)
     if response.status_code == 200:
         try:
-            inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]
+            inserted_models = [
+                _obj_to_db.order_state_from_db_model(m) for m in response.body
+            ]
             for model in inserted_models:
                 _remove_old_states(model.order_id)
                 _log_info(f"Order state (ID={model.id}) has been sent.")
-                if model.status in {_models.OrderStatus.DONE, _models.OrderStatus.CANCELED}:
+                if model.status in {
+                    _models.OrderStatus.DONE,
+                    _models.OrderStatus.CANCELED,
+                }:
                     car_id = _order.from_active_to_inactive_order(model.order_id)
                     max_n = _order.max_n_of_inactive_orders()
                     if max_n is not None and car_id is not None:
@@ -123,7 +131,9 @@ def create_order_states_from_argument_and_post(
                             _order.delete_oldest_inactive_order(car_id)
             return _json_response(inserted_models)
         except Exception as e:
-            _log_error(f"Error while converting Order State DB models to Order State models: {e}.\n Response body is {response.body}.")
+            _log_error(
+                f"Error while converting Order State DB models to Order State models: {e}.\n Response body is {response.body}."
+            )
     else:
         return _log_error_and_respond(
             f"Order state could not be sent. {response.body['detail']}",
@@ -172,7 +182,9 @@ def get_order_states(
         _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
-        criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
+        criteria: dict[str, Callable[[Any], bool]] = {
+            "order_id": lambda x: x == order_id
+        }
         return _get_order_states(criteria, wait, since, last_n)
 
 
@@ -213,7 +225,10 @@ def _remove_old_states(order_id: int) -> _Response:
     order_state_db_models = _db_access.get(
         _db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id}
     )
-    delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
+    delta = (
+        len(order_state_db_models)
+        - _db_models.OrderStateDBModel.max_n_of_stored_states()
+    )
     if delta > 0:
         response = _db_access.delete_n(
             _db_models.OrderStateDBModel,
@@ -227,7 +242,9 @@ def _remove_old_states(order_id: int) -> _Response:
         return _text_response("No old order states to remove.")
 
 
-def _trim_states_after_done_or_canceled(states: list[_models.OrderState]) -> list[_models.OrderState]:
+def _trim_states_after_done_or_canceled(
+    states: list[_models.OrderState],
+) -> list[_models.OrderState]:
     done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
     filtered_states: list[_models.OrderState] = []
     received_states = states.copy()
@@ -235,7 +252,10 @@ def _trim_states_after_done_or_canceled(states: list[_models.OrderState]) -> lis
         if done_or_canceled_states.get(state.order_id) is not None:
             states.remove(state)
         else:
-            if state.status == _models.OrderStatus.DONE or state.status == _models.OrderStatus.CANCELED:
+            if (
+                state.status == _models.OrderStatus.DONE
+                or state.status == _models.OrderStatus.CANCELED
+            ):
                 done_or_canceled_states[state.order_id] = state
             filtered_states.append(state)
     return filtered_states

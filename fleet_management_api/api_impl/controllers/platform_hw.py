@@ -28,7 +28,9 @@ def create_hws() -> _Response:
         return _log_invalid_request_body_format()
     else:
         platform_hws = [_PlatformHW.from_dict(p) for p in connexion.request.get_json()]
-        platform_hw_db_model = [_obj_to_db.platform_hw_to_db_model(p) for p in platform_hws]
+        platform_hw_db_model = [
+            _obj_to_db.platform_hw_to_db_model(p) for p in platform_hws
+        ]
         response = _db_access.add(*platform_hw_db_model)
         if response.status_code == 200:
             inserted_models: list[_PlatformHW] = [
@@ -50,7 +52,8 @@ def get_hws() -> _Response:
     """Get all existing platform HWs."""
     hw_id_moodels = _db_access.get(_db_models.PlatformHWDBModel)
     platform_hw_ids: list[_PlatformHW] = [
-        _obj_to_db.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_id_moodels
+        _obj_to_db.platform_hw_from_db_model(hw_id_model)
+        for hw_id_model in hw_id_moodels
     ]
     _log_info(f"Found {len(platform_hw_ids)} platform HWs.")
     return _json_response(platform_hw_ids)
@@ -61,10 +64,14 @@ def get_hw(platform_hw_id: int) -> _Response:
     hw_models = _db_access.get(
         _db_models.PlatformHWDBModel, criteria={"id": lambda x: x == platform_hw_id}
     )
-    platform_hws = [_obj_to_db.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
+    platform_hws = [
+        _obj_to_db.platform_hw_from_db_model(hw_id_model) for hw_id_model in hw_models
+    ]
     if len(platform_hws) == 0:
         return _log_error_and_respond(
-            f"Platform HW  with ID={platform_hw_id} was not found.", 404, "Object not found"
+            f"Platform HW  with ID={platform_hw_id} was not found.",
+            404,
+            "Object not found",
         )
     else:
         _log_info(f"Found {len(platform_hws)} platform HWs with ID={platform_hw_id}")
@@ -84,7 +91,9 @@ def delete_hw(platform_hw_id: int) -> _Response:
         )
     response = _db_access.delete(_db_models.PlatformHWDBModel, platform_hw_id)
     if response.status_code == 200:
-        return _log_info_and_respond(f"Platform HW with ID={platform_hw_id} has been deleted.")
+        return _log_info_and_respond(
+            f"Platform HW with ID={platform_hw_id} has been deleted."
+        )
     else:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(

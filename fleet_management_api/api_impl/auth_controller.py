@@ -16,7 +16,12 @@ _security = SecurityObj()
 
 
 def init_security(
-    keycloak_url: str, client_id: str, secret_key: str, scope: str, realm: str, callback: str
+    keycloak_url: str,
+    client_id: str,
+    secret_key: str,
+    scope: str,
+    realm: str,
+    callback: str,
 ) -> None:
     _security.set_config(keycloak_url, client_id, secret_key, scope, realm, callback)
 

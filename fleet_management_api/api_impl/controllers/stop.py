@@ -75,14 +75,18 @@ def get_stop(stop_id: int) -> _Response:
     stop_db_models: list[_db_models.StopDBModel] = _db_access.get(
         _db_models.StopDBModel, criteria={"id": lambda x: x == stop_id}
     )
-    stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
+    stops = [
+        _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
+    ]
     if len(stops) == 0:
         return _log_error_and_respond(
             f"Stop with ID={stop_id} was not found.", 404, title="Object not found"
         )
     else:
         _log_info(f"Found {len(stops)} stop with ID={stop_id}")
-        return _Response(body=stops[0], status_code=200, content_type="application/json")
+        return _Response(
+            body=stops[0], status_code=200, content_type="application/json"
+        )
 
 
 def get_stops() -> _Response:
@@ -127,7 +131,9 @@ def update_stops() -> _Response:
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _Response:
-    route_db_models = [m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids]
+    route_db_models = [
+        m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids
+    ]
     if len(route_db_models) > 0:
         return _log_error_and_respond(
             f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",
@@ -135,4 +141,6 @@ def _get_routes_referencing_stop(stop_id: int) -> _Response:
             title="Cannot delete object because it is referenced by other objects",
         )
     else:
-        return _log_info_and_respond(f"Stop with ID={stop_id} is not referenced by any route.")
+        return _log_info_and_respond(
+            f"Stop with ID={stop_id} is not referenced by any route."
+        )

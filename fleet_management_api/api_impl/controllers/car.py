@@ -51,7 +51,9 @@ def create_cars() -> _Response:  # noqa: E501
         for car in cars:
             car_db_models.append(_obj_to_db.car_to_db_model(car))
             checked.append(
-                _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=car.platform_hw_id)
+                _db_access.db_object_check(
+                    _db_models.PlatformHWDBModel, id_=car.platform_hw_id
+                )
             )
             checked.append(
                 _db_access.db_object_check(
@@ -147,7 +149,9 @@ def update_cars() -> _Response:
     - the platform HW is not referenced by any other existing car.
     """
     if connexion.request.is_json:
-        cars = [_models.Car.from_dict(item) for item in connexion.request.get_json()]  # noqa: E501
+        cars = [
+            _models.Car.from_dict(item) for item in connexion.request.get_json()
+        ]  # noqa: E501
         car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
         response = _db_access.update(*car_db_model)
         if response.status_code == 200:
@@ -156,7 +160,9 @@ def update_cars() -> _Response:
             )
         else:
             msg = f"Cars with IDs {[c.id for c in cars]} could not be updated. {response.body['detail']}"
-            return _log_error_and_respond(msg, response.status_code, response.body["title"])
+            return _log_error_and_respond(
+                msg, response.status_code, response.body["title"]
+            )
     else:
         return _log_invalid_request_body_format()
 
@@ -174,7 +180,8 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
 
 
 def _post_default_car_state(car_ids: list[int]) -> _Response:
-    car_states = \
-        [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
+    car_states = [
+        _CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids
+    ]
     response = _create_car_state_from_argument_and_post(car_states)
     return response

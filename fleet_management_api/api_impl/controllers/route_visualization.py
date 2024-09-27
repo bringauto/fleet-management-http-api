@@ -19,7 +19,8 @@ from fleet_management_api.api_impl.api_logging import (
 def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
-        _db_models.RouteVisualizationDBModel, criteria={"route_id": lambda x: x == route_id}
+        _db_models.RouteVisualizationDBModel,
+        criteria={"route_id": lambda x: x == route_id},
     )
     if len(rp_db_models) == 0:
         return _error(
@@ -76,10 +77,14 @@ def redefine_route_visualizations() -> _Response:
         vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
         response = _db_access.update(*vis_db_models)
         if response.status_code == 200:
-            inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
+            inserted_vis = [
+                _obj_to_db.route_visualization_from_db_model(m) for m in response.body
+            ]
             for v in inserted_vis:
                 assert v.id is not None
-                _log_info(f"Route visualization (ID={v.id}) has been succesfully redefined.")
+                _log_info(
+                    f"Route visualization (ID={v.id}) has been succesfully redefined."
+                )
             return _json_response(inserted_vis)
         else:
             return _log_error_and_respond(

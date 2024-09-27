@@ -48,7 +48,9 @@ def create_routes() -> _Response:
                 assert route.id is not None
                 _create_empty_route_visualization(route.id)
                 _log_info(f"Route (name='{route.name}) has been created.")
-            return _json_response([_obj_to_db.route_from_db_model(m) for m in inserted_db_models])
+            return _json_response(
+                [_obj_to_db.route_from_db_model(m) for m in inserted_db_models]
+            )
         else:
             return _log_error_and_respond(
                 f"Routes could not be created. {response.body['detail']}",
@@ -84,7 +86,10 @@ def get_route(route_id: int) -> _models.Route:
     route_db_models = _db_access.get(
         _db_models.RouteDBModel, criteria={"id": lambda x: x == route_id}
     )
-    routes = [_obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
+    routes = [
+        _obj_to_db.route_from_db_model(route_db_model)
+        for route_db_model in route_db_models
+    ]
     if len(routes) == 0:
         return _log_error_and_respond(
             f"Route with ID={route_id} was not found.", 404, title="Object not found"
@@ -98,7 +103,8 @@ def get_routes() -> list[_models.Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(_db_models.RouteDBModel)
     route: list[_models.Route] = [
-        _obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models
+        _obj_to_db.route_from_db_model(route_db_model)
+        for route_db_model in route_db_models
     ]
     _log_info(f"Found {len(route)} routes.")
     return _json_response(route)
@@ -116,11 +122,15 @@ def update_routes() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        routes = [_models.Route.from_dict(item) for item in connexion.request.get_json()]
+        routes = [
+            _models.Route.from_dict(item) for item in connexion.request.get_json()
+        ]
         check_stops_response = _find_nonexistent_stops(*routes)
         if not check_stops_response.status_code == 200:
             return _log_error_and_respond(
-                check_stops_response.body, check_stops_response.status_code, "Object not found"
+                check_stops_response.body,
+                check_stops_response.status_code,
+                "Object not found",
             )
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
         response = _db_access.update(*route_db_models)
@@ -142,12 +152,16 @@ def _check_route_model(route: _models.Route) -> _Response:
     check_stops_response = _find_nonexistent_stops(route)
     if not check_stops_response.status_code == 200:
         return check_stops_response
-    return _text_response(f"Route (ID={route.id}, name='{route.name}) has been checked.")
+    return _text_response(
+        f"Route (ID={route.id}, name='{route.name}) has been checked."
+    )
 
 
 def _create_empty_route_visualization(route_id: int) -> _Response:
     response = _db_access.add(
-        _db_models.RouteVisualizationDBModel(id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"),
+        _db_models.RouteVisualizationDBModel(
+            id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"
+        ),
     )
     if not response.status_code == 200:
         return _error(
@@ -156,13 +170,17 @@ def _create_empty_route_visualization(route_id: int) -> _Response:
             response.body["title"],
         )
     else:
-        return _text_response(f"Empty route visualization (route ID={route_id}) has been created.")
+        return _text_response(
+            f"Empty route visualization (route ID={route_id}) has been created."
+        )
 
 
 def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
     for route in routes:
         checked_id_set: set[int] = set(route.stop_ids)
-        existing_ids = set([stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)])
+        existing_ids = set(
+            [stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)]
+        )
         nonexistent_stop_ids = checked_id_set.difference(existing_ids)
         if nonexistent_stop_ids:
             return _error(
@@ -172,7 +190,9 @@ def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
                 title="Object not found",
             )
         else:
-            return _text_response(f"Route (ID={route.id}, name='{route.name}) has been checked.")
+            return _text_response(
+                f"Route (ID={route.id}, name='{route.name}) has been checked."
+            )
 
 
 def _find_related_orders(route_id: int) -> _Response:

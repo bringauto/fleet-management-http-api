@@ -63,7 +63,9 @@ def n_of_active_orders(car_id: int) -> int:
             _active_orders[car_id] = list()
         else:
             _active_orders[car_id] = [
-                order.id for order in response.body if order.last_state.status not in FINAL_STATUSES
+                order.id
+                for order in response.body
+                if order.last_state.status not in FINAL_STATUSES
             ]
     return len(_active_orders[car_id])
 
@@ -77,7 +79,9 @@ def n_of_inactive_orders(car_id: int) -> int:
             _inactive_orders[car_id] = list()
         else:
             _inactive_orders[car_id] = [
-                order.id for order in response.body if order.last_state.status in FINAL_STATUSES
+                order.id
+                for order in response.body
+                if order.last_state.status in FINAL_STATUSES
             ]
     return len(_inactive_orders[car_id])
 
@@ -166,12 +170,16 @@ def create_orders() -> _Response:
 
     order_db_models: list[_db_models.OrderDBModel] = []
     checked: list[_db_access.CheckBeforeAdd] = []
-    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in connexion.request.get_json()]
+    orders: list[_models.Order] = [
+        _models.Order.from_dict(o) for o in connexion.request.get_json()
+    ]
     orders_per_car = _group_new_orders_by_car(orders)
 
     if _max_n_of_active_orders is not None:
         for car_id in orders_per_car:
-            if len(orders_per_car[car_id]) > _max_n_of_active_orders - n_of_active_orders(car_id):
+            if len(
+                orders_per_car[car_id]
+            ) > _max_n_of_active_orders - n_of_active_orders(car_id):
                 return _error(
                     403,
                     f"Maximum number {_max_n_of_active_orders} of active orders has been reached.",
@@ -188,7 +196,9 @@ def create_orders() -> _Response:
         checked.extend(
             [
                 _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
-                _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.db_object_check(
+                    _db_models.StopDBModel, id_=order.target_stop_id
+                ),
                 _db_access.db_object_check(
                     _db_models.RouteDBModel,
                     order.stop_route_id,
@@ -215,7 +225,9 @@ def create_orders() -> _Response:
             _log_info(f"Order (ID={model.id}) has been created.")
 
         db_states = _post_default_order_states(ids).body
-        states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
+        states = [
+            _obj_to_db.order_state_from_db_model(db_state) for db_state in db_states
+        ]
 
         posted_orders: list[_models.Order] = []
         for model, state in zip(posted_db_models, states):
@@ -259,7 +271,9 @@ def get_order(car_id: int, order_id: int) -> _Response:
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
     if len(order_db_models) == 0:
-        msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
+        msg = (
+            f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
+        )
         _log_error(msg)
         return _error(404, msg, "Object not found")
     else:
@@ -305,10 +319,14 @@ def get_orders(since: int = 0) -> _Response:
 
 
 def _car_exist(car_id: int) -> bool:
-    return bool(_db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id}))
+    return bool(
+        _db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id})
+    )
 
 
-def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _models.Order | None:
+def _get_order_with_last_state(
+    order_db_model: _db_models.OrderDBModel,
+) -> _models.Order | None:
     states = _db_access.get(
         _db_models.OrderStateDBModel,
         criteria={"order_id": lambda x: x == order_db_model.id},
@@ -326,7 +344,9 @@ def _get_order_with_last_state(order_db_model: _db_models.OrderDBModel) -> _mode
     return order
 
 
-def _group_new_orders_by_car(orders: list[_models.Order]) -> dict[CarId, list[_models.Order]]:
+def _group_new_orders_by_car(
+    orders: list[_models.Order],
+) -> dict[CarId, list[_models.Order]]:
     orders_by_car: dict[CarId, list[_models.Order]] = defaultdict(list)
     for order in orders:
         orders_by_car[order.car_id].append(order)
@@ -339,7 +359,7 @@ def _default_order_state(order_id: int) -> _models.OrderState:
 
 def _post_default_order_states(order_ids: list[int]) -> _Response:
     order_states = [_default_order_state(id_) for id_ in order_ids]
-    response = _order_state.create_order_states_from_argument_and_post(order_states, check_final_state=False)
+    response = _order_state.create_order_states_from_argument_and_post(
+        order_states, check_final_state=False
+    )
     return response
-
-
