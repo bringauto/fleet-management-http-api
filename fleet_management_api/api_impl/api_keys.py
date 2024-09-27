@@ -1,4 +1,4 @@
-import random as _random
+import secrets as _secrets
 import string as _string
 from typing import Optional
 
@@ -65,7 +65,7 @@ def verify_key_and_return_key_info(
 
 
 def _generate_key() -> str:  # pragma: no cover
-    return "".join(_random.choice(_string.ascii_letters) for _ in range(_KEY_LENGTH))
+    return "".join(_secrets.choice(_string.ascii_letters) for _ in range(_KEY_LENGTH))
 
 
 def _key_added_msg(name: str, key: str) -> str:
