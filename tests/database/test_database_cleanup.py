@@ -33,13 +33,6 @@ class Test_Database_Cleanup(unittest.TestCase):
         _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
         self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
 
-fails_but_the_table_exists(self):
-        _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
-        _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
-        restart_database()
-        response = _db_access.update(_db_models.CarDBModel(id=1, name="car1", platform_hw_id=1, under_test=True))
-        self.assertEqual(response.status_code, 404)
-
     def test_deleting_object_after_database_cleanup_fails_but_the_table_exists(self):
         _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
         _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
