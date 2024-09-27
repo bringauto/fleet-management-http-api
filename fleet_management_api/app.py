@@ -74,7 +74,7 @@ class _TestApp:
                 return uri + f"?api_key={self._key}"
 
 
-def get_test_app(predef_api_key: str = "", clear_logs: bool = True) -> _TestApp:
+def get_test_app(predef_api_key: str = "") -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 
     It enables to surpass the API key verification by providing a predefined API key.
