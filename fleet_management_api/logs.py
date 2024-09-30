@@ -29,8 +29,11 @@ def configure_logging(component_name: str, config: dict) -> None:
             raise ValueError("No logging configuration found")
         logger = logging.getLogger(LOGGER_NAME)
         verbose: bool = log_config.get("verbose", None)
+        log_dir_path = log_config.get("log-path", None)
         if verbose is None:
             raise ValueError("No verbosity level found in logging configuration")
+        if not os.path.exists(log_dir_path):
+            raise ValueError(f"Log directory does not exist: {log_dir_path}. Check the config file.")
 
         logger.setLevel(_log_level_by_verbosity[verbose])
 

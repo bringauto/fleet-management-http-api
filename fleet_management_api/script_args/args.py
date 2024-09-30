@@ -91,8 +91,10 @@ def load_config_file(path: str) -> dict[str, Any]:
         with open(path) as config_file:
             config = json.load(config_file)
             return config
-    except:
+    except FileNotFoundError:
         raise ConfigFileNotFound(f"Could not load config file from path '{path}'.")
+    except Exception as e:
+        raise ValueError(f"Error when loading the config file: {e}")
 
 
 def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
