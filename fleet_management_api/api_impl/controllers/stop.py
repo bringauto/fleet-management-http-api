@@ -16,6 +16,10 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
+from ...response_consts import (
+    CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
+    OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
+)
 
 
 def create_stops() -> _Response:
@@ -75,18 +79,12 @@ def get_stop(stop_id: int) -> _Response:
     stop_db_models: list[_db_models.StopDBModel] = _db_access.get(
         _db_models.StopDBModel, criteria={"id": lambda x: x == stop_id}
     )
-    stops = [
-        _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
-    ]
+    stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
-        return _log_error_and_respond(
-            f"Stop with ID={stop_id} was not found.", 404, title="Object not found"
-        )
+        return _log_error_and_respond(f"Stop (ID={stop_id}) not found.", 404, title=_OBJ_NOT_FOUND)
     else:
         _log_info(f"Found {len(stops)} stop with ID={stop_id}")
-        return _Response(
-            body=stops[0], status_code=200, content_type="application/json"
-        )
+        return _Response(body=stops[0], status_code=200, content_type="application/json")
 
 
 def get_stops() -> _Response:
@@ -117,7 +115,7 @@ def update_stops() -> _Response:
         if response.status_code == 200:
             updated_stops: list[_db_models.StopDBModel] = response.body
             for s in updated_stops:
-                _log_info(f"Stop (ID={s.id} has been succesfully updated.")
+                _log_info(f"Stop (ID={s.id}) has been succesfully updated.")
             return _text_response(
                 f"Stops {[s.name for s in updated_stops]} were succesfully updated."
             )
@@ -131,16 +129,12 @@ def update_stops() -> _Response:
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _Response:
-    route_db_models = [
-        m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids
-    ]
+    route_db_models = [m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids]
     if len(route_db_models) > 0:
         return _log_error_and_respond(
             f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",
             400,
-            title="Cannot delete object because it is referenced by other objects",
+            title=_CANNOT_DELETE_REFERENCED,
         )
     else:
-        return _log_info_and_respond(
-            f"Stop with ID={stop_id} is not referenced by any route."
-        )
+        return _log_info_and_respond(f"Stop (ID={stop_id}) not referenced by any route.")

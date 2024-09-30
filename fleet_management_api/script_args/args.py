@@ -105,7 +105,7 @@ def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
             config_dict["database"]["test"] = test
         config = _APIConfig(**config_dict)
     except Exception as e:
-        print(f"\nCheck the configuration file ('{config_path}').\n")
+        print(f"Check the configuration file ('{config_path}'). {e}")
         raise e
     _update_config_with_args(args, config)
     return ScriptArgs(args, config)

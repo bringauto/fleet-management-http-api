@@ -16,6 +16,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
+from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 
 
 def create_routes() -> _Response:
@@ -33,7 +34,7 @@ def create_routes() -> _Response:
         routes = [_models.Route.from_dict(r) for r in connexion.request.get_json()]
         for r in routes:
             check_response = _check_route_model(r)
-            if not check_response.status_code == 200:
+            if check_response.status_code != 200:
                 return _log_error_and_respond(
                     check_response.body["detail"],
                     check_response.status_code,
@@ -92,7 +93,7 @@ def get_route(route_id: int) -> _models.Route:
     ]
     if len(routes) == 0:
         return _log_error_and_respond(
-            f"Route with ID={route_id} was not found.", 404, title="Object not found"
+            f"Route with ID={route_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
         _log_info(f"Found {len(routes)} route with ID={route_id}")
@@ -130,7 +131,7 @@ def update_routes() -> _Response:
             return _log_error_and_respond(
                 check_stops_response.body,
                 check_stops_response.status_code,
-                "Object not found",
+                _OBJ_NOT_FOUND,
             )
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
         response = _db_access.update(*route_db_models)
@@ -187,7 +188,7 @@ def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
                 404,
                 f"Route (ID={route.id}, name='{route.name}) has not been created - some of the required stops do not exist. "
                 f"Nonexstent stop ids: {nonexistent_stop_ids}",
-                title="Object not found",
+                title=_OBJ_NOT_FOUND,
             )
         else:
             return _text_response(

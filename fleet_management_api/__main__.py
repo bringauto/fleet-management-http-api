@@ -7,7 +7,7 @@ from fleet_management_api.controllers.security_controller import set_auth_params
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from fleet_management_api.database.connection import set_up_database
 from fleet_management_api.api_impl.data_setup import set_up_data
-from fleet_management_api.logs import configure_logging, LOGGER_NAME
+from fleet_management_api.logs import configure_logging
 
 
 def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
@@ -15,9 +15,9 @@ def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
     try:
         response = requests.get(keycloak_url + "/realms/" + realm)
         response.raise_for_status()
-    except:
+        return response.json()["public_key"]
+    except Exception:
         return ""
-    return response.json()["public_key"]
 
 
 def _set_up_oauth(config: _args.Security) -> None:

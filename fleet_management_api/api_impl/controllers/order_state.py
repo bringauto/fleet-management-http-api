@@ -19,7 +19,10 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.controllers.order as _order
-
+from ...response_consts import (
+    CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
+    OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+)
 
 OrderId = int
 
@@ -55,7 +58,7 @@ def create_order_states_from_argument_and_post(
     for id_, order in orders.items():
         if order is None:
             return _log_error_and_respond(
-                f"Order with id='{id_}' was not found.", 404, "Object not found"
+                f"Order with id='{id_}' was not found.", 404, _OBJ_NOT_FOUND
             )
         assert order is not None
         if check_final_state:
@@ -72,14 +75,14 @@ def create_order_states_from_argument_and_post(
                         f"Order with id='{last_state.order_id}' has already received status DONE."
                         "No other Order State can be added.",
                         403,
-                        title="Could not create new object",
+                        title=_CANNOT_CREATE_OBJECT,
                     )
                 elif last_state.status == _models.OrderStatus.CANCELED:
                     return _log_error_and_respond(
                         f"Order with id='{last_state.order_id}' has already received status CANCELED."
                         "No other Order State can be added.",
                         403,
-                        title="Could not create new object",
+                        title=_CANNOT_CREATE_OBJECT,
                     )
 
     if not order_states:

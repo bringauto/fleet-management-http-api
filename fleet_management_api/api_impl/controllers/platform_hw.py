@@ -14,6 +14,9 @@ from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
 )
+from ...response_consts import (
+    OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+)
 
 
 def create_hws() -> _Response:
@@ -69,9 +72,9 @@ def get_hw(platform_hw_id: int) -> _Response:
     ]
     if len(platform_hws) == 0:
         return _log_error_and_respond(
-            f"Platform HW  with ID={platform_hw_id} was not found.",
+            f"Platform HW with ID={platform_hw_id} was not found.",
             404,
-            "Object not found",
+            title=_OBJ_NOT_FOUND,
         )
     else:
         _log_info(f"Found {len(platform_hws)} platform HWs with ID={platform_hw_id}")

@@ -3,6 +3,10 @@
         "log-path": "log",
         "verbose": true
     },
+    "http_server": {
+        "base_uri": "http://localhost:8080/v2/management",
+        "port": 8080
+    },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com",
         "client_id": "",

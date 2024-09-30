@@ -5,17 +5,13 @@ import sqlalchemy as _sqa
 from sqlalchemy import Engine as _Engine
 from sqlalchemy import create_engine as _create_engine
 
-# import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.database.db_models import (
     Base as _Base,
     CarStateDBModel as _CarStateDBModel,
-    OrderStateDBModel as _OrderStateDBModel
+    OrderStateDBModel as _OrderStateDBModel,
 )
 from fleet_management_api.script_args.configs import Database as _Database
-from fleet_management_api.api_impl.api_logging import (
-    log_info as _log_info,
-    log_error as _log_error
-)
+from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
 
 
 _db_connection: Optional[_Engine] = None
@@ -71,7 +67,7 @@ def db_url(
 def db_url_test(db_file_location: str = "") -> str:
     """Compose and return a url used to connect API to a sqlite database."""
     if db_file_location == "":
-        return f"sqlite:///:memory:"
+        return "sqlite:///:memory:"
     else:
         return f"sqlite:///{db_file_location}"
 
@@ -166,9 +162,7 @@ def set_up_database(config: _Database) -> None:
         )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _CarStateDBModel.set_max_n_of_stored_states(
-        config.maximum_number_of_table_rows["car_states"]
-    )
+    _CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
     _OrderStateDBModel.set_max_n_of_stored_states(
         config.maximum_number_of_table_rows["order_states"]
     )
@@ -220,8 +214,7 @@ def _new_connection(url: str) -> _Engine:
 
 def _test_new_connection(engine: _Engine) -> None:
     try:
-        with engine.connect():
-            pass
+        engine.connect()
     except Exception as e:
         raise CannotConnectToDatabase(
             "Could not connect to the database with the given connection parameters: \n"

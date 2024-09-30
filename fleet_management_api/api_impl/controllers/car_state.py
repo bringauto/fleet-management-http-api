@@ -67,7 +67,7 @@ def create_car_states_from_argument_and_post(
             )
             _log_error(cleanup_error_msg)
             msg = msg + "\n" + cleanup_error_msg
-            title = "Could not remove old car states."
+            title = "Could not delete object"
         else:
             return _json_response(inserted_models)
     else:
