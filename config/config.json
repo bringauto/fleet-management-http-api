@@ -5,7 +5,7 @@
     },
     "http_server": {
         "base_uri": "http://localhost:8080/v2/management",
-        "port": 8080
+        "port": 8081
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com",

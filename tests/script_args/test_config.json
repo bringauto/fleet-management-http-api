@@ -4,7 +4,8 @@
         "verbose": true
     },
     "http_server": {
-        "base_uri": "https://someadress.com/"
+        "base_uri": "https://someadress.com/",
+        "port": 8081
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com/",
