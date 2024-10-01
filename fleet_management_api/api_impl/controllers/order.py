@@ -63,10 +63,11 @@ def n_of_active_orders(car_id: int) -> int:
         if response.status_code != 200:
             _active_orders[car_id] = list()
         else:
+            orders: list[_models.Order] = response.body
             _active_orders[car_id] = [
                 order.id
-                for order in response.body
-                if order.last_state.status not in FINAL_STATUSES
+                for order in orders
+                if order.last_state is not None and order.last_state.status not in FINAL_STATUSES
             ]
     return len(_active_orders[car_id])
 
@@ -79,10 +80,11 @@ def n_of_inactive_orders(car_id: int) -> int:
         if response.status_code != 200:
             _inactive_orders[car_id] = list()
         else:
+            orders: list[_models.Order] = response.body
             _inactive_orders[car_id] = [
                 order.id
-                for order in response.body
-                if order.last_state.status in FINAL_STATUSES
+                for order in orders
+                if order.last_state is not None and order.last_state.status in FINAL_STATUSES
             ]
     return len(_inactive_orders[car_id])
 
@@ -171,16 +173,16 @@ def create_orders() -> _Response:
 
     order_db_models: list[_db_models.OrderDBModel] = []
     checked: list[_db_access.CheckBeforeAdd] = []
-    orders: list[_models.Order] = [
-        _models.Order.from_dict(o) for o in connexion.request.get_json()
-    ]
+    json_data = connexion.request.get_json()
+    if not isinstance(json_data, list):
+        return _error(400, "Invalid input: expected a list of orders.", "Bad Request")
+
+    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in json_data]
     orders_per_car = _group_new_orders_by_car(orders)
 
     if _max_n_of_active_orders is not None:
         for car_id in orders_per_car:
-            if len(
-                orders_per_car[car_id]
-            ) > _max_n_of_active_orders - n_of_active_orders(car_id):
+            if len(orders_per_car[car_id]) > _max_n_of_active_orders - n_of_active_orders(car_id):
                 return _error(
                     403,
                     f"Maximum number {_max_n_of_active_orders} of active orders has been reached.",
@@ -197,9 +199,7 @@ def create_orders() -> _Response:
         checked.extend(
             [
                 _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
-                _db_access.db_object_check(
-                    _db_models.StopDBModel, id_=order.target_stop_id
-                ),
+                _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
                 _db_access.db_object_check(
                     _db_models.RouteDBModel,
                     order.stop_route_id,
@@ -226,9 +226,7 @@ def create_orders() -> _Response:
             _log_info(f"Order (ID={model.id}) has been created.")
 
         db_states = _post_default_order_states(ids).body
-        states = [
-            _obj_to_db.order_state_from_db_model(db_state) for db_state in db_states
-        ]
+        states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
 
         posted_orders: list[_models.Order] = []
         for model, state in zip(posted_db_models, states):
@@ -272,9 +270,7 @@ def get_order(car_id: int, order_id: int) -> _Response:
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
     if len(order_db_models) == 0:
-        msg = (
-            f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
-        )
+        msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
         _log_error(msg)
         return _error(404, msg, _OBJ_NOT_FOUND)
     else:
@@ -320,9 +316,7 @@ def get_orders(since: int = 0) -> _Response:
 
 
 def _car_exist(car_id: int) -> bool:
-    return bool(
-        _db_access.get(_db_models.CarDBModel, criteria={"id": lambda x: x == car_id})
-    )
+    return bool(_db_access.exists(_db_models.CarDBModel, {"id": lambda x: x==car_id}))
 
 
 def _get_order_with_last_state(

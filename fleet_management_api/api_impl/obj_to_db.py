@@ -128,13 +128,13 @@ def order_state_from_db_model(
     )
 
 
-def platform_hw_to_db_model(
+def hw_to_db_model(
     platform_hw: _models.PlatformHW,
 ) -> _db_models.PlatformHWDBModel:
     return _db_models.PlatformHWDBModel(id=platform_hw.id, name=platform_hw.name)
 
 
-def platform_hw_from_db_model(
+def hw_from_db_model(
     platform_hw_db_model: _db_models.PlatformHWDBModel,
 ) -> _models.PlatformHW:
     return _models.PlatformHW(

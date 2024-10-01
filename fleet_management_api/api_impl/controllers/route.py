@@ -179,6 +179,8 @@ def _create_empty_route_visualization(route_id: int) -> _Response:
 def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
     for route in routes:
         checked_id_set: set[int] = set(route.stop_ids)
+        for id_ in checked_id_set:
+            _db_access.exists(_db_models.StopDBModel, criteria={"id": lambda x: x == id_})
         existing_ids = set(
             [stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)]
         )

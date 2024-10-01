@@ -4,6 +4,7 @@ import argparse
 import json
 
 from fleet_management_api.script_args.configs import APIConfig as _APIConfig
+import logging
 
 
 _EMPTY_VALUE = None
@@ -106,11 +107,15 @@ def _parse_arguments(parser: argparse.ArgumentParser) -> ScriptArgs:
         if test is not None:
             config_dict["database"]["test"] = test
         config = _APIConfig(**config_dict)
+        _update_config_with_args(args, config)
+        return ScriptArgs(args, config)
+
+    except ConfigFileNotFound as e:
+        logging.error(f"Configuration file not found. {e}")
+        raise
     except Exception as e:
-        print(f"Check the configuration file ('{config_path}'). {e}")
+        logging.error(f"Check the configuration file ('{config_path}'). {e}")
         raise e
-    _update_config_with_args(args, config)
-    return ScriptArgs(args, config)
 
 
 def _update_config_with_args(args: dict[str, Any], config: _APIConfig) -> None:

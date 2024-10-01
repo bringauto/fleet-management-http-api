@@ -232,7 +232,7 @@ def delete_n(
     are deleted.
     """
 
-    if not column_name in base.__table__.columns.keys():
+    if column_name not in base.__table__.columns.keys():
         return _error(
             500,
             f"Column {column_name} not found in table {base.__tablename__}.",
@@ -259,6 +259,23 @@ def delete_n(
 
 
 @db_access_method
+def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None) -> bool:
+    """Check if an object with the given ID exists in the database."""
+    source = _get_current_connection_source()
+    table = base.__table__
+    if criteria is None:
+        criteria = {}
+    with _Session(source) as session:
+        clauses = [
+            criteria[attr_label](getattr(table.columns, attr_label))
+            for attr_label in criteria.keys()
+        ]
+        stmt = _sqa.select(_sqa.exists().where(*clauses))  # type: ignore
+        result = bool(session.execute(stmt).scalar())
+        return result
+
+
+@db_access_method
 def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
@@ -276,8 +293,6 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
             return results
         except _NoResultFound as e:
             raise _NoResultFound(f"{base.model_name} with ID={id_value} not found. {e}")
-        except Exception as e:
-            raise e
 
 
 @db_access_method
@@ -374,8 +389,6 @@ def get_children(
             raise ParentNotFound(
                 f"Parent with ID={parent_id} not found in table {parent_base.__tablename__}. {e}"
             )
-        except Exception as e:
-            raise e
 
 
 @db_access_method
@@ -477,8 +490,8 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
         return
     tablename = objs[0].__tablename__
     for obj in objs[1:]:
-        if not obj.__tablename__ == tablename:
-            raise TypeError(f"Object being added to database must belong to the same table.")
+        if obj.__tablename__ != tablename:
+            raise TypeError("Object being added to database must belong to the same table.")
 
 
 def _is_awaited_result_valid(

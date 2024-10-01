@@ -50,9 +50,7 @@ def create_car_states_from_argument_and_post(
     state_db_models = [_obj_to_db.car_state_to_db_model(s) for s in car_states]
     response = _db_access.add(
         *state_db_models,
-        checked=[
-            _db_access.db_object_check(_db_models.CarDBModel, id_=car_states[0].car_id)
-        ],
+        checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_states[0].car_id)],
     )
     if response.status_code == 200:
         inserted_models = [_obj_to_db.car_state_from_db_model(s) for s in response.body]
@@ -80,9 +78,7 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
-def get_all_car_states(
-    since: int = 0, wait: bool = False, last_n: int = 0
-) -> _Response:
+def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
     """Get all car states for all the cars.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -108,9 +104,7 @@ def get_all_car_states(
     return _json_response(car_states)
 
 
-def get_car_states(
-    car_id: int, since: int = 0, wait: bool = False, last_n: int = 0
-) -> _Response:
+def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
     """Get car states for a car idenfified by 'car_id' of an existing car.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True

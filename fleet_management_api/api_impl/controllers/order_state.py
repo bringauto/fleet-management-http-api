@@ -21,7 +21,7 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.controllers.order as _order
 from ...response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
-    OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+    OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
 
 OrderId = int
@@ -38,9 +38,7 @@ def create_order_states() -> _Response:
     """
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
-    order_states = [
-        _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
-    ]
+    order_states = [_models.OrderState.from_dict(item) for item in _connexion.request.get_json()]
     return create_order_states_from_argument_and_post(order_states)
 
 
@@ -97,8 +95,7 @@ def create_order_states_from_argument_and_post(
             done_or_canceled_states[state.order_id] = state
         elif (
             done_or_canceled_states[state.order_id].status == _models.OrderStatus.DONE
-            or done_or_canceled_states[state.order_id].status
-            == _models.OrderStatus.CANCELED
+            or done_or_canceled_states[state.order_id].status == _models.OrderStatus.CANCELED
         ):
             order_states.remove(state)
 
@@ -116,9 +113,7 @@ def create_order_states_from_argument_and_post(
     response = _db_access.add(*db_models)
     if response.status_code == 200:
         try:
-            inserted_models = [
-                _obj_to_db.order_state_from_db_model(m) for m in response.body
-            ]
+            inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]
             for model in inserted_models:
                 _remove_old_states(model.order_id)
                 _log_info(f"Order state (ID={model.id}) has been sent.")
@@ -185,9 +180,7 @@ def get_order_states(
         _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
-        criteria: dict[str, Callable[[Any], bool]] = {
-            "order_id": lambda x: x == order_id
-        }
+        criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
         return _get_order_states(criteria, wait, since, last_n)
 
 
@@ -228,10 +221,7 @@ def _remove_old_states(order_id: int) -> _Response:
     order_state_db_models = _db_access.get(
         _db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id}
     )
-    delta = (
-        len(order_state_db_models)
-        - _db_models.OrderStateDBModel.max_n_of_stored_states()
-    )
+    delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
     if delta > 0:
         response = _db_access.delete_n(
             _db_models.OrderStateDBModel,

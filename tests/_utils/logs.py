@@ -1,20 +1,30 @@
 import json
 import os
 
+import logging
+
 
 def clear_logs() -> None:
     """Find and clear the log file."""
     try:
-        log_dir = os.path.dirname(__file__)
-        config = json.loads(open(os.path.join(log_dir,"test_config.json")).read())
-        log_file_path = config["logging"]["log-path"]
-        for file in os.listdir(log_file_path):
-            if os.path.isfile(file) and file.endswith(".log"):
-                with open(file, "w") as f:
-                    f.write("")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(current_dir, "test_config.json"), "r") as f:
+            config = json.load(f)
+        _clear_log_files(os.path.abspath(config["logging"]["log-path"]))
+
     except KeyError as e:
-        print("Missing key in configuration file: ", e)
+        logging.error(f"Missing key in configuration file: {e}")
     except FileNotFoundError as e:
-        print("Configuration file not found: ", e)
+        logging.error(f"Configuration file not found: {e}")
     except Exception as e:
-        print("Unexpected error when clearing up log files: ", e)
+        logging.error(f"Unexpected error when clearing up log files: {e}")
+
+
+def _clear_log_files(directory: str) -> None:
+    """Clear all log files in the directory (absolute path)."""
+    if not os.path.exists(directory):
+        return
+    for file in os.listdir(directory):
+        if file.endswith(".log"):
+            with open(file, "w") as f:
+                f.close()

@@ -1,11 +1,14 @@
 import jwt
 
-import fleet_management_api.api_impl as _api
-from fleet_management_api.api_impl.api_keys import verify_key_and_return_key_info as _verify_key_and_return_key_info
+from fleet_management_api.api_impl.api_keys import (
+    verify_key_and_return_key_info as _verify_key_and_return_key_info,
+)
 
 
 _public_key: str
 _client_id: str
+
+
 def set_auth_params(public_key: str, client_id: str) -> None:
     global _public_key
     _public_key = "-----BEGIN PUBLIC KEY-----\n" + public_key + "\n-----END PUBLIC KEY-----"
@@ -26,15 +29,15 @@ def info_from_oAuth2AuthCode(token):
     :rtype: dict | None
     """
     try:
-        decoded_token = jwt.decode(token, _public_key, algorithms=['RS256'], audience='account')
+        decoded_token = jwt.decode(token, _public_key, algorithms=["RS256"], audience="account")
     except:
         return None
 
     for origin in decoded_token["allowed-origins"]:
         if origin == _client_id:
-            return {'scopes': {}, 'uid': ''}
+            return {"scopes": {}, "uid": ""}
 
-    return None # type: ignore
+    return None  # type: ignore
 
 
 def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
@@ -49,7 +52,7 @@ def validate_scope_oAuth2AuthCode(required_scopes, token_scopes):
     :rtype: bool
     """
     # looks for scopes returned by the function above
-    #return set(required_scopes).issubset(set(token_scopes))
+    # return set(required_scopes).issubset(set(token_scopes))
     return True
 
 
@@ -66,7 +69,7 @@ def info_from_APIKeyAuth(api_key, *args) -> None | dict:
     """
 
     code, info = _verify_key_and_return_key_info(api_key)
-    if code==200:
-        return {'name': info.name} # type: ignore
+    if code == 200:
+        return {"name": info.name}  # type: ignore
     else:
         return None
