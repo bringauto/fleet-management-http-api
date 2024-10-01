@@ -38,9 +38,19 @@ def create_order_states() -> _Response:
     """
     if not _connexion.request.is_json:
         return _log_invalid_request_body_format()
-    order_states = [
-        _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
-    ]
+def create_order_states() -> _Response:
+    """Post new states of existing orders."""
+    if not _connexion.request.is_json:
+        return _log_invalid_request_body_format()
+    try:
+        order_states = [
+            _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
+        ]
+    except (ValueError, TypeError) as e:
+        return _log_error_and_respond(
+            f"Invalid request data: {e}", 400, title="Invalid Request Data"
+        )
+    return create_order_states_from_argument_and_post(order_states)
     return create_order_states_from_argument_and_post(order_states)
 
 
