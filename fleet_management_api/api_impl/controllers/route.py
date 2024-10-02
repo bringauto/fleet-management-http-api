@@ -1,8 +1,17 @@
 import connexion  # type: ignore
+from functools import partial
 
 import fleet_management_api.models as _models
+from fleet_management_api.models import (
+    Route as _Route,
+)
 import fleet_management_api.database.db_access as _db_access
-import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.database.db_models import (
+    OrderDBModel as _OrderDBModel,
+    RouteDBModel as _RouteDBModel,
+    RouteVisualizationDBModel as _RouteVisDBModel,
+    StopDBModel as _StopDBModel,
+)
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
@@ -34,7 +43,7 @@ def create_routes() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        routes = [_models.Route.from_dict(r) for r in connexion.request.get_json()]
+        routes = [_Route.from_dict(r) for r in connexion.request.get_json()]
         for r in routes:
             check_response = _check_route_model(r)
             if check_response.status_code != 200:
@@ -47,7 +56,7 @@ def create_routes() -> _Response:
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
         response = _db_access.add(*route_db_models)
         if response.status_code == 200:
-            inserted_db_models: list[_db_models.RouteDBModel] = response.body
+            inserted_db_models: list[_RouteDBModel] = response.body
             for route in inserted_db_models:
                 assert route.id is not None
                 _create_empty_route_visualization(route.id)
@@ -72,7 +81,7 @@ def delete_route(route_id: int) -> _Response:
             related_orders_response.status_code,
             related_orders_response.body,
         )
-    response = _db_access.delete(_db_models.RouteDBModel, route_id)
+    response = _db_access.delete(_RouteDBModel, route_id)
     if response.status_code != 200:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(
@@ -85,10 +94,10 @@ def delete_route(route_id: int) -> _Response:
         return _log_info_and_respond(route_deletion_msg)
 
 
-def get_route(route_id: int) -> _models.Route:
+def get_route(route_id: int) -> _Route:
     """Get an existing route identified by 'route_id'."""
     route_db_models = _db_access.get(
-        _db_models.RouteDBModel, criteria={"id": lambda x: x == route_id}
+        _RouteDBModel, criteria={"id": lambda x: x == route_id}
     )
     routes = [
         _obj_to_db.route_from_db_model(route_db_model)
@@ -103,10 +112,10 @@ def get_route(route_id: int) -> _models.Route:
         return _json_response(routes[0])
 
 
-def get_routes() -> list[_models.Route]:
+def get_routes() -> list[_Route]:
     """Get all existing routes."""
-    route_db_models = _db_access.get(_db_models.RouteDBModel)
-    route: list[_models.Route] = [
+    route_db_models = _db_access.get(_RouteDBModel)
+    route: list[_Route] = [
         _obj_to_db.route_from_db_model(route_db_model)
         for route_db_model in route_db_models
     ]
@@ -126,9 +135,7 @@ def update_routes() -> _Response:
     if not connexion.request.is_json:
         return _log_invalid_request_body_format()
     else:
-        routes = [
-            _models.Route.from_dict(item) for item in connexion.request.get_json()
-        ]
+        routes = [_Route.from_dict(item) for item in connexion.request.get_json()]
         check_stops_response = _find_nonexistent_stops(*routes)
         if check_stops_response.status_code != 200:
             return _log_error_and_respond(
@@ -139,7 +146,7 @@ def update_routes() -> _Response:
         route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
         response = _db_access.update(*route_db_models)
         if response.status_code == 200:
-            inserted_routes: list[_db_models.RouteDBModel] = response.body
+            inserted_routes: list[_RouteDBModel] = response.body
             for r in inserted_routes:
                 _log_info(f"Route (ID={r.id} has been succesfully updated.")
             return _text_response("Routes were succesfully updated.")
@@ -152,7 +159,7 @@ def update_routes() -> _Response:
             )
 
 
-def _check_route_model(route: _models.Route) -> _Response:
+def _check_route_model(route: _Route) -> _Response:
     check_stops_response = _find_nonexistent_stops(route)
     if check_stops_response.status_code != 200:
         return check_stops_response
@@ -163,7 +170,7 @@ def _check_route_model(route: _models.Route) -> _Response:
 
 def _create_empty_route_visualization(route_id: int) -> _Response:
     response = _db_access.add(
-        _db_models.RouteVisualizationDBModel(
+        _RouteVisDBModel(
             id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"
         ),
     )
@@ -179,13 +186,14 @@ def _create_empty_route_visualization(route_id: int) -> _Response:
         )
 
 
-def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
+def _find_nonexistent_stops(*routes: _Route) -> _Response:
     for route in routes:
         checked_id_set: set[int] = set(route.stop_ids)
         for id_ in checked_id_set:
-            _db_access.exists(_db_models.StopDBModel, criteria={"id": lambda x: x == id_})
+            foo = lambda x, id_: x == id_
+            _db_access.exists(_StopDBModel, criteria={"id": partial(foo, id_=id_)})
         existing_ids = set(
-            [stop_id.id for stop_id in _db_access.get(_db_models.StopDBModel)]
+            [stop_id.id for stop_id in _db_access.get(_StopDBModel)]
         )
         nonexistent_stop_ids = checked_id_set.difference(existing_ids)
         if nonexistent_stop_ids:
@@ -203,7 +211,7 @@ def _find_nonexistent_stops(*routes: _models.Route) -> _Response:
 
 def _find_related_orders(route_id: int) -> _Response:
     related_orders = _db_access.get(
-        _db_models.OrderDBModel, criteria={"stop_route_id": lambda x: x == route_id}
+        _OrderDBModel, criteria={"stop_route_id": lambda x: x == route_id}
     )
     if related_orders:
         return _error(
