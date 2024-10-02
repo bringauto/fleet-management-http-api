@@ -1,20 +1,20 @@
 import connexion  # type: ignore
 
-from ...models import PlatformHW as _PlatformHW
-from ...database import db_access as _db_access
-from ...database import db_models as _db_models
-from ...api_impl import obj_to_db as _obj_to_db
-from ...api_impl.api_logging import (
+from fleet_management_api.models import PlatformHW as _PlatformHW
+from fleet_management_api.database import db_access as _db_access
+from fleet_management_api.database import db_models as _db_models
+from fleet_management_api.api_impl import obj_to_db as _obj_to_db
+from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
-from ...api_impl.api_responses import (
+from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
 )
-from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 
 
 def create_hws() -> _Response:
@@ -50,11 +50,11 @@ def create_hws() -> _Response:
 def get_hws() -> _Response:
     """Get all existing platform HWs."""
     hw_id_models = _db_access.get(_db_models.PlatformHWDBModel)
-    hw_ids: list[_PlatformHW] = [
+    platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
     ]
-    _log_info(f"Found {len(hw_ids)} platform HWs.")
-    return _json_response(hw_ids)
+    _log_info(f"Found {len(platform_hw_ids)} platform HWs.")
+    return _json_response(platform_hw_ids)
 
 
 def get_hw(platform_hw_id: int) -> _Response:
