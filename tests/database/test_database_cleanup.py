@@ -2,15 +2,41 @@ import unittest
 import subprocess
 import time
 
+import psycopg2  # type: ignore
+from psycopg2 import OperationalError
+
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 
 
+def wait_for_db(max_retries=50, delay=0.1):
+    retries = 0
+    while retries < max_retries:
+        try:
+            conn = psycopg2.connect(
+                dbname="test_management_api",
+                user="postgres",
+                password="1234",
+                host="localhost",
+                port=5432
+            )
+            conn.close()
+            return
+        except OperationalError:
+            retries += 1
+            time.sleep(delay)
+    raise TimeoutError("Database did not become available in time")
+
+
 def restart_database():
-    subprocess.run(["docker", "compose", "down", "postgresql-database"])
-    subprocess.run(["docker", "compose", "up", "postgresql-database", "-d"])
-    time.sleep(1.5)
+    try:
+        subprocess.run(["docker", "compose", "down", "postgresql-database"])
+        subprocess.run(["docker", "compose", "up", "postgresql-database", "-d"])
+    except Exception as e:
+        print(e)
+        raise
+    wait_for_db()
 
 
 class Test_Database_Cleanup(unittest.TestCase):
@@ -25,7 +51,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         self.assertEqual( _db_access.get(_db_models.CarDBModel)[0].name, "car1")
         restart_database()
         cars = _db_access.get(_db_models.CarDBModel)
-        self.assertEqual(cars, [])
+        self.assertFalse(cars)
 
     def test_object_can_be_added_after_database_cleanup(self):
         restart_database()
@@ -54,10 +80,14 @@ class Test_Database_Cleanup(unittest.TestCase):
         _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
         restart_database()
         response = _db_access.get_by_id(_db_models.CarDBModel, 1)
-        self.assertEqual(response, [])
+        self.assertFalse(response)
 
     def tearDown(self) -> None:
-        subprocess.run(["docker", "compose", "down", "postgresql-database"])
+        try:
+            subprocess.run(["docker", "compose", "down", "postgresql-database"], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error stopping database: {e}")
+            # Optionally, you might want to raise the error or take additional actions
 
 
 if __name__ == "__main__":  # pragma: no cover

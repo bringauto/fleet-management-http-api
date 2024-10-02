@@ -1,7 +1,7 @@
 {
     "logging": {
-        "log-path": "log",
-        "verbose": true
+        "log-path": "./log/",
+        "verbose": false
     },
     "http_server": {
         "base_uri": "http://localhost/v2/management",

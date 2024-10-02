@@ -1,6 +1,6 @@
 {
     "logging": {
-        "log-path": "log",
+        "log-path": "./log/",
         "verbose": true
     },
     "http_server": {

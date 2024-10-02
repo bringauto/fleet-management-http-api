@@ -175,7 +175,7 @@ If creation of any of the objects fails, no changes occur on the server.
 Requirements:
 
 - There must be no [Car](#car) referencing the Platform HW.
-- The name must be unique.
+- The car name must be unique.
 
 Result:
 
