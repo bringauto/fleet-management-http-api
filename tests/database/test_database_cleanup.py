@@ -17,7 +17,7 @@ class Test_Database_Cleanup(unittest.TestCase):
 
     def setUp(self):
         restart_database()
-        _connection.set_connection_source("localhost", 5432, "fleet_management_api_db", "postgres", "1234")
+        _connection.set_connection_source("localhost", 5432, "test_management_api", "postgres", "1234")
 
     def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
         _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))

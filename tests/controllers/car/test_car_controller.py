@@ -1,7 +1,4 @@
-import sys
 import unittest
-
-sys.path.append(".")
 
 from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
 import fleet_management_api.app as _app

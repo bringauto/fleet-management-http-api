@@ -1,9 +1,6 @@
 import unittest
-import sys
 from unittest.mock import patch, Mock
 import os
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus

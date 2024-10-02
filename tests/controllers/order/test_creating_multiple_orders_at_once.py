@@ -1,10 +1,7 @@
 import unittest
-import sys
 import os
 import concurrent.futures as futures
 import time
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus

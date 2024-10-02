@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "1234"
-      POSTGRES_DB: fleet_management_api_db
+      POSTGRES_DB: test_management_api
     networks:
       - api-network
     ports:

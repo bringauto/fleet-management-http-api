@@ -1,7 +1,4 @@
 import unittest
-import sys
-
-sys.path.append(".")
 from concurrent.futures import ThreadPoolExecutor
 import time
 

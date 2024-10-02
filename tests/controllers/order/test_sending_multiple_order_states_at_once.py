@@ -1,7 +1,4 @@
 import unittest
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app

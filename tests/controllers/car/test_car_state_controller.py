@@ -1,8 +1,5 @@
 import unittest
-import sys
 from unittest.mock import patch, Mock
-
-sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, GNSSPosition, MobilePhone

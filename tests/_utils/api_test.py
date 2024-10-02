@@ -1,8 +1,5 @@
 import unittest
 import os
-import sys
-
-sys.path.append(".")
 
 from tests._utils.logs import clear_logs
 import fleet_management_api.database.connection as _connection
