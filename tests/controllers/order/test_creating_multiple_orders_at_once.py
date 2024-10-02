@@ -9,7 +9,6 @@ import fleet_management_api.app as _app
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import set_max_n_of_inactive_orders
 from fleet_management_api.database.timestamp import timestamp_ms
-from tests._utils.logs import clear_logs
 
 
 class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):

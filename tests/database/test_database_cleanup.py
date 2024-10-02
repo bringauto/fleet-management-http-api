@@ -45,9 +45,12 @@ class Test_Database_Cleanup(unittest.TestCase):
         restart_database()
         _connection.set_connection_source("localhost", 5432, "test_management_api", "postgres", "1234")
 
-    def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
+    def _set_up_test_data(self):
         _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
         _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
+
+    def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
+        self._set_up_test_data()
         self.assertEqual( _db_access.get(_db_models.CarDBModel)[0].name, "car1")
         restart_database()
         cars = _db_access.get(_db_models.CarDBModel)
@@ -55,20 +58,17 @@ class Test_Database_Cleanup(unittest.TestCase):
 
     def test_object_can_be_added_after_database_cleanup(self):
         restart_database()
-        _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
-        _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
+        self._set_up_test_data()
         self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
 
     def test_deleting_object_after_database_cleanup_fails_but_the_table_exists(self):
-        _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
-        _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
+        self._set_up_test_data()
         restart_database()
         response = _db_access.delete(_db_models.CarDBModel, id_=1)
         self.assertEqual(response.status_code, 404)
 
     def test_deleting_n_objects_after_database_cleanup_fails_but_the_table_exists(self):
-        _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
-        _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
+        self._set_up_test_data()
         _db_access.add(_db_models.CarDBModel(name="car2", platform_hw_id=1, under_test=True))
         _db_access.add(_db_models.CarDBModel(name="car3", platform_hw_id=1, under_test=True))
         restart_database()
@@ -76,8 +76,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         self.assertEqual(response.body, "0 objects deleted from the database.")
 
     def test_getting_object_by_id_after_database_cleanup_fails_but_the_table_exists(self):
-        _db_access.add(_db_models.PlatformHWDBModel(name="platform1"))
-        _db_access.add(_db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True))
+        self._set_up_test_data()
         restart_database()
         response = _db_access.get_by_id(_db_models.CarDBModel, 1)
         self.assertFalse(response)
@@ -87,7 +86,6 @@ class Test_Database_Cleanup(unittest.TestCase):
             subprocess.run(["docker", "compose", "down", "postgresql-database"], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error stopping database: {e}")
-            # Optionally, you might want to raise the error or take additional actions
 
 
 if __name__ == "__main__":  # pragma: no cover
