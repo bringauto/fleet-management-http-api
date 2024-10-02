@@ -16,7 +16,10 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
-from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from ...response_consts import (
+    CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
+    OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+)
 
 
 def create_routes() -> _Response:
@@ -63,14 +66,14 @@ def create_routes() -> _Response:
 def delete_route(route_id: int) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(route_id)
-    if not related_orders_response.status_code == 200:
+    if related_orders_response.status_code != 200:
         return _log_error_and_respond(
             related_orders_response.status_code,
             related_orders_response.status_code,
             related_orders_response.body,
         )
     response = _db_access.delete(_db_models.RouteDBModel, route_id)
-    if not response.status_code == 200:
+    if response.status_code != 200:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(
             f"Could not delete route with ID={route_id}{note}. {response.body['detail']}",
@@ -127,7 +130,7 @@ def update_routes() -> _Response:
             _models.Route.from_dict(item) for item in connexion.request.get_json()
         ]
         check_stops_response = _find_nonexistent_stops(*routes)
-        if not check_stops_response.status_code == 200:
+        if check_stops_response.status_code != 200:
             return _log_error_and_respond(
                 check_stops_response.body,
                 check_stops_response.status_code,
@@ -151,7 +154,7 @@ def update_routes() -> _Response:
 
 def _check_route_model(route: _models.Route) -> _Response:
     check_stops_response = _find_nonexistent_stops(route)
-    if not check_stops_response.status_code == 200:
+    if check_stops_response.status_code != 200:
         return check_stops_response
     return _text_response(
         f"Route (ID={route.id}, name='{route.name}) has been checked."
@@ -164,7 +167,7 @@ def _create_empty_route_visualization(route_id: int) -> _Response:
             id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"
         ),
     )
-    if not response.status_code == 200:
+    if response.status_code != 200:
         return _error(
             response.status_code,
             f"Could not create route visualization for route with ID={route_id}. {response.body['detail']}",
@@ -207,7 +210,7 @@ def _find_related_orders(route_id: int) -> _Response:
             400,
             f"Route (ID={route_id}) could not be deleted, because there are orders related to it. "
             f"Related orders: {related_orders}",
-            title="Cannot delete object as other objects depend on it",
+            title=_CANNOT_DELETE_REFERENCED,
         )
     else:
         return _text_response(f"Route (ID={route_id}) has been checked.")

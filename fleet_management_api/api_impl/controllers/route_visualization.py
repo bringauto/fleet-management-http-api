@@ -2,7 +2,6 @@ import connexion as _connexion  # type: ignore
 
 from fleet_management_api.models import RouteVisualization as _RouteVisualization
 import fleet_management_api.database.db_access as _db_access
-import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.database.db_models import (
     RouteDBModel as _RouteDBModel,
     RouteVisualizationDBModel as _RouteVisDBModel,
@@ -24,7 +23,7 @@ from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
-        _db_models.RouteVisualizationDBModel,
+        _RouteVisDBModel,
         criteria={"route_id": lambda x: x == route_id},
     )
     if len(rp_db_models) == 0:
