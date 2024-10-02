@@ -59,6 +59,9 @@ def configure_logging(component_name: str, config: dict) -> None:
 
         logger.propagate = False
 
+    except PermissionError as pe:
+        logging.error(f"{component_name}: Permission to write into an existing log file denied: {pe}")
+        raise
     except ValueError as ve:
         logging.error(f"{component_name}: Configuration error: {ve}")
         raise
