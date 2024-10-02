@@ -1,6 +1,7 @@
 import secrets as _secrets
 import string as _string
 from typing import Optional
+import logging
 
 from sqlalchemy import Engine as _Engine
 
@@ -8,10 +9,10 @@ from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBMo
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 import fleet_management_api.database.connection as _connection
-import logging
+from fleet_management_api.logs import LOGGER_NAME as _LOGGER_NAME
 
 
-logger = logging.getLogger("werkzeug")
+logger = logging.getLogger(_LOGGER_NAME)
 
 
 _KEY_LENGTH = 30
@@ -59,7 +60,7 @@ def verify_key_and_return_key_info(
         logger.error(f"Error while verifying key: {e}")
         return 500, "Internal server error."
     if len(_key_db_models) == 0:
-        return 401, f"Invalid API key used."
+        return 401, "Invalid API key used."
     else:
         return 200, _key_db_models[0]
 

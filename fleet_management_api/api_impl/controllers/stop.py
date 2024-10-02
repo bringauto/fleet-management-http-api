@@ -16,7 +16,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
-from ...response_consts import (
+from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )

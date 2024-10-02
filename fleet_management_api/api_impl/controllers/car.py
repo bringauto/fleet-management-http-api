@@ -21,7 +21,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
-from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 
 
 def create_cars() -> _Response:  # noqa: E501

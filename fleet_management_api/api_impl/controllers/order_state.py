@@ -19,7 +19,7 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.controllers.order as _order
-from ...response_consts import (
+from fleet_management_api.response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )

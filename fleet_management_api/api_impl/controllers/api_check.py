@@ -4,7 +4,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from ...response_consts import DB_CONNECTION_ERROR as _DB_CONNECTION_ERROR
+from fleet_management_api.response_consts import DB_CONNECTION_ERROR as _DB_CONNECTION_ERROR
 
 
 def check_api_is_alive() -> _Response:

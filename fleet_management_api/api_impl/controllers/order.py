@@ -20,7 +20,7 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.api_impl.controllers.order_state as _order_state
-from ...response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 
 
 CarId = int
