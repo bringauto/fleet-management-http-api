@@ -35,7 +35,9 @@ def create_car_states() -> _Response:
         return create_car_states_from_argument_and_post(car_states)
 
 
-def create_car_states_from_argument_and_post(car_states: list[_models.CarState]) -> _Response:
+def create_car_states_from_argument_and_post(
+    car_states: list[_models.CarState],
+) -> _Response:
     """Post new car states using list passed as argument.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -57,10 +59,13 @@ def create_car_states_from_argument_and_post(car_states: list[_models.CarState])
             _log_info(msg)
             cleanup_response = _remove_old_states(model.car_id)
         if cleanup_response.status_code != 200:
-            code, cleanup_error_msg = cleanup_response.status_code, cleanup_response.body
+            code, cleanup_error_msg = (
+                cleanup_response.status_code,
+                cleanup_response.body,
+            )
             _log_error(cleanup_error_msg)
             msg = msg + "\n" + cleanup_error_msg
-            title = "Could not remove old car states."
+            title = "Could not delete object"
         else:
             return _json_response(inserted_models)
     else:
@@ -114,7 +119,10 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
             raise _db_access.ParentNotFound
         car_state_db_models = _db_access.get(
             base=_db_models.CarStateDBModel,
-            criteria={"car_id": lambda i: i == car_id, "timestamp": lambda x: x >= since},
+            criteria={
+                "car_id": lambda i: i == car_id,
+                "timestamp": lambda x: x >= since,
+            },
             wait=wait,
             first_n=last_n,
             sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -124,7 +132,9 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         return _json_response(car_states)
     except _db_access.ParentNotFound as e:
         return _log_error_and_respond(
-            f"Car with ID={car_id} not found. {e}", 404, title="Referenced object not found"
+            f"Car with ID={car_id} not found. {e}",
+            404,
+            title="Referenced object not found",
         )
     except Exception as e:  # pragma: no cover
         return _log_error_and_respond(str(e), 500, title="Unexpected internal error")

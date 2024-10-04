@@ -1,9 +1,6 @@
 import unittest
-import sys
 from unittest.mock import patch, Mock
 import os
-
-sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.models import (
@@ -16,11 +13,12 @@ from fleet_management_api.models import (
 )
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)

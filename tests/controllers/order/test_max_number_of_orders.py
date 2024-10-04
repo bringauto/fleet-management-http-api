@@ -1,8 +1,5 @@
 import unittest
 import os
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
@@ -12,7 +9,7 @@ from fleet_management_api.api_impl.controllers.order import (
     clear_inactive_orders,
 )
 from fleet_management_api.models import Car, MobilePhone, Order, OrderState, OrderStatus
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import (
     n_of_active_orders,
     n_of_inactive_orders,
@@ -24,6 +21,7 @@ from fleet_management_api.api_impl.controllers.order import (
 class Test_Number_Of_Active_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
         self.app = _app.get_test_app()
@@ -93,6 +91,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
 class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -169,6 +168,7 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
 class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
         clear_inactive_orders()
@@ -247,6 +247,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
 class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
         clear_inactive_orders()

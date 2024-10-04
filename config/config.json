@@ -1,7 +1,11 @@
 {
+    "logging": {
+        "log-path": "./log/",
+        "verbose": true
+    },
     "http_server": {
-        "base_uri": "http://localhost:8080/v2/management",
-        "port": 8080
+        "base_uri": "http://localhost/v2/management",
+        "port": 8081
     },
     "security": {
         "keycloak_url": "https://keycloak.bringauto.com",
@@ -13,7 +17,7 @@
     "database": {
         "connection": {
             "location": "localhost",
-            "database_name": "fleet_management_api_db",
+            "database_name": "test_management_api",
             "username": "postgres",
             "password": "1234",
             "port": 5432

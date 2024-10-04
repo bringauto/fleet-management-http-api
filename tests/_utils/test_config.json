@@ -1,14 +1,14 @@
 {
     "logging": {
-        "log-path": "log",
-        "verbose": true
+        "log-path": "./log/",
+        "verbose": false
     },
     "http_server": {
-        "base_uri": "https://someadress.com/",
-        "port": 8081
+        "base_uri": "http://localhost/v2/management",
+        "port": 8080
     },
     "security": {
-        "keycloak_url": "https://keycloak.bringauto.com/",
+        "keycloak_url": "https://keycloak.bringauto.com",
         "client_id": "",
         "client_secret_key": "",
         "scope": "",
@@ -17,14 +17,14 @@
     "database": {
         "connection": {
             "location": "localhost",
-            "database_name": "fleet_management",
+            "database_name": "test_management_api",
             "username": "postgres",
             "password": "1234",
             "port": 5432
         },
         "maximum_number_of_table_rows": {
-            "car_states": 10,
-            "order_states": 10
+            "car_states": 100,
+            "order_states": 100
         }
     },
     "api": {
@@ -35,7 +35,7 @@
     "data": {
         "orders": {
             "max_active_orders": 5,
-            "max_inactive_orders": 10
+            "max_inactive_orders": 5
         }
     }
 }

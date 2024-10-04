@@ -1,14 +1,11 @@
 import unittest
-import sys
 from unittest.mock import patch, Mock
 import os
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from fleet_management_api.api_impl.controllers.order import (
     clear_active_orders,
     clear_inactive_orders,
@@ -18,6 +15,7 @@ from fleet_management_api.api_impl.controllers.order import (
 
 class Test_Sending_Order(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         clear_active_orders()
         clear_inactive_orders()
@@ -137,6 +135,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
 class Test_No_Orders(unittest.TestCase):
 
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
 
@@ -153,6 +152,7 @@ class Test_No_Orders(unittest.TestCase):
 
 class Test_All_Retrieving_Orders(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -243,6 +243,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 
 class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
     def setUp(self):
+
         self.maxDiff = None
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
@@ -292,6 +293,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
 class Test_Deleting_Order(unittest.TestCase):
     def setUp(self):
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -333,6 +335,7 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mock_timestamp: Mock) -> None:
+
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         mock_timestamp.return_value = 0

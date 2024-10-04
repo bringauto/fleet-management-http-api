@@ -1,19 +1,17 @@
 import unittest
-import os
-import sys
 from unittest.mock import patch, Mock
-
-sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, GNSSPosition, MobilePhone
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests.utils.setup_utils import create_platform_hws
+from tests._utils.setup_utils import create_platform_hws
+import tests._utils.api_test as api_test
 
 
-class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
-    def setUp(self) -> None:
+class Test_Adding_State_Of_Existing_Car(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -51,6 +49,7 @@ class Test_Adding_State_Of_Existing_Car(unittest.TestCase):
 
 
 class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
+
     def test_adding_state_using_example_from_spec(self):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
@@ -68,7 +67,8 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
 
 class Test_Getting_All_Car_States(unittest.TestCase):
-    def setUp(self) -> None:
+
+    def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -102,7 +102,8 @@ class Test_Getting_All_Car_States(unittest.TestCase):
 
 
 class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
-    def setUp(self) -> None:
+
+    def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
@@ -179,9 +180,10 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
             self.assertEqual(len(response.json), 3)
 
 
-class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test("test_db.db")
+class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
@@ -268,14 +270,11 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(len(c.get("/v2/management/carstate/1?since=0").json), max_n)
             self.assertEqual(len(c.get("/v2/management/carstate/2?since=0").json), max_n)
 
-    def tearDown(self) -> None:
-        if os.path.isfile("test_db.db"):
-            os.remove("test_db.db")
 
+class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
 
-class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test()
+    def setUp(self, *args) -> None:
+        super().setUp()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
@@ -315,11 +314,11 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(unittest.TestCase):
             self.assertEqual(response.status_code, 404)
 
 
-class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
+class Test_Filtering_Car_States_By_Timestamp(api_test.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
-    def setUp(self, mocked_timestamp: Mock) -> None:
-        _connection.set_connection_source_test()
+    def setUp(self, mocked_timestamp: Mock, *args) -> None:
+        super().setUp()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
@@ -372,11 +371,11 @@ class Test_Filtering_Car_States_By_Timestamp(unittest.TestCase):
 POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
 
 
-class Test_Returning_Last_N_Car_States(unittest.TestCase):
+class Test_Returning_Last_N_Car_States(api_test.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
-        _connection.set_connection_source_test()
+        super().setUp()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
@@ -445,6 +444,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
+        super().setUp()
         _connection.set_connection_source_test()
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)

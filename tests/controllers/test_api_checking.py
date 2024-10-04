@@ -1,9 +1,5 @@
 import unittest
 from unittest.mock import patch, Mock
-import sys
-
-sys.path.append(".")
-import unittest
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import (

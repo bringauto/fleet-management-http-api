@@ -3,19 +3,17 @@ from unittest.mock import patch, Mock
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms
-from tests.utils.setup_utils import create_platform_hws
+from tests._utils.setup_utils import create_platform_hws
 
 
 class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -65,6 +63,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
 
 class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         set_content_timeout_ms(1000)
         self.app = _app.get_test_app()
@@ -104,6 +103,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
 
 class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -149,6 +149,7 @@ class Test_Timeouts(unittest.TestCase):
 class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mock_timestamp_ms: Mock) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 2)

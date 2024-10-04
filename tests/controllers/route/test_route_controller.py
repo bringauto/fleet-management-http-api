@@ -1,7 +1,4 @@
 import unittest
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
@@ -14,7 +11,7 @@ from fleet_management_api.models import (
     GNSSPosition,
     MobilePhone,
 )
-from tests.utils.setup_utils import create_stops, create_route
+from tests._utils.setup_utils import create_stops, create_route
 
 
 class Test_Creating_Route(unittest.TestCase):

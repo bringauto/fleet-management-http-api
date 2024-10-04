@@ -1,13 +1,13 @@
 FROM python:3.10-alpine
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+WORKDIR /home/bringauto
 
-COPY ./requirements.txt /usr/src/app/
+COPY ./requirements.txt /home/bringauto
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /usr/src/app
+RUN mkdir /home/bringauto/log
+COPY config /home/bringauto/config
+COPY fleet_management_api /home/bringauto/fleet_management_api
 
 EXPOSE 8080
 

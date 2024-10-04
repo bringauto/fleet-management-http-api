@@ -1,6 +1,7 @@
-import random as _random
+import secrets as _secrets
 import string as _string
 from typing import Optional
+import logging
 
 from sqlalchemy import Engine as _Engine
 
@@ -8,6 +9,10 @@ from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBMo
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 import fleet_management_api.database.connection as _connection
+from fleet_management_api.logs import LOGGER_NAME as _LOGGER_NAME
+
+
+logger = logging.getLogger(_LOGGER_NAME)
 
 
 _KEY_LENGTH = 30
@@ -41,25 +46,27 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
 def verify_key_and_return_key_info(
     api_key: str, connection_source: Optional[_Engine] = None
 ) -> tuple[int, str | _ApiKeyDBModel]:
-
     """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
-
-    _key_db_models = _db_access.get(
-        _ApiKeyDBModel,
-        criteria={"key": lambda x: x == api_key},
-        connection_source=connection_source,
-    )
+    try:
+        _key_db_models = _db_access.get(
+            _ApiKeyDBModel,
+            criteria={"key": lambda x: x == api_key},
+            connection_source=connection_source,
+        )
+    except Exception as e:
+        logger.error(f"Error while verifying key: {e}")
+        return 500, "Internal server error."
     if len(_key_db_models) == 0:
-        return 401, f"Invalid API key used."
+        return 401, "Invalid API key used."
     else:
         return 200, _key_db_models[0]
 
 
 def _generate_key() -> str:  # pragma: no cover
-    return "".join(_random.choice(_string.ascii_letters) for _ in range(_KEY_LENGTH))
+    return "".join(_secrets.choice(_string.ascii_letters) for _ in range(_KEY_LENGTH))
 
 
 def _key_added_msg(name: str, key: str) -> str:

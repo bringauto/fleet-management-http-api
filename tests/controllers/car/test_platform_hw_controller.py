@@ -1,12 +1,9 @@
 import unittest
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.models import PlatformHW, Car, MobilePhone
-from tests.utils.setup_utils import create_route, create_stops
+from tests._utils.setup_utils import create_route, create_stops
 
 
 class Test_Creating_Platform_HW(unittest.TestCase):

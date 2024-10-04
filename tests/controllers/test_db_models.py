@@ -222,7 +222,7 @@ class Test_Creating_Order_DB_Model(unittest.TestCase):
 class Test_Creating_Platform_HW_DB_Model(unittest.TestCase):
     def test_creating_db_model_from_paltform_hw_id_preserves_attribute_values(self):
         platform_hwid = PlatformHW(name="test_platform")
-        platform_db_model = _obj_to_db.platform_hw_to_db_model(platform_hwid)
+        platform_db_model = _obj_to_db.hw_to_db_model(platform_hwid)
         self.assertEqual(platform_db_model.id, platform_hwid.id)
         self.assertEqual(platform_db_model.name, platform_hwid.name)
 
@@ -230,8 +230,8 @@ class Test_Creating_Platform_HW_DB_Model(unittest.TestCase):
         self,
     ):
         platform_hwid_in = PlatformHW(name="test_platform")
-        platform_hwid_out = _obj_to_db.platform_hw_from_db_model(
-            _obj_to_db.platform_hw_to_db_model(platform_hwid_in)
+        platform_hwid_out = _obj_to_db.hw_from_db_model(
+            _obj_to_db.hw_to_db_model(platform_hwid_in)
         )
         self.assertEqual(platform_hwid_out, platform_hwid_in)
 

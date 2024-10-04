@@ -1,18 +1,11 @@
 import unittest
-import sys
-import os
 
-sys.path.append(".")
-
-import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
+import tests._utils.api_test as api_test
 
 
-class Test_Retrieving_Last_N_Records(unittest.TestCase):
-    def setUp(self) -> None:
-        _connection.set_connection_source_test(db_file_path="tests/database/test_get_last_n.db")
-        models.initialize_test_tables(_connection.current_connection_source())
+class Test_Retrieving_Last_N_Records(api_test.TestCase):
 
     def test_retrieving_single_item_with_highest_attribute_value(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)
@@ -86,10 +79,6 @@ class Test_Retrieving_Last_N_Records(unittest.TestCase):
         self.assertEqual(retrieved_objs[0].id, 3)
         self.assertEqual(retrieved_objs[1].test_int, 100)
         self.assertEqual(retrieved_objs[1].id, 1)
-
-    def tearDown(self) -> None:  # pragma: no cover
-        if os.path.isfile("tests/database/test_get_last_n.db"):
-            os.remove("tests/database/test_get_last_n.db")
 
 
 if __name__ == "__main__":

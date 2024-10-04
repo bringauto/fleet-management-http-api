@@ -1,4 +1,5 @@
-import requests
+import requests  # type: ignore
+
 import fleet_management_api.script_args as _args
 import fleet_management_api.app as app
 from fleet_management_api.api_impl.auth_controller import init_security
@@ -6,6 +7,7 @@ from fleet_management_api.controllers.security_controller import set_auth_params
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from fleet_management_api.database.connection import set_up_database
 from fleet_management_api.api_impl.data_setup import set_up_data
+from fleet_management_api.logs import configure_logging
 
 
 def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
@@ -13,9 +15,9 @@ def _retrieve_keycloak_public_key(keycloak_url: str, realm: str) -> str:
     try:
         response = requests.get(keycloak_url + "/realms/" + realm)
         response.raise_for_status()
-    except:
+        return response.json()["public_key"]
+    except Exception:
         return ""
-    return response.json()["public_key"]
 
 
 def _set_up_oauth(config: _args.Security) -> None:
@@ -38,10 +40,13 @@ def _set_up_oauth(config: _args.Security) -> None:
 
 if __name__ == "__main__":
     application = app.get_app()
-    args = _args.request_and_get_script_arguments(
-        "Run the Fleet Management v2 HTTP API server."
-    )
+    args = _args.request_and_get_script_arguments("Run the Fleet Management v2 HTTP API server.")
 
+    try:
+        configure_logging("Fleet Management HTTP API", {"logging": args.config.logging})
+    except Exception as e:
+        print(f"Error when configuring logging. {e}")
+        exit(1)
     db_config = args.config.database
     api_config = args.config.api
     http_server_config = args.config.http_server

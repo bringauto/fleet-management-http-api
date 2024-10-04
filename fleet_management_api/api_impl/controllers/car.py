@@ -21,6 +21,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
+from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 
 
 def create_cars() -> _Response:  # noqa: E501
@@ -109,7 +110,7 @@ def get_car(car_id: int) -> _Response:
     )
     if len(db_cars) == 0:
         return _log_error_and_respond(
-            f"Car with ID={car_id} was not found.", 404, title="Object was not found"
+            f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
         car = _get_car_with_last_state(db_cars[0])
@@ -174,7 +175,6 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
 
 
 def _post_default_car_state(car_ids: list[int]) -> _Response:
-    car_states = \
-        [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
+    car_states = [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
     response = _create_car_state_from_argument_and_post(car_states)
     return response

@@ -3,19 +3,17 @@ from unittest.mock import patch, Mock
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms
-from tests.utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
 class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -129,6 +127,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
 
 class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -185,6 +184,7 @@ class Test_Timeouts(unittest.TestCase):
 class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mock_timestamp_ms: Mock) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app)
@@ -283,6 +283,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mock_timestamp_ms: Mock) -> None:
+
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
         create_platform_hws(self.app, 3)
