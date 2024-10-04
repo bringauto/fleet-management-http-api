@@ -136,9 +136,7 @@ def create_order_states_from_argument_and_post(
                             _order.delete_oldest_inactive_order(car_id)
             return _json_response(inserted_models)
         except Exception as e:
-            _log_error(
-                f"Error while converting Order State DB models to Order State models: {e}.\n Response body is {response.body}."
-            )
+            _log_error(f"Error while converting Order State DB models to Order State models: {e}.")
     else:
         return _log_error_and_respond(
             f"Order state could not be sent. {response.body['detail']}",

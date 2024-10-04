@@ -1,7 +1,6 @@
 import unittest
 import subprocess
 import time
-
 import psycopg2  # type: ignore
 from psycopg2 import OperationalError
 
@@ -33,8 +32,11 @@ def restart_database():
     try:
         subprocess.run(["docker", "compose", "down", "postgresql-database"])
         subprocess.run(["docker", "compose", "up", "postgresql-database", "-d"])
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to restart database: {e}")
+        raise
     except Exception as e:
-        print(e)
+        print(f"Unexpected error when restarting database connection: {e}")
         raise
     wait_for_db()
 

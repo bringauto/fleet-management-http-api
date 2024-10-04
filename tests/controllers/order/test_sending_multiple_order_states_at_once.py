@@ -79,18 +79,21 @@ class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCa
 
 class Test_Removing_States_From_Posted_List_Of_States_When_Final_State_Is_Also_Being_Posted(unittest.TestCase):
 
-    def test_removing_states_coming_after_final_states(self):
+
+    def test_all_states_of_the_same_order_are_kept_if_final_state_is_the_last_one(self):
         states = [OrderState(order_id=1, status="in_progress"), OrderState(order_id=1, status="done")]
         states = _trim_states_after_done_or_canceled(states)
         self.assertEqual(len(states), 2)
         self.assertEqual(states[0].status, "in_progress")
         self.assertEqual(states[1].status, "done")
 
+    def test_removing_states_coming_after_final_states(self):
         states = [OrderState(order_id=1, status="done"), OrderState(order_id=1, status="in_progress")]
         states = _trim_states_after_done_or_canceled(states)
         self.assertEqual(len(states), 1)
         self.assertEqual(states[0].status, "done")
 
+    def test_states_of_different_orders_are_handled_separately(self):
         states = [
             OrderState(order_id=1, status="done"),
             OrderState(order_id=1, status="in_progress"),
