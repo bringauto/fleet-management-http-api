@@ -90,24 +90,10 @@ def create_order_states_from_argument_and_post(
                         title=_CANNOT_CREATE_OBJECT,
                     )
 
-    if not order_states:
-        return _json_response([], code=200)
-
+    # after this call, there is either no final state or it is the last state in the list `order_states`
     order_states = _trim_states_after_done_or_canceled(order_states)
 
-    done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
-    received_states = order_states.copy()
-    for state in received_states:
-        if done_or_canceled_states.get(state.order_id) is None:
-            done_or_canceled_states[state.order_id] = state
-        elif (
-            done_or_canceled_states[state.order_id].status == _models.OrderStatus.DONE
-            or done_or_canceled_states[state.order_id].status == _models.OrderStatus.CANCELED
-        ):
-            order_states.remove(state)
-
     db_models: list[_db_models.OrderStateDBModel] = []
-
     for state in order_states:
         db_model = _obj_to_db.order_state_to_db_model(state)
         order = orders[state.order_id]
@@ -115,9 +101,7 @@ def create_order_states_from_argument_and_post(
         db_model.car_id = order.car_id
         db_models.append(db_model)
 
-    assert len(db_models) > 0
-
-    response = _db_access.add(*db_models)
+    response: _Response = _db_access.add(*db_models)
     if response.status_code == 200:
         try:
             inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]
