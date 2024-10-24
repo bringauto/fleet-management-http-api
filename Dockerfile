@@ -1,15 +1,17 @@
-FROM python:3.10-alpine
+FROM bringauto/python-environment:latest
 
 WORKDIR /home/bringauto
 
 COPY ./requirements.txt /home/bringauto
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN "$PYTHON_ENVIRONMENT_PYTHON3" -m pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir /home/bringauto/log
 COPY config /home/bringauto/config
 COPY fleet_management_api /home/bringauto/fleet_management_api
 
 EXPOSE 8080
 
-ENTRYPOINT ["python"]
-CMD ["-m", "fleet_management_api", "config/config.json"]
+USER 5000:5000
+RUN mkdir /home/bringauto/log
+
+ENTRYPOINT ["bash", "-c", "$PYTHON_ENVIRONMENT_PYTHON3 -m fleet_management_api $0 $@"]
+CMD ["config/config.json"]
