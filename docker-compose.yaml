@@ -13,8 +13,8 @@ services:
       - ./log:/home/bringauto/log/
     networks:
       - api-network
-    entrypoint:
-      ["python", "-m", "fleet_management_api", "config/config.json", "--location", "postgresql-database"]
+    command:
+      ["config/config.json", "--location", "postgresql-database"]
 
   postgresql-database:
     image: postgres:16
