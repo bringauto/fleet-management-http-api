@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Any, Literal
+from typing import Optional, Literal
 
 import pydantic
 
@@ -27,7 +27,7 @@ class Logging(pydantic.BaseModel):
 
         @pydantic.field_validator("level", mode="before")
         @classmethod
-        def validate_command(cls, level: str) -> str:
+        def validate_level(cls, level: str) -> str:
             return level.upper()
 
 
