@@ -30,8 +30,9 @@ Python 3.10.12+
 The server settings can be found in the `config/config.json`, including the database logging information and parameters for the database cleanup.
 
 The main parts of the configuration file are the following:
-
-- `logging`. Contains the logging configuration.
+- `logging` - contains the keys `console`and `file` for printing the logs into a console and a file, respectively. The `file` contains field `path` to set the (absolute or relative) path to the directory to store the logs. Both contain the following keys:
+  - `level` - logging level as a string (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). Case-insensitive.
+  - `use` - set to `True` to allow to print the logs, otherwise set to `False`.
 - `http_server`. Contains the server's URI and port.
 - `security`. Described [here](#configuring-oauth2).
 - `database`. This contains the database connection configuration and the tables' parameters (e.g., the maximum number of stored records).
