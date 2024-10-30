@@ -1,16 +1,34 @@
 from __future__ import annotations
-from typing import Optional, Any
+from typing import Optional, Any, Literal
 
 import pydantic
 
 
+LoggingLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
+
 class APIConfig(pydantic.BaseModel):
-    logging: dict[str, Any]
+    logging: Logging
     http_server: HTTPServer
     database: Database
     security: Security
     api: API
     data: Data
+
+
+class Logging(pydantic.BaseModel):
+    console: HandlerConfig
+    file: HandlerConfig
+
+    class HandlerConfig(pydantic.BaseModel):
+        level: LoggingLevel
+        use: bool
+        path: str = ""
+
+        @pydantic.field_validator("level", mode="before")
+        @classmethod
+        def validate_command(cls, level: str) -> str:
+            return level.upper()
 
 
 class Data(pydantic.BaseModel):
