@@ -43,7 +43,7 @@ if __name__ == "__main__":
     args = _args.request_and_get_script_arguments("Run the Fleet Management v2 HTTP API server.")
 
     try:
-        configure_logging("Fleet Management HTTP API", {"logging": args.config.logging})
+        configure_logging("Fleet Management HTTP API", args.config)
     except Exception as e:
         print(f"Error when configuring logging. {e}")
         exit(1)
