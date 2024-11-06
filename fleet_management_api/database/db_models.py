@@ -23,6 +23,15 @@ class Base(_DeclarativeBase):
         )
 
 
+class TenantDBModel(Base):
+    model_name = "Tenant"
+    __tablename__ = "tenants"
+    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+
+    def __repr__(self) -> str:
+        return f"Tenant(ID={self.id}, name={self.name})"
+
+
 class PlatformHWDBModel(Base):
     model_name = "PlatformHW"
     __tablename__ = "platform_hw"

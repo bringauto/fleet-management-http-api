@@ -108,11 +108,14 @@ class CheckBeforeAdd:
 
 def db_access_method(func: Callable) -> Callable:
     """Decorator for the function that restarts the database connection source in case of operational error."""
+
     @_functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
             response = func(*args, **kwargs)
-            if hasattr(response, "status_code") and (response.status_code==503 or response.status_code == 500):
+            if hasattr(response, "status_code") and (
+                response.status_code == 503 or response.status_code == 500
+            ):
                 raise RuntimeError(response.body)
             return response
         except _sqaexc.OperationalError as e:
@@ -122,11 +125,10 @@ def db_access_method(func: Callable) -> Callable:
             _restart_connection_source()
             return func(*args, **kwargs)
         except Exception as e:
-            _logging.warning(
-                f"Restarting connection source due to an database error. Error: {e}"
-            )
+            _logging.warning(f"Restarting connection source due to an database error. Error: {e}")
             _restart_connection_source()
             return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -382,7 +384,7 @@ def get_children(
             children = [
                 child
                 for child in raw_children
-                    if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
+                if all(crit(getattr(child, attr)) for attr, crit in criteria.items())
             ]
             return children
         except _NoResultFound as e:
