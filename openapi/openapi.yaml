@@ -2,7 +2,7 @@
   info:
     title: BringAuto Fleet Management v2 API
     description: Specification for BringAuto fleet backend HTTP API
-    version: 3.3.0
+    version: 3.4.0
     contact:
       name: BringAuto s.r.o
       url: https://bringauto.com
@@ -37,6 +37,8 @@
       description: Stop state-related functions
     - name: security
       description: Authentication-related functions
+    - name: tenant
+      description: Tenant-related functions
 
   paths:
     /apialive:
@@ -87,6 +89,11 @@
       $ref: 'security.yaml#/paths/~1token_get'
     /token_refresh:
       $ref: 'security.yaml#/paths/~1token_refresh'
+
+    /tenant:
+      $ref: 'tenant.yaml#/paths/~1tenant'
+    /tenant/{tenantId}:
+      $ref: 'tenant.yaml#/paths/~1tenant~1{tenantId}'
 
   components:
     securitySchemes:
