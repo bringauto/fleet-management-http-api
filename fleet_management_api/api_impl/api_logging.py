@@ -17,6 +17,11 @@ def log_info(message: str) -> None:
     logger.info(message)
 
 
+def log_debug(message: str) -> None:
+    """Pass a custom debug message to the API logger."""
+    logger.debug(message)
+
+
 def log_error(message: str) -> None:
     """Pass a custom error message to the API logger."""
     logger.error(message)
