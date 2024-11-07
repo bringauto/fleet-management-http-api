@@ -5,7 +5,7 @@ from typing import Optional
 
 from fleet_management_api.api_impl.security import SecurityObj
 from flask import redirect
-from fleet_management_api.api_impl.api_logging import log_info, log_error
+from fleet_management_api.api_impl.api_logging import log_info, log_error, log_debug
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     error as _error,
@@ -35,8 +35,9 @@ def login() -> _Response:
     """
     try:
         return redirect(_security.get_authentication_url())
-    except:
+    except Exception as e:
         msg = "Problem reaching oAuth service."
+        log_debug(str(e))
         log_error(msg)
         return _error(500, msg, "oAuth service error")
 
