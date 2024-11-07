@@ -9,6 +9,7 @@ import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestBase as _TestBase  # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
 from tests._utils.logs import clear_logs
+from tests._utils import TEST_TENANT
 
 
 class Test_Creating_Database_URL(unittest.TestCase):
@@ -68,15 +69,15 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
         test_obj = _TestBase(test_str="test_name", test_int=1)
-        response = _db_access.add(test_obj)
+        response = _db_access.add(TEST_TENANT, test_obj)
         print(response.body)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(_db_access.get(_TestBase)), 1)
+        self.assertEqual(len(_db_access.get(TEST_TENANT, _TestBase)), 1)
 
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
 
-        self.assertEqual(len(_db_access.get(_TestBase)), 0)
+        self.assertEqual(len(_db_access.get(TEST_TENANT, _TestBase)), 0)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):
@@ -149,7 +150,7 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
         self.assertTrue(_connection.current_connection_source() is None)
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
-            _db_access.add(test_obj)
+            _db_access.add(TEST_TENANT, test_obj)
 
 
 class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):

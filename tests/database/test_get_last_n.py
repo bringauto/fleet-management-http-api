@@ -3,6 +3,7 @@ import unittest
 import fleet_management_api.database.db_access as _db_access
 import tests.database.models as models
 import tests._utils.api_test as api_test
+from tests._utils import TEST_TENANT
 
 
 class Test_Retrieving_Last_N_Records(api_test.TestCase):
@@ -10,9 +11,9 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
     def test_retrieving_single_item_with_highest_attribute_value(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=100)
-        _db_access.add(test_obj_1, test_obj_2)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=1, sort_result_by={"test_int": "desc"}
+            TEST_TENANT, models.TestBase, first_n=1, sort_result_by={"test_int": "desc"}
         )
         self.assertEqual(len(retrieved_objs), 1)
         self.assertEqual(retrieved_objs[0].test_int, 150)
@@ -20,9 +21,9 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
     def test_retrieving_both_items_sorted_by_attribute_value_in_descending_order(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=100)
-        _db_access.add(test_obj_1, test_obj_2)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=2, sort_result_by={"test_int": "desc"}
+            TEST_TENANT, models.TestBase, first_n=2, sort_result_by={"test_int": "desc"}
         )
         self.assertEqual(retrieved_objs[0].test_int, 150)
         self.assertEqual(retrieved_objs[1].test_int, 100)
@@ -31,9 +32,9 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=100)
         test_obj_2 = models.TestBase(id=9, test_str="test_string", test_int=120)
-        _db_access.add(test_obj_1, test_obj_2)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=2, sort_result_by={"test_int": "desc"}
+            TEST_TENANT, models.TestBase, first_n=2, sort_result_by={"test_int": "desc"}
         )
         self.assertEqual(len(retrieved_objs), 2)
         self.assertEqual(retrieved_objs[0].test_int, 150)
@@ -43,9 +44,9 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)
         test_obj_2 = models.TestBase(id=8, test_str="test_string", test_int=100)
         test_obj_3 = models.TestBase(id=9, test_str="test_string", test_int=120)
-        _db_access.add(test_obj_1, test_obj_2, test_obj_3)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2, test_obj_3)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=3, sort_result_by={"test_int": "asc"}
+            TEST_TENANT, models.TestBase, first_n=3, sort_result_by={"test_int": "asc"}
         )
         self.assertEqual(retrieved_objs[0].test_int, 100)
         self.assertEqual(retrieved_objs[1].test_int, 120)
@@ -56,9 +57,12 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=100)
         test_obj_2 = models.TestBase(test_str="test_string", test_int=100)
         test_obj_3 = models.TestBase(test_str="test_string", test_int=120)
-        _db_access.add(test_obj_1, test_obj_2, test_obj_3)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2, test_obj_3)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=2, sort_result_by={"test_int": "desc", "id": "desc"}
+            TEST_TENANT,
+            models.TestBase,
+            first_n=2,
+            sort_result_by={"test_int": "desc", "id": "desc"},
         )
         self.assertEqual(retrieved_objs[0].test_int, 120)
         self.assertEqual(retrieved_objs[0].id, 3)
@@ -71,9 +75,12 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=100)
         test_obj_2 = models.TestBase(test_str="test_string", test_int=100)
         test_obj_3 = models.TestBase(test_str="test_string", test_int=120)
-        _db_access.add(test_obj_1, test_obj_2, test_obj_3)
+        _db_access.add(TEST_TENANT, test_obj_1, test_obj_2, test_obj_3)
         retrieved_objs = _db_access.get(
-            models.TestBase, first_n=2, sort_result_by={"test_int": "desc", "id": "asc"}
+            TEST_TENANT,
+            models.TestBase,
+            first_n=2,
+            sort_result_by={"test_int": "desc", "id": "asc"},
         )
         self.assertEqual(retrieved_objs[0].test_int, 120)
         self.assertEqual(retrieved_objs[0].id, 3)

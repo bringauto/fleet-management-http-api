@@ -134,6 +134,7 @@ def db_access_method(func: Callable) -> Callable:
 
 @db_access_method
 def add(
+    tenant: str,
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
@@ -193,7 +194,7 @@ def add(
 
 
 @db_access_method
-def delete(base: type[_Base], id_: Any) -> _Response:
+def delete(tenant: str, base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
     with _Session(source) as session:
@@ -220,6 +221,7 @@ def delete(base: type[_Base], id_: Any) -> _Response:
 
 @db_access_method
 def delete_n(
+    tenant: str,
     base: type[_Base],
     n: int,
     column_name: str,
@@ -261,7 +263,9 @@ def delete_n(
 
 
 @db_access_method
-def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None) -> bool:
+def exists(
+    tenant: str, base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None
+) -> bool:
     """Check if an object with the given ID exists in the database."""
     source = _get_current_connection_source()
     table = base.__table__
@@ -278,7 +282,9 @@ def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]
 
 
 @db_access_method
-def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None) -> list[_Base]:
+def get_by_id(
+    tenant: str, base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
+) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     An optional `connection_source` may be specified to replace the otherwise used global connection
@@ -299,6 +305,7 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
 
 @db_access_method
 def get(
+    tenant: str,
     base: type[_Base],
     first_n: int = 0,
     sort_result_by: Optional[dict[ColumnName, Order]] = None,
@@ -362,6 +369,7 @@ def get(
 
 
 def get_children(
+    tenant: str,
     parent_base: type[_Base],
     parent_id: int,
     children_col_name: str,
@@ -394,7 +402,7 @@ def get_children(
 
 
 @db_access_method
-def update(*updated: _Base) -> _Response:
+def update(tenant: str, *updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
@@ -421,6 +429,7 @@ def update(*updated: _Base) -> _Response:
 
 
 def wait_for_new(
+    tenant: str,
     base: type[_Base],
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     timeout_ms: Optional[int] = None,
