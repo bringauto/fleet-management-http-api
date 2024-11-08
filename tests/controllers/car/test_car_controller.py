@@ -303,9 +303,7 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(api_test.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
 
-    def test_creating_car_using_platformhw_already_assigned_to_other_car_yields_code_400(
-        self,
-    ):
+    def test_creating_car_using_platformhw_assigned_to_other_car_yields_code_400(self):
         car_1 = Car(
             name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )

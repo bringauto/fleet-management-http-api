@@ -283,7 +283,7 @@ def exists(
 
 @db_access_method
 def get_by_id(
-    tenant: str, base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
+    base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None, tenant: Optional[str] = None
 ) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
@@ -305,7 +305,6 @@ def get_by_id(
 
 @db_access_method
 def get(
-    tenant: str,
     base: type[_Base],
     first_n: int = 0,
     sort_result_by: Optional[dict[ColumnName, Order]] = None,
@@ -314,6 +313,7 @@ def get(
     timeout_ms: Optional[int] = None,
     omitted_relationships: Optional[list[_InstrumentedAttribute]] = None,
     connection_source: Optional[_sqa.Engine] = None,
+    tenant: Optional[str] = None,
 ) -> list[Any]:
     """Get instances of the `base`.
 
@@ -429,10 +429,10 @@ def update(tenant: str, *updated: _Base) -> _Response:
 
 
 def wait_for_new(
-    tenant: str,
     base: type[_Base],
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     timeout_ms: Optional[int] = None,
+    tenant: Optional[str] = None,
 ) -> list[Any]:
     """Wait for new instances of the ORM mapped class `base` that satisfy the `criteria` to be sent to the database.
 

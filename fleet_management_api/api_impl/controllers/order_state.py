@@ -24,6 +24,7 @@ from fleet_management_api.response_consts import (
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
 
+
 OrderId = int
 
 
