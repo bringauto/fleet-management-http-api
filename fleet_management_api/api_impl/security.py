@@ -32,7 +32,7 @@ class SecurityObj:
     def get_authentication_url(self) -> str:
         """Get keycloak url used for authentication."""
         auth_url = self._oid.auth_url(
-            redirect_uri=self._callback, scope=self._scope, state=self._state
+            redirect_uri=self._callback, state=self._state, scope=self._scope
         )
         return auth_url
 
