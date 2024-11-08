@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("./server")
 from typing import Optional
 
 from fleet_management_api.api_impl.security import SecurityObj

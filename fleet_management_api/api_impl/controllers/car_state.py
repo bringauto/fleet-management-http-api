@@ -1,5 +1,3 @@
-import connexion  # type: ignore
-
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
@@ -16,6 +14,7 @@ import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 def create_car_states() -> _Response:
@@ -26,13 +25,11 @@ def create_car_states() -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    if not connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
-    else:
-        car_states = [
-            _models.CarState.from_dict(s) for s in connexion.request.get_json()
-        ]  # noqa: E501
-        return create_car_states_from_argument_and_post(car_states)
+    car_states = [_models.CarState.from_dict(s) for s in request.data]  # noqa: E501
+    return create_car_states_from_argument_and_post(car_states)
 
 
 def create_car_states_from_argument_and_post(

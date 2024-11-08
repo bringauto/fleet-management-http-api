@@ -1,8 +1,6 @@
 from typing import Optional
 from collections import defaultdict
 
-import connexion  # type: ignore
-
 from fleet_management_api.api_impl.api_responses import (
     error as _error,
     json_response as _json_response,
@@ -21,6 +19,7 @@ import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.api_impl.controllers.order_state as _order_state
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 CarId = int
@@ -168,16 +167,16 @@ def create_orders() -> _Response:
     - the route exists and contains the target stop,
     - the maximum number of active orders for any referenced car has not been reached.
     """
-    if not connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
 
     order_db_models: list[_db_models.OrderDBModel] = []
     checked: list[_db_access.CheckBeforeAdd] = []
-    json_data = connexion.request.get_json()
-    if not isinstance(json_data, list):
+    if not isinstance(request.data, list):
         return _error(400, "Invalid input: expected a list of orders.", "Bad Request")
 
-    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in json_data]
+    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in request.data]
     orders_per_car = _group_new_orders_by_car(orders)
 
     if _max_n_of_active_orders is not None:
@@ -316,7 +315,7 @@ def get_orders(since: int = 0) -> _Response:
 
 
 def _car_exist(car_id: int) -> bool:
-    return bool(_db_access.exists(_db_models.CarDBModel, {"id": lambda x: x==car_id}))
+    return bool(_db_access.exists(_db_models.CarDBModel, {"id": lambda x: x == car_id}))
 
 
 def _get_order_with_last_state(

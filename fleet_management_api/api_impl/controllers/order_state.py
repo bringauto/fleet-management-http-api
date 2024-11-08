@@ -1,7 +1,5 @@
 from typing import Callable, Any, Optional
 
-import connexion as _connexion  # type: ignore
-
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
@@ -23,6 +21,8 @@ from fleet_management_api.response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
+from fleet_management_api.api_impl.load_request import Request as _Request
+
 
 
 OrderId = int
@@ -37,12 +37,11 @@ def create_order_states() -> _Response:
     - the order exists,
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
-    if not _connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
     try:
-        order_states = [
-            _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
-        ]
+        order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
         return _log_error_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
