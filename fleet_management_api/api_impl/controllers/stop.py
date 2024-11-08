@@ -1,5 +1,3 @@
-import connexion  # type: ignore
-
 from fleet_management_api.models.stop import Stop as _Stop
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
@@ -20,6 +18,7 @@ from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 def create_stops() -> _Response:
@@ -30,24 +29,24 @@ def create_stops() -> _Response:
     The stop creation can succeed only if:
     - there is no stop with the same name.
     """
-    if not connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
+    stops = [_Stop.from_dict(s) for s in request.data]
+    stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
+    response = _db_access.add(*stop_db_models)
+    if response.status_code == 200:
+        posted_db_models: list[_db_models.StopDBModel] = response.body
+        for stop in posted_db_models:
+            _log_info(f"Stop (name='{stop.name}) has been created.")
+        models = [_obj_to_db.stop_from_db_model(m) for m in posted_db_models]
+        return _json_response(models)
     else:
-        stops = [_Stop.from_dict(s) for s in connexion.request.get_json()]
-        stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-        response = _db_access.add(*stop_db_models)
-        if response.status_code == 200:
-            posted_db_models: list[_db_models.StopDBModel] = response.body
-            for stop in posted_db_models:
-                _log_info(f"Stop (name='{stop.name}) has been created.")
-            models = [_obj_to_db.stop_from_db_model(m) for m in posted_db_models]
-            return _json_response(models)
-        else:
-            return _error(
-                response.status_code,
-                f"Stops (name='{[s.name for s in stop_db_models]})' could not be created. {response.body['detail']}",
-                title=response.body["title"],
-            )
+        return _error(
+            response.status_code,
+            f"Stops (name='{[s.name for s in stop_db_models]})' could not be created. {response.body['detail']}",
+            title=response.body["title"],
+        )
 
 
 def delete_stop(stop_id: int) -> _Response:
@@ -106,26 +105,24 @@ def update_stops() -> _Response:
     - all stops exist,
     - there is no stop with the same name.
     """
-    if not connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
+    stops = [_Stop.from_dict(s) for s in request.data]
+    stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
+    response = _db_access.update(*stop_db_models)
+    if response.status_code == 200:
+        updated_stops: list[_db_models.StopDBModel] = response.body
+        for s in updated_stops:
+            _log_info(f"Stop (ID={s.id}) has been succesfully updated.")
+        return _text_response(f"Stops {[s.name for s in updated_stops]} were succesfully updated.")
     else:
-        stops = [_Stop.from_dict(s) for s in connexion.request.get_json()]
-        stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-        response = _db_access.update(*stop_db_models)
-        if response.status_code == 200:
-            updated_stops: list[_db_models.StopDBModel] = response.body
-            for s in updated_stops:
-                _log_info(f"Stop (ID={s.id}) has been succesfully updated.")
-            return _text_response(
-                f"Stops {[s.name for s in updated_stops]} were succesfully updated."
-            )
-        else:
-            note = " (not found)" if response.status_code == 404 else ""
-            return _log_error_and_respond(
-                f"Stops {[s.name for s in stops]} could not be updated {note}. {response.body['detail']}",
-                response.status_code,
-                response.body["title"],
-            )
+        note = " (not found)" if response.status_code == 404 else ""
+        return _log_error_and_respond(
+            f"Stops {[s.name for s in stops]} could not be updated {note}. {response.body['detail']}",
+            response.status_code,
+            response.body["title"],
+        )
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _Response:

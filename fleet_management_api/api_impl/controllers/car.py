@@ -1,5 +1,3 @@
-import connexion  # type: ignore
-
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.models import (
@@ -22,6 +20,7 @@ from fleet_management_api.api_impl.api_logging import (
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 def create_cars() -> _Response:  # noqa: E501
@@ -35,56 +34,52 @@ def create_cars() -> _Response:  # noqa: E501
     - the car name is unique.
     - the platform HW is not referenced by any existing car.
     """
-    if not connexion.request.is_json:
-        _log_invalid_request_body_format()
-    request = connexion.request.get_json()
+    request = _Request.load()
     if not request:
-        return _json_response([])
+        return _log_invalid_request_body_format()
+    cars: list[_models.Car] = []
+    for car_dict in request.data:
+        car_dict["lastState"] = None
+        car = _models.Car.from_dict(car_dict)
+        cars.append(car)
+    car_db_models = []
+    checked = []
+    for car in cars:
+        car_db_models.append(_obj_to_db.car_to_db_model(car))
+        checked.append(
+            _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=car.platform_hw_id)
+        )
+        checked.append(
+            _db_access.db_object_check(
+                _db_models.RouteDBModel,
+                id_=car.default_route_id,
+                allow_nonexistence=True,
+            )
+        )
+
+    response = _db_access.add(*car_db_models, checked=checked)
+    if response.status_code == 200:
+        posted_db_models: list[_db_models.CarDBModel] = response.body
+        ids: list[int] = []
+        for model in posted_db_models:
+            assert model.id is not None
+            ids.append(model.id)
+            _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
+
+        db_states = _post_default_car_state(ids)
+        states = [_obj_to_db.car_state_from_db_model(s) for s in db_states.body]
+
+        posted_cars: list[_Car] = []
+        for model, state in zip(posted_db_models, states):
+            posted_car = _obj_to_db.car_from_db_model(model, state)
+            posted_cars.append(posted_car)
+        return _json_response(posted_cars)
     else:
-        cars: list[_models.Car] = []
-        for car_dict in connexion.request.get_json():
-            car_dict["lastState"] = None
-            car = _models.Car.from_dict(car_dict)
-            cars.append(car)
-
-        car_db_models = []
-        checked = []
-        for car in cars:
-            car_db_models.append(_obj_to_db.car_to_db_model(car))
-            checked.append(
-                _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=car.platform_hw_id)
-            )
-            checked.append(
-                _db_access.db_object_check(
-                    _db_models.RouteDBModel,
-                    id_=car.default_route_id,
-                    allow_nonexistence=True,
-                )
-            )
-
-        response = _db_access.add(*car_db_models, checked=checked)
-        if response.status_code == 200:
-            posted_db_models: list[_db_models.CarDBModel] = response.body
-            ids: list[int] = []
-            for model in posted_db_models:
-                assert model.id is not None
-                ids.append(model.id)
-                _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
-
-            db_states = _post_default_car_state(ids)
-            states = [_obj_to_db.car_state_from_db_model(s) for s in db_states.body]
-
-            posted_cars: list[_Car] = []
-            for model, state in zip(posted_db_models, states):
-                posted_car = _obj_to_db.car_from_db_model(model, state)
-                posted_cars.append(posted_car)
-            return _json_response(posted_cars)
-        else:
-            return _log_error_and_respond(
-                code=response.status_code,
-                msg=f"Cars could not be created. {response.body['detail']}",
-                title=response.body["title"],
-            )
+        return _log_error_and_respond(
+            code=response.status_code,
+            msg=f"Cars could not be created. {response.body['detail']}",
+            title=response.body["title"],
+        )
 
 
 def delete_car(car_id: int) -> _Response:
@@ -147,19 +142,18 @@ def update_cars() -> _Response:
     - the car name is unique.
     - the platform HW is not referenced by any other existing car.
     """
-    if connexion.request.is_json:
-        cars = [_models.Car.from_dict(item) for item in connexion.request.get_json()]  # noqa: E501
-        car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
-        response = _db_access.update(*car_db_model)
-        if response.status_code == 200:
-            return _log_info_and_respond(
-                f"Cars with IDs {[c.id for c in cars]} has been succesfully updated."
-            )
-        else:
-            msg = f"Cars with IDs {[c.id for c in cars]} could not be updated. {response.body['detail']}"
-            return _log_error_and_respond(msg, response.status_code, response.body["title"])
-    else:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
+    cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
+    car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
+    response = _db_access.update(*car_db_model)
+    car_ids = [c.id for c in cars]
+    if response.status_code == 200:
+        return _log_info_and_respond(f"Cars with IDs {car_ids} has been succesfully updated.")
+    else:
+        msg = f"Cars with IDs {car_ids} could not be updated. {response.body['detail']}"
+        return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
 def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car:

@@ -1,5 +1,3 @@
-import connexion  # type: ignore
-
 from fleet_management_api.models import PlatformHW as _PlatformHW
 from fleet_management_api.database import db_access as _db_access
 from fleet_management_api.database import db_models as _db_models
@@ -15,6 +13,7 @@ from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 def create_hws() -> _Response:
@@ -25,10 +24,11 @@ def create_hws() -> _Response:
     The HW creation can succeed only if:
     - there is no HW with the same name.
     """
-    if not connexion.request.is_json:
+    request = _Request.load()
+    if not request:
         return _log_invalid_request_body_format()
     else:
-        hws = [_PlatformHW.from_dict(p) for p in connexion.request.get_json()]
+        hws = [_PlatformHW.from_dict(p) for p in request.data]
         hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
         response: _Response = _db_access.add(*hw_db_model)
         if response.status_code == 200:
@@ -59,7 +59,9 @@ def get_hws() -> _Response:
 
 def get_hw(platform_hw_id: int) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
-    hw_models = _db_access.get(_db_models.PlatformHWDBModel, criteria={"id": lambda x: x == platform_hw_id})
+    hw_models = _db_access.get(
+        _db_models.PlatformHWDBModel, criteria={"id": lambda x: x == platform_hw_id}
+    )
     hws = [_obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(hws) == 0:
         return _log_error_and_respond(
