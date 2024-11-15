@@ -38,7 +38,7 @@ class Test_Object_Existence(api_test.TestCase):
             _db_access.exists(TEST_TENANT, models.TestBase, {"id": lambda x: x == test_obj.id})
         )
         test_obj.test_str = "new_string"
-        _db_access.update(test_obj)
+        _db_access.update(TEST_TENANT, test_obj)
         self.assertTrue(
             _db_access.exists(TEST_TENANT, models.TestBase, {"id": lambda x: x == test_obj.id})
         )

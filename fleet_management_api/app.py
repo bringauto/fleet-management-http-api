@@ -9,9 +9,12 @@ from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBMo
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order import (
     clear_active_orders,
-    clear_inactive_orders
+    clear_inactive_orders,
 )
 import fleet_management_api.database.db_access as _db_access
+
+
+TENANT_COOKIE_NAME = "tenant"
 
 
 def get_app() -> connexion.FlaskApp:
@@ -35,15 +38,17 @@ class _TestApp:
             self._app = flask_app
             self._api_key = api_key
 
-        def test_client(self) -> _FlaskClient:
+        def test_client(self, tenant: str = "") -> _FlaskClient:
             if self._api_key == "":
-                return _TestApp._TestClient(self._app, self._api_key)
+                return _TestApp._TestClient(self._app, self._api_key, tenant=tenant)
             else:
-                return self._app.test_client()
+                return self._app.test_client(TEST_TENANT)
 
     class _TestClient(_FlaskClient):
-        def __init__(self, application, api_key: str, *args, **kwargs) -> None:
+        def __init__(self, application, api_key: str, tenant: str, *args, **kwargs) -> None:
             super().__init__(application, *args, **kwargs)
+            if tenant:
+                self.set_cookie("", TENANT_COOKIE_NAME, tenant)
             self._key = api_key
 
         def get(self, url: str, *args, **kwargs) -> Any:
@@ -82,10 +87,8 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
     If the api_key is left empty, no authentication is required.
     The api_key can be set to any value, that can be used as a value for 'api_key' query parameter in the API calls.
     """
-    _db_access.add(
-        _ApiKeyDBModel(
-            key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()
-        ),
+    _db_access.add_without_tenant(
+        _ApiKeyDBModel(key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()),
     )
     clear_active_orders()
     clear_inactive_orders()

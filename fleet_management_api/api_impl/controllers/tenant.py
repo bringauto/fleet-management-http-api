@@ -15,6 +15,7 @@ from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
+from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 
 
 def create_tenants() -> _Response:
@@ -30,7 +31,7 @@ def create_tenants() -> _Response:
     else:
         tenants = [_Tenant.from_dict(p) for p in connexion.request.get_json()]
         tenant_db_model = [_obj_to_db.tenant_to_db_model(p) for p in tenants]
-        response: _Response = _db_access.add(*tenant_db_model)
+        response: _Response = _db_access.add_without_tenant(*tenant_db_model)
         if response.status_code == 200:
             inserted_models: list[_Tenant] = [
                 _obj_to_db.tenant_from_db_model(item) for item in response.body
@@ -87,7 +88,12 @@ def delete_tenant(tenant_id: int) -> _Response:
             400,
             title="Cannot delete object",
         )
-    response = _db_access.delete(_db_models.TenantDBModel, tenant_id)
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    response = _db_access.delete(request.tenant, _db_models.TenantDBModel, tenant_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Tenant with ID={tenant_id} has been deleted.")
     else:

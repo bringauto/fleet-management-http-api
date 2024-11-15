@@ -4,6 +4,7 @@ import unittest
 import fleet_management_api.app as _app
 from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.models import Route, Stop, GNSSPosition
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
@@ -26,12 +27,12 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
             name="test_stop_D",
             position=GNSSPosition(latitude=49.3, longitude=16.8, altitude=420),
         )
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/stop", json=[self.stop_A, self.stop_B, self.stop_C, self.stop_D])
 
     def test_defining_route_list_of_stops(self):
         route = Route(name="test_route", stop_ids=[1, 3])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[route])
             response = c.get(f"/v2/management/route/1")
             self.assertEqual(response.status_code, 200)
@@ -39,7 +40,7 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
 
     def test_updating_list_of_stops(self):
         route = Route(id=1, name="test_route", stop_ids=[1, 3])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[route])
             self.assertEqual(response.status_code, 200)
             route.stop_ids.append(2)
@@ -50,13 +51,13 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
 
     def test_creating_list_of_routes_with_nonexistent_stop_yields_code_404(self):
         route = Route(id=5, name="test_route", stop_ids=[1, 456876786798678])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[route])
             self.assertEqual(response.status_code, 404)
 
     def test_route_is_not_created_if_any_of_its_stops_does_not_exist(self):
         route = Route(name="test_route", stop_ids=[1, 4556564858])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[route])
             self.assertEqual(response.status_code, 404)
 
@@ -65,7 +66,7 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
 
     def test_updating_list_of_stops_with_nonexistent_stop_yields_code_404(self):
         route = Route(id=1, name="test_route", stop_ids=[1, 3])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[route])
             route.stop_ids.append(9651965651651)
             response = c.put("/v2/management/route", json=[route])
@@ -96,11 +97,11 @@ class Test_Deleting_Stops_Referenced_By_Route(unittest.TestCase):
             name="test_stop_D",
             position=GNSSPosition(latitude=49.3, longitude=16.8, altitude=420),
         )
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/stop", json=[self.stop_A, self.stop_B, self.stop_C, self.stop_D])
 
     def test_deleting_stop_no_referenced_by_any_route_is_allowed(self):
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.delete(f"/v2/management/stop/1")
             self.assertEqual(response.status_code, 200)
             response = c.get(f"/v2/management/stop")
@@ -111,7 +112,7 @@ class Test_Deleting_Stops_Referenced_By_Route(unittest.TestCase):
     ):
         route_1 = Route(name="test_route_1", stop_ids=[1, 3])
         route_2 = Route(name="test_route_2", stop_ids=[2, 3])
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[route_1, route_2])
             response = c.delete(f"/v2/management/stop/1")
             self.assertEqual(response.status_code, 400)

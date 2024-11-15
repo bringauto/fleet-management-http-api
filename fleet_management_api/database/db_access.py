@@ -34,6 +34,7 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 Order = Literal["asc", "desc"]
 ColumnName = str
+EMPTY_TENANT = "empty_tenant"
 
 
 class ParentNotFound(Exception):
@@ -132,6 +133,22 @@ def db_access_method(func: Callable) -> Callable:
     return wrapper
 
 
+def add_without_tenant(
+    *added: _Base,
+    checked: Optional[Iterable[CheckBeforeAdd]] = None,
+    connection_source: Optional[_sqa.Engine] = None,
+    auto_id: bool = True,
+) -> _Response:
+    """Add a an object to the database without specifying a tenant.
+
+    For more details see documentation for the `add` method.
+    """
+
+    return add(
+        EMPTY_TENANT, *added, checked=checked, connection_source=connection_source, auto_id=auto_id
+    )
+
+
 @db_access_method
 def add(
     tenant: str,
@@ -221,7 +238,6 @@ def delete(tenant: str, base: type[_Base], id_: Any) -> _Response:
 
 @db_access_method
 def delete_n(
-    tenant: str,
     base: type[_Base],
     n: int,
     column_name: str,
@@ -263,9 +279,7 @@ def delete_n(
 
 
 @db_access_method
-def exists(
-    tenant: str, base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None
-) -> bool:
+def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None) -> bool:
     """Check if an object with the given ID exists in the database."""
     source = _get_current_connection_source()
     table = base.__table__
@@ -369,7 +383,6 @@ def get(
 
 
 def get_children(
-    tenant: str,
     parent_base: type[_Base],
     parent_id: int,
     children_col_name: str,
@@ -429,10 +442,10 @@ def update(tenant: str, *updated: _Base) -> _Response:
 
 
 def wait_for_new(
+    tenant: str,
     base: type[_Base],
     criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
     timeout_ms: Optional[int] = None,
-    tenant: Optional[str] = None,
 ) -> list[Any]:
     """Wait for new instances of the ORM mapped class `base` that satisfy the `criteria` to be sent to the database.
 

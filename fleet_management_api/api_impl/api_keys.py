@@ -33,7 +33,7 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     if len(already_existing_keys) > 0:
         return 400, _key_already_exists_msg(key_name)
     else:
-        response = _db_access.add(
+        response = _db_access.add_without_tenant(
             _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now),
             connection_source=connection_source,
         )

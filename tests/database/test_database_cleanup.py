@@ -58,7 +58,7 @@ class Test_Database_Cleanup(unittest.TestCase):
 
     def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(TEST_TENANT, _db_models.CarDBModel)[0].name, "car1")
+        self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
         restart_database()
         cars = _db_access.get(TEST_TENANT, _db_models.CarDBModel)
         self.assertFalse(cars)
@@ -66,7 +66,7 @@ class Test_Database_Cleanup(unittest.TestCase):
     def test_object_can_be_added_after_database_cleanup(self):
         restart_database()
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(TEST_TENANT, _db_models.CarDBModel)[0].name, "car1")
+        self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
 
     def test_deleting_object_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()

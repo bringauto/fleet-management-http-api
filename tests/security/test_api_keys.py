@@ -6,6 +6,8 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.api_impl.api_keys as _api_keys
 import fleet_management_api.app as _app
 
+from tests._utils.constants import TEST_TENANT
+
 
 class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
     def setUp(self) -> None:
@@ -47,7 +49,7 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
         self.app = _app.get_test_app()
 
     def test_using_nonexistent_key_yields_code_401(self):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 200)
 
@@ -64,7 +66,7 @@ class Test_Using_Already_Existing_API_Key(unittest.TestCase):
     @patch("fleet_management_api.api_impl.api_keys._generate_key")
     def test_using_existing_key(self, mock_generate_key: Mock):
         mock_generate_key.return_value = "abcd"
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get("/v2/management/car")
             self.assertEqual(response.status_code, 401)
             response = c.get("/v2/management/car?api_key=abcd")

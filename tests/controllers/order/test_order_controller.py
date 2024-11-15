@@ -11,6 +11,7 @@ from fleet_management_api.api_impl.controllers.order import (
     clear_inactive_orders,
     set_max_n_of_active_orders,
 )
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Sending_Order(unittest.TestCase):
@@ -20,13 +21,13 @@ class Test_Sending_Order(unittest.TestCase):
         clear_active_orders()
         clear_inactive_orders()
         self.app = _app.get_test_app()
-        create_platform_hws(self.app)
-        create_stops(self.app, 7)
-        create_route(self.app, stop_ids=(2, 4, 6))
+        create_platform_hws(TEST_TENANT, self.app)
+        create_stops(TEST_TENANT, self.app, 7)
+        create_route(TEST_TENANT, self.app, stop_ids=(2, 4, 6))
         self.car = Car(
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/car", json=[self.car])
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
@@ -40,7 +41,7 @@ class Test_Sending_Order(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/order", json=[order])
             self.assertEqual(response.status_code, 200)
             order.id = 1
@@ -64,7 +65,7 @@ class Test_Sending_Order(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/order", json=[order])
             self.assertEqual(response.status_code, 404)
 
@@ -76,7 +77,7 @@ class Test_Sending_Order(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/order", json=[order])
             self.assertEqual(response.status_code, 404)
 
@@ -88,13 +89,13 @@ class Test_Sending_Order(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/order", json=[order])
             self.assertEqual(response.status_code, 400)
 
     def test_sending_incomplete_order_data_yields_code_400(self):
         incomplete_order_dict = {}
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/order", json=[incomplete_order_dict])
             self.assertEqual(response.status_code, 400)
 
@@ -109,10 +110,10 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
         clear_active_orders()
         clear_inactive_orders()
         app = _app.get_test_app()
-        create_platform_hws(app)
-        create_stops(app, 1)
-        create_route(app, stop_ids=(1,))
-        with app.app.test_client() as c:
+        create_platform_hws(TEST_TENANT, app)
+        create_stops(TEST_TENANT, app, 1)
+        create_route(TEST_TENANT, app, stop_ids=(1,))
+        with app.app.test_client(TEST_TENANT) as c:
             example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Order"][
                 "example"
             ]
@@ -140,8 +141,8 @@ class Test_No_Orders(unittest.TestCase):
         self.app = _app.get_test_app()
 
     def test_retrieving_all_orders_when_no_orders_exist_yields_code_200(self):
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.get("/v2/management/order")
             self.assertEqual(response.status_code, 200)
             self.assertListEqual(response.json, [])
 
@@ -155,9 +156,9 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
-        create_platform_hws(self.app, 2)
-        create_stops(self.app, 7)
-        create_route(self.app, stop_ids=(2, 4, 6))
+        create_platform_hws(TEST_TENANT, self.app, 2)
+        create_stops(TEST_TENANT, self.app, 7)
+        create_route(TEST_TENANT, self.app, stop_ids=(2, 4, 6))
         set_max_n_of_active_orders(5)
         self.car_1 = Car(
             name="test_car_1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
@@ -165,7 +166,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
         self.car_2 = Car(
             name="test_car_2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/car", json=[self.car_1])
             assert response.json is not None
             self.car_1.id = response.json[0]["id"]
@@ -187,22 +188,22 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post(
                 "/v2/management/order",
                 json=[self.order_1, self.order_1, self.order_2, self.order_2, self.order_2],
             )
 
     def test_retrieving_all_orders_when_some_orders_exist_yields_code_200_and_list_of_orders(self):
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.get("/v2/management/order")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 5)
 
     def test_retrieving_all_orders_for_car_when_some_orders_exist_yields_list_of_orders_assigned_to_the_car(
         self,
     ):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get(f"/v2/management/order/{self.car_1.id}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 2)
@@ -212,13 +213,13 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
 
     def test_retrieving_nonexistent_order(self):
         nonexistent_order_id = 651651651
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get(f"/v2/management/order/12/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
     def test_retrieving_orders_for_nonexistent_car(self):
         nonexistent_car_id = 651651651
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get(f"/v2/management/order/{nonexistent_car_id}")
             self.assertEqual(response.status_code, 404)
 
@@ -230,9 +231,9 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/order", json=[order])
-            response = c.get(f"/v2/management/order")
+            response = c.get("/v2/management/order")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(Order.from_dict(response.json[0]).target_stop_id, order.target_stop_id)
 
@@ -247,13 +248,13 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
         self.maxDiff = None
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
-        create_platform_hws(self.app)
-        create_stops(self.app, 7)
-        create_route(self.app, stop_ids=(2, 4, 6))
+        create_platform_hws(TEST_TENANT, self.app)
+        create_stops(TEST_TENANT, self.app, 7)
+        create_route(TEST_TENANT, self.app, stop_ids=(2, 4, 6))
         self.car = Car(
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/car", json=[self.car])
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
@@ -267,9 +268,9 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="1234567890"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/order", json=[order])
-            response = c.get(f"/v2/management/order/1/1")
+            response = c.get("/v2/management/order/1/1")
             self.assertEqual(response.status_code, 200)
             order.id = 1
             order.last_state = OrderState(
@@ -282,7 +283,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
     def test_retrieving_non_existing_order_yields_code_404(self):
         nonexistent_order_id = 65169861848
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.get(f"/v2/management/order/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
@@ -296,13 +297,13 @@ class Test_Deleting_Order(unittest.TestCase):
 
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
-        create_platform_hws(self.app)
-        create_stops(self.app, 7)
-        create_route(self.app, stop_ids=(2, 4, 6))
+        create_platform_hws(TEST_TENANT, self.app)
+        create_stops(TEST_TENANT, self.app, 7)
+        create_route(TEST_TENANT, self.app, stop_ids=(2, 4, 6))
         self.car = Car(
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/car", json=[self.car])
             self.order = Order(
                 is_visible=True,
@@ -314,15 +315,15 @@ class Test_Deleting_Order(unittest.TestCase):
             c.post("/v2/management/order", json=[self.order])
 
     def test_deleting_existing_order(self):
-        with self.app.app.test_client() as c:
-            response = c.delete(f"/v2/management/order/1/1")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.delete("/v2/management/order/1/1")
             self.assertEqual(response.status_code, 200)
-            response = c.get(f"/v2/management/order")
+            response = c.get("/v2/management/order")
             self.assertEqual(response.json, [])
 
     def test_deleting_nonexistent_order_yields_code_404(self):
         nonexistent_order_id = 651651651
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.delete(f"/v2/management/order/1/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
@@ -339,13 +340,13 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
         mock_timestamp.return_value = 0
-        create_platform_hws(self.app)
-        create_stops(self.app, 2)
-        create_route(self.app, stop_ids=(1, 2))
+        create_platform_hws(TEST_TENANT, self.app)
+        create_stops(TEST_TENANT, self.app, 2)
+        create_route(TEST_TENANT, self.app, stop_ids=(1, 2))
         self.car = Car(
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/car", json=[self.car])
 
         self.order_1 = Order(
@@ -362,31 +363,31 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
             stop_route_id=1,
             notification_phone=MobilePhone(phone="4444444444"),
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             mock_timestamp.return_value = 1000
             c.post("/v2/management/order", json=[self.order_1])
             mock_timestamp.return_value = 2000
             c.post("/v2/management/order", json=[self.order_2])
 
     def test_setting_since_to_zero_returns_all_orders(self) -> None:
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order?since=0")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.get("/v2/management/order?since=0")
             self.assertEqual(response.status_code, 200)
             assert response.json is not None
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["timestamp"], 1000)
 
     def test_setting_since_to_time_after_some_status_returns_only_statuses_after_that(self) -> None:
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order?since=1001")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.get("/v2/management/order?since=1001")
             self.assertEqual(response.status_code, 200)
             assert response.json is not None
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["timestamp"], 2000)
 
     def test_filtering_out_all_statuses(self) -> None:
-        with self.app.app.test_client() as c:
-            response = c.get(f"/v2/management/order?since=2001")
+        with self.app.app.test_client(TEST_TENANT) as c:
+            response = c.get("/v2/management/order?since=2001")
             self.assertEqual(response.status_code, 200)
             assert response.json is not None
             self.assertEqual(len(response.json), 0)

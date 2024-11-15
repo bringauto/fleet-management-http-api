@@ -13,7 +13,10 @@ from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
 
 
 def create_hws() -> _Response:
@@ -24,27 +27,30 @@ def create_hws() -> _Response:
     The HW creation can succeed only if:
     - there is no HW with the same name.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    hws = [_PlatformHW.from_dict(p) for p in request.data]
+    hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
+    response: _Response = _db_access.add(request.tenant, *hw_db_model)
+    if response.status_code == 200:
+        inserted_models: list[_PlatformHW] = [
+            _obj_to_db.hw_from_db_model(item) for item in response.body
+        ]
+        for p in inserted_models:
+            assert p.id is not None
+            _log_info(f"Platform HW (name='{p.name}) has been created.")
+        return _json_response(inserted_models)
     else:
-        hws = [_PlatformHW.from_dict(p) for p in request.data]
-        hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
-        response: _Response = _db_access.add(*hw_db_model)
-        if response.status_code == 200:
-            inserted_models: list[_PlatformHW] = [
-                _obj_to_db.hw_from_db_model(item) for item in response.body
-            ]
-            for p in inserted_models:
-                assert p.id is not None
-                _log_info(f"Platform HW (name='{p.name}) has been created.")
-            return _json_response(inserted_models)
-        else:
-            return _log_error_and_respond(
-                f"Platform HW (names='{[p.name for p in hws]}) could not be created. {response.body['detail']}",
-                response.status_code,
-                response.body["title"],
-            )
+        return _log_error_and_respond(
+            f"Platform HW (names='{[p.name for p in hws]}) could not be created. {response.body['detail']}",
+            response.status_code,
+            response.body["title"],
+        )
 
 
 def get_hws() -> _Response:
@@ -85,7 +91,12 @@ def delete_hw(platform_hw_id: int) -> _Response:
             400,
             title="Cannot delete object",
         )
-    response = _db_access.delete(_db_models.PlatformHWDBModel, platform_hw_id)
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    response = _db_access.delete(request.tenant, _db_models.PlatformHWDBModel, platform_hw_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Platform HW with ID={platform_hw_id} has been deleted.")
     else:

@@ -14,7 +14,7 @@ import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJSON
 
 
 def create_car_states() -> _Response:
@@ -25,14 +25,19 @@ def create_car_states() -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     car_states = [_models.CarState.from_dict(s) for s in request.data]  # noqa: E501
-    return create_car_states_from_argument_and_post(car_states)
+    return create_car_states_from_argument_and_post(request.tenant, car_states)
 
 
 def create_car_states_from_argument_and_post(
+    tenant: str,
     car_states: list[_models.CarState],
 ) -> _Response:
     """Post new car states using list passed as argument.
@@ -46,6 +51,7 @@ def create_car_states_from_argument_and_post(
         return _json_response([])
     state_db_models = [_obj_to_db.car_state_to_db_model(s) for s in car_states]
     response = _db_access.add(
+        tenant,
         *state_db_models,
         checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_states[0].car_id)],
     )

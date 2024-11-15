@@ -16,7 +16,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJSON
 
 
 def get_route_visualization(route_id: int) -> _Response:
@@ -47,9 +47,11 @@ def redefine_route_visualizations() -> _Response:
     The visualization can be redefined only if:
     - the route exists.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _error(401, "Tenant not received in the request.", title="Unspecified tenant")
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDBModel, v.route_id):
@@ -73,7 +75,7 @@ def redefine_route_visualizations() -> _Response:
             )
 
     vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
-    response = _db_access.update(*vis_db_models)
+    response = _db_access.update(request.tenant, *vis_db_models)
     if response.status_code == 200:
         inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
         for v in inserted_vis:

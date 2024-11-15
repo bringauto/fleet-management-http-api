@@ -20,7 +20,10 @@ from fleet_management_api.api_impl.api_logging import (
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
 
 
 def create_cars() -> _Response:  # noqa: E501
@@ -34,7 +37,7 @@ def create_cars() -> _Response:  # noqa: E501
     - the car name is unique.
     - the platform HW is not referenced by any existing car.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
     cars: list[_models.Car] = []
@@ -57,7 +60,7 @@ def create_cars() -> _Response:  # noqa: E501
             )
         )
 
-    response = _db_access.add(*car_db_models, checked=checked)
+    response = _db_access.add(request.tenant, *car_db_models, checked=checked)
     if response.status_code == 200:
         posted_db_models: list[_db_models.CarDBModel] = response.body
         ids: list[int] = []
@@ -66,7 +69,7 @@ def create_cars() -> _Response:  # noqa: E501
             ids.append(model.id)
             _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
-        db_states = _post_default_car_state(ids)
+        db_states = _post_default_car_state(request.tenant, ids)
         states = [_obj_to_db.car_state_from_db_model(s) for s in db_states.body]
 
         posted_cars: list[_Car] = []
@@ -87,7 +90,12 @@ def delete_car(car_id: int) -> _Response:
 
     :param car_id: ID of the car to be deleted.
     """
-    response = _db_access.delete(_db_models.CarDBModel, car_id)
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    response = _db_access.delete(request.tenant, _db_models.CarDBModel, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
         return _log_info_and_respond(msg)
@@ -142,12 +150,16 @@ def update_cars() -> _Response:
     - the car name is unique.
     - the platform HW is not referenced by any other existing car.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
     car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
-    response = _db_access.update(*car_db_model)
+    response = _db_access.update(request.tenant, *car_db_model)
     car_ids = [c.id for c in cars]
     if response.status_code == 200:
         return _log_info_and_respond(f"Cars with IDs {car_ids} has been succesfully updated.")
@@ -168,7 +180,7 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
     return car
 
 
-def _post_default_car_state(car_ids: list[int]) -> _Response:
+def _post_default_car_state(tenant: str, car_ids: list[int]) -> _Response:
     car_states = [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
-    response = _create_car_state_from_argument_and_post(car_states)
+    response = _create_car_state_from_argument_and_post(tenant, car_states)
     return response

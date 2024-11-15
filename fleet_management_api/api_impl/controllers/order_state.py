@@ -21,8 +21,7 @@ from fleet_management_api.response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import Request as _Request
-
+from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJSON
 
 
 OrderId = int
@@ -37,20 +36,24 @@ def create_order_states() -> _Response:
     - the order exists,
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     try:
         order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
         return _log_error_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
         )
-    return create_order_states_from_argument_and_post(order_states)
+    return create_order_states_from_argument_and_post(request.tenant, order_states)
 
 
 def create_order_states_from_argument_and_post(
-    order_states: list[_models.OrderState], check_final_state: bool = True
+    tenant: str, order_states: list[_models.OrderState], check_final_state: bool = True
 ) -> _Response:
     """Create new states of existing orders. The Order State models are passed as an argument.
 
@@ -101,7 +104,7 @@ def create_order_states_from_argument_and_post(
         db_model.car_id = order.car_id
         db_models.append(db_model)
 
-    response: _Response = _db_access.add(*db_models)
+    response: _Response = _db_access.add(tenant, *db_models)
     if response.status_code == 200:
         try:
             inserted_models = [_obj_to_db.order_state_from_db_model(m) for m in response.body]

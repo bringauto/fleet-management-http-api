@@ -6,20 +6,21 @@ from fleet_management_api.database.connection import (
     set_connection_source_test,
     unset_connection_source,
 )
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Api_Checking(unittest.TestCase):
     def test_unavailable_api_yields_code_404(self):
         set_connection_source_test()
         self.app = _app.get_test_app()
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.head("/nonexistent-base/apialive")
             self.assertEqual(response.status_code, 404)
 
     def test_available_api_yields_code_200(self):
         set_connection_source_test()
         self.app = _app.get_test_app()
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.head("/v2/management/apialive")
             self.assertEqual(response.status_code, 200)
 
@@ -30,7 +31,7 @@ class Test_Api_Checking(unittest.TestCase):
         mock_info_from_APIKeyAuth.return_value = {"name": "Admin"}
         self.app = _app.get_test_app()
         unset_connection_source()
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT) as c:
             response = c.head("/v2/management/apialive")
             self.assertEqual(response.status_code, 503)
 

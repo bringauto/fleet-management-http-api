@@ -3,6 +3,7 @@ import unittest
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import RouteVisualization, Route, GNSSPosition
 import fleet_management_api.app as _app
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Posting_New_Route_Visualization(unittest.TestCase):
@@ -12,24 +13,24 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
         self.route = Route(name="test_route")
 
     def test_getting_route_visualization_for_newly_defined_route_yields_empty_list(self):
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[self.route])
             response = c.get("/v2/management/route-visualization/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["points"], [])
 
     def test_getting_route_visualization_for_nonexistent_route_yields_404(self):
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.get("/v2/management/route-visualization/1")
             self.assertEqual(response.status_code, 404)
 
     def test_post_route_visualization_to_existing_route(self):
         points = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
         route_visualization = RouteVisualization(route_id=1, points=points, hexcolor="#FF0000")
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[self.route])
             self.assertEqual(response.status_code, 200)
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route-visualization", json=[route_visualization])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/route-visualization/1")
@@ -48,10 +49,10 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
         route_2 = Route(name="test_route_2")
         vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
         vis_2 = RouteVisualization(route_id=2, points=points_2, hexcolor="#FFEE00")
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[self.route, route_2])
             self.assertEqual(response.status_code, 200)
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route-visualization", json=[vis_1, vis_2])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/route-visualization/1")
@@ -73,10 +74,10 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
         vis_1 = RouteVisualization(route_id=1, points=points_1, hexcolor="#FF0000")
         # route for the following visualization does not exist
         vis_2 = RouteVisualization(route_id=25252, points=points_2, hexcolor="#FFEE00")
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route", json=[self.route])
             self.assertEqual(response.status_code, 200)
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route-visualization", json=[vis_1, vis_2])
             self.assertEqual(response.status_code, 404)
             response = c.get("/v2/management/route-visualization/1")
@@ -86,7 +87,7 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
 
     def test_route_visualization_accepts_only_hexadecimal_color_code(self):
         invalid_colors = ["#FF000", "#", "   ", "red"]
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[self.route])
         for color in invalid_colors:
             with self.subTest(color=color):
@@ -112,7 +113,7 @@ class Updating_Route_Visualization(unittest.TestCase):
             GNSSPosition(50.0, 22.0, 350.0),
             GNSSPosition(-48.0, -22.0, 250.0),
         ]
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[self.route])
 
             c.post(
@@ -141,7 +142,7 @@ class Updating_Route_Visualization(unittest.TestCase):
             GNSSPosition(50.0, 22.0, 350.0),
             GNSSPosition(-48.0, -22.0, 250.0),
         ]
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[self.route])
 
             c.post(
@@ -161,7 +162,7 @@ class Updating_Route_Visualization(unittest.TestCase):
     def test_updating_route_visualization_for_nonexistent_route_yields_404(self):
         points = [GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)]
         route_visualization = RouteVisualization(route_id=1, points=points)
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             response = c.post("/v2/management/route-visualization", json=[route_visualization])
             self.assertEqual(response.status_code, 404)
 
@@ -173,7 +174,7 @@ class Test_Route_Removal(unittest.TestCase):
 
     def test_route_visualization_are_not_accessible_after_route_is_removed(self):
         route = Route(name="test_route")
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[route])
             response = c.delete("/v2/management/route/1")
             self.assertEqual(response.status_code, 200)
@@ -189,7 +190,7 @@ class Test_Route_Removal(unittest.TestCase):
             route_id=1,
             points=[GNSSPosition(49.0, 21.0, 300.0), GNSSPosition(48.0, 22.0, 350.0)],
         )
-        with self.app.test_client() as c:
+        with self.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/route", json=[old_route])
             c.delete("/v2/management/route/1")
             response = c.post("/v2/management/route", json=[new_route])

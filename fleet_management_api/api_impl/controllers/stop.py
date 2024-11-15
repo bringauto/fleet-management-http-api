@@ -18,7 +18,10 @@ from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
 
 
 def create_stops() -> _Response:
@@ -29,12 +32,16 @@ def create_stops() -> _Response:
     The stop creation can succeed only if:
     - there is no stop with the same name.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.add(*stop_db_models)
+    response = _db_access.add(request.tenant, *stop_db_models)
     if response.status_code == 200:
         posted_db_models: list[_db_models.StopDBModel] = response.body
         for stop in posted_db_models:
@@ -61,7 +68,12 @@ def delete_stop(stop_id: int) -> _Response:
             routes_response.status_code,
             routes_response.body["title"],
         )
-    response = _db_access.delete(_db_models.StopDBModel, stop_id)
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    response = _db_access.delete(request.tenant, _db_models.StopDBModel, stop_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
@@ -105,12 +117,16 @@ def update_stops() -> _Response:
     - all stops exist,
     - there is no stop with the same name.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.update(*stop_db_models)
+    response = _db_access.update(request.tenant, *stop_db_models)
     if response.status_code == 200:
         updated_stops: list[_db_models.StopDBModel] = response.body
         for s in updated_stops:

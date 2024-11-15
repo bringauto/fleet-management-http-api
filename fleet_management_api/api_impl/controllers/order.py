@@ -19,7 +19,10 @@ import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.api_impl.controllers.order_state as _order_state
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
 
 
 CarId = int
@@ -167,9 +170,13 @@ def create_orders() -> _Response:
     - the route exists and contains the target stop,
     - the maximum number of active orders for any referenced car has not been reached.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
 
     order_db_models: list[_db_models.OrderDBModel] = []
     checked: list[_db_access.CheckBeforeAdd] = []
@@ -213,7 +220,7 @@ def create_orders() -> _Response:
         )
         order_db_models.append(_obj_to_db.order_to_db_model(order))
 
-    response = _db_access.add(*order_db_models, checked=checked)
+    response = _db_access.add(request.tenant, *order_db_models, checked=checked)
 
     if response.status_code == 200:
         # orders are created in the database, now log them
@@ -224,7 +231,7 @@ def create_orders() -> _Response:
             ids.append(model.id)
             _log_info(f"Order (ID={model.id}) has been created.")
 
-        db_states = _post_default_order_states(ids).body
+        db_states = _post_default_order_states(request.tenant, ids).body
         states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
 
         posted_orders: list[_models.Order] = []
@@ -244,7 +251,12 @@ def create_orders() -> _Response:
 
 def delete_order(car_id: int, order_id: int) -> _Response:
     """Delete an existing order."""
-    response = _db_access.delete(_db_models.OrderDBModel, order_id)
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
+    response = _db_access.delete(request.tenant, _db_models.OrderDBModel, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _log_info(msg)
@@ -351,9 +363,9 @@ def _default_order_state(order_id: int) -> _models.OrderState:
     return _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
 
 
-def _post_default_order_states(order_ids: list[int]) -> _Response:
+def _post_default_order_states(tenant: str, order_ids: list[int]) -> _Response:
     order_states = [_default_order_state(id_) for id_ in order_ids]
     response = _order_state.create_order_states_from_argument_and_post(
-        order_states, check_final_state=False
+        tenant, order_states, check_final_state=False
     )
     return response

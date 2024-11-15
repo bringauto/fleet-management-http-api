@@ -1,16 +1,28 @@
 from __future__ import annotations
 import dataclasses
-from typing import Any
+from typing import Any, Optional
 
 import connexion  # type: ignore
 
 
 @dataclasses.dataclass
-class Request:
+class RequestJSON:
     data: Any
+    tenant: Optional[str] = None
 
     @staticmethod
-    def load() -> Request | None:
+    def load() -> RequestJSON | None:
         if not connexion.request.is_json:
             return None
-        return Request(data=connexion.request.get_json())
+        tenant = connexion.request.cookies.get("tenant", None)
+        return RequestJSON(data=connexion.request.get_json(), tenant=tenant)
+
+
+@dataclasses.dataclass
+class RequestEmpty:
+    tenant: Optional[str] = None
+
+    @staticmethod
+    def load() -> RequestJSON:
+        tenant = connexion.request.cookies.get("tenant", None)
+        return RequestEmpty(tenant=tenant)

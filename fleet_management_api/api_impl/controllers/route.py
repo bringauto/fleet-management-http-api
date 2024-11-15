@@ -27,7 +27,10 @@ from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
 
 
 def create_routes() -> _Response:
@@ -39,9 +42,13 @@ def create_routes() -> _Response:
     - all stops exist,
     - there is not a route with the same name.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     routes = [_Route.from_dict(r) for r in request.data]
     for r in routes:
         check_response = _check_route_model(r)
@@ -53,12 +60,12 @@ def create_routes() -> _Response:
             )
 
     route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
-    response = _db_access.add(*route_db_models)
+    response = _db_access.add(request.tenant, *route_db_models)
     if response.status_code == 200:
         inserted_db_models: list[_RouteDBModel] = response.body
         for route in inserted_db_models:
             assert route.id is not None
-            _create_empty_route_visualization(route.id)
+            _create_empty_route_visualization(request.tenant, route.id)
             _log_info(f"Route (name='{route.name}) has been created.")
         return _json_response([_obj_to_db.route_from_db_model(m) for m in inserted_db_models])
     else:
@@ -71,6 +78,11 @@ def create_routes() -> _Response:
 
 def delete_route(route_id: int) -> _Response:
     """Delete an existing route identified by 'route_id'."""
+    request = _RequestEmpty.load()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     related_orders_response = _find_related_orders(route_id)
     if related_orders_response.status_code != 200:
         return _log_error_and_respond(
@@ -78,7 +90,7 @@ def delete_route(route_id: int) -> _Response:
             related_orders_response.status_code,
             related_orders_response.body,
         )
-    response = _db_access.delete(_RouteDBModel, route_id)
+    response = _db_access.delete(request.tenant, _RouteDBModel, route_id)
     if response.status_code != 200:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(
@@ -123,9 +135,13 @@ def update_routes() -> _Response:
     - all stops exist,
     - all route IDs exist.
     """
-    request = _Request.load()
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    if not request.tenant:
+        return _log_error_and_respond(
+            "Tenant not received in the request.", 401, "Unspecified tenant"
+        )
     routes = [_Route.from_dict(item) for item in request.data]
     check_stops_response = _find_nonexistent_stops(*routes)
     if check_stops_response.status_code != 200:
@@ -135,7 +151,7 @@ def update_routes() -> _Response:
             _OBJ_NOT_FOUND,
         )
     route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
-    response = _db_access.update(*route_db_models)
+    response = _db_access.update(request.tenant, *route_db_models)
     if response.status_code == 200:
         inserted_routes: list[_RouteDBModel] = response.body
         for r in inserted_routes:
@@ -157,8 +173,9 @@ def _check_route_model(route: _Route) -> _Response:
     return _text_response(f"Route (ID={route.id}, name='{route.name}) has been checked.")
 
 
-def _create_empty_route_visualization(route_id: int) -> _Response:
+def _create_empty_route_visualization(tenant: str, route_id: int) -> _Response:
     response = _db_access.add(
+        tenant,
         _RouteVisDBModel(id=route_id, route_id=route_id, points=[], hexcolor="#00BCF2"),
     )
     if response.status_code != 200:
