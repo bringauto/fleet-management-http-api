@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Optional, Literal, Callable, Iterable
+from typing import Any, Optional, Literal, Callable, Iterable, ParamSpec, TypeVar
 import functools as _functools
 import logging as _logging
 
@@ -13,7 +13,7 @@ from sqlalchemy.orm import (
 )
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
-from fleet_management_api.database.db_models import Base as _Base
+from fleet_management_api.database.db_models import Base as _Base, TenantDBModel as _TenantDBModel
 from fleet_management_api.database.connection import (
     get_current_connection_source as _get_current_connection_source,
     restart_connection_source as _restart_connection_source,
@@ -26,6 +26,10 @@ from fleet_management_api.api_impl.api_responses import (
 )
 
 from ..logs import LOGGER_NAME
+
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 logger = _logging.getLogger(LOGGER_NAME)
@@ -45,6 +49,18 @@ class ParentNotFound(Exception):
 
 class DatabaseRecordValueError(Exception):
     """Raised when the value of the record in the database does not meet the condition."""
+
+    pass
+
+
+class UnspecifiedTenant(Exception):
+    """Raised when the tenant is not specified in the request."""
+
+    pass
+
+
+class TennantDoesNotExist(Exception):
+    """Raised when the tenant does not exist in the database."""
 
     pass
 
@@ -107,17 +123,17 @@ class CheckBeforeAdd:
                     condition.check(result)
 
 
-def db_access_method(func: Callable) -> Callable:
+def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
     """Decorator for the function that restarts the database connection source in case of operational error."""
 
     @_functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         try:
             response = func(*args, **kwargs)
             if hasattr(response, "status_code") and (
                 response.status_code == 503 or response.status_code == 500
             ):
-                raise RuntimeError(response.body)
+                raise RuntimeError(str(response))
             return response
         except _sqaexc.OperationalError as e:
             _logging.warning(
@@ -170,6 +186,9 @@ def add(
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
+    response = _check_and_set_tenant(tenant, *added)
+    if response.status_code != 200:
+        return response
     source = _get_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
@@ -214,6 +233,9 @@ def add(
 def delete(tenant: str, base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
+    response = _check_and_set_tenant(tenant, base(id=id_))
+    if response.status_code != 200:
+        return response
     with _Session(source) as session:
         try:
             inst = session.get_one(base, id_)
@@ -296,9 +318,7 @@ def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]
 
 
 @db_access_method
-def get_by_id(
-    base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None, tenant: Optional[str] = None
-) -> list[_Base]:
+def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None) -> list[_Base]:
     """Returns instances of the `base` with IDs from the `IDs` tuple.
 
     An optional `connection_source` may be specified to replace the otherwise used global connection
@@ -345,6 +365,8 @@ def get(
     global _wait_mg
     if criteria is None:
         criteria = {}
+    if tenant:
+        criteria["tenant_name"] = lambda x: x == tenant
     if sort_result_by is None:
         sort_result_by = {}
     table = base.__table__
@@ -423,6 +445,9 @@ def update(tenant: str, *updated: _Base) -> _Response:
     if not updated:
         return _text_response("Empty request body. Nothing to update in the database.")
     source = _get_current_connection_source()
+    response = _check_and_set_tenant(tenant, *updated)
+    if response.status_code != 200:
+        return response
     with _Session(source) as session, session.begin():
         try:
             for item in updated:
@@ -439,27 +464,6 @@ def update(tenant: str, *updated: _Base) -> _Response:
         except Exception as e:
             session.rollback()
             return _error(500, str(e), title="Cannot update object due to unexpected error")
-
-
-def wait_for_new(
-    tenant: str,
-    base: type[_Base],
-    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
-    timeout_ms: Optional[int] = None,
-) -> list[Any]:
-    """Wait for new instances of the ORM mapped class `base` that satisfy the `criteria` to be sent to the database.
-
-    `timeout_ms` is the timeout for the waiting for data in milliseconds.
-    """
-    global _wait_mg
-    if criteria is None:
-        criteria = {}
-    result = _wait_mg.wait_for_content(
-        key=base.__tablename__,
-        timeout_ms=timeout_ms,
-        validation=_functools.partial(_is_awaited_result_valid, criteria),
-    )
-    return result
 
 
 def db_object_check(
@@ -534,3 +538,33 @@ def _set_id_to_none(db_model_instances: tuple[_Base, ...]) -> None:
     """Set "id" attribute of all the db_model_instances to None."""
     for obj in db_model_instances:
         obj.id = None  # type: ignore
+
+
+def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
+    """Check if the tenant exists and set the `tenant` attribute to all the `objs`."""
+    if not objs:
+        return _json_response([])
+    if "tenant_name" not in objs[0].__table__.columns.keys():
+        if tenant_name == EMPTY_TENANT:
+            # correct adding of an object, that is not assigned to any tenant
+            return _json_response([])
+        else:
+            return _error(
+                500,
+                f"Database model {objs[0].__class__.__name__} does not have a 'tenant_name' attribute.",
+                title="Unexpected error when accessing database.",
+            )
+    if not tenant_name:
+        return _error(400, "Tenant not received in the request.", title="Tenant not received.")
+
+    tenants = get(_TenantDBModel, criteria={"name": lambda x: x == tenant_name})
+    if not tenants:
+        return _error(
+            404,
+            f"Tenant '{tenant_name}' does not exist in the database.",
+            title="Tenant not found.",
+        )
+
+    for obj in objs:
+        obj.tenant_name = tenant_name  # type: ignore
+    return _json_response([])

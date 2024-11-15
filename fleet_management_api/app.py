@@ -1,17 +1,21 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 
 from flask.testing import FlaskClient as _FlaskClient  # type: ignore
 import connexion  # type: ignore
 
 from .encoder import JSONEncoder
-from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBModel
+from fleet_management_api.database.db_models import (
+    ApiKeyDBModel as _ApiKeyDBModel,
+    TenantDBModel as _TenantDBModel,
+)
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order import (
     clear_active_orders,
     clear_inactive_orders,
 )
 import fleet_management_api.database.db_access as _db_access
+from tests._utils.constants import TEST_TENANT
 
 
 TENANT_COOKIE_NAME = "tenant"
@@ -79,7 +83,9 @@ class _TestApp:
                 return uri + f"?api_key={self._key}"
 
 
-def get_test_app(predef_api_key: str = "") -> _TestApp:
+def get_test_app(
+    predef_api_key: str = "", additional_tenants: Optional[list[str]] = None
+) -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 
     It enables to surpass the API key verification by providing a predefined API key.
@@ -90,6 +96,12 @@ def get_test_app(predef_api_key: str = "") -> _TestApp:
     _db_access.add_without_tenant(
         _ApiKeyDBModel(key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()),
     )
+    if additional_tenants is None:
+        additional_tenants = []
+
+    additional_tenants.append(TEST_TENANT)
+    for tenant in set(additional_tenants):
+        _db_access.add_without_tenant(_TenantDBModel(name=tenant))
     clear_active_orders()
     clear_inactive_orders()
     return _TestApp(predef_api_key)

@@ -55,7 +55,8 @@ def create_hws() -> _Response:
 
 def get_hws() -> _Response:
     """Get all existing platform HWs."""
-    hw_id_models = _db_access.get(_db_models.PlatformHWDBModel)
+    tenant = _RequestEmpty.load().tenant
+    hw_id_models = _db_access.get(_db_models.PlatformHWDBModel, tenant=tenant)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
     ]

@@ -11,6 +11,9 @@ from sqlalchemy.orm import relationship as _relationship
 OrderId = int
 
 
+TENNANTS_NAME = "tenants.name"
+
+
 class Base(_DeclarativeBase):
     model_name: str = "Base"
     id: _Mapped[Optional[int]] = _mapped_column(
@@ -37,6 +40,7 @@ class PlatformHWDBModel(Base):
     __tablename__ = "platform_hw"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     cars: _Mapped[list["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"PlatformHW(ID={self.id}, name={self.name})"
@@ -65,6 +69,7 @@ class CarDBModel(Base):
     default_route: _Mapped["RouteDBModel"] = _relationship(
         "RouteDBModel", lazy="noload", back_populates="cars"
     )
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"Car(ID={self.id}, name={self.name}, platform_hw_ID={self.platform_hw_id})"
@@ -82,6 +87,8 @@ class CarStateDBModel(Base):
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
 
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="select")
+
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -120,6 +127,7 @@ class OrderDBModel(Base):
         "StopDBModel", back_populates="orders", lazy="noload"
     )
     car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return (
@@ -140,6 +148,7 @@ class OrderStateDBModel(Base):
     order: _Mapped[OrderDBModel] = _relationship(
         "OrderDBModel", back_populates="states", lazy="noload"
     )
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -161,6 +170,7 @@ class StopDBModel(Base):
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     is_auto_stop: _Mapped[bool] = _mapped_column(_sqa.Boolean)
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     orders: _Mapped[list["OrderDBModel"]] = _relationship(
         "OrderDBModel", back_populates="target_stop"
@@ -175,7 +185,7 @@ class RouteDBModel(Base):
     __tablename__ = "routes"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
-
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
     cars: _Mapped[list[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
     route_visualization: _Mapped[object] = _relationship(
         "RouteVisualizationDBModel",
@@ -196,6 +206,7 @@ class RouteVisualizationDBModel(Base):
         "RouteDBModel", back_populates="route_visualization", lazy="noload"
     )
     route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"RouteVisualization (ID={self.id}, route_ID={self.route_id}, points={self.points})"

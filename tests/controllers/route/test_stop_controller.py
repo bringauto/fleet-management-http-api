@@ -4,11 +4,14 @@ import unittest
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
+import fleet_management_api.database.db_models as _db_models
+import fleet_management_api.database.db_access as _db_access
+
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
-from tests._utils import TEST_TENANT
+from tests._utils.constants import TEST_TENANT
 
 
-class Test_Creating_Stop(unittest.TestCase):
+class Test_Creating_Stops(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
@@ -177,6 +180,7 @@ class Test_Updating_Stop(unittest.TestCase):
     def setUp(self):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
+        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
 
     def test_updating_single_existing_stop(self):
         position = _models.GNSSPosition(latitude=49, longitude=16, altitude=50)

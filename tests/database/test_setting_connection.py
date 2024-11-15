@@ -1,6 +1,9 @@
 import os
 import unittest
 from unittest.mock import patch, Mock
+import sys
+
+sys.path.append(".")
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
@@ -9,7 +12,7 @@ import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestBase as _TestBase  # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
 from tests._utils.logs import clear_logs
-from tests._utils import TEST_TENANT
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Creating_Database_URL(unittest.TestCase):
@@ -68,16 +71,16 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
     ):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
+        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
         test_obj = _TestBase(test_str="test_name", test_int=1)
         response = _db_access.add(TEST_TENANT, test_obj)
-        print(response.body)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(_db_access.get(TEST_TENANT, _TestBase)), 1)
+        self.assertEqual(len(_db_access.get(tenant=TEST_TENANT, base=_TestBase)), 1)
 
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
 
-        self.assertEqual(len(_db_access.get(TEST_TENANT, _TestBase)), 0)
+        self.assertEqual(len(_db_access.get(tenant=TEST_TENANT, base=_TestBase)), 0)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):
@@ -147,7 +150,7 @@ class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCas
     def test_calling_add_method_without_setting_connection_raises_runtime_error(self):
         clear_logs()
         _connection.unset_connection_source()
-        self.assertTrue(_connection.current_connection_source() is None)
+        self.assertIsNone(_connection.current_connection_source())
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
             _db_access.add(TEST_TENANT, test_obj)
@@ -157,11 +160,13 @@ class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):
     def test_getting_connection_source_does_not_set_current_connection_source_in_connection_module(
         self,
     ):
+
+        _connection.set_connection_source_test()
         source_1 = _connection.get_connection_source_test("test_db_file.db")
         source_2 = _connection.current_connection_source()
-        self.assertTrue(source_1 is not None)
-        self.assertFalse(source_1 is source_2)
-        self.assertTrue(source_2 is not None)
+        self.assertIsNotNone(source_1)
+        self.assertNotEqual(source_1, source_2)
+        self.assertIsNotNone(source_2)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):

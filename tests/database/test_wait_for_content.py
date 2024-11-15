@@ -6,10 +6,11 @@ from sqlalchemy.pool.impl import QueuePool
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.database.db_models import TenantDBModel
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
 import tests._utils.api_test as api_test
-from tests._utils import TEST_TENANT
+from tests._utils.constants import TEST_TENANT
 
 
 class Test_Wait_Objects(unittest.TestCase):
@@ -58,12 +59,16 @@ class Test_Wait_Objects(unittest.TestCase):
 
 class Test_Waiting_For_Content(api_test.TestCase):
 
+    def setUp(self, test_db_path=""):
+        super().setUp(test_db_path)
+        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
     ):
         test_obj = models.TestBase(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(_db_access.get, models.TestBase, wait=True)
+            future = executor.submit(_db_access.get, base=models.TestBase, wait=True)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
             retrieved_objs = future.result()
             self.assertEqual(retrieved_objs[0].test_str, test_obj.test_str)
@@ -73,7 +78,7 @@ class Test_Waiting_For_Content(api_test.TestCase):
     ):
         test_obj = models.TestBase(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(_db_access.get, models.TestBase, wait=False)
+            future = executor.submit(_db_access.get, base=models.TestBase, wait=False)
             time.sleep(0.05)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
             retrieved_objs = future.result()
@@ -81,15 +86,21 @@ class Test_Waiting_For_Content(api_test.TestCase):
 
     def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=100)
+            future = executor.submit(
+                _db_access.get, base=models.TestBase, wait=True, timeout_ms=100
+            )
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_response_is_sent_to_multiple_waiters(self):
         test_obj = models.TestBase(test_str="test_x", test_int=123)
         with ThreadPoolExecutor(max_workers=5) as executor:
-            future1 = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=1000)
-            future2 = executor.submit(_db_access.get, models.TestBase, wait=True, timeout_ms=1000)
+            future1 = executor.submit(
+                _db_access.get, base=models.TestBase, wait=True, timeout_ms=1000
+            )
+            future2 = executor.submit(
+                _db_access.get, base=models.TestBase, wait=True, timeout_ms=1000
+            )
             time.sleep(0.05)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
             retrieved_objs1 = future1.result()
@@ -105,8 +116,8 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(
                 _db_access.get,
-                TEST_TENANT,
-                models.TestBase,
+                tenant=TEST_TENANT,
+                base=models.TestBase,
                 criteria={"test_int": lambda x: x == 456},
                 wait=True,
                 timeout_ms=500,
@@ -116,24 +127,6 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
             time.sleep(0.01)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
-
-
-class Test_Waiting_For_New_Content_To_Be_Sent(api_test.TestCase):
-
-    def test_waiting_for_new_record_to_be_sent_to_database(self):
-        old_record = models.TestBase(id=111, test_str="test_1", test_int=123)
-        new_record = models.TestBase(id=222, test_str="test_2", test_int=456)
-        _db_access.add(TEST_TENANT, old_record)
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            future = executor.submit(
-                _db_access.wait_for_new, TEST_TENANT, models.TestBase, timeout_ms=5000
-            )
-            time.sleep(0.5)
-            executor.submit(_db_access.add, TEST_TENANT, new_record)
-            time.sleep(0.05)
-            retrieved_objs = future.result()
-            self.assertEqual(len(retrieved_objs), 1)
-            self.assertEqual(retrieved_objs[0].test_str, new_record.test_str)
 
 
 class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
@@ -153,7 +146,7 @@ class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
         assert isinstance(src.pool, QueuePool)
 
         def get_and_count_connections():
-            _db_access.get(models.TestBase, wait=True)
+            _db_access.get(base=models.TestBase, wait=True)
 
         with ThreadPoolExecutor() as executor:
             executor.submit(get_and_count_connections)

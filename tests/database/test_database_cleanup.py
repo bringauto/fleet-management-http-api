@@ -7,7 +7,7 @@ from psycopg2 import OperationalError
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
-from tests._utils import TEST_TENANT
+from tests._utils.constants import TEST_TENANT
 
 
 def wait_for_db(max_retries=50, delay=0.1):
@@ -49,6 +49,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         _connection.set_connection_source(
             "localhost", 5432, "test_management_api", "postgres", "1234"
         )
+        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
 
     def _set_up_test_data(self):
         _db_access.add(TEST_TENANT, _db_models.PlatformHWDBModel(name="platform1"))
@@ -60,7 +61,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         self._set_up_test_data()
         self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
         restart_database()
-        cars = _db_access.get(TEST_TENANT, _db_models.CarDBModel)
+        cars = _db_access.get(tenant=TEST_TENANT, base=_db_models.CarDBModel)
         self.assertFalse(cars)
 
     def test_object_can_be_added_after_database_cleanup(self):
@@ -84,14 +85,14 @@ class Test_Database_Cleanup(unittest.TestCase):
         )
         restart_database()
         response = _db_access.delete_n(
-            TEST_TENANT, _db_models.CarDBModel, n=2, column_name="id", start_from="maximum"
+            _db_models.CarDBModel, n=2, column_name="id", start_from="maximum"
         )
         self.assertEqual(response.body, "0 objects deleted from the database.")
 
     def test_getting_object_by_id_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()
         restart_database()
-        response = _db_access.get_by_id(TEST_TENANT, _db_models.CarDBModel, 1)
+        response = _db_access.get_by_id(_db_models.CarDBModel, 1)
         self.assertFalse(response)
 
     def tearDown(self) -> None:

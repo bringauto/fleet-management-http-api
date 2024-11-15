@@ -22,6 +22,7 @@ class TestBase(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, unique=True)
     test_str: Mapped[str] = mapped_column(String)
     test_int: Mapped[int] = mapped_column(Integer)
+    tenant_name: Mapped[str] = mapped_column(String)
 
 
 @dataclasses.dataclass
@@ -31,6 +32,7 @@ class TestBase2(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     test_str_2: Mapped[str] = mapped_column(String)
     test_int_2: Mapped[int] = mapped_column(Integer)
+    tenant_name: Mapped[str] = mapped_column(String)
 
 
 def initialize_test_tables(connection_engine: Optional[Engine]) -> None:
