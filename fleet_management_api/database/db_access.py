@@ -173,6 +173,11 @@ def add_without_tenant(
     )
 
 
+def delete_without_tenant(base: type[_Base], id_: int) -> _Response:
+    """Delete an object with the given ID from the database without specifying a tenant."""
+    return delete(EMPTY_TENANT, base, id_)
+
+
 @db_access_method
 def add(
     tenant: str,

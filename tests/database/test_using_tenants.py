@@ -117,5 +117,26 @@ class Test_Deleting_Objects(api_test.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class Test_Deleting_Tenants(api_test.TestCase):
+
+    def setUp(self):
+        super().setUp()
+        _db_access.add_without_tenant(TenantDBModel(name="tenant_1"))
+
+    def test_deleting_existing_tenant_is_accepted(self) -> None:
+        response = _db_access.delete_without_tenant(TenantDBModel, id_=1)
+        self.assertEqual(response.status_code, 200)
+
+    def test_deleting_nonexisting_tenant_is_yields_404_error(self) -> None:
+        response = _db_access.delete_without_tenant(TenantDBModel, id_=2)
+        self.assertEqual(response.status_code, 404)
+
+    def _test_tenant_owning_some_object_cannot_be_deleted_and_yields_400_error(self) -> None:
+        obj = models.TestBase(test_str="test1", test_int=4)
+        _db_access.add("tenant_1", obj)
+        response = _db_access.delete_without_tenant(TenantDBModel, id_=1)
+        self.assertEqual(response.status_code, 400)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)  # pragma: no cover
