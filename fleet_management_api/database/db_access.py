@@ -149,6 +149,14 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
+def add_tenants(*names: str) -> None:
+    """Add tenants to the database."""
+    tenants = [_TenantDBModel(name=name) for name in names]
+    response = add_without_tenant(*tenants)
+    if response.status_code != 200:
+        raise RuntimeError(f"Error when adding tenants: {response.body}")
+
+
 def add_without_tenant(
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
