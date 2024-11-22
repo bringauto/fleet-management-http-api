@@ -30,65 +30,91 @@ class TenantDBModel(Base):
     model_name = "Tenant"
     __tablename__ = "tenants"
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    owned: _Mapped[list["OwnedByTenant"]] = _relationship("OwnedByTenant", back_populates="tenant")
 
     def __repr__(self) -> str:
         return f"Tenant(ID={self.id}, name={self.name})"
 
 
-class PlatformHWDBModel(Base):
+class OwnedByTenant(Base):
+    model_name: str = "OwnedByTenant"
+    __tablename__ = "owned_by_tenant"
+    __mapper_args__ = {"polymorphic_identity": "owned_by_tenant", "polymorphic_on": "type"}
+
+    type: _Mapped[str] = _mapped_column(_sqa.String, nullable=False)
+    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, nullable=False)
+    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey("tenants.name"), nullable=False)
+    tenant: _Mapped[TenantDBModel] = _relationship(
+        "TenantDBModel", lazy="noload", back_populates="owned", foreign_keys=[tenant_name]
+    )
+
+
+class PlatformHWDBModel(OwnedByTenant):
     model_name = "PlatformHW"
     __tablename__ = "platform_hw"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    cars: _Mapped[list["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    __mapper_args__ = {"polymorphic_identity": "platform_hw"}
+
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, nullable=False)
+    cars: _Mapped[list[CarDBModel]] = _relationship(
+        "CarDBModel", lazy="noload", foreign_keys="CarDBModel.platform_hw_id"
+    )
 
     def __repr__(self) -> str:
         return f"PlatformHW(ID={self.id}, name={self.name})"
 
 
-class CarDBModel(Base):
+class CarDBModel(OwnedByTenant):
     model_name = "Car"
     __tablename__ = "cars"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    __mapper_args__ = {"polymorphic_identity": "car"}
+
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
+    name: _Mapped[str] = _mapped_column(_sqa.String, nullable=False)
     platform_hw_id: _Mapped[int] = _mapped_column(
         _sqa.ForeignKey("platform_hw.id"), nullable=False, unique=True
+    )
+    platformhw: _Mapped[PlatformHWDBModel] = _relationship(
+        "PlatformHWDBModel", back_populates="cars", lazy="noload", foreign_keys=[platform_hw_id]
     )
     car_admin_phone: _Mapped[Optional[dict]] = _mapped_column(_sqa.JSON)
     default_route_id: _Mapped[Optional[int]] = _mapped_column(
         _sqa.ForeignKey("routes.id"), nullable=True
     )
     under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, nullable=False)
-
-    platformhw: _Mapped["PlatformHWDBModel"] = _relationship(
-        "PlatformHWDBModel", back_populates="cars", lazy="noload"
-    )
     states: _Mapped[list["CarStateDBModel"]] = _relationship(
-        "CarStateDBModel", cascade="save-update, merge, delete", back_populates="car"
+        "CarStateDBModel",
+        cascade="save-update, merge, delete",
+        back_populates="car",
+        foreign_keys="CarStateDBModel.car_id",
     )
-    orders: _Mapped[list["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
+    orders: _Mapped[list["OrderDBModel"]] = _relationship(
+        "OrderDBModel", back_populates="car", foreign_keys="OrderDBModel.car_id"
+    )
     default_route: _Mapped["RouteDBModel"] = _relationship(
-        "RouteDBModel", lazy="noload", back_populates="cars"
+        "RouteDBModel", lazy="noload", back_populates="cars", foreign_keys=[default_route_id]
     )
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"Car(ID={self.id}, name={self.name}, platform_hw_ID={self.platform_hw_id})"
 
 
-class CarStateDBModel(Base):
+class CarStateDBModel(OwnedByTenant):
     model_name = "CarState"
     __tablename__ = "car_states"
+    __mapper_args__ = {"polymorphic_identity": "car_state"}
+
     _max_n_of_states: int = 50
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
     status: _Mapped[str] = _mapped_column(_sqa.String)
     speed: _Mapped[float] = _mapped_column(_sqa.Float)
     fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-
-    car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="select")
-
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    car: _Mapped[CarDBModel] = _relationship(
+        "CarDBModel", back_populates="states", lazy="select", foreign_keys=[car_id]
+    )
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -106,10 +132,12 @@ class CarStateDBModel(Base):
         )
 
 
-class OrderDBModel(Base):
+class OrderDBModel(OwnedByTenant):
     model_name = "Order"
     __tablename__ = "orders"
+    __mapper_args__ = {"polymorphic_identity": "order"}
 
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     priority: _Mapped[str] = _mapped_column(_sqa.String)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
     target_stop_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("stops.id"), nullable=False)
@@ -117,17 +145,18 @@ class OrderDBModel(Base):
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
     is_visible: _Mapped[bool] = _mapped_column(_sqa.Boolean)
-
     states: _Mapped[list["OrderStateDBModel"]] = _relationship(
         "OrderStateDBModel",
         cascade="save-update, merge, delete",
         back_populates="order",
+        foreign_keys="OrderStateDBModel.order_id",
     )
     target_stop: _Mapped["StopDBModel"] = _relationship(
-        "StopDBModel", back_populates="orders", lazy="noload"
+        "StopDBModel", back_populates="orders", lazy="noload", foreign_keys=[target_stop_id]
     )
-    car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    car: _Mapped["CarDBModel"] = _relationship(
+        "CarDBModel", back_populates="orders", lazy="noload", foreign_keys=[car_id]
+    )
 
     def __repr__(self) -> str:
         return (
@@ -137,18 +166,20 @@ class OrderDBModel(Base):
         )
 
 
-class OrderStateDBModel(Base):
+class OrderStateDBModel(OwnedByTenant):
     model_name = "OrderState"
     __tablename__ = "order_states"
+    __mapper_args__ = {"polymorphic_identity": "order_state"}
+
     _max_n_of_states: int = 50
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     status: _Mapped[str] = _mapped_column(_sqa.String)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
     car_id: _Mapped[int] = _mapped_column(_sqa.Integer)
     order_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("orders.id"), nullable=False)
     order: _Mapped[OrderDBModel] = _relationship(
-        "OrderDBModel", back_populates="states", lazy="noload"
+        "OrderDBModel", back_populates="states", lazy="noload", foreign_keys=[order_id]
     )
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -163,50 +194,58 @@ class OrderStateDBModel(Base):
         return f"OrderState(ID={self.id}, order_ID={self.order_id}, status={self.status}, timestamp={self.timestamp})"
 
 
-class StopDBModel(Base):
+class StopDBModel(OwnedByTenant):
     model_name = "Stop"
     __tablename__ = "stops"
+    __mapper_args__ = {"polymorphic_identity": "stop"}
+
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     position: _Mapped[dict] = _mapped_column(_sqa.JSON)
     notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
     is_auto_stop: _Mapped[bool] = _mapped_column(_sqa.Boolean)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
-
-    orders: _Mapped[list["OrderDBModel"]] = _relationship(
-        "OrderDBModel", back_populates="target_stop"
+    orders: _Mapped[list[OrderDBModel]] = _relationship(
+        "OrderDBModel", back_populates="target_stop", foreign_keys="OrderDBModel.target_stop_id"
     )
 
     def __repr__(self) -> str:
         return f"Stop(ID={self.id}, name={self.name}, position={self.position}, notification_phone={self.notification_phone})"
 
 
-class RouteDBModel(Base):
+class RouteDBModel(OwnedByTenant):
     model_name = "Route"
     __tablename__ = "routes"
+    __mapper_args__ = {"polymorphic_identity": "route"}
+
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
-    cars: _Mapped[list[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
+    cars: _Mapped[list[CarDBModel]] = _relationship(
+        "CarDBModel", back_populates="default_route", foreign_keys="CarDBModel.default_route_id"
+    )
     route_visualization: _Mapped[object] = _relationship(
         "RouteVisualizationDBModel",
         cascade="save-update, merge, delete",
         back_populates="route",
+        foreign_keys="RouteVisualizationDBModel.route_id",
     )
 
     def __repr__(self) -> str:
         return f"Route(ID={self.id}, name={self.name}, stop_ids={self.stop_ids})"
 
 
-class RouteVisualizationDBModel(Base):
+class RouteVisualizationDBModel(OwnedByTenant):
     model_name = "RouteVisualization"
     __tablename__ = "route_visualization"
+    __mapper_args__ = {"polymorphic_identity": "route_visualization"}
+
+    id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("owned_by_tenant.id"), primary_key=True)
     points: _Mapped[object] = _mapped_column(_sqa.PickleType)
     hexcolor: _Mapped[str] = _mapped_column(_sqa.String, nullable=True)
-    route: _Mapped[RouteDBModel] = _relationship(
-        "RouteDBModel", back_populates="route_visualization", lazy="noload"
-    )
     route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    route: _Mapped[RouteDBModel] = _relationship(
+        "RouteDBModel", back_populates="route_visualization", lazy="noload", foreign_keys=[route_id]
+    )
 
     def __repr__(self) -> str:
         return f"RouteVisualization (ID={self.id}, route_ID={self.route_id}, points={self.points})"
