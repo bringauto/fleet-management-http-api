@@ -42,7 +42,9 @@ class OwnedByTenant(Base):
     __mapper_args__ = {"polymorphic_identity": "owned_by_tenant", "polymorphic_on": "type"}
 
     type: _Mapped[str] = _mapped_column(_sqa.String, nullable=False)
-    id: _Mapped[int] = _mapped_column(_sqa.Integer, primary_key=True, nullable=False)
+    id: _Mapped[int] = _mapped_column(
+        _sqa.Integer, nullable=False, primary_key=True, autoincrement=True
+    )
     tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey("tenants.name"), nullable=False)
     tenant: _Mapped[TenantDBModel] = _relationship(
         "TenantDBModel", lazy="noload", back_populates="owned", foreign_keys=[tenant_name]
@@ -254,6 +256,7 @@ class RouteVisualizationDBModel(OwnedByTenant):
 class ApiKeyDBModel(Base):
     model_name = "ApiKey"
     __tablename__ = "api_keys"
+
     name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     key: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
     creation_timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
