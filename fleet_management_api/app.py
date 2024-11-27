@@ -6,8 +6,8 @@ import connexion  # type: ignore
 
 from .encoder import JSONEncoder
 from fleet_management_api.database.db_models import (
-    ApiKeyDBModel as _ApiKeyDBModel,
-    TenantDBModel as _TenantDBModel,
+    ApiKeyDB as _ApiKeyDB,
+    TenantDB as _TenantDB,
 )
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order import (
@@ -94,14 +94,14 @@ def get_test_app(
     The api_key can be set to any value, that can be used as a value for 'api_key' query parameter in the API calls.
     """
     _db_access.add_without_tenant(
-        _ApiKeyDBModel(key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()),
+        _ApiKeyDB(key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()),
     )
     if additional_tenants is None:
         additional_tenants = []
 
     additional_tenants.append(TEST_TENANT)
     for tenant in set(additional_tenants):
-        _db_access.add_without_tenant(_TenantDBModel(name=tenant))
+        _db_access.add_without_tenant(_TenantDB(name=tenant))
     clear_active_orders()
     clear_inactive_orders()
     return _TestApp(predef_api_key)

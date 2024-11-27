@@ -56,7 +56,7 @@ def create_hws() -> _Response:
 def get_hws() -> _Response:
     """Get all existing platform HWs."""
     tenant = _RequestEmpty.load().tenant
-    hw_id_models = _db_access.get(_db_models.PlatformHWDBModel, tenant=tenant)
+    hw_id_models = _db_access.get(_db_models.PlatformHWDB, tenant=tenant)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
     ]
@@ -67,7 +67,7 @@ def get_hws() -> _Response:
 def get_hw(platform_hw_id: int) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
     hw_models = _db_access.get(
-        _db_models.PlatformHWDBModel, criteria={"id": lambda x: x == platform_hw_id}
+        _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
     hws = [_obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(hws) == 0:
@@ -86,7 +86,7 @@ def delete_hw(platform_hw_id: int) -> _Response:
 
     The platform HW cannot be deleted if assigned to a Car.
     """
-    if _db_access.exists(_db_models.CarDBModel, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
+    if _db_access.exists(_db_models.CarDB, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
         return _log_error_and_respond(
             f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",
             400,
@@ -97,7 +97,7 @@ def delete_hw(platform_hw_id: int) -> _Response:
         return _log_error_and_respond(
             "Tenant not received in the request.", 401, "Unspecified tenant"
         )
-    response = _db_access.delete(request.tenant, _db_models.PlatformHWDBModel, platform_hw_id)
+    response = _db_access.delete(request.tenant, _db_models.PlatformHWDB, platform_hw_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Platform HW with ID={platform_hw_id} has been deleted.")
     else:

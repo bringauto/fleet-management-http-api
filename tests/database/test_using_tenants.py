@@ -1,7 +1,7 @@
 import unittest
 
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDBModel
+from fleet_management_api.database.db_models import TenantDB
 import tests.database.models as models
 import tests._utils.api_test as api_test
 
@@ -22,7 +22,7 @@ class Test_Creating_Objects(api_test.TestCase):
 
     def test_creating_object_with_existing_tenant_specified_is_accepted(self) -> None:
         obj = models.TestBase(test_str="test", test_int=4)
-        _db_access.add_without_tenant(TenantDBModel(name="test-tenant"))
+        _db_access.add_without_tenant(TenantDB(name="test-tenant"))
         response = _db_access.add("test-tenant", obj)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.body, [obj])
@@ -32,9 +32,7 @@ class Test_Retrieving_Objects(api_test.TestCase):
 
     def setUp(self):
         super().setUp()
-        _db_access.add_without_tenant(
-            TenantDBModel(name="tenant_1"), TenantDBModel(name="tenant_2")
-        )
+        _db_access.add_without_tenant(TenantDB(name="tenant_1"), TenantDB(name="tenant_2"))
         obj_1 = models.TestBase(test_str="test1", test_int=4)
         obj_2 = models.TestBase(test_str="test2", test_int=4)
         _db_access.add("tenant_1", obj_1)
@@ -65,9 +63,7 @@ class Test_Updating_Objects(api_test.TestCase):
 
     def setUp(self):
         super().setUp()
-        _db_access.add_without_tenant(
-            TenantDBModel(name="tenant_1"), TenantDBModel(name="tenant_2")
-        )
+        _db_access.add_without_tenant(TenantDB(name="tenant_1"), TenantDB(name="tenant_2"))
         obj_1 = models.TestBase(test_str="test1", test_int=4)
         obj_2 = models.TestBase(test_str="test2", test_int=4)
         _db_access.add("tenant_1", obj_1)
@@ -96,9 +92,7 @@ class Test_Deleting_Objects(api_test.TestCase):
 
     def setUp(self):
         super().setUp()
-        _db_access.add_without_tenant(
-            TenantDBModel(name="tenant_1"), TenantDBModel(name="tenant_2")
-        )
+        _db_access.add_without_tenant(TenantDB(name="tenant_1"), TenantDB(name="tenant_2"))
         obj_1 = models.TestBase(test_str="test1", test_int=4)
         _db_access.add("tenant_1", obj_1)
 
@@ -121,20 +115,20 @@ class Test_Deleting_Tenants(api_test.TestCase):
 
     def setUp(self):
         super().setUp()
-        _db_access.add_without_tenant(TenantDBModel(name="tenant_1"))
+        _db_access.add_without_tenant(TenantDB(name="tenant_1"))
 
     def test_deleting_existing_tenant_is_accepted(self) -> None:
-        response = _db_access.delete_without_tenant(TenantDBModel, id_=1)
+        response = _db_access.delete_without_tenant(TenantDB, id_=1)
         self.assertEqual(response.status_code, 200)
 
     def test_deleting_nonexisting_tenant_is_yields_404_error(self) -> None:
-        response = _db_access.delete_without_tenant(TenantDBModel, id_=2)
+        response = _db_access.delete_without_tenant(TenantDB, id_=2)
         self.assertEqual(response.status_code, 404)
 
     def _test_tenant_owning_some_object_cannot_be_deleted_and_yields_400_error(self) -> None:
         obj = models.TestBase(test_str="test1", test_int=4)
         _db_access.add("tenant_1", obj)
-        response = _db_access.delete_without_tenant(TenantDBModel, id_=1)
+        response = _db_access.delete_without_tenant(TenantDB, id_=1)
         self.assertEqual(response.status_code, 400)
 
 

@@ -195,7 +195,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
         self,
     ):
         test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
-        max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
+        max_n = _db_models.CarStateDB.max_n_of_stored_states()
         with self.app.app.test_client(TEST_TENANT) as c:
             oldest_state = CarState(
                 status="idle", car_id=1, fuel=50, speed=7, position=test_position
@@ -247,8 +247,8 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT) as c:
             c.post("/v2/management/car", json=[car_2])
-        _db_models.CarStateDBModel.set_max_n_of_stored_states(5)
-        max_n = _db_models.CarStateDBModel.max_n_of_stored_states()
+        _db_models.CarStateDB.set_max_n_of_stored_states(5)
+        max_n = _db_models.CarStateDB.max_n_of_stored_states()
         with self.app.app.test_client(TEST_TENANT) as c:
             for i in range(0, max_n + 5):
                 car_state = CarState(

@@ -1,11 +1,8 @@
 from __future__ import annotations
 from typing import Optional
 
-import sqlalchemy as _sqa
-from sqlalchemy.orm import Mapped as _Mapped
-from sqlalchemy.orm import DeclarativeBase as _DeclarativeBase
-from sqlalchemy.orm import mapped_column as _mapped_column
-from sqlalchemy.orm import relationship as _relationship
+from sqlalchemy import Boolean, BigInteger, Float, ForeignKey, Integer, JSON, PickleType, String
+from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 
 
 OrderId = int
@@ -14,10 +11,10 @@ OrderId = int
 TENNANTS_NAME = "tenants.name"
 
 
-class Base(_DeclarativeBase):
+class Base(DeclarativeBase):
     model_name: str = "Base"
-    id: _Mapped[Optional[int]] = _mapped_column(
-        _sqa.Integer, primary_key=True, unique=True, nullable=False
+    id: Mapped[Optional[int]] = mapped_column(
+        Integer, primary_key=True, unique=True, nullable=False
     )
 
     def copy(self) -> Base:
@@ -26,69 +23,63 @@ class Base(_DeclarativeBase):
         )
 
 
-class TenantDBModel(Base):
+class TenantDB(Base):
     model_name = "Tenant"
     __tablename__ = "tenants"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
+    name: Mapped[str] = mapped_column(String, unique=True)
 
     def __repr__(self) -> str:
         return f"Tenant(ID={self.id}, name={self.name})"
 
 
-class PlatformHWDBModel(Base):
+class PlatformHWDB(Base):
     model_name = "PlatformHW"
     __tablename__ = "platform_hw"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    cars: _Mapped[list["CarDBModel"]] = _relationship("CarDBModel", lazy="noload")
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    name: Mapped[str] = mapped_column(String, unique=True)
+    cars: Mapped[list[CarDB]] = relationship("CarDB", lazy="noload")
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"PlatformHW(ID={self.id}, name={self.name})"
 
 
-class CarDBModel(Base):
+class CarDB(Base):
     model_name = "Car"
     __tablename__ = "cars"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    platform_hw_id: _Mapped[int] = _mapped_column(
-        _sqa.ForeignKey("platform_hw.id"), nullable=False, unique=True
+    name: Mapped[str] = mapped_column(String, unique=True)
+    platform_hw_id: Mapped[int] = mapped_column(
+        ForeignKey("platform_hw.id"), nullable=False, unique=True
     )
-    car_admin_phone: _Mapped[Optional[dict]] = _mapped_column(_sqa.JSON)
-    default_route_id: _Mapped[Optional[int]] = _mapped_column(
-        _sqa.ForeignKey("routes.id"), nullable=True
-    )
-    under_test: _Mapped[bool] = _mapped_column(_sqa.Boolean, nullable=False)
+    car_admin_phone: Mapped[Optional[dict]] = mapped_column(JSON)
+    default_route_id: Mapped[Optional[int]] = mapped_column(ForeignKey("routes.id"), nullable=True)
+    under_test: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
-    platformhw: _Mapped["PlatformHWDBModel"] = _relationship(
-        "PlatformHWDBModel", back_populates="cars", lazy="noload"
+    platformhw: Mapped[PlatformHWDB] = relationship(
+        "PlatformHWDB", back_populates="cars", lazy="noload"
     )
-    states: _Mapped[list["CarStateDBModel"]] = _relationship(
-        "CarStateDBModel", cascade="save-update, merge, delete", back_populates="car"
+    states: Mapped[list[CarStateDB]] = relationship(
+        "CarStateDB", cascade="save-update, merge, delete", back_populates="car"
     )
-    orders: _Mapped[list["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
-    default_route: _Mapped["RouteDBModel"] = _relationship(
-        "RouteDBModel", lazy="noload", back_populates="cars"
-    )
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    orders: Mapped[list[OrderDB]] = relationship("OrderDB", back_populates="car")
+    default_route: Mapped[RouteDB] = relationship("RouteDB", lazy="noload", back_populates="cars")
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"Car(ID={self.id}, name={self.name}, platform_hw_ID={self.platform_hw_id})"
 
 
-class CarStateDBModel(Base):
+class CarStateDB(Base):
     model_name = "CarState"
     __tablename__ = "car_states"
     _max_n_of_states: int = 50
-    car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
-    status: _Mapped[str] = _mapped_column(_sqa.String)
-    speed: _Mapped[float] = _mapped_column(_sqa.Float)
-    fuel: _Mapped[int] = _mapped_column(_sqa.Integer)
-    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-
-    car: _Mapped[CarDBModel] = _relationship("CarDBModel", back_populates="states", lazy="select")
-
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String)
+    speed: Mapped[float] = mapped_column(Float)
+    fuel: Mapped[int] = mapped_column(Integer)
+    position: Mapped[dict] = mapped_column(JSON)
+    timestamp: Mapped[int] = mapped_column(BigInteger)
+    car: Mapped[CarDB] = relationship("CarDB", back_populates="states", lazy="select")
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -106,28 +97,23 @@ class CarStateDBModel(Base):
         )
 
 
-class OrderDBModel(Base):
+class OrderDB(Base):
     model_name = "Order"
     __tablename__ = "orders"
 
-    priority: _Mapped[str] = _mapped_column(_sqa.String)
-    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-    target_stop_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("stops.id"), nullable=False)
-    stop_route_id: _Mapped[int] = _mapped_column(_sqa.Integer)
-    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
-    is_visible: _Mapped[bool] = _mapped_column(_sqa.Boolean)
-
-    states: _Mapped[list["OrderStateDBModel"]] = _relationship(
-        "OrderStateDBModel",
-        cascade="save-update, merge, delete",
-        back_populates="order",
+    priority: Mapped[str] = mapped_column(String)
+    timestamp: Mapped[int] = mapped_column(BigInteger)
+    target_stop_id: Mapped[int] = mapped_column(ForeignKey("stops.id"), nullable=False)
+    stop_route_id: Mapped[int] = mapped_column(Integer)
+    notification_phone: Mapped[dict] = mapped_column(JSON)
+    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    is_visible: Mapped[bool] = mapped_column(Boolean)
+    states: Mapped[list[OrderStateDB]] = relationship(
+        "OrderStateDB", cascade="save-update, merge, delete", back_populates="order"
     )
-    target_stop: _Mapped["StopDBModel"] = _relationship(
-        "StopDBModel", back_populates="orders", lazy="noload"
-    )
-    car: _Mapped["CarDBModel"] = _relationship("CarDBModel", back_populates="orders", lazy="noload")
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    target_stop: Mapped[StopDB] = relationship("StopDB", back_populates="orders", lazy="noload")
+    car: Mapped[CarDB] = relationship("CarDB", back_populates="orders", lazy="noload")
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return (
@@ -137,18 +123,16 @@ class OrderDBModel(Base):
         )
 
 
-class OrderStateDBModel(Base):
+class OrderStateDB(Base):
     model_name = "OrderState"
     __tablename__ = "order_states"
     _max_n_of_states: int = 50
-    status: _Mapped[str] = _mapped_column(_sqa.String)
-    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-    car_id: _Mapped[int] = _mapped_column(_sqa.Integer)
-    order_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("orders.id"), nullable=False)
-    order: _Mapped[OrderDBModel] = _relationship(
-        "OrderDBModel", back_populates="states", lazy="noload"
-    )
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    status: Mapped[str] = mapped_column(String)
+    timestamp: Mapped[int] = mapped_column(BigInteger)
+    car_id: Mapped[int] = mapped_column(Integer)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    order: Mapped[OrderDB] = relationship("OrderDB", back_populates="states", lazy="noload")
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -163,32 +147,29 @@ class OrderStateDBModel(Base):
         return f"OrderState(ID={self.id}, order_ID={self.order_id}, status={self.status}, timestamp={self.timestamp})"
 
 
-class StopDBModel(Base):
+class StopDB(Base):
     model_name = "Stop"
     __tablename__ = "stops"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    position: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    notification_phone: _Mapped[dict] = _mapped_column(_sqa.JSON)
-    is_auto_stop: _Mapped[bool] = _mapped_column(_sqa.Boolean)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
-
-    orders: _Mapped[list["OrderDBModel"]] = _relationship(
-        "OrderDBModel", back_populates="target_stop"
-    )
+    name: Mapped[str] = mapped_column(String, unique=True)
+    position: Mapped[dict] = mapped_column(JSON)
+    notification_phone: Mapped[dict] = mapped_column(JSON)
+    is_auto_stop: Mapped[bool] = mapped_column(Boolean)
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
+    orders: Mapped[list[OrderDB]] = relationship("OrderDB", back_populates="target_stop")
 
     def __repr__(self) -> str:
         return f"Stop(ID={self.id}, name={self.name}, position={self.position}, notification_phone={self.notification_phone})"
 
 
-class RouteDBModel(Base):
+class RouteDB(Base):
     model_name = "Route"
     __tablename__ = "routes"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    stop_ids: _Mapped[object] = _mapped_column(_sqa.PickleType)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
-    cars: _Mapped[list[CarDBModel]] = _relationship("CarDBModel", back_populates="default_route")
-    route_visualization: _Mapped[object] = _relationship(
-        "RouteVisualizationDBModel",
+    name: Mapped[str] = mapped_column(String, unique=True)
+    stop_ids: Mapped[object] = mapped_column(PickleType)
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
+    cars: Mapped[list[CarDB]] = relationship("CarDB", back_populates="default_route")
+    route_visualization: Mapped[object] = relationship(
+        "RouteVisualizationDB",
         cascade="save-update, merge, delete",
         back_populates="route",
     )
@@ -197,27 +178,27 @@ class RouteDBModel(Base):
         return f"Route(ID={self.id}, name={self.name}, stop_ids={self.stop_ids})"
 
 
-class RouteVisualizationDBModel(Base):
+class RouteVisualizationDB(Base):
     model_name = "RouteVisualization"
     __tablename__ = "route_visualization"
-    points: _Mapped[object] = _mapped_column(_sqa.PickleType)
-    hexcolor: _Mapped[str] = _mapped_column(_sqa.String, nullable=True)
-    route: _Mapped[RouteDBModel] = _relationship(
-        "RouteDBModel", back_populates="route_visualization", lazy="noload"
+    points: Mapped[object] = mapped_column(PickleType)
+    hexcolor: Mapped[str] = mapped_column(String, nullable=True)
+    route: Mapped[RouteDB] = relationship(
+        "RouteDB", back_populates="route_visualization", lazy="noload"
     )
-    route_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("routes.id"), nullable=False)
-    tenant_name: _Mapped[str] = _mapped_column(_sqa.ForeignKey(TENNANTS_NAME), nullable=False)
+    route_id: Mapped[int] = mapped_column(ForeignKey("routes.id"), nullable=False)
+    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENNANTS_NAME), nullable=False)
 
     def __repr__(self) -> str:
         return f"RouteVisualization (ID={self.id}, route_ID={self.route_id}, points={self.points})"
 
 
-class ApiKeyDBModel(Base):
+class ApiKeyDB(Base):
     model_name = "ApiKey"
     __tablename__ = "api_keys"
-    name: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    key: _Mapped[str] = _mapped_column(_sqa.String, unique=True)
-    creation_timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+    name: Mapped[str] = mapped_column(String, unique=True)
+    key: Mapped[str] = mapped_column(String, unique=True)
+    creation_timestamp: Mapped[int] = mapped_column(BigInteger)
 
     def __repr__(self) -> str:
         return (

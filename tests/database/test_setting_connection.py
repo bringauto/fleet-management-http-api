@@ -68,7 +68,7 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
     ):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
-        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT))
         test_obj = _TestBase(test_str="test_name", test_int=1)
         response = _db_access.add(TEST_TENANT, test_obj)
         self.assertEqual(response.status_code, 200)
@@ -112,8 +112,8 @@ class Test_Setting_Up_Database(unittest.TestCase):
                 maximum_number_of_table_rows={"car_states": 18, "order_states": 124},
             )
         )
-        self.assertEqual(_db_models.CarStateDBModel.max_n_of_stored_states(), 18)
-        self.assertEqual(_db_models.OrderStateDBModel.max_n_of_stored_states(), 124)
+        self.assertEqual(_db_models.CarStateDB.max_n_of_stored_states(), 18)
+        self.assertEqual(_db_models.OrderStateDB.max_n_of_stored_states(), 124)
 
     @patch("fleet_management_api.database.connection._set_connection")
     def test_setting_up_database_without_connection_being_set_raises_exception(

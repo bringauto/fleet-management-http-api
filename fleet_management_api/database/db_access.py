@@ -13,7 +13,7 @@ from sqlalchemy.orm import (
 )
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
-from fleet_management_api.database.db_models import Base as _Base, TenantDBModel as _TenantDBModel
+from fleet_management_api.database.db_models import Base as _Base, TenantDB as _TenantDB
 from fleet_management_api.database.connection import (
     get_current_connection_source as _get_current_connection_source,
     restart_connection_source as _restart_connection_source,
@@ -151,7 +151,7 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
 
 def add_tenants(*names: str) -> None:
     """Add tenants to the database."""
-    tenants = [_TenantDBModel(name=name) for name in names]
+    tenants = [_TenantDB(name=name) for name in names]
     response = add_without_tenant(*tenants)
     if response.status_code != 200:
         raise RuntimeError(f"Error when adding tenants: {response.body}")
@@ -570,7 +570,7 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
     if not tenant_name:
         return _error(400, "Tenant not received in the request.", title="Tenant not received.")
 
-    tenants = get(_TenantDBModel, criteria={"name": lambda x: x == tenant_name})
+    tenants = get(_TenantDB, criteria={"name": lambda x: x == tenant_name})
     if not tenants:
         return _error(
             404,

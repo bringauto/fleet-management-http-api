@@ -1,7 +1,7 @@
 import unittest
 
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDBModel
+from fleet_management_api.database.db_models import TenantDB
 import tests.database.models as models
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT
@@ -11,7 +11,7 @@ class Test_Object_Existence(api_test.TestCase):
 
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_object_exists_after_it_is_added_to_the_database(self):
         test_obj = models.TestBase(test_str="test_string", test_int=5)

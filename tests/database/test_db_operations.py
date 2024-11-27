@@ -1,7 +1,7 @@
 import unittest
 
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDBModel
+from fleet_management_api.database.db_models import TenantDB
 import tests.database.models as models
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT
@@ -11,7 +11,7 @@ class Test_Creating_Records(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_adding_single_record_to_database_succesfully(self):
         test_obj = models.TestBase(test_str="test_string", test_int=5)
@@ -43,7 +43,7 @@ class Test_Sending_And_Retrieving_From_Database(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_table_is_initially_empty(self):
         objs_out = _db_access.get(tenant=TEST_TENANT, base=models.TestBase)
@@ -91,7 +91,7 @@ class Test_Updating_Records(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_updating_an_existing_record(self):
         test_obj = models.TestBase(test_str="test_string", test_int=5)
@@ -134,7 +134,7 @@ class Test_Retrieving_Multiple_Records_By_Ids(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_getting_items_by_id(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=5)
@@ -156,7 +156,7 @@ class Test_Deleting_Database_Record(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_deleting_an_existing_record(self):
         test_obj = models.TestBase(id=7, test_str="test_string", test_int=5)
@@ -177,7 +177,7 @@ class Test_Deleting_N_Database_Records(api_test.TestCase):
 
     def setUp(self, test_db_path: str = "") -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_deleting_n_records_with_least_ids(self):
         test_obj_1 = models.TestBase(test_str="test_string", test_int=5)

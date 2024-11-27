@@ -178,7 +178,7 @@ def create_orders() -> _Response:
             "Tenant not received in the request.", 401, "Unspecified tenant"
         )
 
-    order_db_models: list[_db_models.OrderDBModel] = []
+    order_db_models: list[_db_models.OrderDB] = []
     checked: list[_db_access.CheckBeforeAdd] = []
     if not isinstance(request.data, list):
         return _error(400, "Invalid input: expected a list of orders.", "Bad Request")
@@ -204,10 +204,10 @@ def create_orders() -> _Response:
             )
         checked.extend(
             [
-                _db_access.db_object_check(_db_models.CarDBModel, id_=order.car_id),
-                _db_access.db_object_check(_db_models.StopDBModel, id_=order.target_stop_id),
+                _db_access.db_object_check(_db_models.CarDB, id_=order.car_id),
+                _db_access.db_object_check(_db_models.StopDB, id_=order.target_stop_id),
                 _db_access.db_object_check(
-                    _db_models.RouteDBModel,
+                    _db_models.RouteDB,
                     order.stop_route_id,
                     _db_access.db_obj_condition(
                         attribute_name="stop_ids",
@@ -224,7 +224,7 @@ def create_orders() -> _Response:
 
     if response.status_code == 200:
         # orders are created in the database, now log them
-        posted_db_models: list[_db_models.OrderDBModel] = response.body
+        posted_db_models: list[_db_models.OrderDB] = response.body
         ids: list[int] = []
         for model in posted_db_models:
             assert model.id is not None
@@ -256,7 +256,7 @@ def delete_order(car_id: int, order_id: int) -> _Response:
         return _log_error_and_respond(
             "Tenant not received in the request.", 401, "Unspecified tenant"
         )
-    response = _db_access.delete(request.tenant, _db_models.OrderDBModel, order_id)
+    response = _db_access.delete(request.tenant, _db_models.OrderDB, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _log_info(msg)
@@ -277,7 +277,7 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
 def get_order(car_id: int, order_id: int) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
-        base=_db_models.OrderDBModel,
+        base=_db_models.OrderDB,
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
     if len(order_db_models) == 0:
@@ -297,8 +297,8 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
         return _log_error_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title=_OBJ_NOT_FOUND
         )
-    db_orders: list[_db_models.OrderDBModel] = _db_access.get_children(  # type: ignore
-        parent_base=_db_models.CarDBModel,
+    db_orders: list[_db_models.OrderDB] = _db_access.get_children(  # type: ignore
+        parent_base=_db_models.CarDB,
         parent_id=car_id,
         children_col_name="orders",
         criteria={"timestamp": lambda z: z >= since},
@@ -315,9 +315,7 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
 def get_orders(since: int = 0) -> _Response:
     """Get all existing orders."""
     _log_info("Listing all existing orders.")
-    db_orders = _db_access.get(
-        _db_models.OrderDBModel, criteria={"timestamp": lambda x: x >= since}
-    )
+    db_orders = _db_access.get(_db_models.OrderDB, criteria={"timestamp": lambda x: x >= since})
     orders: list[_models.Order] = list()
     for db_order in db_orders:
         order = _get_order_with_last_state(db_order)
@@ -327,14 +325,14 @@ def get_orders(since: int = 0) -> _Response:
 
 
 def _car_exist(car_id: int) -> bool:
-    return bool(_db_access.exists(_db_models.CarDBModel, {"id": lambda x: x == car_id}))
+    return bool(_db_access.exists(_db_models.CarDB, {"id": lambda x: x == car_id}))
 
 
 def _get_order_with_last_state(
-    order_db_model: _db_models.OrderDBModel,
+    order_db_model: _db_models.OrderDB,
 ) -> _models.Order | None:
     states = _db_access.get(
-        _db_models.OrderStateDBModel,
+        _db_models.OrderStateDB,
         criteria={"order_id": lambda x: x == order_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,

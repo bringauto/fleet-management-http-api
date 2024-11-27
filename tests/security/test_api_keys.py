@@ -27,7 +27,7 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 
         code, data = _api_keys.verify_key_and_return_key_info("abcd", self.src)
         self.assertEqual(code, 200)
-        self.assertTrue(isinstance(data, _api_keys._ApiKeyDBModel))
+        self.assertTrue(isinstance(data, _api_keys._ApiKeyDB))
         self.assertEqual(data.name, key_name)  # type: ignore
         self.assertEqual(data.key, "abcd")  # type: ignore
 

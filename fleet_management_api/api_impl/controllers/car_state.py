@@ -53,7 +53,7 @@ def create_car_states_from_argument_and_post(
     response = _db_access.add(
         tenant,
         *state_db_models,
-        checked=[_db_access.db_object_check(_db_models.CarDBModel, id_=car_states[0].car_id)],
+        checked=[_db_access.db_object_check(_db_models.CarDB, id_=car_states[0].car_id)],
     )
     if response.status_code == 200:
         inserted_models = [_obj_to_db.car_state_from_db_model(s) for s in response.body]
@@ -93,7 +93,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
     """
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
-        _db_models.CarStateDBModel,
+        _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=last_n,
@@ -118,10 +118,10 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     try:
-        if not _db_access.get_by_id(_db_models.CarDBModel, car_id):
+        if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
         car_state_db_models = _db_access.get(
-            base=_db_models.CarStateDBModel,
+            base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,
                 "timestamp": lambda x: x >= since,
@@ -145,13 +145,13 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
 
 def _remove_old_states(car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
-        _db_models.CarStateDBModel, criteria={"car_id": lambda x: x == car_id}
+        _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
     )
     curr_n_of_states = len(car_state_db_models)
-    delta = curr_n_of_states - _db_models.CarStateDBModel.max_n_of_stored_states()
+    delta = curr_n_of_states - _db_models.CarStateDB.max_n_of_stored_states()
     if delta > 0:
         response = _db_access.delete_n(
-            _db_models.CarStateDBModel,
+            _db_models.CarStateDB,
             delta,
             column_name="timestamp",
             start_from="minimum",

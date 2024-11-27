@@ -250,7 +250,7 @@ class Test_Creating_Tenant_DB_Model(unittest.TestCase):
         self.assertEqual(tenant_out, tenant)
 
 
-class Test_Creating_RouteDBModel(unittest.TestCase):
+class Test_Creating_RouteDB(unittest.TestCase):
     def test_creating_db_model_from_route_preserves_attribute_values(self):
         route = Route(name="test_route", stop_ids=[1, 2, 3])
         route_db_model = _obj_to_db.route_to_db_model(route)
@@ -263,7 +263,7 @@ class Test_Creating_RouteDBModel(unittest.TestCase):
         self.assertEqual(route_out, route_in)
 
 
-class Test_Creating_StopDBModel(unittest.TestCase):
+class Test_Creating_StopDB(unittest.TestCase):
     def test_creating_db_model_from_stop_preserves_attribute_values(self):
         stop = Stop(
             name="test_stop",
@@ -287,7 +287,7 @@ class Test_Creating_StopDBModel(unittest.TestCase):
         self.assertEqual(stop_out, stop_in)
 
 
-class Test_Creating_OrderStateDBModel(unittest.TestCase):
+class Test_Creating_OrderStateDB(unittest.TestCase):
     def test_creating_db_model_from_order_state_preserves_attribute_values(self):
         order_state = OrderState(id=1, status="to_accept", order_id=1)
         order_state_db_model = _obj_to_db.order_state_to_db_model(order_state)
@@ -312,7 +312,7 @@ class Test_Creating_OrderStateDBModel(unittest.TestCase):
         self.assertEqual(order_state_db_model.timestamp, 1234567890)
 
 
-class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
+class Test_Creating_RouteVisualizationDB(unittest.TestCase):
     def test_creating_db_model_from_route_visualization_preserves_attribute_values(self):
         route_visualization = RouteVisualization(
             id=8,

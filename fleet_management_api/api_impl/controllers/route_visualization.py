@@ -1,8 +1,8 @@
 from fleet_management_api.models import RouteVisualization as _RouteVisualization
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import (
-    RouteDBModel as _RouteDBModel,
-    RouteVisualizationDBModel as _RouteVisDBModel,
+    RouteDB as _RouteDB,
+    RouteVisualizationDB as _RouteVisDB,
 )
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_responses import (
@@ -22,7 +22,7 @@ from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJS
 def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
-        _RouteVisDBModel,
+        _RouteVisDB,
         criteria={"route_id": lambda x: x == route_id},
     )
     if len(rp_db_models) == 0:
@@ -54,15 +54,15 @@ def redefine_route_visualizations() -> _Response:
         return _error(401, "Tenant not received in the request.", title="Unspecified tenant")
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
-        if not _db_access.db_object_check(_RouteDBModel, v.route_id):
+        if not _db_access.db_object_check(_RouteDB, v.route_id):
             return _error(
                 404,
                 f"Route with ID={v.route_id} does not exist.",
                 title=_OBJ_NOT_FOUND,
             )
 
-    existing_vis: list[_RouteVisDBModel] = _db_access.get(_RouteVisDBModel)
-    existing_vis_dict: dict[int, _RouteVisDBModel] = {v.route_id: v for v in existing_vis}
+    existing_vis: list[_RouteVisDB] = _db_access.get(_RouteVisDB)
+    existing_vis_dict: dict[int, _RouteVisDB] = {v.route_id: v for v in existing_vis}
     for v in vis:
         if v.route_id in existing_vis_dict:
             id_ = existing_vis_dict[v.route_id].id

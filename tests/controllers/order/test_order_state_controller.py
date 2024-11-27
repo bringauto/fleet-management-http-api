@@ -224,7 +224,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order_1])
             c.post("/v2/management/order", json=[order_2])
-        self.max_n = _db_models.OrderStateDBModel.max_n_of_stored_states()
+        self.max_n = _db_models.OrderStateDB.max_n_of_stored_states()
 
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
         self,
@@ -259,7 +259,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def test_total_number_of_order_states_does_not_exceed_number_of_orders_times_the_maximum_number_of_states_for_single_order(
         self,
     ):
-        _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
+        _db_models.OrderStateDB.set_max_n_of_stored_states(50)
         with self.app.app.test_client(TEST_TENANT) as c:
             order_state_1 = OrderState(status="to_accept", order_id=1)
             for _ in range(100):
@@ -411,7 +411,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
 
     def test_sending_large_number_of_order_states_before_done_state(self):
         some_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
-        _db_models.OrderStateDBModel.set_max_n_of_stored_states(50)
+        _db_models.OrderStateDB.set_max_n_of_stored_states(50)
         with self.app.app.test_client(TEST_TENANT) as c:
             for _ in range(60):
                 response = c.post("/v2/management/orderstate", json=[some_state])

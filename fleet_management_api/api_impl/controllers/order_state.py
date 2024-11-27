@@ -62,7 +62,7 @@ def create_order_states_from_argument_and_post(
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
     order_ids = [order_state.order_id for order_state in order_states]
-    orders: dict[int, _db_models.OrderDBModel | None] = _existing_orders(*order_ids)
+    orders: dict[int, _db_models.OrderDB | None] = _existing_orders(*order_ids)
     for id_, order in orders.items():
         if order is None:
             return _log_error_and_respond(
@@ -70,8 +70,8 @@ def create_order_states_from_argument_and_post(
             )
         assert order is not None
         if check_final_state:
-            last_states: list[_db_models.OrderStateDBModel] = _db_access.get(
-                _db_models.OrderStateDBModel,
+            last_states: list[_db_models.OrderStateDB] = _db_access.get(
+                _db_models.OrderStateDB,
                 criteria={"order_id": lambda x: x == order.id},
                 sort_result_by={"timestamp": "desc", "id": "desc"},
                 first_n=1,
@@ -96,7 +96,7 @@ def create_order_states_from_argument_and_post(
     # after this call, there is either no final state or it is the last state in the list `order_states`
     order_states = _trim_states_after_done_or_canceled(order_states)
 
-    db_models: list[_db_models.OrderStateDBModel] = []
+    db_models: list[_db_models.OrderStateDB] = []
     for state in order_states:
         db_model = _obj_to_db.order_state_to_db_model(state)
         order = orders[state.order_id]
@@ -176,13 +176,11 @@ def get_order_states(
         return _get_order_states(criteria, wait, since, last_n)
 
 
-def _existing_orders(*order_ids: int) -> dict[int, _db_models.OrderDBModel | None]:
+def _existing_orders(*order_ids: int) -> dict[int, _db_models.OrderDB | None]:
     order_ids = tuple(dict.fromkeys(order_ids).keys())
-    models: dict[int, _db_models.OrderDBModel | None] = dict()
+    models: dict[int, _db_models.OrderDB | None] = dict()
     for id_ in order_ids:
-        models_with_id = _db_access.get(
-            _db_models.OrderDBModel, criteria={"id": lambda x: x == id_}
-        )
+        models_with_id = _db_access.get(_db_models.OrderDB, criteria={"id": lambda x: x == id_})
         if models_with_id:
             models[id_] = models_with_id[0]
         else:
@@ -195,7 +193,7 @@ def _get_order_states(
 ) -> _Response:
     criteria["timestamp"] = lambda x: x >= since
     order_state_db_models = _db_access.get(
-        _db_models.OrderStateDBModel,
+        _db_models.OrderStateDB,
         wait=wait,
         criteria=criteria,
         first_n=last_n,
@@ -211,12 +209,12 @@ def _get_order_states(
 
 def _remove_old_states(order_id: int) -> _Response:
     order_state_db_models = _db_access.get(
-        _db_models.OrderStateDBModel, criteria={"order_id": lambda x: x == order_id}
+        _db_models.OrderStateDB, criteria={"order_id": lambda x: x == order_id}
     )
-    delta = len(order_state_db_models) - _db_models.OrderStateDBModel.max_n_of_stored_states()
+    delta = len(order_state_db_models) - _db_models.OrderStateDB.max_n_of_stored_states()
     if delta > 0:
         response = _db_access.delete_n(
-            _db_models.OrderStateDBModel,
+            _db_models.OrderStateDB,
             n=delta,
             column_name="timestamp",
             start_from="minimum",

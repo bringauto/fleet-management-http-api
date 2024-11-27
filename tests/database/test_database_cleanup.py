@@ -49,48 +49,48 @@ class Test_Database_Cleanup(unittest.TestCase):
         _connection.set_connection_source(
             "localhost", 5432, "test_management_api", "postgres", "1234"
         )
-        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT))
 
     def _set_up_test_data(self):
-        _db_access.add(TEST_TENANT, _db_models.PlatformHWDBModel(name="platform1"))
+        _db_access.add(TEST_TENANT, _db_models.PlatformHWDB(name="platform1"))
         _db_access.add(
-            TEST_TENANT, _db_models.CarDBModel(name="car1", platform_hw_id=1, under_test=True)
+            TEST_TENANT, _db_models.CarDB(name="car1", platform_hw_id=1, under_test=True)
         )
 
     def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
+        self.assertEqual(_db_access.get(_db_models.CarDB)[0].name, "car1")
         restart_database()
 
         _db_access.add_tenants(TEST_TENANT)
-        cars = _db_access.get(tenant=TEST_TENANT, base=_db_models.CarDBModel)
+        cars = _db_access.get(tenant=TEST_TENANT, base=_db_models.CarDB)
         self.assertFalse(cars)
 
     def test_object_can_be_added_after_database_cleanup(self):
         restart_database()
         _db_access.add_tenants(TEST_TENANT)
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(_db_models.CarDBModel)[0].name, "car1")
+        self.assertEqual(_db_access.get(_db_models.CarDB)[0].name, "car1")
 
     def test_deleting_object_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()
         restart_database()
         _db_access.add_tenants(TEST_TENANT)
-        response = _db_access.delete(TEST_TENANT, _db_models.CarDBModel, id_=1)
+        response = _db_access.delete(TEST_TENANT, _db_models.CarDB, id_=1)
         self.assertEqual(response.status_code, 404)
 
     def test_deleting_n_objects_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()
         _db_access.add(
-            TEST_TENANT, _db_models.CarDBModel(name="car2", platform_hw_id=1, under_test=True)
+            TEST_TENANT, _db_models.CarDB(name="car2", platform_hw_id=1, under_test=True)
         )
         _db_access.add(
-            TEST_TENANT, _db_models.CarDBModel(name="car3", platform_hw_id=1, under_test=True)
+            TEST_TENANT, _db_models.CarDB(name="car3", platform_hw_id=1, under_test=True)
         )
         restart_database()
         _db_access.add_tenants(TEST_TENANT)
         response = _db_access.delete_n(
-            _db_models.CarDBModel, n=2, column_name="id", start_from="maximum"
+            _db_models.CarDB, n=2, column_name="id", start_from="maximum"
         )
         self.assertEqual(response.body, "0 objects deleted from the database.")
 
@@ -98,7 +98,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         self._set_up_test_data()
         restart_database()
         _db_access.add_tenants(TEST_TENANT)
-        response = _db_access.get_by_id(_db_models.CarDBModel, 1)
+        response = _db_access.get_by_id(_db_models.CarDB, 1)
         self.assertFalse(response)
 
     def tearDown(self) -> None:

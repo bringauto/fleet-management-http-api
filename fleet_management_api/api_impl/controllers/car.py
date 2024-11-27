@@ -49,12 +49,10 @@ def create_cars() -> _Response:  # noqa: E501
     checked = []
     for car in cars:
         car_db_models.append(_obj_to_db.car_to_db_model(car))
-        checked.append(
-            _db_access.db_object_check(_db_models.PlatformHWDBModel, id_=car.platform_hw_id)
-        )
+        checked.append(_db_access.db_object_check(_db_models.PlatformHWDB, id_=car.platform_hw_id))
         checked.append(
             _db_access.db_object_check(
-                _db_models.RouteDBModel,
+                _db_models.RouteDB,
                 id_=car.default_route_id,
                 allow_nonexistence=True,
             )
@@ -62,7 +60,7 @@ def create_cars() -> _Response:  # noqa: E501
 
     response = _db_access.add(request.tenant, *car_db_models, checked=checked)
     if response.status_code == 200:
-        posted_db_models: list[_db_models.CarDBModel] = response.body
+        posted_db_models: list[_db_models.CarDB] = response.body
         ids: list[int] = []
         for model in posted_db_models:
             assert model.id is not None
@@ -95,7 +93,7 @@ def delete_car(car_id: int) -> _Response:
         return _log_error_and_respond(
             "Tenant not received in the request.", 401, "Unspecified tenant"
         )
-    response = _db_access.delete(request.tenant, _db_models.CarDBModel, car_id)
+    response = _db_access.delete(request.tenant, _db_models.CarDB, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
         return _log_info_and_respond(msg)
@@ -107,9 +105,9 @@ def delete_car(car_id: int) -> _Response:
 def get_car(car_id: int) -> _Response:
     """Get a car identified by 'car_id'."""
     db_cars = _db_access.get(
-        _db_models.CarDBModel,
+        _db_models.CarDB,
         criteria={"id": lambda x: x == car_id},
-        omitted_relationships=[_db_models.CarDBModel.orders],
+        omitted_relationships=[_db_models.CarDB.orders],
     )
     if len(db_cars) == 0:
         return _log_error_and_respond(
@@ -124,8 +122,8 @@ def get_car(car_id: int) -> _Response:
 def get_cars() -> _Response:  # noqa: E501
     """List all cars."""
     db_cars = _db_access.get(
-        _db_models.CarDBModel,
-        omitted_relationships=[_db_models.CarDBModel.orders],
+        _db_models.CarDB,
+        omitted_relationships=[_db_models.CarDB.orders],
     )
     cars: list[_models.Car] = list()
     if len(db_cars) == 0:
@@ -168,9 +166,9 @@ def update_cars() -> _Response:
         return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
-def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car:
+def _get_car_with_last_state(car_db_model: _db_models.CarDB) -> _models.Car:
     db_last_states = _db_access.get(
-        _db_models.CarStateDBModel,
+        _db_models.CarStateDB,
         criteria={"car_id": lambda x: x == car_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,

@@ -180,7 +180,7 @@ class Test_Updating_Stop(unittest.TestCase):
     def setUp(self):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app().app
-        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT))
 
     def test_updating_single_existing_stop(self):
         position = _models.GNSSPosition(latitude=49, longitude=16, altitude=50)

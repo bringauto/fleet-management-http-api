@@ -11,7 +11,7 @@ class Test_Retrieving_Last_N_Records(api_test.TestCase):
 
     def setUp(self):
         super().setUp()
-        _db_access.add_without_tenant(_db_models.TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT))
 
     def test_retrieving_single_item_with_highest_attribute_value(self):
         test_obj_1 = models.TestBase(id=7, test_str="test_string", test_int=150)

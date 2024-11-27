@@ -43,7 +43,7 @@ def create_stops() -> _Response:
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.add(request.tenant, *stop_db_models)
     if response.status_code == 200:
-        posted_db_models: list[_db_models.StopDBModel] = response.body
+        posted_db_models: list[_db_models.StopDB] = response.body
         for stop in posted_db_models:
             _log_info(f"Stop (name='{stop.name}) has been created.")
         models = [_obj_to_db.stop_from_db_model(m) for m in posted_db_models]
@@ -73,7 +73,7 @@ def delete_stop(stop_id: int) -> _Response:
         return _log_error_and_respond(
             "Tenant not received in the request.", 401, "Unspecified tenant"
         )
-    response = _db_access.delete(request.tenant, _db_models.StopDBModel, stop_id)
+    response = _db_access.delete(request.tenant, _db_models.StopDB, stop_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
@@ -87,8 +87,8 @@ def delete_stop(stop_id: int) -> _Response:
 
 def get_stop(stop_id: int) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
-    stop_db_models: list[_db_models.StopDBModel] = _db_access.get(
-        _db_models.StopDBModel, criteria={"id": lambda x: x == stop_id}
+    stop_db_models: list[_db_models.StopDB] = _db_access.get(
+        _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
     stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
@@ -100,7 +100,7 @@ def get_stop(stop_id: int) -> _Response:
 
 def get_stops() -> _Response:
     """Get all existing stops."""
-    stop_db_models = _db_access.get(_db_models.StopDBModel)
+    stop_db_models = _db_access.get(_db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
@@ -128,7 +128,7 @@ def update_stops() -> _Response:
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.update(request.tenant, *stop_db_models)
     if response.status_code == 200:
-        updated_stops: list[_db_models.StopDBModel] = response.body
+        updated_stops: list[_db_models.StopDB] = response.body
         for s in updated_stops:
             _log_info(f"Stop (ID={s.id}) has been succesfully updated.")
         return _text_response(f"Stops {[s.name for s in updated_stops]} were succesfully updated.")
@@ -142,7 +142,7 @@ def update_stops() -> _Response:
 
 
 def _get_routes_referencing_stop(stop_id: int) -> _Response:
-    route_db_models = [m for m in _db_access.get(_db_models.RouteDBModel) if stop_id in m.stop_ids]
+    route_db_models = [m for m in _db_access.get(_db_models.RouteDB) if stop_id in m.stop_ids]
     if len(route_db_models) > 0:
         return _log_error_and_respond(
             f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",

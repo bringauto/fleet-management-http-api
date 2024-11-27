@@ -6,7 +6,7 @@ from sqlalchemy.pool.impl import QueuePool
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDBModel
+from fleet_management_api.database.db_models import TenantDB
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
 import tests._utils.api_test as api_test
@@ -61,7 +61,7 @@ class Test_Waiting_For_Content(api_test.TestCase):
 
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDBModel(name=TEST_TENANT))
+        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT))
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,

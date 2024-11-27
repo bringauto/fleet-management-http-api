@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import Engine as _Engine
 
-from fleet_management_api.database.db_models import ApiKeyDBModel as _ApiKeyDBModel
+from fleet_management_api.database.db_models import ApiKeyDB as _ApiKeyDB
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 import fleet_management_api.database.connection as _connection
@@ -26,7 +26,7 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
     already_existing_keys = _db_access.get(
-        _ApiKeyDBModel,
+        _ApiKeyDB,
         criteria={"name": lambda x: x == key_name},
         connection_source=connection_source,
     )
@@ -34,7 +34,7 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
         return 400, _key_already_exists_msg(key_name)
     else:
         response = _db_access.add_without_tenant(
-            _ApiKeyDBModel(key=key, name=key_name, creation_timestamp=now),
+            _ApiKeyDB(key=key, name=key_name, creation_timestamp=now),
             connection_source=connection_source,
         )
         if response.status_code == 400:
@@ -45,14 +45,14 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
 
 def verify_key_and_return_key_info(
     api_key: str, connection_source: Optional[_Engine] = None
-) -> tuple[int, str | _ApiKeyDBModel]:
+) -> tuple[int, str | _ApiKeyDB]:
     """Verify that the API key is valid and return the key info (timestamp of when the key was created and the key name)."""
 
     if connection_source is None:
         connection_source = _connection.current_connection_source()
     try:
         _key_db_models = _db_access.get(
-            _ApiKeyDBModel,
+            _ApiKeyDB,
             criteria={"key": lambda x: x == api_key},
             connection_source=connection_source,
         )
