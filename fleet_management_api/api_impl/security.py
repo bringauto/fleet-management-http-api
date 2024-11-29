@@ -1,8 +1,53 @@
 from typing import Optional
-
+import json
 import urllib.parse as _url
 
+from connexion.lifecycle import ConnexionRequest
+import jwt
+
 from keycloak import KeycloakOpenID  # type: ignore
+
+
+class TenantNotAccessible(Exception):
+    pass
+
+
+class NoHeaderWithJWTToken(Exception):
+    pass
+
+
+class TenantFromToken:
+
+    algorithm = "HS256"
+
+    def __init__(self, request: ConnexionRequest, key: str) -> None:
+        self._tenant_name = self._check_and_read(request, key)
+
+    @property
+    def name(self) -> str:
+        return self._tenant_name
+
+    @staticmethod
+    def _check_and_read(request: ConnexionRequest, key: str) -> str:
+        tenant = request.cookies.get("tenant", None)
+        if not tenant:
+            return ""
+        if "Authorization" not in request.headers:
+            raise NoHeaderWithJWTToken
+        bearer = str(request.headers["Authorization"]).split(" ")[-1]
+        decoded_str = jwt.decode(bearer, key, algorithms=[TenantFromToken.algorithm])["Payload"]
+        payload = json.loads(decoded_str)
+        if "group" not in payload:
+            raise TenantNotAccessible("No item group in token. Token does not contain tenants.")
+        group: list[str] = payload["group"]
+        tenants = [item.split("/")[-1] for item in group if item.startswith("/customers/")]
+        if not tenants:
+            return tenant
+        if tenant not in tenants:
+            raise TenantNotAccessible(
+                f"Tenant {tenant} send in cookie is not among accessible tenants sent in JWT token."
+            )
+        return tenant
 
 
 class SecurityObj:

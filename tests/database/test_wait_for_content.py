@@ -66,9 +66,9 @@ class Test_Waiting_For_Content(api_test.TestCase):
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
     ):
-        test_obj = models.TestBase(test_str="test", test_int=123)
+        test_obj = models.TestItem(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(_db_access.get, base=models.TestBase, wait=True)
+            future = executor.submit(_db_access.get, base=models.TestItem, wait=True)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
             retrieved_objs = future.result()
             self.assertEqual(retrieved_objs[0].test_str, test_obj.test_str)
@@ -76,9 +76,9 @@ class Test_Waiting_For_Content(api_test.TestCase):
     def test_not_enabling_wait_mechanism_and_unavailable_content_immediatelly_returns_empty_list(
         self,
     ):
-        test_obj = models.TestBase(test_str="test", test_int=123)
+        test_obj = models.TestItem(test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(_db_access.get, base=models.TestBase, wait=False)
+            future = executor.submit(_db_access.get, base=models.TestItem, wait=False)
             time.sleep(0.05)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
             retrieved_objs = future.result()
@@ -87,19 +87,19 @@ class Test_Waiting_For_Content(api_test.TestCase):
     def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(
-                _db_access.get, base=models.TestBase, wait=True, timeout_ms=100
+                _db_access.get, base=models.TestItem, wait=True, timeout_ms=100
             )
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_response_is_sent_to_multiple_waiters(self):
-        test_obj = models.TestBase(test_str="test_x", test_int=123)
+        test_obj = models.TestItem(test_str="test_x", test_int=123)
         with ThreadPoolExecutor(max_workers=5) as executor:
             future1 = executor.submit(
-                _db_access.get, base=models.TestBase, wait=True, timeout_ms=1000
+                _db_access.get, base=models.TestItem, wait=True, timeout_ms=1000
             )
             future2 = executor.submit(
-                _db_access.get, base=models.TestBase, wait=True, timeout_ms=1000
+                _db_access.get, base=models.TestItem, wait=True, timeout_ms=1000
             )
             time.sleep(0.05)
             executor.submit(_db_access.add, TEST_TENANT, test_obj)
@@ -112,12 +112,12 @@ class Test_Waiting_For_Content(api_test.TestCase):
 class Test_Waiting_For_Specific_Content(api_test.TestCase):
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
-        test_obj = models.TestBase(id=5, test_str="test", test_int=123)
+        test_obj = models.TestItem(id=5, test_str="test", test_int=123)
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(
                 _db_access.get,
                 tenant=TEST_TENANT,
-                base=models.TestBase,
+                base=models.TestItem,
                 criteria={"test_int": lambda x: x == 456},
                 wait=True,
                 timeout_ms=500,
@@ -141,12 +141,12 @@ class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
     """
 
     def test_single_connection_is_reused_by_every_request_and_then_checked_in_into_pool(self):
-        test_obj = models.TestBase(test_str="test", test_int=123)
+        test_obj = models.TestItem(test_str="test", test_int=123)
         src = _connection.current_connection_source()
         assert isinstance(src.pool, QueuePool)
 
         def get_and_count_connections():
-            _db_access.get(base=models.TestBase, wait=True)
+            _db_access.get(base=models.TestItem, wait=True)
 
         with ThreadPoolExecutor() as executor:
             executor.submit(get_and_count_connections)

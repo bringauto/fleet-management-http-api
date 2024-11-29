@@ -24,6 +24,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
+from fleet_management_api.api_impl.security import TenantFromToken
 
 from ..logs import LOGGER_NAME
 
@@ -38,7 +39,15 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 Order = Literal["asc", "desc"]
 ColumnName = str
-EMPTY_TENANT = "empty_tenant"
+
+
+class EmptyTenant(TenantFromToken):
+
+    def __init__(self, *args):
+        self._tenant_name = "empty_tenant"
+
+
+EMPTY_TENANT = EmptyTenant()
 
 
 class ParentNotFound(Exception):
@@ -180,7 +189,7 @@ def delete_without_tenant(base: type[_Base], id_: int) -> _Response:
 
 @db_access_method
 def add(
-    tenant: str,
+    tenant: TenantFromToken,
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
@@ -196,12 +205,12 @@ def add(
     (an sqlalchemy Engine object).
     """
     global _wait_mg
+    if not tenant.name:
+        return _error(401, "Tenant not received in the request.", title="Tenant not received.")
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
-    response = _check_and_set_tenant(tenant, *added)
-    if response.status_code != 200:
-        return response
+    _set_tenant_id_to_all_objs(tenant.name, *added)
     source = _get_current_connection_source(connection_source)
     with _Session(source) as session:
         try:
@@ -352,6 +361,7 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
 
 @db_access_method
 def get(
+    tenant: TenantFromToken,
     base: type[_Base],
     first_n: int = 0,
     sort_result_by: Optional[dict[ColumnName, Order]] = None,
@@ -360,7 +370,6 @@ def get(
     timeout_ms: Optional[int] = None,
     omitted_relationships: Optional[list[_InstrumentedAttribute]] = None,
     connection_source: Optional[_sqa.Engine] = None,
-    tenant: Optional[str] = None,
 ) -> list[Any]:
     """Get instances of the `base`.
 
@@ -376,10 +385,9 @@ def get(
     the globally defined Engine is used.
     """
     global _wait_mg
+
     if criteria is None:
         criteria = {}
-    if tenant:
-        criteria["tenant_name"] = lambda x: x == tenant
     if sort_result_by is None:
         sort_result_by = {}
     table = base.__table__
@@ -390,7 +398,14 @@ def get(
             criteria[attr_label](getattr(table.columns, attr_label))
             for attr_label in criteria.keys()
         ]
-        stmt = _sqa.select(base).where(*clauses)  # type: ignore
+        if tenant.name:
+            stmt = (
+                _sqa.select(getattr(_TenantDB.__table__.c, base.__tablename__))
+                .where(_TenantDB.name == tenant.name)
+                .where(*clauses)
+            )  # type: ignore
+        else:
+            stmt = _sqa.select(base).where(*clauses)  # type: ignore
         for (
             attr_label,
             order,
@@ -581,3 +596,15 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
     for obj in objs:
         obj.tenant_name = tenant_name  # type: ignore
     return _json_response([])
+
+
+def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> None:
+    """Set tenant_id attribute to all the objs."""
+    if "tenant_id" not in objs[0].__table__.columns.keys():
+        return
+    tenants: list[_TenantDB] = get(_TenantDB, criteria={"name": lambda x: x == tenant_name})
+    if not tenants:
+        raise TennantDoesNotExist(f"Tenant {tenant_name} does not exist in the database.")
+    for obj in objs:
+        assert hasattr(obj, "tenant_id")
+        obj.tenant_id = tenants[0].id
