@@ -14,11 +14,13 @@ class CarActionState(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id=None, timestamp=None, action_status=None):  # noqa: E501
+    def __init__(self, id=None, car_id=None, timestamp=None, action_status=None):  # noqa: E501
         """CarActionState - a model defined in OpenAPI
 
         :param id: The id of this CarActionState.  # noqa: E501
         :type id: int
+        :param car_id: The car_id of this CarActionState.  # noqa: E501
+        :type car_id: int
         :param timestamp: The timestamp of this CarActionState.  # noqa: E501
         :type timestamp: int
         :param action_status: The action_status of this CarActionState.  # noqa: E501
@@ -26,17 +28,20 @@ class CarActionState(Model):
         """
         self.openapi_types = {
             'id': int,
+            'car_id': int,
             'timestamp': int,
             'action_status': CarActionStatus
         }
 
         self.attribute_map = {
             'id': 'id',
+            'car_id': 'carId',
             'timestamp': 'timestamp',
             'action_status': 'actionStatus'
         }
 
         self._id = id
+        self._car_id = car_id
         self._timestamp = timestamp
         self._action_status = action_status
 
@@ -71,6 +76,29 @@ class CarActionState(Model):
         """
 
         self._id = id
+
+    @property
+    def car_id(self) -> int:
+        """Gets the car_id of this CarActionState.
+
+
+        :return: The car_id of this CarActionState.
+        :rtype: int
+        """
+        return self._car_id
+
+    @car_id.setter
+    def car_id(self, car_id: int):
+        """Sets the car_id of this CarActionState.
+
+
+        :param car_id: The car_id of this CarActionState.
+        :type car_id: int
+        """
+        if car_id is None:
+            raise ValueError("Invalid value for `car_id`, must not be `None`")  # noqa: E501
+
+        self._car_id = car_id
 
     @property
     def timestamp(self) -> int:

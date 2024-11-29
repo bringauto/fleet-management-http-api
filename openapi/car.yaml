@@ -424,6 +424,8 @@ components:
       properties:
         id:
           $ref: 'common_models.yaml#/components/schemas/Id'
+        carId:
+          $ref: 'common_models.yaml#/components/schemas/Id'
         timestamp:
           $ref: 'common_models.yaml#/components/schemas/Timestamp'
         actionStatus:
