@@ -22,6 +22,8 @@ tags:
   name: car
 - description: Car state-related functions
   name: carState
+- description: Car action-related functions
+  name: carAction
 - description: Order-related functions
   name: order
 - description: Order state-related functions
@@ -35,6 +37,203 @@ tags:
 - description: Authentication-related functions
   name: security
 paths:
+  /action/car/{carId}:
+    get:
+      operationId: get_car_action_states
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
+          description: Successfully found Car Action States complying with the request
+            parameters.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds car action states for a Car with given carId.
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+  /action/car/{carId}/pause:
+    post:
+      operationId: pause_car
+      parameters:
+      - description: ID of the Car which should be paused.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarActionState'
+          description: Successfully paused the Car.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: "Finds and pauses a Car with given carId, if not already paused. Sets\
+        \ car action status to PAUSED if it is not in PAUSED action status already."
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+  /action/car/{carId}/unpause:
+    post:
+      operationId: unpause_car
+      parameters:
+      - description: ID of the Car which should be unpaused.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarActionState'
+          description: Successfully unpaused the Car.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: "Finds and unpauses a Car with given carId, if paused. Sets car action\
+        \ status to NORMAL only if it is in PAUSED action status."
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
   /apialive:
     head:
       operationId: check_api_is_alive
@@ -2879,11 +3078,44 @@ components:
       - out_of_order
       - driving
       - in_stop
-      - paused_by_phone
       - paused_by_obstacle
       - paused_by_button
       example: idle
       title: CarStatus
+      type: string
+    CarActionState:
+      description: Car Action State object structure
+      example:
+        actionStatus: normal
+        id: 1
+        timestamp: 1616425275913
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: Id
+          type: integer
+        timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425275913
+          format: int64
+          title: Timestamp
+          type: integer
+        actionStatus:
+          $ref: '#/components/schemas/CarActionStatus'
+      required:
+      - actionStatus
+      - carId
+      title: CarActionState
+      type: object
+    CarActionStatus:
+      description: Car Action Status enum
+      enum:
+      - normal
+      - paused
+      example: normal
+      title: CarActionStatus
       type: string
     Order:
       description: Order object structure.

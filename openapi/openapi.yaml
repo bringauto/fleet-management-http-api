@@ -25,6 +25,8 @@
       description: Car related functions
     - name: carState
       description: Car state-related functions
+    - name: carAction
+      description: Car action-related functions
     - name: order
       description: Order-related functions
     - name: orderState
@@ -50,6 +52,12 @@
       $ref: 'car.yaml#/paths/~1carstate'
     /carstate/{carId}:
       $ref: 'car.yaml#/paths/~1carstate~1{carId}'
+    /action/car/{carId}:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}'
+    /action/car/{carId}/pause:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1pause'
+    /action/car/{carId}/unpause:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1unpause'
 
     /order:
       $ref: 'order.yaml#/paths/~1order'
