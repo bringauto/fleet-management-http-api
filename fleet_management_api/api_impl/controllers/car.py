@@ -3,12 +3,18 @@ import connexion  # type: ignore
 import fleet_management_api.models as _models
 import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.models import (
+    CarActionState as _CarActionState,
+    CarActionStatus as _CarActionStatus,
     CarState as _CarState,
+    CarStatus as _CarStatus,
     Car as _Car,
 )
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.controllers.car_state import (
-    create_car_states_from_argument_and_post as _create_car_state_from_argument_and_post,
+    create_car_states_from_argument_and_save_to_db as _create_car_state_from_argument_and_post,
+)
+from fleet_management_api.api_impl.controllers.car_action import (
+    create_car_action_states_from_argument_and_save_to_db as _create_car_action_state_from_argument_and_post,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
@@ -71,12 +77,12 @@ def create_cars() -> _Response:  # noqa: E501
                 ids.append(model.id)
                 _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
-            db_states = _post_default_car_state(ids)
-            states = [_obj_to_db.car_state_from_db_model(s) for s in db_states.body]
+            car_states = _post_default_car_state(ids).body
+            car_action_states = _post_default_car_action_state(ids).body
 
             posted_cars: list[_Car] = []
-            for model, state in zip(posted_db_models, states):
-                posted_car = _obj_to_db.car_from_db_model(model, state)
+            for model, state, action_state in zip(posted_db_models, car_states, car_action_states):
+                posted_car = _obj_to_db.car_from_db_model(model, state, action_state)
                 posted_cars.append(posted_car)
             return _json_response(posted_cars)
         else:
@@ -169,12 +175,28 @@ def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,
     )
+    db_last_action_states = _db_access.get(
+        _db_models.CarActionStateDBModel,
+        criteria={"car_id": lambda x: x == car_db_model.id},
+        sort_result_by={"timestamp": "desc", "id": "desc"},
+        first_n=1,
+    )
     last_state = _obj_to_db.car_state_from_db_model(db_last_states[0])
-    car = _obj_to_db.car_from_db_model(car_db_model, last_state)
+    last_action_state = _obj_to_db.car_action_state_from_db_model(db_last_action_states[0])
+
+    car = _obj_to_db.car_from_db_model(car_db_model, last_state, last_action_state)
     return car
 
 
 def _post_default_car_state(car_ids: list[int]) -> _Response:
-    car_states = [_CarState(car_id=id_, status=_models.CarStatus.OUT_OF_ORDER) for id_ in car_ids]
+    car_states = [_CarState(car_id=id_, status=_CarStatus.OUT_OF_ORDER) for id_ in car_ids]
     response = _create_car_state_from_argument_and_post(car_states)
+    return response
+
+
+def _post_default_car_action_state(car_ids: list[int]) -> _Response:
+    car_action_states = [
+        _CarActionState(car_id=id_, action_status=_CarActionStatus.NORMAL) for id_ in car_ids
+    ]
+    response = _create_car_action_state_from_argument_and_post(car_action_states)
     return response

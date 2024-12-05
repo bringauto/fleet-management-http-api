@@ -32,10 +32,10 @@ def create_car_states() -> _Response:
         car_states = [
             _models.CarState.from_dict(s) for s in connexion.request.get_json()
         ]  # noqa: E501
-        return create_car_states_from_argument_and_post(car_states)
+        return create_car_states_from_argument_and_save_to_db(car_states)
 
 
-def create_car_states_from_argument_and_post(
+def create_car_states_from_argument_and_save_to_db(
     car_states: list[_models.CarState],
 ) -> _Response:
     """Post new car states using list passed as argument.

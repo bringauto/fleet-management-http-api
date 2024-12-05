@@ -10,7 +10,7 @@ def clear_logs() -> None:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(current_dir, "test_config.json"), "r") as f:
             config = json.load(f)
-        _clear_log_files(os.path.abspath(config["logging"]["log-path"]))
+        _clear_log_files(os.path.abspath(config["logging"]["file"]["path"]))
 
     except KeyError as e:
         logging.error(f"Missing key in configuration file: {e}")

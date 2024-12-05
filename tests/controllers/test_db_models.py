@@ -6,6 +6,8 @@ from fleet_management_api.models import (
     Car,
     CarState,
     CarStatus,
+    CarActionState,
+    CarActionStatus,
     GNSSPosition,
     MobilePhone,
     Order,
@@ -24,6 +26,10 @@ LAST_CAR_STATE = CarState(
     speed=7,
     fuel=8,
     position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
+)
+LAST_CAR_ACTION_STATE = CarActionState(
+    action_status=CarActionStatus.NORMAL,
+    car_id=1,
 )
 LAST_ORDER_STATE = OrderState(
     status=OrderStatus.TO_ACCEPT,
@@ -64,9 +70,12 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
         car_out = _obj_to_db.car_from_db_model(
-            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
+            _obj_to_db.car_to_db_model(car_in),
+            last_state=LAST_CAR_STATE,
+            last_action_state=LAST_CAR_ACTION_STATE,
         )
         car_in.last_state = LAST_CAR_STATE
+        car_in.last_action_state = LAST_CAR_ACTION_STATE
         self.assertEqual(car_out, car_in)
 
     def test_car_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(
@@ -79,9 +88,12 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             default_route_id=1,
         )
         car_out = _obj_to_db.car_from_db_model(
-            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
+            _obj_to_db.car_to_db_model(car_in),
+            last_state=LAST_CAR_STATE,
+            last_action_state=LAST_CAR_ACTION_STATE,
         )
         car_in.last_state = LAST_CAR_STATE
+        car_in.last_action_state = LAST_CAR_ACTION_STATE
         self.assertEqual(car_out, car_in)
 
 
@@ -230,9 +242,7 @@ class Test_Creating_Platform_HW_DB_Model(unittest.TestCase):
         self,
     ):
         platform_hwid_in = PlatformHW(name="test_platform")
-        platform_hwid_out = _obj_to_db.hw_from_db_model(
-            _obj_to_db.hw_to_db_model(platform_hwid_in)
-        )
+        platform_hwid_out = _obj_to_db.hw_from_db_model(_obj_to_db.hw_to_db_model(platform_hwid_in))
         self.assertEqual(platform_hwid_out, platform_hwid_in)
 
 
@@ -330,6 +340,36 @@ class Test_Creating_RouteVisualizationDBModel(unittest.TestCase):
             _obj_to_db.route_visualization_to_db_model(route_visualization_in)
         )
         self.assertEqual(route_visualization_out, route_visualization_in)
+
+
+class Test_Creating_Car_Action_State_DB_Model(unittest.TestCase):
+    def test_creating_car_action_state_db_model_from_car_action_state_object_preserves_attribute_values(
+        self,
+    ):
+        state = CarActionState(action_status=CarActionStatus.NORMAL, car_id=1)
+        car_action_state_db_model = _obj_to_db.car_action_state_to_db_model(state)
+        self.assertEqual(car_action_state_db_model.status, state.action_status)
+        self.assertEqual(car_action_state_db_model.car_id, state.car_id)
+
+    @patch("fleet_management_api.database.timestamp._get_time_in_ms")
+    def test_car_state_converted_to_db_model_and_back_is_unchanged(
+        self, mock_timestamp_in_ms: Mock
+    ):
+        mock_timestamp_in_ms.return_value = 123456
+        state_in = CarActionState(action_status="paused", car_id=1, timestamp=123456)
+        state_out = _obj_to_db.car_action_state_from_db_model(
+            _obj_to_db.car_action_state_to_db_model(state_in)
+        )
+        self.assertEqual(state_out, state_in)
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_car_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(
+        self, mock_timestamp_in_ms: Mock
+    ):
+        mock_timestamp_in_ms.return_value = 1234567890
+        order_state = CarState(status="normal", car_id=2)
+        order_state_db_model = _obj_to_db.car_state_to_db_model(order_state)
+        self.assertEqual(order_state_db_model.timestamp, 1234567890)
 
 
 if __name__ == "__main__":

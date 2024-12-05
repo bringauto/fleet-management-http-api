@@ -108,7 +108,7 @@ Data structure containing attributes of a given Car, that change in time.
 Required data:
 
 - car ID: unsigned integer
-- status: enum, available options = {idle, charging, out_of_order, paused_by_phone}
+- status: enum, available options = {idle, charging, out_of_order, paused_by_button}
 - fuel: unsigned integer
 - speed: float
 - position: [GNSSPosition](#gnss-position)

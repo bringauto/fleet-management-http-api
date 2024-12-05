@@ -90,6 +90,18 @@ class CarStateDBModel(Base):
         )
 
 
+class CarActionStateDBModel(Base):
+    model_name = "CarActionState"
+    __tablename__ = "car_action_states"
+    car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
+    status: _Mapped[str] = _mapped_column(_sqa.String)
+    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
+    car: _Mapped[CarDBModel] = _relationship("CarDBModel", lazy="noload")
+
+    def __repr__(self) -> str:
+        return f"CarActionState(ID={self.id}, car_ID={self.car_id}, status={self.status}, timestamp={self.timestamp})"
+
+
 class OrderDBModel(Base):
     model_name = "Order"
     __tablename__ = "orders"
