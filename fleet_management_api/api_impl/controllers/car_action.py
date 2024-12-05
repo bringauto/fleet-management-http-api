@@ -19,7 +19,7 @@ def get_car_action_states(
      # noqa: E501
 
 
-    :rtype: Union[List[CarActionState], Tuple[List[CarActionState], int], Tuple[List[CarActionState], int, Dict[str, str]]
+    :rtype: ConnexionResponse
     """
 
     db_models = _db_access.get(
@@ -37,7 +37,7 @@ def get_car_action_states(
     return _json_response(states)
 
 
-def pause_car(car_id):  # noqa: E501
+def pause_car(car_id: int) -> _Response:
     """Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
 
      # noqa: E501
@@ -45,9 +45,11 @@ def pause_car(car_id):  # noqa: E501
     :param car_id: ID of the Car which should be paused.
     :type car_id: int
 
-    :rtype: Union[CarActionState, Tuple[CarActionState, int], Tuple[CarActionState, int, Dict[str, str]]
+    :rtype: ConnexionResponse
     """
-    return "do some magic!"
+
+    state = CarActionState(car_id=car_id, action_status="paused")
+    return create_car_action_states_from_argument_and_save_to_db([state])
 
 
 def unpause_car(car_id):  # noqa: E501
@@ -58,14 +60,14 @@ def unpause_car(car_id):  # noqa: E501
     :param car_id: ID of the Car which should be unpaused.
     :type car_id: int
 
-    :rtype: Union[CarActionState, Tuple[CarActionState, int], Tuple[CarActionState, int, Dict[str, str]]
+    :rtype: ConnexionResponse
     """
     return "do some magic!"
 
 
 def create_car_action_states_from_argument_and_save_to_db(
     states: list[CarActionState],
-) -> _Response:  # noqa: E501
+) -> _Response:
     """Post new car action states using list passed as argument.
 
     If some of the car action states' creation fails, no states are added to the server.

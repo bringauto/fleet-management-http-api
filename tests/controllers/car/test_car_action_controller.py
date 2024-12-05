@@ -57,25 +57,58 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["actionStatus"], "paused")
 
+    def test_creating_action_state_for_existing_car_yields_200_response(self):
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=[self.car])
+            state = CarActionState(car_id=1, action_status="pause")
+            response = create_car_action_states_from_argument_and_save_to_db([state])
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.body[0].action_status, "pause")
 
-#     def test_adding_state_to_nonexisting_car_returns_code_404(self):
-#         nonexistent_car_id = 121651516
-#         gnss_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
-#         car_state = CarState(
-#             status="idle",
-#             car_id=nonexistent_car_id,
-#             speed=7,
-#             fuel=80,
-#             position=gnss_position,
-#         )
-#         with self.app.app.test_client() as c:
-#             response = c.post("/v2/management/carstate", json=[car_state])
-#             self.assertEqual(response.status_code, 404)
+    def test_after_pause_is_car_last_action_state_equal_to_paused(self):
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/action/car/1/pause")
+            response = c.get("/v2/management/car/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["lastActionState"]["actionStatus"], "paused")
 
-#     def test_sending_incomplete_state_returns_code_400(self):
-#         with self.app.app.test_client() as c:
-#             response = c.post("/v2/management/carstate", json={})
-#             self.assertEqual(response.status_code, 400)
+
+class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app)
+        self.car = Car(
+            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
+        )
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=[self.car])
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_pausing_car_in_normal_state_creates_new_state_with_paused_status(self, tmock: Mock):
+        with self.app.app.test_client() as c:
+            tmock.return_value = 1000
+            response = c.post("/v2/management/action/car/1/pause")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["actionStatus"], "paused")
+            self.assertEqual(response.json[0]["timestamp"], 1000)
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def _test_pausing_car_in_paused_state_does_not_create_new_action_state_and_yields_400_code(
+        self, tmock: Mock
+    ):
+        with self.app.app.test_client() as c:
+            tmock.return_value = 1000
+            c.post("/v2/management/action/car/1/pause")
+            tmock.return_value = 2000
+            response = c.post("/v2/management/action/car/1/pause")
+            self.assertEqual(response.status_code, 400)
+            c.get("/v2/management/action/car/1")
+            assert response.json is not None
+            self.assertEqual(response.json["actionStatus"], "paused")
+            self.assertEqual(response.json["timestamp"], 1000)
 
 
 # class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
