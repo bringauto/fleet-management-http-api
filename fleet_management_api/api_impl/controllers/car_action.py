@@ -1,6 +1,9 @@
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
-from fleet_management_api.models.car_action_state import CarActionState  # noqa: E501
+from fleet_management_api.models.car_action_state import (
+    CarActionState,
+    CarActionStatus,
+)  # noqa: E501
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
@@ -9,6 +12,9 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
 )
 from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
+
+
+CarId = int
 
 
 def get_car_action_states(
@@ -62,7 +68,8 @@ def unpause_car(car_id):  # noqa: E501
 
     :rtype: ConnexionResponse
     """
-    return "do some magic!"
+    state = CarActionState(car_id=car_id, action_status="normal")
+    return create_car_action_states_from_argument_and_save_to_db([state])
 
 
 def create_car_action_states_from_argument_and_save_to_db(
@@ -74,9 +81,24 @@ def create_car_action_states_from_argument_and_save_to_db(
 
     The car action state creation can succeed only if:
     - the car exists.
+
+    Any two states belonging to the same car are merged,
+    if they come one after another and have the same action status.
     """
     if not states:
         return _json_response([])
+
+    last_states = get_last_action_states(*{state.car_id for state in states})
+    extended_states = last_states + states
+    car_ids_with_duplicit_states = check_consecutive_states_are_different(extended_states)
+    if car_ids_with_duplicit_states:
+        return _error(
+            400,
+            f"Received two consecutive states with the same action status for cars: "
+            f"{car_ids_with_duplicit_states}, which is not allowed.",
+            "Consecutive states with the same action status",
+        )
+
     state_db_models = [_obj_to_db.car_action_state_to_db_model(s) for s in states]
     response = _db_access.add(
         *state_db_models,
@@ -97,3 +119,31 @@ def create_car_action_states_from_argument_and_save_to_db(
         )
         _log_error(msg)
     return _error(code=code, msg=msg, title=title)
+
+
+def check_consecutive_states_are_different(states: list[CarActionState]) -> set[CarId]:
+    """Remove consecutive states with the same action status."""
+    last_statuses: dict[CarId, CarActionStatus] = dict()
+    car_ids_with_duplicit_states = set()
+    for state in states:
+        car_id = state.car_id
+        if car_id in last_statuses and state.action_status == last_statuses[car_id]:
+            car_ids_with_duplicit_states.add(car_id)
+        last_statuses[car_id] = state.action_status
+        # otherwise, the state is skipped, a.k.a. merged with the previous one
+    return car_ids_with_duplicit_states
+
+
+def get_last_action_states(*car_ids: int) -> list[CarActionState]:
+    """Get last action state for each car in car_ids."""
+    states = []
+    for car_id in car_ids:
+        db_model = _db_access.get(
+            _db_models.CarActionStateDBModel,
+            criteria={"car_id": lambda x: x == car_id},
+            sort_result_by={"timestamp": "desc", "id": "desc"},
+            first_n=1,
+        )
+        if db_model:
+            states.append(_obj_to_db.car_action_state_from_db_model(db_model[0]))
+    return states
