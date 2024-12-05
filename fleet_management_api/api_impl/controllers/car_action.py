@@ -17,6 +17,12 @@ from fleet_management_api.api_impl.api_logging import log_info as _log_info, log
 CarId = int
 
 
+STATE_TRANSITIONS: dict[str, set[str]] = {
+    CarActionStatus.NORMAL: {CarActionStatus.PAUSED},
+    CarActionStatus.PAUSED: {CarActionStatus.NORMAL},
+}
+
+
 def get_car_action_states(
     car_id: int, since: int = 0, wait: bool = False, last_n: int = 0
 ) -> _Response:
@@ -90,12 +96,11 @@ def create_car_action_states_from_argument_and_save_to_db(
 
     last_states = get_last_action_states(*{state.car_id for state in states})
     extended_states = last_states + states
-    car_ids_with_duplicit_states = check_consecutive_states_are_different(extended_states)
-    if car_ids_with_duplicit_states:
+    invalid_state_transitions = check_for_invalid_car_action_state_transitions(extended_states)
+    if invalid_state_transitions:
         return _error(
             400,
-            f"Received two consecutive states with the same action status for cars: "
-            f"{car_ids_with_duplicit_states}, which is not allowed.",
+            f"Received invalid state transitions: {invalid_state_transitions}",
             "Consecutive states with the same action status",
         )
 
@@ -121,17 +126,28 @@ def create_car_action_states_from_argument_and_save_to_db(
     return _error(code=code, msg=msg, title=title)
 
 
-def check_consecutive_states_are_different(states: list[CarActionState]) -> set[CarId]:
-    """Remove consecutive states with the same action status."""
+def check_for_invalid_car_action_state_transitions(
+    states: list[CarActionState],
+) -> dict[CarId, list[tuple[CarActionStatus, CarActionStatus]]]:
+    """Return a dictionary of car ids with invalid state transitions."""
     last_statuses: dict[CarId, CarActionStatus] = dict()
-    car_ids_with_duplicit_states = set()
+    invalid_state_transitions: dict[CarId, list[tuple[CarActionStatus, CarActionStatus]]] = dict()
     for state in states:
         car_id = state.car_id
-        if car_id in last_statuses and state.action_status == last_statuses[car_id]:
-            car_ids_with_duplicit_states.add(car_id)
-        last_statuses[car_id] = state.action_status
+        if car_id not in last_statuses:
+            last_statuses[car_id] = state.action_status
+        else:
+            last_status_value = str(last_statuses[car_id])
+            allowed_next_statuses = STATE_TRANSITIONS.get(last_status_value, set())
+            if state.action_status not in allowed_next_statuses:
+                if not car_id in invalid_state_transitions:
+                    invalid_state_transitions[car_id] = []
+                invalid_state_transitions[car_id].append(
+                    (last_statuses[car_id], state.action_status)
+                )
+            last_statuses[car_id] = state.action_status
         # otherwise, the state is skipped, a.k.a. merged with the previous one
-    return car_ids_with_duplicit_states
+    return invalid_state_transitions
 
 
 def get_last_action_states(*car_ids: int) -> list[CarActionState]:
