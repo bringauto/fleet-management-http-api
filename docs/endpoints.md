@@ -6,6 +6,7 @@
 
 - [API]()
 - [Car](#car-endpoints)
+- [Car Action](#car-action-endpoints)
 - [Car State](#car-state-endpoints)
 - [Order](#order-endpoints)
 - [Order State](#order-state-endpoints)
@@ -91,6 +92,61 @@ Response codes:
 - 200: Successful car removal.
 - 400: Bad request. The carId is not a valid integer.
 - 404: Not found. The Car with the given ID does not exist.
+
+
+# Car Action endpoints
+
+Car Action [description](definitions.md#car-action).
+
+More on endpoints [here](entity_manipulations.md#car-action).
+
+## /action/car/{carId}
+
+### GET
+
+Returns action states for a car with the given ID.
+
+Query parameters:
+
+- 'since' - timestamp in milliseconds (default=0). API returns only action states with timestamp >= since.
+- 'wait' - boolean (default=False). If True and no action states would be returned, the request will wait for the next relevant action states to be added.
+- 'lastN' - integer (default=0). Limits the number of returned action states. If the number of action states is greater than the specified limit, the server returns N action states with the highest timestamp or (if timestamp are equal) the highest ID. If set to 0 or less, number of returned action states is NOT limited.
+
+Query options since and wait determine the behavior as described in [Wait mechanism documentation](https://docs.google.com/document/d/1DOHSFV2ui8C7Oyrui1sVxadSqaxPjlY3uif-EK2-Uxo)
+
+Response format: JSON array of CarActionState objects.
+
+Response codes:
+
+- 200: Successfully found a car action states.
+- 400: Bad request. The carId is not a valid integer.
+- 404: Not found. The Car with the given ID does not exist.
+
+## /action/car/{carId}/pause
+
+### POST
+
+Pause the car with the given ID if the car is not paused.
+
+Response codes:
+
+- 200: Successfully paused the car.
+- 400: Bad request. Either the carId is not a valid integer or the car is not in state that allows pausing.
+- 404: Not found. The Car with the given ID does not exist.
+
+
+## /action/car/{carId}/unpause
+
+### POST
+
+Unpause the car with the given ID if the car is paused.
+
+Response codes:
+
+- 200: Successfully unpaused the car.
+- 400: Bad request. Either the carId is not a valid integer or the car is not in state that allows unpausing.
+- 404: Not found. The Car with the given ID does not exist.
+
 
 # Car State endpoints
 
