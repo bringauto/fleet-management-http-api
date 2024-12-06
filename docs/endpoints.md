@@ -96,9 +96,9 @@ Response codes:
 
 # Car Action endpoints
 
-Car Action [description](definitions.md#car-action).
+Car Action State [description](definitions.md#car-action-state).
 
-More on endpoints [here](entity_manipulations.md#car-action).
+More on endpoints [here](entity_manipulations.md#car-action-state).
 
 ## /action/car/{carId}
 

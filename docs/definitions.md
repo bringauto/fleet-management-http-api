@@ -49,6 +49,7 @@ Example:
 # Entities
 
 - [Car](#car)
+- [Car Action State](#car-action-state)
 - [Car State](#car-state)
 - [Order](#order)
 - [Order State](#order-state)
@@ -101,6 +102,27 @@ Example:
 }
 ```
 
+## Car Action State
+
+Data structure containing action status of a given Car, meaning how the Car reacts to existing Orders (the actual logic is implemented in components further down the line to the Car).
+
+Required data:
+
+- car ID: unsigned integer
+- status: enum, available options = {`paused`, `unpaused`}
+
+Example:
+
+```json
+{
+  "id": 12,
+  "timestamp": 1707805396753,
+  "carId": 1,
+  "status": "paused"
+}
+```
+
+
 ## Car State
 
 Data structure containing attributes of a given Car, that change in time.
@@ -108,7 +130,7 @@ Data structure containing attributes of a given Car, that change in time.
 Required data:
 
 - car ID: unsigned integer
-- status: enum, available options = {idle, charging, out_of_order, paused_by_button}
+- status: enum, available options = {`idle`, `charging`, `out_of_order`, `paused_by_button`}
 - fuel: unsigned integer
 - speed: float
 - position: [GNSSPosition](#gnss-position)

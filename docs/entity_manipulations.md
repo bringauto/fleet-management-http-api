@@ -1,6 +1,7 @@
 # Index
 
 - [Car](#car)
+- [Car Action State](#car-action-state)
 - [Car State](#car-state)
 - [Order](#order)
 - [Order State](#order-state)
@@ -60,6 +61,32 @@ Result:
 
 - The Car is deleted.
 - All the [Car States](#car-state) referencing the Car are deleted.
+
+
+## Car Action State
+
+Entity [description](definitions.md#car-action-state).
+
+There is a maximum number of Car Action States $N_{car\,action\,states}$ that can be stored by the API.
+
+### Pause/Unpause
+
+The method does not accept any parameters. After calling it, the server creates a new Car Action State with the `paused`/`normal` status for a given Car.
+
+Requirements:
+
+- The [Car](#car) must exist.
+- The status of the previous Car Action State must be `normal`/`paused`.
+
+Result:
+
+- A Car Action State is created.
+- The Car Action State ID is automatically set by the server.
+- The Car Action State's timestamp is set to match the time the endpoint has been called.
+- Oldest Car Action State might be deleted, so the number of action states stored by the API for the particular [Car](#car) is not greater than $N_{car\,action\,states}$.
+- All the Clients waiting for some new Car Action States of a particular [Car](#car) receive a response (for the car action state GET method).
+
+If creation of the object fails, no changes occur on the server.
 
 ## Car State
 
