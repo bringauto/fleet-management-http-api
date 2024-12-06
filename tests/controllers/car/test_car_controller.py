@@ -197,7 +197,8 @@ class Test_Logging_Car_Creation(api_test.TestCase):
             app = _app.get_test_app()
             with app.app.test_client() as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
-                self.assertEqual(len(logs.output), 2)
+                # there should be three logs - one for a car, another for the car state and the last one for the car action state
+                self.assertEqual(len(logs.output), 3)
                 self.assertIn(str(car.name), logs.output[0])
 
     def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(

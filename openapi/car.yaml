@@ -258,6 +258,106 @@ paths:
         default:
           $ref: './errors.yaml#/components/responses/UnexpectedError'
 
+  /action/car/{carId}:
+    get:
+      operationId: getCarActionStates
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+      tags:
+        - carAction
+      summary: Finds car action states for a Car with given carId.
+      parameters:
+        - name: carId
+          in: path
+          description: ID of the Car for which to return the action states.
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
+      responses:
+        '200':
+          description: Successfully found Car Action States complying with the request parameters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+        '400':
+          $ref: './errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './errors.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: './errors.yaml#/components/responses/UnexpectedError'
+  /action/car/{carId}/pause:
+    post:
+      operationId: pauseCar
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+      tags:
+        - carAction
+      summary: Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
+      parameters:
+        - name: carId
+          in: path
+          description: ID of the Car which should be paused.
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Successfully paused the Car.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarActionState'
+        '400':
+          $ref: './errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './errors.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: './errors.yaml#/components/responses/UnexpectedError'
+
+  /action/car/{carId}/unpause:
+    post:
+      operationId: unpauseCar
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+      tags:
+        - carAction
+      summary: Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
+      parameters:
+        - name: carId
+          in: path
+          description: ID of the Car which should be unpaused.
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Successfully unpaused the Car.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarActionState'
+        '400':
+          $ref: './errors.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './errors.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './errors.yaml#/components/responses/NotFound'
+        default:
+          $ref: './errors.yaml#/components/responses/UnexpectedError'
+
 components:
   schemas:
     Car:
@@ -286,6 +386,8 @@ components:
           example: false
         lastState:
           $ref: '#/components/schemas/CarState'
+        lastActionState:
+          $ref: '#/components/schemas/CarActionState'
     CarState:
       type: object
       description: Car State object structure
@@ -313,6 +415,7 @@ components:
           example: 20.5
         position:
           $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+
     CarStatus:
       type: string
       description: Car Status enum
@@ -322,7 +425,30 @@ components:
         - out_of_order
         - driving
         - in_stop
-        - paused_by_phone
         - paused_by_obstacle
         - paused_by_button
       example: idle
+
+    CarActionState:
+      type: object
+      description: Car Action State object structure
+      required:
+        - actionStatus
+        - carId
+      properties:
+        id:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        carId:
+          $ref: 'common_models.yaml#/components/schemas/Id'
+        timestamp:
+          $ref: 'common_models.yaml#/components/schemas/Timestamp'
+        actionStatus:
+          $ref: '#/components/schemas/CarActionStatus'
+
+    CarActionStatus:
+      type: string
+      description: Car Action Status enum
+      enum:
+        - normal
+        - paused
+      example: normal

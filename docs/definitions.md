@@ -49,6 +49,7 @@ Example:
 # Entities
 
 - [Car](#car)
+- [Car Action State](#car-action-state)
 - [Car State](#car-state)
 - [Order](#order)
 - [Order State](#order-state)
@@ -78,6 +79,7 @@ Data assigned by API:
 - id: unsigned integer
 - timestamp: unsigned integer
 - last state: [Car State](#car-state)
+- last action state: [Car Action State](#car-action-state)
 
 Example:
 
@@ -97,9 +99,36 @@ Example:
     "speed": 10.5,
     "status": "driving",
     "timestamp": 1713774431780
+  },
+  "lastActionState": {
+    "carId": 9,
+    "id": 1,
+    "status": "unpaused",
+    "timestamp": 1713774431780
   }
 }
 ```
+
+## Car Action State
+
+Data structure containing action status of a given Car, meaning how the Car reacts to existing Orders (the actual logic is implemented in components further down the line to the Car).
+
+Required data:
+
+- car ID: unsigned integer
+- status: enum, available options = {`paused`, `unpaused`}
+
+Example:
+
+```json
+{
+  "id": 12,
+  "timestamp": 1707805396753,
+  "carId": 1,
+  "status": "paused"
+}
+```
+
 
 ## Car State
 
@@ -108,7 +137,7 @@ Data structure containing attributes of a given Car, that change in time.
 Required data:
 
 - car ID: unsigned integer
-- status: enum, available options = {idle, charging, out_of_order, paused_by_phone}
+- status: enum, available options = {`idle`, `charging`, `out_of_order`, `paused_by_button`}
 - fuel: unsigned integer
 - speed: float
 - position: [GNSSPosition](#gnss-position)
