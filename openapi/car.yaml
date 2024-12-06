@@ -265,6 +265,18 @@ paths:
       tags:
         - carAction
       summary: Finds car action states for a Car with given carId.
+      parameters:
+        - name: carId
+          in: path
+          description: ID of the Car which should be unpaused.
+          required: true
+          example: 1
+          schema:
+            type: integer
+            format: int32
+        - $ref: 'common_models.yaml#/components/parameters/Wait'
+        - $ref: 'common_models.yaml#/components/parameters/Since'
+        - $ref: 'common_models.yaml#/components/parameters/LastN'
       responses:
         '200':
           description: Successfully found Car Action States complying with the request parameters.

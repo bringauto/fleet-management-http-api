@@ -1,21 +1,22 @@
 import unittest
 from unittest.mock import patch, Mock
+import time
+
+import concurrent.futures as _futures
 
 import fleet_management_api.app as _app
 from fleet_management_api.models import (
     Car,
     CarActionStatus,
     CarActionState,
-    GNSSPosition,
     MobilePhone,
 )
-import fleet_management_api.database.connection as _connection
-import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.api_impl.controllers.car_action import (
     create_car_action_states_from_argument_and_save_to_db,
     check_for_invalid_car_action_state_transitions,
     get_last_action_states,
 )
+from fleet_management_api.database.timestamp import timestamp_ms
 
 from tests._utils.setup_utils import create_platform_hws
 import tests._utils.api_test as api_test
@@ -230,6 +231,57 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
             assert response.json is not None
             self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.NORMAL)
             self.assertEqual(response.json[-1]["timestamp"], self.last_timestamp + 2000)
+
+
+class Test_Query_Parameters(api_test.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_only_states_inclusively_newer_than_since_parameter_value_are_returned(
+        self, tmock: Mock
+    ):
+        app = _app.get_test_app()
+        create_platform_hws(app)
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        with app.app.test_client() as c:
+            tmock.return_value = 1000
+            c.post("/v2/management/car", json=[car])
+            tmock.return_value = 2000
+            c.post("/v2/management/action/car/1/pause")
+            response = c.get("/v2/management/action/car/1?since=1500")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
+
+    def test_last_n_parameter_limits_number_of_returned_states(self):
+        app = _app.get_test_app()
+        create_platform_hws(app)
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        with app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car])
+            c.post("/v2/management/action/car/1/pause")
+            c.post("/v2/management/action/car/1/unpause")
+            response = c.get("/v2/management/action/car/1?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
+
+    def test_wait_parameter_yields_empty_response_when_no_new_states_are_posted(self):
+        app = _app.get_test_app()
+        create_platform_hws(app)
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        with _futures.ThreadPoolExecutor() as ex:
+            with app.app.test_client() as c:
+                c.post("/v2/management/car", json=[car]).json
+                time.sleep(1)
+                timestamp = timestamp_ms()
+                f1 = ex.submit(c.get, f"/v2/management/action/car/1?wait=true&since={timestamp}")
+                time.sleep(1)
+                c.post("/v2/management/action/car/1/pause")
+                response = f1.result()
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
 
 
 if __name__ == "__main__":  # pragma: no coverage

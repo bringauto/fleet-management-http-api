@@ -40,6 +40,43 @@ paths:
   /action/car/{carId}:
     get:
       operationId: get_car_action_states
+      parameters:
+      - description: ID of the Car which should be unpaused.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
       responses:
         "200":
           content:
