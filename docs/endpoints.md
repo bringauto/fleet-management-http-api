@@ -4,7 +4,7 @@
 
 # Index
 
-- [API]()
+- [API](#api-endpoints)
 - [Car](#car-endpoints)
 - [Car Action](#car-action-endpoints)
 - [Car State](#car-state-endpoints)
