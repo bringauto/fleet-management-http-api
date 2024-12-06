@@ -374,11 +374,113 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
         with self.app.app.test_client() as c:
             response = c.get("/v2/management/action/car/1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json[0]["actionStatus"], "normal")
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
 
             c.delete("/v2/management/car/1")
             response = c.get("/v2/management/action/car/1")
             self.assertEqual(response.status_code, 404)
+
+
+class Test_Returning_Last_N_Car_States(api_test.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        super().setUp()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 1)
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            c.post("/v2/management/car", json=[car])
+
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/action/car/1/pause")
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/action/car/1/unpause")
+
+    def test_returning_last_1_state(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/action/car/1?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
+
+    def test_returning_last_2_states(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/action/car/1?lastN=2")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
+            self.assertEqual(response.json[1]["actionStatus"], CarActionStatus.NORMAL)
+
+    def test_setting_last_n_to_higher_value_than_number_of_existing_states_yields_all_existing_states(
+        self,
+    ):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/action/car/1?lastN=100000")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 3)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
+            self.assertEqual(response.json[1]["actionStatus"], CarActionStatus.PAUSED)
+            self.assertEqual(response.json[2]["actionStatus"], CarActionStatus.NORMAL)
+
+    def test_returning_last_two_states_newer_than_given_timestamp(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/action/car/1?lastN=2&since=1500")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
+
+
+class Test_Returning_Last_N_Car_States_For_Given_Car(api_test.TestCase):
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def setUp(self, mocked_timestamp: Mock) -> None:
+        super().setUp()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 2)
+        self.car_1 = Car(
+            platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
+        )
+        self.car_2 = Car(
+            platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789")
+        )
+        with self.app.app.test_client() as c:
+            mocked_timestamp.return_value = 0
+            response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
+            assert response.json is not None
+            self.car_1.id = response.json[0]["id"]
+            self.car_2.id = response.json[1]["id"]
+
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/action/car/2/pause")
+            mocked_timestamp.return_value = 1000
+            c.post("/v2/management/action/car/1/pause")
+            c.post("/v2/management/action/car/2/unpause")
+            mocked_timestamp.return_value = 2000
+            c.post("/v2/management/action/car/1/unpause")
+            c.post("/v2/management/action/car/2/pause")
+
+    def test_returning_last_1_state_for_given_car(self):
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/action/car/{self.car_1.id}?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
+
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/action/car/{self.car_2.id}?lastN=1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
+
+    def test_returning_last_2_states_for_given_car(self):
+        with self.app.app.test_client() as c:
+            response = c.get(f"/v2/management/action/car/{self.car_1.id}?lastN=2")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
+            self.assertEqual(response.json[1]["actionStatus"], CarActionStatus.NORMAL)
 
 
 if __name__ == "__main__":  # pragma: no coverage
