@@ -41,7 +41,7 @@ paths:
     get:
       operationId: get_car_action_states
       parameters:
-      - description: ID of the Car which should be unpaused.
+      - description: ID of the Car for which to return the action states.
         example: 1
         in: path
         name: carId

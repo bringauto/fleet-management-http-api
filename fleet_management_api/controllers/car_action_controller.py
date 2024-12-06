@@ -13,7 +13,7 @@ def get_car_action_states(car_id, wait=None, since=None, last_n=None):  # noqa: 
 
      # noqa: E501
 
-    :param car_id: ID of the Car which should be unpaused.
+    :param car_id: ID of the Car for which to return the action states.
     :type car_id: int
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool

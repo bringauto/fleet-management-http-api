@@ -268,7 +268,7 @@ paths:
       parameters:
         - name: carId
           in: path
-          description: ID of the Car which should be unpaused.
+          description: ID of the Car for which to return the action states.
           required: true
           example: 1
           schema:
