@@ -12,7 +12,11 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
     text_response as _text_response,
 )
-from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
+from fleet_management_api.api_impl.api_logging import (
+    log_info as _log_info,
+    log_error as _log_error,
+    log_error_and_respond as _log_error_and_respond,
+)
 
 
 CarId = int
@@ -34,7 +38,12 @@ def get_car_action_states(
 
     :rtype: ConnexionResponse
     """
-
+    if not _db_access.get_by_id(_db_models.CarDBModel, car_id):
+        return _log_error_and_respond(
+            f"Car with ID={car_id} not found. Cannot get car action states.",
+            404,
+            title="Referenced object not found",
+        )
     db_models = _db_access.get(
         _db_models.CarActionStateDBModel,
         criteria={"timestamp": lambda x: x >= since, "car_id": lambda x: x == car_id},

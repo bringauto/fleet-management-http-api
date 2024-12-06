@@ -52,6 +52,9 @@ class CarDBModel(Base):
     states: _Mapped[list["CarStateDBModel"]] = _relationship(
         "CarStateDBModel", cascade="save-update, merge, delete", back_populates="car"
     )
+    action_states: _Mapped[list["CarActionStateDBModel"]] = _relationship(
+        "CarActionStateDBModel", cascade="save-update, merge, delete", back_populates="car"
+    )
     orders: _Mapped[list["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
     default_route: _Mapped["RouteDBModel"] = _relationship(
         "RouteDBModel", lazy="noload", back_populates="cars"
@@ -97,7 +100,10 @@ class CarActionStateDBModel(Base):
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
     status: _Mapped[str] = _mapped_column(_sqa.String)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-    car: _Mapped[CarDBModel] = _relationship("CarDBModel", lazy="noload")
+
+    car: _Mapped[CarDBModel] = _relationship(
+        "CarDBModel", back_populates="action_states", lazy="select"
+    )
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:

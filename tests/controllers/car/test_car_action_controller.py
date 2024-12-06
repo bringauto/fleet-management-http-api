@@ -360,8 +360,25 @@ class Test_Maximum_Number_Of_States(api_test.TestCase):
             self.assertEqual(len(c.get("/v2/management/action/car/2?since=0").json), max_n)
 
 
+class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
 
+    def setUp(self, *args) -> None:
+        super().setUp()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 1)
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car])
 
+    def test_no_action_states_exists_for_car_after_car_is_deleted(self):
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/action/car/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json[0]["actionStatus"], "normal")
+
+            c.delete("/v2/management/car/1")
+            response = c.get("/v2/management/action/car/1")
+            self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":  # pragma: no coverage
