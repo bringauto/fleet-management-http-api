@@ -6,7 +6,7 @@
         },
         "file": {
             "level": "debug",
-            "use": false,
+            "use": true,
             "path": "./log/"
         }
     },
