@@ -11,6 +11,7 @@ from fleet_management_api.models import (
     CarActionState,
     MobilePhone,
 )
+from fleet_management_api.database.db_models import CarActionStateDBModel
 from fleet_management_api.api_impl.controllers.car_action import (
     create_car_action_states_from_argument_and_save_to_db,
     check_for_invalid_car_action_state_transitions,
@@ -282,6 +283,85 @@ class Test_Query_Parameters(api_test.TestCase):
                 response = f1.result()
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
+
+
+class Test_Maximum_Number_Of_States(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        self.app = _app.get_test_app()
+        create_platform_hws(self.app, 2)
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car])
+
+    def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
+        self,
+    ):
+        max_n = CarActionStateDBModel.max_n_of_stored_states()
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/action/car/1/pause")
+            is_paused = True
+            for _ in range(1, max_n - 2):
+                if is_paused:
+                    response = c.post("/v2/management/action/car/1/unpause")
+                else:
+                    response = c.post("/v2/management/action/car/1/pause")
+                is_paused = not is_paused
+
+            response = c.get("/v2/management/action/car/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), max_n - 1)
+
+            if is_paused:
+                c.post("/v2/management/action/car/1/unpause")
+            else:
+                c.post("/v2/management/action/car/1/pause")
+            is_paused = not is_paused
+
+            response = c.get("/v2/management/action/car/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), max_n)
+
+            if is_paused:
+                c.post("/v2/management/action/car/1/unpause")
+            else:
+                c.post("/v2/management/action/car/1/pause")
+            is_paused = not is_paused
+
+            response = c.get("/v2/management/action/car/1?since=0")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), max_n)
+            self.assertTrue(isinstance(response.json, list))
+
+    def test_max_states_in_db_for_two_cars_is_double_of_max_n_of_states_for_single_car(self):
+        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car_2])
+
+        CarActionStateDBModel.set_max_n_of_stored_states(5)
+        max_n = CarActionStateDBModel.max_n_of_stored_states()
+        with self.app.app.test_client() as c:
+            is_paused = False
+            for _ in range(0, max_n + 5):
+                if is_paused:
+                    c.post(f"/v2/management/action/car/1/unpause")
+                else:
+                    c.post("/v2/management/action/car/1/pause")
+                is_paused = not is_paused
+            is_paused = False
+            for _ in range(max_n, 2 * max_n + 5):
+                if is_paused:
+                    c.post("/v2/management/action/car/2/unpause")
+                else:
+                    c.post("/v2/management/action/car/2/pause")
+                is_paused = not is_paused
+            self.assertEqual(len(c.get("/v2/management/action/car/1?since=0").json), max_n)
+            self.assertEqual(len(c.get("/v2/management/action/car/2?since=0").json), max_n)
+
+
+
+
 
 
 if __name__ == "__main__":  # pragma: no coverage

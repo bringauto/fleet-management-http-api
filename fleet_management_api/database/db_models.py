@@ -93,10 +93,20 @@ class CarStateDBModel(Base):
 class CarActionStateDBModel(Base):
     model_name = "CarActionState"
     __tablename__ = "car_action_states"
+    _max_n_of_states: int = 50
     car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
     status: _Mapped[str] = _mapped_column(_sqa.String)
     timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
     car: _Mapped[CarDBModel] = _relationship("CarDBModel", lazy="noload")
+
+    @classmethod
+    def max_n_of_stored_states(cls) -> int:
+        return cls._max_n_of_states
+
+    @classmethod
+    def set_max_n_of_stored_states(cls, n: int) -> None:
+        if n > 0:
+            cls._max_n_of_states = n
 
     def __repr__(self) -> str:
         return f"CarActionState(id={self.id}, car_id={self.car_id}, status={self.status}, timestamp={self.timestamp})"

@@ -10,6 +10,7 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
     error as _error,
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
 
@@ -112,10 +113,26 @@ def create_car_action_states_from_argument_and_save_to_db(
     title = ""
     if response.status_code == 200:
         inserted_models = [_obj_to_db.car_action_state_from_db_model(s) for s in response.body]
+        invalid_cleanup_responses = []
         for model in inserted_models:
             code, msg = 200, f"Car action state (ID={model.id}) was succesfully created."
             _log_info(msg)
-        return _json_response(inserted_models)
+            cleanup_response = _remove_old_states(model.car_id)
+            if cleanup_response.status_code != 200:
+                invalid_cleanup_responses.append(cleanup_response)
+        if invalid_cleanup_responses:
+            most_severe_cleanup_response = max(
+                invalid_cleanup_responses, key=lambda x: x.status_code
+            )
+            code, cleanup_error_msg = (
+                most_severe_cleanup_response.status_code,
+                most_severe_cleanup_response.body,
+            )
+            _log_error(cleanup_error_msg)
+            msg = msg + "\n" + cleanup_error_msg
+            title = "Could not delete object"
+        else:
+            return _json_response(inserted_models)
     else:
         code, msg, title = (
             response.status_code,
@@ -163,3 +180,22 @@ def get_last_action_states(*car_ids: int) -> list[CarActionState]:
         if db_model:
             states.append(_obj_to_db.car_action_state_from_db_model(db_model[0]))
     return states
+
+
+def _remove_old_states(car_id: int) -> _Response:
+    car_state_db_models = _db_access.get(
+        _db_models.CarActionStateDBModel, criteria={"car_id": lambda x: x == car_id}
+    )
+    curr_n_of_states = len(car_state_db_models)
+    delta = curr_n_of_states - _db_models.CarActionStateDBModel.max_n_of_stored_states()
+    if delta > 0:
+        response = _db_access.delete_n(
+            _db_models.CarActionStateDBModel,
+            delta,
+            column_name="timestamp",
+            start_from="minimum",
+            criteria={"car_id": lambda x: x == car_id},
+        )
+        return response
+    else:
+        return _text_response("")
