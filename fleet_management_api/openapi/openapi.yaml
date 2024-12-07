@@ -152,7 +152,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarActionState'
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
           description: Successfully paused the Car.
         "400":
           content:
@@ -220,7 +222,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarActionState'
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
           description: Successfully unpaused the Car.
         "400":
           content:
