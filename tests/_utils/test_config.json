@@ -15,7 +15,7 @@
         "port": 8080
     },
     "security": {
-        "keycloak_url": "https://keycloak.bringauto.com",
+        "keycloak_url": "https://keycloak.bringauto.com/auth/",
         "client_id": "",
         "client_secret_key": "",
         "scope": "",
