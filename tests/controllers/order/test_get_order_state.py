@@ -7,7 +7,10 @@ from concurrent.futures import ThreadPoolExecutor
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone
-from fleet_management_api.database.db_access import set_content_timeout_ms
+from fleet_management_api.database.db_access import set_content_timeout_ms, delete
+from fleet_management_api.database.db_models import OrderStateDBModel
+
+import tests._utils.api_test as api_test
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 
 
@@ -379,6 +382,33 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db.db"):
             os.remove("test_db.db")
+
+
+class Test_Retrieving_Order_With_States_Deleted(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        app = _app.get_test_app()
+        create_platform_hws(app)
+        create_stops(app, 1)
+        create_route(app, stop_ids=(1,))
+
+    def test_last_order_state_is_none_if_all_order_states_have_been_deleted(self):
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        app = _app.get_test_app()
+        with app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car], content_type="application/json")
+            c.post(
+                "/v2/management/order", json=[Order(car_id=1, target_stop_id=1, stop_route_id=1)]
+            )
+            # delete only existing car state (using the database-access method delete instead of the API, which does not provide the delete method for car states)
+            delete(OrderStateDBModel, 1)
+            response = c.get("/v2/management/orderstate/1")
+            # there are now no order states for order with ID=1
+            self.assertEqual(response.json, [])
+            response = c.get("/v2/management/order/1/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertIsNone(Order.from_dict(response.json).last_state)
 
 
 if __name__ == "__main__":

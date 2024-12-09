@@ -169,23 +169,38 @@ def update_cars() -> _Response:
 
 
 def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car:
+    last_state = _get_last_car_state(car_db_model)
+    last_action_state = _get_last_car_action_state(car_db_model)
+    car = _obj_to_db.car_from_db_model(car_db_model, last_state, last_action_state)
+    return car
+
+
+def _get_last_car_state(car_db_model: _db_models.CarDBModel) -> _CarState | None:
     db_last_states = _db_access.get(
         _db_models.CarStateDBModel,
         criteria={"car_id": lambda x: x == car_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,
     )
+    if db_last_states:
+        last_state = _obj_to_db.car_state_from_db_model(db_last_states[0])
+    else:
+        last_state = None
+    return last_state
+
+
+def _get_last_car_action_state(car_db_model: _db_models.CarDBModel) -> _CarActionState | None:
     db_last_action_states = _db_access.get(
         _db_models.CarActionStateDBModel,
         criteria={"car_id": lambda x: x == car_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
         first_n=1,
     )
-    last_state = _obj_to_db.car_state_from_db_model(db_last_states[0])
-    last_action_state = _obj_to_db.car_action_state_from_db_model(db_last_action_states[0])
-
-    car = _obj_to_db.car_from_db_model(car_db_model, last_state, last_action_state)
-    return car
+    if db_last_action_states:
+        last_action_state = _obj_to_db.car_action_state_from_db_model(db_last_action_states[0])
+    else:
+        last_action_state = None
+    return last_action_state
 
 
 def _post_default_car_state(car_ids: list[int]) -> _Response:

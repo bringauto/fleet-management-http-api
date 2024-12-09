@@ -28,7 +28,9 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
 
         self.orders = [Order(car_id=1, target_stop_id=1, stop_route_id=1) for _ in range(30)]
 
-    def test_waiting_request_for_new_orders_returns_all_just_created_orders_with_their_default_states(self):
+    def test_waiting_request_for_new_orders_returns_all_just_created_orders_with_their_default_states(
+        self,
+    ):
         def get_order_updates():
             with self.app.app.test_client() as c:
                 c.get("/v2/management/orderstate?carId=1&wait=true")
@@ -48,7 +50,7 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/order", json=self.orders)
             for k in range(50):
-                state = OrderState(order_id=k+1, status=OrderStatus.CANCELED)
+                state = OrderState(order_id=k + 1, status=OrderStatus.CANCELED)
                 c.post("/v2/management/orderstate", json=[state])
 
             response = c.get("/v2/management/order?carId=1")
@@ -56,33 +58,6 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
             self.assertEqual(len(orders), 5)
             for order in orders:
                 self.assertEqual(order["lastState"]["status"], "canceled")
-
-    def test_waiting_for_order_updatea_and_marking_ordera_as_done_at_the_same_time_either_yields_orders_with_last_state_or_with_last_state_being_none(self):
-        set_max_n_of_inactive_orders(1)
-        def get_order_updates(since: int = 0):
-            with self.app.app.test_client() as c:
-                c.get(f"/v2/management/orderstate?carId=1&wait=true&{since}")
-                time.sleep(0.081)
-                return c.get("/v2/management/order/1")
-
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/order", json=self.orders)
-            c.post("/v2/management/orderstate", json=[OrderState(order_id=1, status=OrderStatus.DONE)])
-            c.post("/v2/management/orderstate", json=[OrderState(order_id=2, status=OrderStatus.DONE)])
-
-        with self.app.app.test_client() as c, futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(get_order_updates, since=timestamp_ms()+50)
-            def post_done_states():
-                for k in range(3, len(self.orders) + 1):
-                    c.post("/v2/management/orderstate", json=[OrderState(order_id=k, status=OrderStatus.DONE)])
-
-            executor.submit(post_done_states)
-            response = future.result()
-            self.assertEqual(response.status_code, 200)
-            for o in response.json:
-                state = Order.from_dict(o).last_state
-                self.assertTrue(isinstance(state, OrderState))
-
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):

@@ -17,8 +17,8 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
 
 def car_from_db_model(
     car_db_model: _db_models.CarDBModel,
-    last_state: _models.CarState,
-    last_action_state: _models.CarActionState,
+    last_state: _models.CarState | None,
+    last_action_state: _models.CarActionState | None,
 ) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
