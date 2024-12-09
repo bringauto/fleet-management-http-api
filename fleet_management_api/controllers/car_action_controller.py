@@ -35,7 +35,7 @@ def pause_car(car_id):  # noqa: E501
     :param car_id: ID of the Car which should be paused.
     :type car_id: int
 
-    :rtype: Union[CarActionState, Tuple[CarActionState, int], Tuple[CarActionState, int, Dict[str, str]]
+    :rtype: Union[List[CarActionState], Tuple[List[CarActionState], int], Tuple[List[CarActionState], int, Dict[str, str]]
     """
     return 'do some magic!'
 
@@ -48,6 +48,6 @@ def unpause_car(car_id):  # noqa: E501
     :param car_id: ID of the Car which should be unpaused.
     :type car_id: int
 
-    :rtype: Union[CarActionState, Tuple[CarActionState, int], Tuple[CarActionState, int, Dict[str, str]]
+    :rtype: Union[List[CarActionState], Tuple[List[CarActionState], int], Tuple[List[CarActionState], int, Dict[str, str]]
     """
     return 'do some magic!'

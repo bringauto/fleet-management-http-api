@@ -316,7 +316,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarActionState'
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarActionState'
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
@@ -348,7 +350,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CarActionState'
+                type: array
+                items:
+                  $ref: '#/components/schemas/CarActionState'
         '400':
           $ref: './errors.yaml#/components/responses/BadRequest'
         '401':
