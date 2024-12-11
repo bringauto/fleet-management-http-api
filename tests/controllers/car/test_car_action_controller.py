@@ -79,11 +79,10 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
     def test_after_pause_is_car_last_action_state_equal_to_paused(self):
         with self.app.app.test_client() as c:
             c.post("/v2/management/action/car/1/pause")
-            response = c.get("/v2/management/car/1")
+            response = c.get("/v2/management/action/car/1?lastN=1")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(
-                response.json["lastActionState"]["actionStatus"], CarActionStatus.PAUSED
-            )
+
+            self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.PAUSED)
 
 
 class Test_Merging_Action_States(api_test.TestCase):
@@ -170,9 +169,11 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/car", json=[self.car])
+            c.post("/v2/management/car", json=[self.car])
+            response = c.get("/v2/management/action/car/1?lastN=1")
+            print(response.json)
             assert response.json is not None
-            self.last_timestamp = response.json[0]["lastActionState"]["timestamp"]
+            self.last_timestamp = response.json[-1]["timestamp"]
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_pausing_car_in_normal_state_creates_new_state_with_paused_status(self, tmock: Mock):
