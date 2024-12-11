@@ -78,11 +78,11 @@ def create_cars() -> _Response:  # noqa: E501
                 _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
             car_states = _post_default_car_state(ids).body
-            car_action_states = _post_default_car_action_state(ids).body
+            _post_default_car_action_state(ids).body
 
             posted_cars: list[_Car] = []
-            for model, state, action_state in zip(posted_db_models, car_states, car_action_states):
-                posted_car = _obj_to_db.car_from_db_model(model, state, action_state)
+            for model, state in zip(posted_db_models, car_states):
+                posted_car = _obj_to_db.car_from_db_model(model, state)
                 posted_cars.append(posted_car)
             return _json_response(posted_cars)
         else:
@@ -170,8 +170,7 @@ def update_cars() -> _Response:
 
 def _get_car_with_last_state(car_db_model: _db_models.CarDBModel) -> _models.Car:
     last_state = _get_last_car_state(car_db_model)
-    last_action_state = _get_last_car_action_state(car_db_model)
-    car = _obj_to_db.car_from_db_model(car_db_model, last_state, last_action_state)
+    car = _obj_to_db.car_from_db_model(car_db_model, last_state)
     return car
 
 
@@ -187,20 +186,6 @@ def _get_last_car_state(car_db_model: _db_models.CarDBModel) -> _CarState | None
     else:
         last_state = None
     return last_state
-
-
-def _get_last_car_action_state(car_db_model: _db_models.CarDBModel) -> _CarActionState | None:
-    db_last_action_states = _db_access.get(
-        _db_models.CarActionStateDBModel,
-        criteria={"car_id": lambda x: x == car_db_model.id},
-        sort_result_by={"timestamp": "desc", "id": "desc"},
-        first_n=1,
-    )
-    if db_last_action_states:
-        last_action_state = _obj_to_db.car_action_state_from_db_model(db_last_action_states[0])
-    else:
-        last_action_state = None
-    return last_action_state
 
 
 def _post_default_car_state(car_ids: list[int]) -> _Response:
