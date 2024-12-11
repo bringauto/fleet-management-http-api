@@ -27,10 +27,6 @@ LAST_CAR_STATE = CarState(
     fuel=8,
     position=GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50),
 )
-LAST_CAR_ACTION_STATE = CarActionState(
-    action_status=CarActionStatus.NORMAL,
-    car_id=1,
-)
 LAST_ORDER_STATE = OrderState(
     status=OrderStatus.TO_ACCEPT,
     order_id=1,
@@ -70,12 +66,9 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
         car_out = _obj_to_db.car_from_db_model(
-            _obj_to_db.car_to_db_model(car_in),
-            last_state=LAST_CAR_STATE,
-            last_action_state=LAST_CAR_ACTION_STATE,
+            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
         )
         car_in.last_state = LAST_CAR_STATE
-        car_in.last_action_state = LAST_CAR_ACTION_STATE
         self.assertEqual(car_out, car_in)
 
     def test_car_with_all_attributes_specified_converted_to_db_model_and_back_is_unchanged(
@@ -88,12 +81,9 @@ class Test_Creating_Car_DB_Model(unittest.TestCase):
             default_route_id=1,
         )
         car_out = _obj_to_db.car_from_db_model(
-            _obj_to_db.car_to_db_model(car_in),
-            last_state=LAST_CAR_STATE,
-            last_action_state=LAST_CAR_ACTION_STATE,
+            _obj_to_db.car_to_db_model(car_in), last_state=LAST_CAR_STATE
         )
         car_in.last_state = LAST_CAR_STATE
-        car_in.last_action_state = LAST_CAR_ACTION_STATE
         self.assertEqual(car_out, car_in)
 
 

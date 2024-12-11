@@ -345,23 +345,6 @@ class Test_Retrieving_Car_With_States_Deleted(api_test.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(Car.from_dict(response.json).last_state, None)
 
-    def test_action_state_is_none_for_car_whose_action_states_have_been_deleted(
-        self,
-    ):
-        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
-        with app.app.test_client() as c:
-            c.post("/v2/management/car", json=[car], content_type="application/json")
-            # delete only existing car state (using the database-access method delete instead of the API, which does not provide the delete method for car states)
-            delete(CarActionStateDBModel, 1)
-            response = c.get("/v2/management/action/car/1")
-            # there are now no car states for car with ID=1
-            self.assertEqual(response.json, [])
-            # when getting car with ID=1, the default car state should be created
-            response = c.get("/v2/management/car/1")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(Car.from_dict(response.json).last_action_state, None)
-
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main(buffer=True)

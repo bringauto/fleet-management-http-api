@@ -390,8 +390,6 @@ components:
           example: false
         lastState:
           $ref: '#/components/schemas/CarState'
-        lastActionState:
-          $ref: '#/components/schemas/CarActionState'
     CarState:
       type: object
       description: Car State object structure
