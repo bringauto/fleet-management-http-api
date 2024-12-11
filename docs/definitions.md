@@ -79,7 +79,6 @@ Data assigned by API:
 - id: unsigned integer
 - timestamp: unsigned integer
 - last state: [Car State](#car-state)
-- last action state: [Car Action State](#car-action-state)
 
 Example:
 
@@ -98,12 +97,6 @@ Example:
     "id": 1,
     "speed": 10.5,
     "status": "driving",
-    "timestamp": 1713774431780
-  },
-  "lastActionState": {
-    "carId": 9,
-    "id": 1,
-    "status": "unpaused",
     "timestamp": 1713774431780
   }
 }
