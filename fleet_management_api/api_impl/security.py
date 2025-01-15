@@ -17,6 +17,16 @@ class NoHeaderWithJWTToken(Exception):
 
 
 class TenantFromToken:
+    """
+    Each instance of the class is initialized with tenant name read from JWT token
+    in the Authorization header of the request, given the key for decoding the token.
+
+    If the request contains tenant cookie, the tenant name is checked against the tenants
+    listed in the JWT token contained in the request.headers["Authorization"].
+    If the header is missing, an exception is raised.
+
+    If the tenant cookie is not specified, the tenant name will be an empty string.
+    """
 
     algorithm = "HS256"
 
