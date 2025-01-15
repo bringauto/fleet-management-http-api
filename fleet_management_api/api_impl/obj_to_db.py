@@ -3,9 +3,9 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.timestamp as _tstamp
 
 
-def car_to_db_model(car: _models.Car) -> _db_models.CarDB:
+def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
     car_admin_phone = car.car_admin_phone.to_dict() if car.car_admin_phone is not None else None
-    return _db_models.CarDB(
+    return _db_models.CarDBModel(
         id=car.id,
         name=car.name,
         platform_hw_id=car.platform_hw_id,
@@ -15,7 +15,9 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDB:
     )
 
 
-def car_from_db_model(car_db_model: _db_models.CarDB, last_state: _models.CarState) -> _models.Car:
+def car_from_db_model(
+    car_db_model: _db_models.CarDB, last_state: _models.CarState | None
+) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
         name=car_db_model.name,
@@ -59,6 +61,32 @@ def car_state_from_db_model(
         speed=car_state_db_model.speed,
         fuel=car_state_db_model.fuel,
         position=car_position,
+    )
+
+
+def car_action_state_to_db_model(
+    car_action_state: _models.CarActionState,
+) -> _db_models.CarActionStateDBModel:
+    return _db_models.CarActionStateDBModel(
+        id=car_action_state.id,
+        status=str(car_action_state.action_status),
+        car_id=car_action_state.car_id,
+        timestamp=_tstamp.timestamp_ms(),
+    )
+
+
+def car_action_state_from_db_model(
+    car_action_state_db_model: _db_models.CarActionStateDBModel,
+) -> _models.CarActionState:
+    assert isinstance(car_action_state_db_model, _db_models.CarActionStateDBModel), (
+        f"Expected car_action_state_db_model to be of type _db_models.CarActionStateDBModel, "
+        f"but got {type(car_action_state_db_model)}"
+    )
+    return _models.CarActionState(
+        id=car_action_state_db_model.id,
+        timestamp=car_action_state_db_model.timestamp,
+        action_status=car_action_state_db_model.status,
+        car_id=car_action_state_db_model.car_id,
     )
 
 
@@ -134,8 +162,8 @@ def hw_from_db_model(
     return _models.PlatformHW(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
 
 
-def route_to_db_model(route: _models.Route) -> _db_models.RouteDB:
-    return _db_models.RouteDB(id=route.id, name=route.name, stop_ids=route.stop_ids)
+def route_to_db_model(route: _models.Route) -> _db_models.RouteDBModel:
+    return _db_models.RouteDBModel(id=route.id, name=route.name, stop_ids=route.stop_ids)
 
 
 def route_from_db_model(route_db_model: _db_models.RouteDB) -> _models.Route:

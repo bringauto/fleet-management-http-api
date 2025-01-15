@@ -2,7 +2,7 @@
   info:
     title: BringAuto Fleet Management v2 API
     description: Specification for BringAuto fleet backend HTTP API
-    version: 3.4.0
+    version: 3.4.4
     contact:
       name: BringAuto s.r.o
       url: https://bringauto.com
@@ -25,6 +25,8 @@
       description: Car related functions
     - name: carState
       description: Car state-related functions
+    - name: carAction
+      description: Car action-related functions
     - name: order
       description: Order-related functions
     - name: orderState
@@ -52,6 +54,12 @@
       $ref: 'car.yaml#/paths/~1carstate'
     /carstate/{carId}:
       $ref: 'car.yaml#/paths/~1carstate~1{carId}'
+    /action/car/{carId}:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}'
+    /action/car/{carId}/pause:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1pause'
+    /action/car/{carId}/unpause:
+      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1unpause'
 
     /order:
       $ref: 'order.yaml#/paths/~1order'

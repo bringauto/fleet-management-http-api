@@ -6,6 +6,8 @@ from fleet_management_api.models import (
     Car,
     CarState,
     CarStatus,
+    CarActionState,
+    CarActionStatus,
     GNSSPosition,
     MobilePhone,
     Order,
@@ -344,6 +346,36 @@ class Test_Creating_RouteVisualizationDB(unittest.TestCase):
             _obj_to_db.route_visualization_to_db_model(route_visualization_in)
         )
         self.assertEqual(route_visualization_out, route_visualization_in)
+
+
+class Test_Creating_Car_Action_State_DB_Model(unittest.TestCase):
+    def test_creating_car_action_state_db_model_from_car_action_state_object_preserves_attribute_values(
+        self,
+    ):
+        state = CarActionState(action_status=CarActionStatus.NORMAL, car_id=1)
+        car_action_state_db_model = _obj_to_db.car_action_state_to_db_model(state)
+        self.assertEqual(car_action_state_db_model.status, state.action_status)
+        self.assertEqual(car_action_state_db_model.car_id, state.car_id)
+
+    @patch("fleet_management_api.database.timestamp._get_time_in_ms")
+    def test_car_state_converted_to_db_model_and_back_is_unchanged(
+        self, mock_timestamp_in_ms: Mock
+    ):
+        mock_timestamp_in_ms.return_value = 123456
+        state_in = CarActionState(action_status="paused", car_id=1, timestamp=123456)
+        state_out = _obj_to_db.car_action_state_from_db_model(
+            _obj_to_db.car_action_state_to_db_model(state_in)
+        )
+        self.assertEqual(state_out, state_in)
+
+    @patch("fleet_management_api.database.timestamp.timestamp_ms")
+    def test_car_state_db_model_has_timestamp_attribute_corresponding_to_time_of_the_instances_creation(
+        self, mock_timestamp_in_ms: Mock
+    ):
+        mock_timestamp_in_ms.return_value = 1234567890
+        order_state = CarState(status="normal", car_id=2)
+        order_state_db_model = _obj_to_db.car_state_to_db_model(order_state)
+        self.assertEqual(order_state_db_model.timestamp, 1234567890)
 
 
 if __name__ == "__main__":

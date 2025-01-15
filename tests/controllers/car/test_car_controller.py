@@ -2,6 +2,10 @@ import unittest
 
 from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
 import fleet_management_api.app as _app
+from fleet_management_api.database.db_access import delete
+from fleet_management_api.database.db_models import CarStateDBModel, CarActionStateDBModel
+from fleet_management_api.logs import LOGGER_NAME
+
 from tests._utils.setup_utils import create_stops, create_platform_hws, create_route
 import tests._utils.api_test as api_test
 from fleet_management_api.logs import LOGGER_NAME
@@ -197,7 +201,8 @@ class Test_Logging_Car_Creation(api_test.TestCase):
             app = _app.get_test_app()
             with app.app.test_client(TEST_TENANT) as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
-                self.assertEqual(len(logs.output), 2)
+                # there should be three logs - one for a car, another for the car state and the last one for the car action state
+                self.assertEqual(len(logs.output), 3)
                 self.assertIn(str(car.name), logs.output[0])
 
     def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_error(
@@ -315,6 +320,29 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(api_test.TestCase):
             self.assertEqual(response.status_code, 200)
             response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
             self.assertEqual(response.status_code, 400)
+
+
+class Test_Retrieving_Car_With_States_Deleted(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        app = _app.get_test_app()
+        create_platform_hws(app)
+
+    def test_car_state_is_none_for_car_whose_states_have_been_deleted(self):
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        app = _app.get_test_app()
+        with app.app.test_client() as c:
+            c.post("/v2/management/car", json=[car], content_type="application/json")
+            # delete only existing car state (using the database-access method delete instead of the API, which does not provide the delete method for car states)
+            delete(CarStateDBModel, 1)
+            response = c.get("/v2/management/carstate/1")
+            # there are now no car states for car with ID=1
+            self.assertEqual(response.json, [])
+            # when getting car with ID=1, the default car state should be created
+            response = c.get("/v2/management/car/1")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(Car.from_dict(response.json).last_state, None)
 
 
 if __name__ == "__main__":  # pragma: no cover

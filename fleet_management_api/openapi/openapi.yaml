@@ -9,7 +9,7 @@ info:
     name: AGPLv3
     url: https://www.gnu.org/licenses/agpl-3.0.en.html
   title: BringAuto Fleet Management v2 API
-  version: 3.4.0
+  version: 3.4.4
 servers:
 - url: /v2/management
 security:
@@ -22,6 +22,8 @@ tags:
   name: car
 - description: Car state-related functions
   name: carState
+- description: Car action-related functions
+  name: carAction
 - description: Order-related functions
   name: order
 - description: Order state-related functions
@@ -37,6 +39,244 @@ tags:
 - description: Tenant-related functions
   name: tenant
 paths:
+  /action/car/{carId}:
+    get:
+      operationId: get_car_action_states
+      parameters:
+      - description: ID of the Car for which to return the action states.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - description: "Applies to GET methods when no objects would be returned at\
+          \ the moment of request. If wait=true, \\ the request will wait for the\
+          \ next object to be created and then returns it. If wait=False or unspecified,\
+          \ the request will return \\ an empty list."
+        in: query
+        name: wait
+        schema:
+          default: false
+          type: boolean
+      - description: "A Unix timestamp in milliseconds. If specified, only objects\
+          \ created at the time or later will be returned. If unspecified, all objects\
+          \ are returned (since is set to 0 in that case)."
+        in: query
+        name: since
+        schema:
+          format: int64
+          type: integer
+      - description: "If specified, only the last N objects will be returned. If unspecified,\
+          \ all objects are returned. \\ If some states have identical timestamps\
+          \ and they all do not fit into the maximum N states, only those with higher\
+          \ IDs are returned. If value smaller than 1 is provided, this filtering\
+          \ is ignored."
+        in: query
+        name: lastN
+        schema:
+          default: 0
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
+          description: Successfully found Car Action States complying with the request
+            parameters.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Finds car action states for a Car with given carId.
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+  /action/car/{carId}/pause:
+    post:
+      operationId: pause_car
+      parameters:
+      - description: ID of the Car which should be paused.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
+          description: Successfully paused the Car.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: "Finds and pauses a Car with given carId, if not already paused. Sets\
+        \ car action status to PAUSED if it is not in PAUSED action status already."
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
+  /action/car/{carId}/unpause:
+    post:
+      operationId: unpause_car
+      parameters:
+      - description: ID of the Car which should be unpaused.
+        example: 1
+        in: path
+        name: carId
+        required: true
+        schema:
+          format: int32
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CarActionState'
+                type: array
+          description: Successfully unpaused the Car.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: "Finds and unpauses a Car with given carId, if paused. Sets car action\
+        \ status to NORMAL only if it is in PAUSED action status."
+      tags:
+      - carAction
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_action
   /apialive:
     head:
       operationId: check_api_is_alive
@@ -3166,11 +3406,50 @@ components:
       - out_of_order
       - driving
       - in_stop
-      - paused_by_phone
       - paused_by_obstacle
       - paused_by_button
       example: idle
       title: CarStatus
+      type: string
+    CarActionState:
+      description: Car Action State object structure
+      example:
+        actionStatus: normal
+        id: 1
+        carId: 1
+        timestamp: 1616425275913
+      properties:
+        id:
+          example: 1
+          format: int32
+          title: Id
+          type: integer
+        carId:
+          example: 1
+          format: int32
+          title: Id
+          type: integer
+        timestamp:
+          description: A Unix timestamp in milliseconds. The timestamp is used to
+            determine the time of creation of an object.
+          example: 1616425275913
+          format: int64
+          title: Timestamp
+          type: integer
+        actionStatus:
+          $ref: '#/components/schemas/CarActionStatus'
+      required:
+      - actionStatus
+      - carId
+      title: CarActionState
+      type: object
+    CarActionStatus:
+      description: Car Action Status enum
+      enum:
+      - normal
+      - paused
+      example: normal
+      title: CarActionStatus
       type: string
     Order:
       description: Order object structure.

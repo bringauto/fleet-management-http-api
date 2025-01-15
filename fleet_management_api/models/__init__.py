@@ -1,6 +1,8 @@
 # flake8: noqa
 # import models into model package
 from fleet_management_api.models.car import Car
+from fleet_management_api.models.car_action_state import CarActionState
+from fleet_management_api.models.car_action_status import CarActionStatus
 from fleet_management_api.models.car_state import CarState
 from fleet_management_api.models.car_status import CarStatus
 from fleet_management_api.models.error import Error

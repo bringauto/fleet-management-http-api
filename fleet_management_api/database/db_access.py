@@ -142,7 +142,7 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
             if hasattr(response, "status_code") and (
                 response.status_code == 503 or response.status_code == 500
             ):
-                raise RuntimeError(str(response))
+                raise RuntimeError(response.body)
             return response
         except _sqaexc.OperationalError as e:
             _logging.warning(

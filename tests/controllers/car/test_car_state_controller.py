@@ -203,7 +203,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
             c.post("/v2/management/carstate", json=[oldest_state])
             for _ in range(1, max_n - 2):
                 car_state = CarState(
-                    status="paused_by_phone",
+                    status="paused_by_button",
                     car_id=1,
                     fuel=50,
                     speed=7,
@@ -216,7 +216,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
             self.assertEqual(len(response.json), max_n - 1)
 
             car_state = CarState(
-                status="paused_by_phone",
+                status="paused_by_button",
                 car_id=1,
                 fuel=50,
                 speed=7,
@@ -228,7 +228,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
             self.assertEqual(len(response.json), max_n)
 
             newest_state = CarState(
-                status="paused_by_phone",
+                status="paused_by_button",
                 car_id=1,
                 fuel=50,
                 speed=7,
@@ -252,7 +252,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
         with self.app.app.test_client(TEST_TENANT) as c:
             for i in range(0, max_n + 5):
                 car_state = CarState(
-                    status="paused_by_phone",
+                    status="paused_by_button",
                     car_id=1,
                     fuel=50,
                     speed=7,
@@ -261,7 +261,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
                 c.post("/v2/management/carstate", json=[car_state])
             for i in range(max_n, 2 * max_n + 5):
                 car_state = CarState(
-                    status="paused_by_phone",
+                    status="paused_by_button",
                     car_id=2,
                     fuel=50,
                     speed=7,

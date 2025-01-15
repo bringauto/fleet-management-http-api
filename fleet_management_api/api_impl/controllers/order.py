@@ -331,20 +331,8 @@ def _car_exist(car_id: int) -> bool:
 def _get_order_with_last_state(
     order_db_model: _db_models.OrderDB,
 ) -> _models.Order | None:
-    states = _db_access.get(
-        _db_models.OrderStateDB,
-        criteria={"order_id": lambda x: x == order_db_model.id},
-        sort_result_by={"timestamp": "desc", "id": "desc"},
-        first_n=1,
-    )
-    if order_db_model.id is None:
-        return None
-    if not states:
-        # The only way no order state exists is the order is in the process of deletion
-        _log_info(f"No order states for order with ID={order_db_model.id}.")
-        return None
-    last_state = _obj_to_db.order_state_from_db_model(states[0])
-    order = _obj_to_db.order_from_db_model(order_db_model, last_state)
+    last_state = _get_last_order_state(order_db_model)
+    order = _obj_to_db.order_from_db_model(order_db_model=order_db_model, last_state=last_state)
     return order
 
 
@@ -355,6 +343,19 @@ def _group_new_orders_by_car(
     for order in orders:
         orders_by_car[order.car_id].append(order)
     return orders_by_car
+
+
+def _get_last_order_state(order_model_db: _db_models.OrderDBModel) -> _models.OrderState | None:
+    db_last_states = _db_access.get(
+        _db_models.OrderStateDBModel,
+        criteria={"order_id": lambda x: x == order_model_db.id},
+        sort_result_by={"timestamp": "desc", "id": "desc"},
+        first_n=1,
+    )
+    if db_last_states:
+        return _obj_to_db.order_state_from_db_model(db_last_states[0])
+    else:
+        return None
 
 
 def _default_order_state(order_id: int) -> _models.OrderState:

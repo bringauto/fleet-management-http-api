@@ -56,7 +56,7 @@ class Database(pydantic.BaseModel):
         port: int
         database_name: str
 
-    @pydantic.validator("maximum_number_of_table_rows")
+    @pydantic.field_validator("maximum_number_of_table_rows")
     @classmethod
     def maximum_row_number_at_least_one(cls, val_dict: dict[str, int]) -> dict[str, int]:
         for key, value in val_dict.items():

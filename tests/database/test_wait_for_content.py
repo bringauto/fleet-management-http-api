@@ -128,6 +128,29 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
+    def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values_and_waits_for_the_relevant(
+        self,
+    ):
+        test_obj_1 = models.TestBase(id=5, test_str="test", test_int=123)
+        test_obj_2 = models.TestBase(id=6, test_str="test", test_int=456)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            value = 456
+            future = executor.submit(
+                _db_access.get,
+                models.TestBase,
+                criteria={"test_int": lambda x, value=value: x == value},
+                wait=True,
+                timeout_ms=500,
+            )
+            time.sleep(0.01)
+            executor.submit(_db_access.add, test_obj_1)
+            time.sleep(0.01)
+            value = 123
+            executor.submit(_db_access.add, test_obj_2)
+            time.sleep(0.01)
+            retrieved_objs = future.result()
+            self.assertListEqual(retrieved_objs, [test_obj_2])
+
 
 class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
     """There is a maximum number of active connections that can be opened at the same time.
