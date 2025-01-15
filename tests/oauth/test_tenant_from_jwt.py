@@ -38,6 +38,11 @@ class Test_Tenant_From_JWT(unittest.TestCase):
 
     def test_missing_authorization_header_raises_error(self):
         request = ConnexionRequest(TEST_URL, method="GET", headers={})
+        request.headers.pop("Authorization", None)
+        # the tenant has to be set in cookies to produce the exception,
+        # otherwise an empty tenant name would be returned without exception
+        request.cookies["tenant"] = "test_tenant"
+        assert "Authorization" not in request.headers
         with self.assertRaises(NoHeaderWithJWTToken):
             TenantFromToken(request, TEST_KEY)
 
