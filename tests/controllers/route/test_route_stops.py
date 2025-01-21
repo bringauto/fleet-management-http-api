@@ -10,7 +10,7 @@ from tests._utils.constants import TEST_TENANT_NAME
 class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
         self.stop_A = Stop(
             name="test_stop_A",
             position=GNSSPosition(latitude=49, longitude=17, altitude=450),
@@ -80,7 +80,7 @@ class Test_Defining_Route_List_Of_Stops(unittest.TestCase):
 class Test_Deleting_Stops_Referenced_By_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
         self.stop_A = Stop(
             name="test_stop_A",
             position=GNSSPosition(latitude=49, longitude=17, altitude=450),

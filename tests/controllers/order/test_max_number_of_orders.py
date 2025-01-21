@@ -24,7 +24,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))
@@ -78,7 +78,7 @@ class Test_Number_Of_Active_Orders(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/order", json=[order, order])
             self.assertEqual(n_of_active_orders(car_id=1), 2)
-            self.app = _app.get_test_app()
+            self.app = _app.get_test_app(use_previous=True)
             clear_active_orders()
             self.assertEqual(n_of_active_orders(car_id=1), 2)
 
@@ -92,7 +92,7 @@ class Test_Maximum_Number_Of_Active_Orders(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))
@@ -172,7 +172,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
         clear_inactive_orders()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))
@@ -231,7 +231,7 @@ class Test_Number_Of_Inactive_Orders_Lower_Than_Maximum(unittest.TestCase):
                 "/v2/management/orderstate", json=[OrderState(status=OrderStatus.DONE, order_id=2)]
             )
             self.assertEqual(n_of_inactive_orders(car_id=1), 2)
-            self.app = _app.get_test_app()
+            self.app = _app.get_test_app(use_previous=True)
             clear_active_orders()
             self.assertEqual(n_of_inactive_orders(car_id=1), 2)
 
@@ -247,7 +247,7 @@ class Test_Automatic_Removal_Of_Inactive_Orders(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         clear_active_orders()
         clear_inactive_orders()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))

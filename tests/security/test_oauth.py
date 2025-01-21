@@ -108,7 +108,9 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app("testKey", tenants=[TEST_TENANT_1, TEST_TENANT_2])
+        self.app = _app.get_test_app(
+            "testKey", tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
+        )
         with self.app.app.test_client() as client:
             self.hw_1 = PlatformHW(name="test_hw_1")
             client.set_cookie("", "tenant", TEST_TENANT_1)
@@ -131,7 +133,7 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             self.assertEqual(response.json[0]["name"], self.hw_1.name)
             self.assertEqual(response.json[1]["name"], self.hw_2.name)
 
-    def test_for_given_tenant_yields_data_for_that_tenant_only(self) -> None:
+    def test_setting_tenant_cookie_yields_data_for_that_tenant_only(self) -> None:
         with self.app.app.test_client() as client:
             client.set_cookie("", "tenant", TEST_TENANT_1)
             response = client.get("/v2/management/platformhw?api_key=testKey")
@@ -146,10 +148,6 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             assert isinstance(response.json, list)
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["name"], self.hw_2.name)
-
-
-if __name__ == "__main__":  # pragma: no cover
-    unittest.main()
 
 
 if __name__ == "__main__":

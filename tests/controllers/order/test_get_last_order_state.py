@@ -15,7 +15,7 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1, 2))

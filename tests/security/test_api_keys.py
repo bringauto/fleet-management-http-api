@@ -46,7 +46,7 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 class Test_Using_API_Key_In_App(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("db_file.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
 
     def test_using_nonexistent_key_yields_code_401(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -61,7 +61,7 @@ class Test_Using_API_Key_In_App(unittest.TestCase):
 class Test_Using_Already_Existing_API_Key(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("db_file.db")
-        self.app = _app.get_test_app(predef_api_key="abcd")
+        self.app = _app.get_test_app(predef_api_key="abcd", use_previous=True)
 
     @patch("fleet_management_api.api_impl.api_keys._generate_key")
     def test_using_existing_key(self, mock_generate_key: Mock):

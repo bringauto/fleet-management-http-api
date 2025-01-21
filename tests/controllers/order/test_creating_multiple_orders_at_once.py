@@ -16,7 +16,7 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1, 2))
@@ -64,7 +64,7 @@ class Test_Retrieving_Awaited_Orders_In_The_Middle_Of_Their_Deletion(unittest.Te
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1, 2))

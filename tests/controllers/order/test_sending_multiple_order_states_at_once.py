@@ -18,7 +18,7 @@ class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCa
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         set_max_n_of_active_orders(5)
         set_max_n_of_inactive_orders(5)
         create_platform_hws(self.app)

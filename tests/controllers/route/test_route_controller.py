@@ -18,7 +18,7 @@ from tests._utils.constants import TEST_TENANT_NAME
 class Test_Creating_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
 
     def test_creating_route(self):
         route = Route(name="test_route")
@@ -44,7 +44,7 @@ class Test_Creating_Route(unittest.TestCase):
 class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
     def test_adding_state_using_example_from_spec(self):
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Route"][
                 "example"
@@ -58,7 +58,7 @@ class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):
 class Test_Getting_All_Routes(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
 
     def test_retrieving_existing_routes(self):
         route_1 = Route(name="test_route_1")
@@ -79,7 +79,7 @@ class Test_Getting_All_Routes(unittest.TestCase):
 class Test_Getting_Single_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         self.route_1 = Route(name="test_route_1")
         self.route_2 = Route(name="test_route_2")
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -104,7 +104,7 @@ class Test_Getting_Single_Route(unittest.TestCase):
 class Test_Retrieving_Route_Stops(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         stop_1 = Stop(name="stop_1", position=GNSSPosition(latitude=1, longitude=1, altitude=1))
         stop_2 = Stop(name="stop_2", position=GNSSPosition(latitude=2, longitude=2, altitude=2))
         stop_3 = Stop(name="stop_3", position=GNSSPosition(latitude=3, longitude=3, altitude=3))
@@ -125,7 +125,7 @@ class Test_Retrieving_Route_Stops(unittest.TestCase):
 class Test_Deleting_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
 
@@ -163,7 +163,7 @@ class Test_Deleting_Route(unittest.TestCase):
 class Test_Updating_Route(unittest.TestCase):
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         self.route = Route(name="test_route_1")
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/route", json=[self.route])

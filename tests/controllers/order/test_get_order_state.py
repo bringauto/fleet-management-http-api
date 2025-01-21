@@ -24,7 +24,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))
@@ -85,7 +85,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
         set_content_timeout_ms(1000)
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -138,7 +138,7 @@ class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -195,7 +195,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     def setUp(self, mock_timestamp_ms: Mock) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -294,7 +294,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
     def setUp(self, mock_timestamp_ms: Mock) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 3)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -394,14 +394,14 @@ class Test_Retrieving_Order_With_States_Deleted(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         create_platform_hws(app)
         create_stops(app, 1)
         create_route(app, stop_ids=(1,))
 
     def test_last_order_state_is_none_if_all_order_states_have_been_deleted(self):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client() as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
             c.post(

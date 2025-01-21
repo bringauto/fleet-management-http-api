@@ -14,7 +14,7 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
 
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
             platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")

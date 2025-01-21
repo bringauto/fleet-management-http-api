@@ -21,7 +21,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2, 3))
@@ -64,7 +64,7 @@ class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
 class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
     def test_adding_state_using_example_from_spec(self):
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -94,7 +94,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -147,7 +147,7 @@ class Test_Getting_All_Order_States_For_Given_Order(unittest.TestCase):
 class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -199,7 +199,7 @@ class Test_Getting_Order_State_For_Given_Order(unittest.TestCase):
 class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -288,7 +288,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
 class Test_Deleting_Order_States_When_Deleting_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -342,7 +342,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
 
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -435,7 +435,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
 
     def test_done_state(self):
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -450,7 +450,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
             c.post("/v2/management/order", json=[order])
             c.post("/v2/management/orderstate", json=[done_state])
 
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
@@ -461,7 +461,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
 
     def test_canceled_state(self):
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -476,7 +476,7 @@ class Test_Recongnizing_Done_And_Canceled_Orders_After_Restarting_Application(un
             c.post("/v2/management/order", json=[order])
             c.post("/v2/management/orderstate", json=[canceled_state])
 
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.CANCELED)
@@ -499,7 +499,7 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 1)
         create_stops(self.app, 1)
         create_route(self.app, stop_ids=(1,))
@@ -581,7 +581,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         create_stops(self.app, 2)
         create_route(self.app, stop_ids=(1, 2))

@@ -9,7 +9,7 @@ from tests._utils.constants import TEST_TENANT_NAME
 class Test_Posting_New_Route_Visualization(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
         self.route = Route(name="test_route")
 
     def test_getting_route_visualization_for_newly_defined_route_yields_empty_list(self):
@@ -100,7 +100,7 @@ class Test_Posting_New_Route_Visualization(unittest.TestCase):
 class Updating_Route_Visualization(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
         self.route = Route(name="test_route")
 
     def test_updating_route_visualization(self):
@@ -170,7 +170,7 @@ class Updating_Route_Visualization(unittest.TestCase):
 class Test_Route_Removal(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
 
     def test_route_visualization_are_not_accessible_after_route_is_removed(self):
         route = Route(name="test_route")

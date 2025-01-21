@@ -14,8 +14,8 @@ class Test_Adding_State_Of_Existing_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app)
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
@@ -53,8 +53,8 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
 
     def test_adding_state_using_example_from_spec(self):
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app)
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
@@ -71,8 +71,8 @@ class Test_Getting_All_Car_States(unittest.TestCase):
 
     def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app, 2)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, 2)
         car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -106,8 +106,8 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
 
     def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app, 2)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, 2)
         car_1 = Car(
             platform_hw_id=1,
             name="car1",
@@ -185,8 +185,8 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app, 2)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, 2)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
@@ -276,8 +276,8 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app, 1)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car])
@@ -320,8 +320,8 @@ class Test_Filtering_Car_States_By_Timestamp(api_test.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
-        create_platform_hws( self.app, 1)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mocked_timestamp.return_value = 0
@@ -377,7 +377,7 @@ class Test_Returning_Last_N_Car_States(api_test.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -447,7 +447,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
     def setUp(self, mocked_timestamp: Mock) -> None:
         super().setUp()
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
             platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")

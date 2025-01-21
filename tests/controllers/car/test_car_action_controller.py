@@ -28,19 +28,21 @@ from tests._utils.setup_utils import TenantFromTokenMock
 
 class Test_Creating_Car_Action_State(api_test.TestCase):
 
+    def setUp(self, test_db_path=""):
+        super().setUp(test_db_path)
+        self.app = _app.get_test_app(use_previous=True)
+
     def test_for_nonexistent_car_yields_404_error(self):
         state = CarActionState(car_id=1, action_status=CarActionStatus.NORMAL)
-        app = _app.get_test_app()
-        with app.app.test_client(TEST_TENANT_NAME):
+        with self.app.app.test_client(TEST_TENANT_NAME):
             tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
             response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
             self.assertEqual(response.status_code, 404)
 
     def test_for_existing_car_yields_200_response(self):
-        app = _app.get_test_app()
-        create_platform_hws(app)
+        create_platform_hws(self.app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
             response = create_car_action_states_from_argument_and_save_to_db(
@@ -55,7 +57,7 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
@@ -135,7 +137,7 @@ class Test_Getting_Last_Action_States(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
             name="Test Car 1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
@@ -173,7 +175,7 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
@@ -250,14 +252,17 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
 
 class Test_Query_Parameters(api_test.TestCase):
 
+    def setUp(self, test_db_path=""):
+        super().setUp(test_db_path)
+        self.app = _app.get_test_app(use_previous=True)
+
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_only_states_inclusively_newer_than_since_parameter_value_are_returned(
         self, tmock: Mock
     ):
-        app = _app.get_test_app()
-        create_platform_hws(app)
+        create_platform_hws(self.app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = 1000
             c.post("/v2/management/car", json=[car])
             tmock.return_value = 2000
@@ -269,10 +274,9 @@ class Test_Query_Parameters(api_test.TestCase):
             self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
 
     def test_last_n_parameter_limits_number_of_returned_states(self):
-        app = _app.get_test_app()
-        create_platform_hws(app)
+        create_platform_hws(self.app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/action/car/1/pause")
             c.post("/v2/management/action/car/1/unpause")
@@ -283,11 +287,10 @@ class Test_Query_Parameters(api_test.TestCase):
             self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.NORMAL)
 
     def test_wait_parameter_yields_empty_response_when_no_new_states_are_posted(self):
-        app = _app.get_test_app()
-        create_platform_hws(app)
+        create_platform_hws(self.app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with _futures.ThreadPoolExecutor() as ex:
-            with app.app.test_client(TEST_TENANT_NAME) as c:
+            with self.app.app.test_client(TEST_TENANT_NAME) as c:
                 c.post("/v2/management/car", json=[car]).json
                 time.sleep(1)
                 timestamp = timestamp_ms()
@@ -303,7 +306,7 @@ class Test_Maximum_Number_Of_States(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
@@ -368,7 +371,7 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
@@ -390,7 +393,7 @@ class Test_Returning_Last_N_Car_States(api_test.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 1)
         car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
         with self.app.app.test_client() as c:
@@ -441,7 +444,7 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(api_test.TestCase):
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def setUp(self, mocked_timestamp: Mock) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         self.car_1 = Car(
             platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")

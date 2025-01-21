@@ -16,7 +16,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -67,7 +67,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         set_content_timeout_ms(1000)
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         car_1 = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
@@ -106,7 +106,7 @@ class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         car = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
@@ -152,7 +152,7 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
     def setUp(self, mock_timestamp_ms: Mock) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         car_1 = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="9876543210"))

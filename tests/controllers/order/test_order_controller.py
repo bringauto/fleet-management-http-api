@@ -20,7 +20,7 @@ class Test_Sending_Order(unittest.TestCase):
         _connection.set_connection_source_test("test.db")
         clear_active_orders()
         clear_inactive_orders()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 7)
         create_route(self.app, stop_ids=(2, 4, 6))
@@ -109,7 +109,7 @@ class Test_Creating_Order_From_Example_In_Spec(unittest.TestCase):
         _connection.set_connection_source_test("test.db")
         clear_active_orders()
         clear_inactive_orders()
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         create_platform_hws(app)
         create_stops(app, 1)
         create_route(app, stop_ids=(1,))
@@ -138,7 +138,7 @@ class Test_No_Orders(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
 
     def test_retrieving_all_orders_when_no_orders_exist_yields_code_200(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -155,7 +155,7 @@ class Test_All_Retrieving_Orders(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         create_stops(self.app, 7)
         create_route(self.app, stop_ids=(2, 4, 6))
@@ -247,7 +247,7 @@ class Test_Retrieving_Single_Order_From_The_Database(unittest.TestCase):
 
         self.maxDiff = None
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 7)
         create_route(self.app, stop_ids=(2, 4, 6))
@@ -296,7 +296,7 @@ class Test_Deleting_Order(unittest.TestCase):
     def setUp(self):
 
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 7)
         create_route(self.app, stop_ids=(2, 4, 6))
@@ -338,7 +338,7 @@ class Test_Retrieving_Orders_By_Creation_Timestamp(unittest.TestCase):
     def setUp(self, mock_timestamp: Mock) -> None:
 
         _connection.set_connection_source_test("test.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         mock_timestamp.return_value = 0
         create_platform_hws(self.app)
         create_stops(self.app, 2)

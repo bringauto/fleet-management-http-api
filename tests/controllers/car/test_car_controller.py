@@ -16,7 +16,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         self.app.app.def_accessible_tenants(TEST_TENANT_NAME)
         create_platform_hws(self.app, 2)
         create_stops(self.app, 3)
@@ -35,7 +35,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
             under_test=False,
             car_admin_phone=MobilePhone(phone="123456789"),
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post(
                 "/v2/management/car",
@@ -52,7 +52,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
             default_route_id=nonexistent_route_id,
             car_admin_phone=MobilePhone(phone="123456789"),
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 404)
@@ -64,7 +64,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
             default_route_id=1,
             car_admin_phone=MobilePhone(phone="123456789"),
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
 
@@ -83,7 +83,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
             under_test=False,
             car_admin_phone=MobilePhone(phone="123456789"),
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 200)
@@ -104,7 +104,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
         car_2 = Car(
             name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1], content_type="application/json")
             c.post("/v2/management/car", json=[car_2], content_type="application/json")
@@ -114,7 +114,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
 
     def test_creating_car_from_invalid_data_returns_400_error_code(self):
         car_dict_missing_an_admin_phone = {"name": "Test Car", "platformId": 1}
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post(
                 "/v2/management/car",
@@ -130,7 +130,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
         car_2 = Car(
             name="Test Car", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1], content_type="application/json")
             response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
@@ -138,7 +138,7 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_using_invalid_json_returns_400_error_code(self):
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=7)
             self.assertEqual(response.status_code, 400)
@@ -148,13 +148,13 @@ class Test_Retrieving_Single_Car(api_test.TestCase):
     def setUp(self, *args) -> None:
         super().setUp()
         platformhw = PlatformHW(name="Test Platform HW")
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/platformhw", json=[platformhw])
 
     def test_retrieving_single_existing_car(self):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
             response = c.get("/v2/management/car/1")
@@ -164,7 +164,7 @@ class Test_Retrieving_Single_Car(api_test.TestCase):
     def test_retrieving_nonexistent_car_returns_code_404(self):
         nonexistent_car_id = 25
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
             response = c.get(f"/v2/management/car/{nonexistent_car_id}")
@@ -174,7 +174,7 @@ class Test_Retrieving_Single_Car(api_test.TestCase):
 class Test_Creating_Car_Using_Example_From_Specification(api_test.TestCase):
     def setUp(self, *args) -> None:
         super().setUp()
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         create_stops(self.app, 3)
         create_route(self.app, stop_ids=(1, 2))
@@ -194,7 +194,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         create_platform_hws(app)
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
@@ -202,7 +202,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
             car = Car(
                 name="test_car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
             )
-            app = _app.get_test_app()
+            app = _app.get_test_app(use_previous=True)
             with app.app.test_client(TEST_TENANT_NAME) as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 # there should be three logs - one for a car, another for the car state and the last one for the car action state
@@ -216,7 +216,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
             car = Car(
                 name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
             )
-            app = _app.get_test_app()
+            app = _app.get_test_app(use_previous=True)
             with app.app.test_client(TEST_TENANT_NAME) as c:
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 c.post("/v2/management/car", json=[car], content_type="application/json")
@@ -227,12 +227,12 @@ class Test_Updating_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         create_platform_hws(app)
 
     def test_add_and_succesfully_update_car(self) -> None:
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
             car.name = "Updated Test Car"
@@ -248,14 +248,14 @@ class Test_Updating_Car(api_test.TestCase):
         car = Car(
             id=1, name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.put("/v2/management/car", json=[car], content_type="application/json")
             self.assertEqual(response.status_code, 404)
 
     def test_passing_other_object_when_updating_car_yields_400_error(self) -> None:
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
+        app = _app.get_test_app(use_previous=True)
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             response = c.put("/v2/management/car", json={"id": 1}, content_type="application/json")
@@ -266,15 +266,14 @@ class Test_Deleting_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
-        create_platform_hws(app, tenant=TEST_TENANT_NAME)
-        create_stops(app, 7)
-        create_route(app, stop_ids=(2, 4, 6))
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, tenant=TEST_TENANT_NAME)
+        create_stops(self.app, 7)
+        create_route(self.app, stop_ids=(2, 4, 6))
 
     def test_add_and_delete_car(self) -> None:
-        app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             response = c.delete("/v2/management/car/1")
             self.assertEqual(response.status_code, 200)
@@ -283,8 +282,7 @@ class Test_Deleting_Car(api_test.TestCase):
 
     def test_deleting_nonexistent_car_yields_404_error(self) -> None:
         car_id = 17
-        app = _app.get_test_app()
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.delete(f"/v2/management/car/{car_id}")
             self.assertEqual(response.status_code, 404)
 
@@ -296,9 +294,8 @@ class Test_Deleting_Car(api_test.TestCase):
             target_stop_id=2,
             stop_route_id=1,
         )
-        app = _app.get_test_app()
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order])
             response = c.delete("/v2/management/car/1")
@@ -309,8 +306,8 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
-        create_platform_hws(app)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app)
 
     def test_creating_car_using_platformhw_assigned_to_other_car_yields_code_400(self):
         car_1 = Car(
@@ -319,7 +316,7 @@ class Test_All_Cars_Must_Have_Unique_PlatformHWId(api_test.TestCase):
         car_2 = Car(
             name="Test Car 2", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
-        with _app.get_test_app().app.test_client(TEST_TENANT_NAME) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car_1], content_type="application/json")
             self.assertEqual(response.status_code, 200)
             response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
@@ -330,14 +327,13 @@ class Test_Retrieving_Car_With_States_Deleted(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
-        create_platform_hws(app)
+        create_platform_hws(self.app)
 
     def test_car_state_is_none_for_car_whose_states_have_been_deleted(self):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        app = _app.get_test_app()
-        with app.app.test_client() as c:
+        with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[car], content_type="application/json")
             # delete only existing car state (using the database-access method delete instead of the API, which does not provide the delete method for car states)
             delete(self.tenant, CarStateDB, 1)

@@ -24,6 +24,9 @@ TENANT_COOKIE_NAME = "tenant"
 TEST_JWT_KEY = "test_key"
 
 
+_test_app: connexion.FlaskApp | None = None
+
+
 def get_token(*tenants: str) -> str:
     tenant_list = ",".join(f'"/customers/{name}"' for name in tenants)
     return jwt.encode(
@@ -33,16 +36,21 @@ def get_token(*tenants: str) -> str:
     )
 
 
-def get_app() -> connexion.FlaskApp:
-    app = connexion.App(__name__, specification_dir="./openapi/")
-    app.app.json_encoder = JSONEncoder
-    app.add_api("openapi.yaml", pythonic_params=True)
-    return app
+def get_app(use_previous: bool = False) -> connexion.FlaskApp:
+    global _test_app
+    if use_previous and _test_app is not None:
+        return _test_app
+    else:
+        app = connexion.App(__name__, specification_dir="./openapi/")
+        app.app.json_encoder = JSONEncoder
+        app.add_api("openapi.yaml", pythonic_params=True)
+        _test_app = app
+        return app
 
 
 class _TestApp:
-    def __init__(self, api_key: str = "") -> None:
-        self._app = get_app()
+    def __init__(self, api_key: str = "", use_previous: bool = False) -> None:
+        self._app = get_app(use_previous=use_previous)
         self._flask_app = self._TestFlaskApp(api_key, self._app.app)
 
     @property
@@ -110,6 +118,7 @@ def get_test_app(
     predef_api_key: str = "",
     tenants: Optional[list[str]] = None,
     jwt_key: str = TEST_JWT_KEY,
+    use_previous: bool = False,
 ) -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 
@@ -131,6 +140,6 @@ def get_test_app(
     clear_active_orders()
     clear_inactive_orders()
     _set_key(jwt_key)
-    app = _TestApp(predef_api_key)
+    app = _TestApp(predef_api_key, use_previous=use_previous)
     app.app.def_accessible_tenants(*tenants)
     return app

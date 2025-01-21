@@ -14,7 +14,7 @@ from tests._utils.constants import TEST_TENANT_NAME
 class Test_Creating_Stops(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
 
     def test_creating_stops(self):
         position = _models.GNSSPosition(latitude=49, longitude=16, altitude=50)
@@ -71,7 +71,7 @@ class Test_Creating_Stops(unittest.TestCase):
 class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
     def test_adding_stop_using_example_from_spec(self):
         _connection.set_connection_source_test()
-        app = _app.get_test_app().app
+        app = _app.get_test_app(use_previous=True).app
         with app.test_client(TEST_TENANT_NAME) as c:
             example = c.get("/v2/management/openapi.json").json["components"]["schemas"]["Stop"][
                 "example"
@@ -83,7 +83,7 @@ class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
 class Test_Retrieving_All_Stops(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
 
     def test_retrieving_all_stops_without_creating_any_yields_code_200_and_empty_list(
         self,
@@ -115,7 +115,7 @@ class Test_Retrieving_All_Stops(unittest.TestCase):
 class Test_Retrieving_Single_Stop(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
 
     def test_retrieving_single_existing_stop(self):
         position = _models.GNSSPosition(latitude=49, longitude=16, altitude=50)
@@ -149,7 +149,7 @@ class Test_Retrieving_Single_Stop(unittest.TestCase):
 class Test_Deleting_Stop(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
 
     def test_deleting_single_existing_stop(self):
         position = _models.GNSSPosition(latitude=49, longitude=16, altitude=50)
@@ -179,7 +179,7 @@ class Test_Deleting_Stop(unittest.TestCase):
 class Test_Updating_Stop(unittest.TestCase):
     def setUp(self):
         _connection.set_connection_source_test()
-        self.app = _app.get_test_app().app
+        self.app = _app.get_test_app(use_previous=True).app
         _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT_NAME))
 
     def test_updating_single_existing_stop(self):
@@ -227,7 +227,7 @@ class Test_Updating_Stop(unittest.TestCase):
 class Test_Stop_Cannot_Be_Deleted_If_Assigned_To_Order(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         self.stop = _models.Stop(
             id=1,
             name="stop_X",
