@@ -2,7 +2,7 @@ import cProfile, pstats, io
 
 
 def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
+    """A decorator that uses cProfile to profile a function. https://osf.io/upav8"""
 
     def inner(*args, **kwargs):
 

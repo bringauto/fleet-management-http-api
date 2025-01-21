@@ -293,5 +293,3 @@ class TestItem(Base):
 
     def __repr__(self) -> str:
         return f"TestItem(ID={self.id}, test_str={self.test_str}, test_int={self.test_int})"
-
-    
