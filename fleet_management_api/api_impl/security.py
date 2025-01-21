@@ -2,10 +2,12 @@ from typing import Optional
 import json
 import urllib.parse as _url
 
-from connexion.lifecycle import ConnexionRequest
+from connexion.lifecycle import ConnexionRequest  # type: ignore
+from connexion.exceptions import Unauthorized
 import jwt
-
 from keycloak import KeycloakOpenID  # type: ignore
+
+from fleet_management_api.api_impl.load_request import Request as _Request
 
 
 class TenantNotAccessible(Exception):
@@ -14,6 +16,18 @@ class TenantNotAccessible(Exception):
 
 class NoHeaderWithJWTToken(Exception):
     pass
+
+
+_key = ""
+
+
+def set_key(key: str) -> None:
+    global _key
+    _key = key
+
+
+def get_key() -> str:
+    return _key
 
 
 class TenantFromToken:
@@ -30,7 +44,9 @@ class TenantFromToken:
 
     algorithm = "HS256"
 
-    def __init__(self, request: ConnexionRequest, key: str) -> None:
+    def __init__(self, request: _Request, key: str = "") -> None:
+        if not key.strip():
+            key = get_key()
         self._tenant_name = self._check_and_read(request, key)
 
     @property
@@ -39,13 +55,24 @@ class TenantFromToken:
 
     @staticmethod
     def _check_and_read(request: ConnexionRequest, key: str) -> str:
+        if not hasattr(request, "cookies"):
+            return ""
         tenant = request.cookies.get("tenant", None)
         if not tenant:
             return ""
         if "Authorization" not in request.headers:
             raise NoHeaderWithJWTToken
         bearer = str(request.headers["Authorization"]).split(" ")[-1]
-        decoded_str = jwt.decode(bearer, key, algorithms=[TenantFromToken.algorithm])["Payload"]
+
+        if not bearer.strip():
+            if request.query.get("api_key", ""):
+                return tenant
+            raise Unauthorized("No valid JWT token or API key provided.")
+
+        try:
+            decoded_str = jwt.decode(bearer, key, algorithms=[TenantFromToken.algorithm])["Payload"]
+        except jwt.exceptions.DecodeError:
+            raise TenantNotAccessible("Invalid JWT token.")
         payload = json.loads(decoded_str)
         if "group" not in payload:
             raise TenantNotAccessible("No item group in token. Token does not contain tenants.")
@@ -55,7 +82,7 @@ class TenantFromToken:
             return tenant
         if tenant not in tenants:
             raise TenantNotAccessible(
-                f"Tenant {tenant} send in cookie is not among accessible tenants sent in JWT token."
+                f"Tenant {tenant} sent in a cookie is not among accessible tenants sent in JWT token ({tenants})."
             )
         return tenant
 

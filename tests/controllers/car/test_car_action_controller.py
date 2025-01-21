@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock
+import dataclasses
 import time
 
 import concurrent.futures as _futures
@@ -11,7 +12,7 @@ from fleet_management_api.models import (
     CarActionState,
     MobilePhone,
 )
-from fleet_management_api.database.db_models import CarActionStateDBModel
+from fleet_management_api.database.db_models import CarActionStateDB
 from fleet_management_api.api_impl.controllers.car_action import (
     create_car_action_states_from_argument_and_save_to_db,
     check_for_invalid_car_action_state_transitions,
@@ -21,23 +22,30 @@ from fleet_management_api.database.timestamp import timestamp_ms
 
 from tests._utils.setup_utils import create_platform_hws
 import tests._utils.api_test as api_test
+from tests._utils.constants import TEST_TENANT_NAME
+from tests._utils.setup_utils import TenantFromTokenMock
 
 
 class Test_Creating_Car_Action_State(api_test.TestCase):
 
     def test_for_nonexistent_car_yields_404_error(self):
         state = CarActionState(car_id=1, action_status=CarActionStatus.NORMAL)
-        response = create_car_action_states_from_argument_and_save_to_db([state])
-        self.assertEqual(response.status_code, 404)
+        app = _app.get_test_app()
+        with app.app.test_client(TEST_TENANT_NAME):
+            tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+            response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
+            self.assertEqual(response.status_code, 404)
 
     def test_for_existing_car_yields_200_response(self):
         app = _app.get_test_app()
         create_platform_hws(app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client() as c:
+        with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
-            response = create_car_action_states_from_argument_and_save_to_db([state])
+            response = create_car_action_states_from_argument_and_save_to_db(
+                TenantFromTokenMock(name=TEST_TENANT_NAME), [state]
+            )
             print(response.body)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
@@ -52,36 +60,36 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
 
     def test_car_has_normal_action_state_by_default(self):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/action/car/1")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.NORMAL)
 
     def _test_pausing_existing_car_with_normal_action_state_pauses_the_car(self):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/action/car/1/pause")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json["actionStatus"], CarActionStatus.PAUSED)
 
     def test_creating_action_state_for_existing_car_yields_200_response(self):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
-            response = create_car_action_states_from_argument_and_save_to_db([state])
+            tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+            response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
 
     def test_after_pause_is_car_last_action_state_equal_to_paused(self):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/action/car/1/pause")
             response = c.get("/v2/management/action/car/1?lastN=1")
             self.assertEqual(response.status_code, 200)
-
             self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.PAUSED)
 
 
@@ -135,25 +143,27 @@ class Test_Getting_Last_Action_States(api_test.TestCase):
         self.car_2 = Car(
             name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
         )
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/car", json=[self.car_1, self.car_2])
+        self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
+            print(response.json)
 
     def test_getting_last_action_states_after_car_creation_yields_default_states(self):
-        states = get_last_action_states(1, 2)
+        states = get_last_action_states(self.tenant, 1, 2)
         self.assertEqual(len(states), 2)
         self.assertEqual(states[0].action_status, CarActionStatus.NORMAL)
         self.assertEqual(states[1].action_status, CarActionStatus.NORMAL)
 
     def test_id_of_nonexistent_car_is_ignored_when_retrieving_last_states(self):
-        states = get_last_action_states(1, 4, 2, 3)
+        states = get_last_action_states(self.tenant, 1, 4, 2, 3)
         self.assertEqual(len(states), 2)
         self.assertEqual(states[0].action_status, CarActionStatus.NORMAL)
         self.assertEqual(states[1].action_status, CarActionStatus.NORMAL)
 
     def test_last_action_states_contain_the_last_action_state_posted(self) -> None:
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/action/car/1/pause")
-            states = get_last_action_states(2, 1)
+            states = get_last_action_states(self.tenant, 2, 1)
             self.assertEqual(len(states), 2)
             self.assertEqual(states[0].action_status, CarActionStatus.NORMAL)
             self.assertEqual(states[1].action_status, CarActionStatus.PAUSED)
@@ -168,7 +178,8 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
-        with self.app.app.test_client() as c:
+        self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
             response = c.get("/v2/management/action/car/1?lastN=1")
             print(response.json)
@@ -177,7 +188,7 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_pausing_car_in_normal_state_creates_new_state_with_paused_status(self, tmock: Mock):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = self.last_timestamp + 1000
             response = c.post("/v2/management/action/car/1/pause")
             self.assertEqual(response.status_code, 200)
@@ -190,10 +201,12 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
     def test_pausing_car_in_paused_state_does_not_create_new_action_state_and_yields_400_code(
         self, tmock: Mock
     ):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = self.last_timestamp + 1000
             c.post("/v2/management/action/car/1/pause")
-            self.assertEqual(get_last_action_states(1)[0].action_status, CarActionStatus.PAUSED)
+            self.assertEqual(
+                get_last_action_states(self.tenant, 1)[0].action_status, CarActionStatus.PAUSED
+            )
             tmock.return_value += 2000
             response = c.post("/v2/management/action/car/1/pause")
             self.assertEqual(response.status_code, 400)
@@ -206,7 +219,7 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
     def test_unpausing_car_in_paused_state_does_create_new_action_state_with_normal_status_any_yields_code_200(
         self, tmock: Mock
     ):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = self.last_timestamp + 1000
             c.post("/v2/management/action/car/1/pause")
             tmock.return_value = self.last_timestamp + 2000
@@ -221,7 +234,7 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
     def test_unpausing_unpaused_car_does_not_create_new_action_state_and_yields_code_400(
         self, tmock: Mock
     ):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = self.last_timestamp + 1000
             c.post("/v2/management/action/car/1/pause")
             tmock.return_value = self.last_timestamp + 2000
@@ -244,7 +257,7 @@ class Test_Query_Parameters(api_test.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client() as c:
+        with app.app.test_client(TEST_TENANT_NAME) as c:
             tmock.return_value = 1000
             c.post("/v2/management/car", json=[car])
             tmock.return_value = 2000
@@ -259,7 +272,7 @@ class Test_Query_Parameters(api_test.TestCase):
         app = _app.get_test_app()
         create_platform_hws(app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
-        with app.app.test_client() as c:
+        with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/action/car/1/pause")
             c.post("/v2/management/action/car/1/unpause")
@@ -274,7 +287,7 @@ class Test_Query_Parameters(api_test.TestCase):
         create_platform_hws(app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with _futures.ThreadPoolExecutor() as ex:
-            with app.app.test_client() as c:
+            with app.app.test_client(TEST_TENANT_NAME) as c:
                 c.post("/v2/management/car", json=[car]).json
                 time.sleep(1)
                 timestamp = timestamp_ms()
@@ -299,35 +312,29 @@ class Test_Maximum_Number_Of_States(api_test.TestCase):
     def test_oldest_state_is_removed_when_max_n_plus_one_states_were_sent_to_database(
         self,
     ):
-        max_n = CarActionStateDBModel.max_n_of_stored_states()
+        max_n = CarActionStateDB.max_n_of_stored_states()
         with self.app.app.test_client() as c:
             c.post("/v2/management/action/car/1/pause")
             is_paused = True
             for _ in range(1, max_n - 2):
-                if is_paused:
-                    response = c.post("/v2/management/action/car/1/unpause")
-                else:
-                    response = c.post("/v2/management/action/car/1/pause")
+                op = "unpause" if is_paused else "pause"
+                c.post(f"/v2/management/action/car/1/{op}")
                 is_paused = not is_paused
 
             response = c.get("/v2/management/action/car/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n - 1)
 
-            if is_paused:
-                c.post("/v2/management/action/car/1/unpause")
-            else:
-                c.post("/v2/management/action/car/1/pause")
+            op = "unpause" if is_paused else "pause"
+            c.post(f"/v2/management/action/car/1/{op}")
             is_paused = not is_paused
 
             response = c.get("/v2/management/action/car/1?since=0")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), max_n)
 
-            if is_paused:
-                c.post("/v2/management/action/car/1/unpause")
-            else:
-                c.post("/v2/management/action/car/1/pause")
+            op = "unpause" if is_paused else "pause"
+            c.post(f"/v2/management/action/car/1/{op}")
             is_paused = not is_paused
 
             response = c.get("/v2/management/action/car/1?since=0")
@@ -340,22 +347,18 @@ class Test_Maximum_Number_Of_States(api_test.TestCase):
         with self.app.app.test_client() as c:
             c.post("/v2/management/car", json=[car_2])
 
-        CarActionStateDBModel.set_max_n_of_stored_states(5)
-        max_n = CarActionStateDBModel.max_n_of_stored_states()
+        CarActionStateDB.set_max_n_of_stored_states(5)
+        max_n = CarActionStateDB.max_n_of_stored_states()
         with self.app.app.test_client() as c:
             is_paused = False
             for _ in range(0, max_n + 5):
-                if is_paused:
-                    c.post(f"/v2/management/action/car/1/unpause")
-                else:
-                    c.post("/v2/management/action/car/1/pause")
+                op = "unpause" if is_paused else "pause"
+                c.post(f"/v2/management/action/car/1/{op}")
                 is_paused = not is_paused
             is_paused = False
             for _ in range(max_n, 2 * max_n + 5):
-                if is_paused:
-                    c.post("/v2/management/action/car/2/unpause")
-                else:
-                    c.post("/v2/management/action/car/2/pause")
+                op = "unpause" if is_paused else "pause"
+                c.post(f"/v2/management/action/car/2/{op}")
                 is_paused = not is_paused
             self.assertEqual(len(c.get("/v2/management/action/car/1?since=0").json), max_n)
             self.assertEqual(len(c.get("/v2/management/action/car/2?since=0").json), max_n)

@@ -16,6 +16,8 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
+from fleet_management_api.database.db_access import EMPTY_TENANT
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def create_tenants() -> _Response:
@@ -50,7 +52,7 @@ def create_tenants() -> _Response:
 
 def get_tenants() -> _Response:
     """Get all existing tenants."""
-    tenant_id_models = _db_access.get(_db_models.TenantDB)
+    tenant_id_models = _db_access.get(EMPTY_TENANT, _db_models.TenantDB)
     tenant_ids: list[_Tenant] = [
         _obj_to_db.tenant_from_db_model(tenant_id_model) for tenant_id_model in tenant_id_models
     ]
@@ -60,7 +62,9 @@ def get_tenants() -> _Response:
 
 def get_tenant(tenant_id: int) -> _Response:
     """Get an existing tenant identified by 'tenant_id'."""
-    tenant_models = _db_access.get(_db_models.TenantDB, criteria={"id": lambda x: x == tenant_id})
+    tenant_models = _db_access.get(
+        EMPTY_TENANT, _db_models.TenantDB, criteria={"id": lambda x: x == tenant_id}
+    )
     tenants = [
         _obj_to_db.tenant_from_db_model(tenant_id_model) for tenant_id_model in tenant_models
     ]
@@ -87,11 +91,10 @@ def delete_tenant(tenant_id: int) -> _Response:
             title="Cannot delete object",
         )
     request = _RequestEmpty.load()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
-    response = _db_access.delete(request.tenant, _db_models.TenantDB, tenant_id)
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    response = _db_access.delete(tenant, _db_models.TenantDB, tenant_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Tenant with ID={tenant_id} has been deleted.")
     else:

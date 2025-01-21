@@ -9,6 +9,7 @@ OrderId = int
 
 
 TENANT_ID = "tenants.id"
+TENANT_NAME = "tenants.name"
 CASCADE = "save-update, merge, delete"
 
 
@@ -32,6 +33,9 @@ class TenantDB(Base):
     platform_hw: Mapped[list[PlatformHWDB]] = relationship("PlatformHWDB", lazy="select")
     cars: Mapped[list[CarDB]] = relationship("CarDB", lazy="select")
     car_states: Mapped[list[CarStateDB]] = relationship("CarStateDB", lazy="select")
+    car_action_states: Mapped[list[CarActionStateDB]] = relationship(
+        "CarActionStateDB", lazy="select"
+    )
     orders: Mapped[list[OrderDB]] = relationship(
         "OrderDB", lazy="select", foreign_keys="OrderDB.tenant_id"
     )
@@ -45,7 +49,7 @@ class TenantDB(Base):
     route_visualizations: Mapped[list[RouteVisualizationDB]] = relationship(
         "RouteVisualizationDB", lazy="select", foreign_keys="RouteVisualizationDB.tenant_id"
     )
-    test_items: Mapped[list[PlatformHWDB]] = relationship(
+    test_items: Mapped[list[TestItem]] = relationship(
         "TestItem", lazy="select", back_populates="tenant"
     )
 
@@ -87,13 +91,11 @@ class CarDB(Base):
     states: Mapped[list[CarStateDB]] = relationship(
         "CarStateDB", cascade=CASCADE, back_populates="car"
     )
-    action_states: _Mapped[list["CarActionStateDBModel"]] = _relationship(
-        "CarActionStateDBModel", cascade="save-update, merge, delete", back_populates="car"
+    action_states: Mapped[list["CarActionStateDB"]] = relationship(
+        "CarActionStateDB", cascade="save-update, merge, delete", back_populates="car"
     )
-    orders: _Mapped[list["OrderDBModel"]] = _relationship("OrderDBModel", back_populates="car")
-    default_route: _Mapped["RouteDBModel"] = _relationship(
-        "RouteDBModel", lazy="noload", back_populates="cars"
-    )
+    orders: Mapped[list["OrderDB"]] = relationship("OrderDB", back_populates="car")
+    default_route: Mapped["RouteDB"] = relationship("RouteDB", lazy="noload", back_populates="cars")
 
     def __repr__(self) -> str:
         return f"Car(id={self.id}, name={self.name}, platform_hw_ID={self.platform_hw_id})"
@@ -131,17 +133,19 @@ class CarStateDB(Base):
         )
 
 
-class CarActionStateDBModel(Base):
+class CarActionStateDB(Base):
     model_name = "CarActionState"
     __tablename__ = "car_action_states"
     _max_n_of_states: int = 50
-    car_id: _Mapped[int] = _mapped_column(_sqa.ForeignKey("cars.id"), nullable=False)
-    status: _Mapped[str] = _mapped_column(_sqa.String)
-    timestamp: _Mapped[int] = _mapped_column(_sqa.BigInteger)
-
-    car: _Mapped[CarDBModel] = _relationship(
-        "CarDBModel", back_populates="action_states", lazy="select"
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant: Mapped[TenantDB] = relationship(
+        "TenantDB", back_populates="car_action_states", lazy="noload", foreign_keys=[tenant_id]
     )
+    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    status: Mapped[str] = mapped_column(String)
+    timestamp: Mapped[int] = mapped_column(BigInteger)
+
+    car: Mapped[CarDB] = relationship("CarDB", back_populates="action_states", lazy="select")
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -197,7 +201,6 @@ class OrderStateDB(Base):
     car_id: Mapped[int] = mapped_column(Integer)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     order: Mapped[OrderDB] = relationship("OrderDB", back_populates="states", lazy="noload")
-    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -238,7 +241,6 @@ class RouteDB(Base):
     )
     name: Mapped[str] = mapped_column(String, unique=True)
     stop_ids: Mapped[object] = mapped_column(PickleType)
-    tenant_name: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
     cars: Mapped[list[CarDB]] = relationship("CarDB", back_populates="default_route")
     visualization: Mapped[object] = relationship(
         "RouteVisualizationDB",
@@ -291,3 +293,5 @@ class TestItem(Base):
 
     def __repr__(self) -> str:
         return f"TestItem(ID={self.id}, test_str={self.test_str}, test_int={self.test_int})"
+
+    

@@ -11,7 +11,7 @@ from fleet_management_api.api_impl.controllers.order import (
     set_max_n_of_active_orders,
     set_max_n_of_inactive_orders,
 )
-from tests._utils.constants import TEST_TENANT
+from tests._utils.constants import TEST_TENANT_NAME
 
 
 class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCase):
@@ -21,22 +21,22 @@ class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCa
         self.app = _app.get_test_app()
         set_max_n_of_active_orders(5)
         set_max_n_of_inactive_orders(5)
-        create_platform_hws(TEST_TENANT, self.app)
-        create_stops(TEST_TENANT, self.app, 1)
-        create_route(TEST_TENANT, self.app, stop_ids=(1,))
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(car_id=1, target_stop_id=1, stop_route_id=1)
         order_2 = Order(car_id=1, target_stop_id=1, stop_route_id=1)
         order_3 = Order(car_id=1, target_stop_id=1, stop_route_id=1)
 
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order_1, order_2, order_3])
 
     def test_sending_in_progress_first_and_done_second_states_in_single_request_is_allowed(self):
         in_progress = OrderState(order_id=1, status="in_progress")
         done = OrderState(order_id=1, status="done")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/orderstate", json=[in_progress, done])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/orderstate/1")
@@ -50,7 +50,7 @@ class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCa
     ):
         in_progress = OrderState(order_id=1, status="in_progress")
         done = OrderState(order_id=1, status="done")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/orderstate", json=[done, in_progress])
             self.assertEqual(response.status_code, 200)
             response = c.get("/v2/management/orderstate/1")
@@ -70,7 +70,7 @@ class Test_Sending_Done_And_Other_Order_States_In_Single_Request(unittest.TestCa
         canceled_3 = OrderState(order_id=3, status="canceled")
         accepted_3a = OrderState(order_id=3, status="accepted")  # will not be posted
 
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post(
                 "/v2/management/orderstate",
                 json=[

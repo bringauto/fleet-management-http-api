@@ -30,6 +30,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def create_cars() -> _Response:  # noqa: E501
@@ -46,6 +47,7 @@ def create_cars() -> _Response:  # noqa: E501
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     cars: list[_models.Car] = []
     for car_dict in request.data:
         car_dict["lastState"] = None
@@ -64,7 +66,7 @@ def create_cars() -> _Response:  # noqa: E501
             )
         )
 
-    response = _db_access.add(request.tenant, *car_db_models, checked=checked)
+    response = _db_access.add(tenant, *car_db_models, checked=checked)
     if response.status_code == 200:
         posted_db_models: list[_db_models.CarDB] = response.body
         ids: list[int] = []
@@ -73,20 +75,20 @@ def create_cars() -> _Response:  # noqa: E501
             ids.append(model.id)
             _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
-            car_states = _post_default_car_state(request.tenant, ids).body
-            _post_default_car_action_state(ids).body
+        car_states = _post_default_car_state(tenant, ids).body
+        _post_default_car_action_state(tenant, ids).body
 
-            posted_cars: list[_Car] = []
-            for model, state in zip(posted_db_models, car_states):
-                posted_car = _obj_to_db.car_from_db_model(model, state)
-                posted_cars.append(posted_car)
-            return _json_response(posted_cars)
-        else:
-            return _log_error_and_respond(
-                code=response.status_code,
-                msg=f"Cars could not be created. {response.body['detail']}",
-                title=response.body["title"],
-            )
+        posted_cars: list[_Car] = []
+        for model, state in zip(posted_db_models, car_states):
+            posted_car = _obj_to_db.car_from_db_model(model, state)
+            posted_cars.append(posted_car)
+        return _json_response(posted_cars)
+    else:
+        return _log_error_and_respond(
+            code=response.status_code,
+            msg=f"Cars could not be created. {response.body['detail']}",
+            title=response.body["title"],
+        )
 
 
 def delete_car(car_id: int) -> _Response:
@@ -95,11 +97,10 @@ def delete_car(car_id: int) -> _Response:
     :param car_id: ID of the car to be deleted.
     """
     request = _RequestEmpty.load()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
-    response = _db_access.delete(request.tenant, _db_models.CarDB, car_id)
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    response = _db_access.delete(tenant, _db_models.CarDB, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
         return _log_info_and_respond(msg)
@@ -110,7 +111,12 @@ def delete_car(car_id: int) -> _Response:
 
 def get_car(car_id: int) -> _Response:
     """Get a car identified by 'car_id'."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     db_cars = _db_access.get(
+        tenant,
         _db_models.CarDB,
         criteria={"id": lambda x: x == car_id},
         omitted_relationships=[_db_models.CarDB.orders],
@@ -120,23 +126,26 @@ def get_car(car_id: int) -> _Response:
             f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
-        car = _get_car_with_last_state(db_cars[0])
+        car = _get_car_with_last_state(tenant, db_cars[0])
         _log_info(f"Car with ID={car_id} was found.")
         return _json_response(car)
 
 
 def get_cars() -> _Response:  # noqa: E501
     """List all cars."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     db_cars = _db_access.get(
-        _db_models.CarDB,
-        omitted_relationships=[_db_models.CarDB.orders],
+        tenant, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
     )
     cars: list[_models.Car] = list()
     if len(db_cars) == 0:
         _log_info("Listing all cars: no cars found.")
     else:
         for db_car in db_cars:
-            car = _get_car_with_last_state(db_car)
+            car = _get_car_with_last_state(tenant, db_car)
             cars.append(car)
         _log_info(f"Listing all cars: {len(cars)} cars found.")
     return _json_response(cars)
@@ -157,13 +166,10 @@ def update_cars() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
+    tenant = _TenantFromToken(request, "")
     cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
     car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
-    response = _db_access.update(request.tenant, *car_db_model)
+    response = _db_access.update(tenant, *car_db_model)
     car_ids = [c.id for c in cars]
     if response.status_code == 200:
         return _log_info_and_respond(f"Cars with IDs {car_ids} has been succesfully updated.")
@@ -172,14 +178,19 @@ def update_cars() -> _Response:
         return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
-def _get_car_with_last_state(car_db_model: _db_models.CarDB) -> _models.Car:
-    last_state = _get_last_car_state(car_db_model)
+def _get_car_with_last_state(
+    tenant: _TenantFromToken, car_db_model: _db_models.CarDB
+) -> _models.Car:
+    last_state = _get_last_car_state(tenant, car_db_model)
     car = _obj_to_db.car_from_db_model(car_db_model, last_state)
     return car
 
 
-def _get_last_car_state(car_db_model: _db_models.CarDBModel) -> _CarState | None:
+def _get_last_car_state(
+    tenant: _TenantFromToken, car_db_model: _db_models.CarDB
+) -> _CarState | None:
     db_last_states = _db_access.get(
+        tenant,
         _db_models.CarStateDB,
         criteria={"car_id": lambda x: x == car_db_model.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -192,15 +203,15 @@ def _get_last_car_state(car_db_model: _db_models.CarDBModel) -> _CarState | None
     return last_state
 
 
-def _post_default_car_state(tenant: str, car_ids: list[int]) -> _Response:
+def _post_default_car_state(tenant: _TenantFromToken, car_ids: list[int]) -> _Response:
     car_states = [_CarState(car_id=id_, status=_CarStatus.OUT_OF_ORDER) for id_ in car_ids]
     response = _create_car_state_from_argument_and_post(tenant, car_states)
     return response
 
 
-def _post_default_car_action_state(car_ids: list[int]) -> _Response:
+def _post_default_car_action_state(tenant: _TenantFromToken, car_ids: list[int]) -> _Response:
     car_action_states = [
         _CarActionState(car_id=id_, action_status=_CarActionStatus.NORMAL) for id_ in car_ids
     ]
-    response = _create_car_action_state_from_argument_and_post(car_action_states)
+    response = _create_car_action_state_from_argument_and_post(tenant, car_action_states)
     return response

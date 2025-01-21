@@ -17,6 +17,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def create_hws() -> _Response:
@@ -30,13 +31,10 @@ def create_hws() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
+    tenant = _TenantFromToken(request)
     hws = [_PlatformHW.from_dict(p) for p in request.data]
     hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
-    response: _Response = _db_access.add(request.tenant, *hw_db_model)
+    response: _Response = _db_access.add(tenant, *hw_db_model)
     if response.status_code == 200:
         inserted_models: list[_PlatformHW] = [
             _obj_to_db.hw_from_db_model(item) for item in response.body
@@ -55,8 +53,11 @@ def create_hws() -> _Response:
 
 def get_hws() -> _Response:
     """Get all existing platform HWs."""
-    tenant = _RequestEmpty.load().tenant
-    hw_id_models = _db_access.get(_db_models.PlatformHWDB, tenant=tenant)
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    hw_id_models = _db_access.get(tenant, _db_models.PlatformHWDB)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
     ]
@@ -66,8 +67,12 @@ def get_hws() -> _Response:
 
 def get_hw(platform_hw_id: int) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     hw_models = _db_access.get(
-        _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
+        tenant, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
     hws = [_obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(hws) == 0:
@@ -93,11 +98,10 @@ def delete_hw(platform_hw_id: int) -> _Response:
             title="Cannot delete object",
         )
     request = _RequestEmpty.load()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
-    response = _db_access.delete(request.tenant, _db_models.PlatformHWDB, platform_hw_id)
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    response = _db_access.delete(tenant, _db_models.PlatformHWDB, platform_hw_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Platform HW with ID={platform_hw_id} has been deleted.")
     else:

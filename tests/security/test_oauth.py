@@ -7,7 +7,7 @@ import flask_jwt_extended as fjwt
 import fleet_management_api.api_impl.security as _security
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
-from tests._utils.constants import TEST_TENANT
+from tests._utils.constants import TEST_TENANT_NAME
 
 
 class Test_Appending_To_URIs(unittest.TestCase):
@@ -54,7 +54,7 @@ class Test_Playing_With_Oauth(unittest.TestCase):
         self.app = _app.get_test_app(predef_api_key="key_not_used")
 
     def _test_using_nonexistent_key_yields_code_401(self):
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(
                 "/v2/management/car",
                 headers={

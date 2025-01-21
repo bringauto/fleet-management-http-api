@@ -22,6 +22,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def create_stops() -> _Response:
@@ -35,13 +36,10 @@ def create_stops() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
+    tenant = _TenantFromToken(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.add(request.tenant, *stop_db_models)
+    response = _db_access.add(tenant, *stop_db_models)
     if response.status_code == 200:
         posted_db_models: list[_db_models.StopDB] = response.body
         for stop in posted_db_models:
@@ -61,19 +59,18 @@ def delete_stop(stop_id: int) -> _Response:
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    routes_response = _get_routes_referencing_stop(stop_id)
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    routes_response = _get_routes_referencing_stop(tenant, stop_id)
     if routes_response.status_code != 200:
         return _log_error_and_respond(
             routes_response.body["title"],
             routes_response.status_code,
             routes_response.body["title"],
         )
-    request = _RequestEmpty.load()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
-    response = _db_access.delete(request.tenant, _db_models.StopDB, stop_id)
+    response = _db_access.delete(tenant, _db_models.StopDB, stop_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
@@ -87,8 +84,12 @@ def delete_stop(stop_id: int) -> _Response:
 
 def get_stop(stop_id: int) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
-        _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
+        tenant, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
     stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
@@ -100,7 +101,11 @@ def get_stop(stop_id: int) -> _Response:
 
 def get_stops() -> _Response:
     """Get all existing stops."""
-    stop_db_models = _db_access.get(_db_models.StopDB)
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
+    stop_db_models = _db_access.get(tenant, _db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
@@ -120,13 +125,10 @@ def update_stops() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
+    tenant = _TenantFromToken(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.update(request.tenant, *stop_db_models)
+    response = _db_access.update(tenant, *stop_db_models)
     if response.status_code == 200:
         updated_stops: list[_db_models.StopDB] = response.body
         for s in updated_stops:
@@ -141,8 +143,10 @@ def update_stops() -> _Response:
         )
 
 
-def _get_routes_referencing_stop(stop_id: int) -> _Response:
-    route_db_models = [m for m in _db_access.get(_db_models.RouteDB) if stop_id in m.stop_ids]
+def _get_routes_referencing_stop(tenant: _TenantFromToken, stop_id: int) -> _Response:
+    route_db_models = [
+        m for m in _db_access.get(tenant, _db_models.RouteDB) if stop_id in m.stop_ids
+    ]
     if len(route_db_models) > 0:
         return _log_error_and_respond(
             f"Stop with ID={stop_id} cannot be deleted because it is referenced by routes: {route_db_models}.",

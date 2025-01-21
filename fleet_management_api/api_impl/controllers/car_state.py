@@ -10,11 +10,15 @@ from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
-import fleet_management_api.models as _models
+from fleet_management_api.models import CarState as _CarState
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJSON
+from fleet_management_api.api_impl.load_request import (
+    RequestJSON as _RequestJSON,
+    RequestEmpty as _RequestEmpty,
+)
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def create_car_states() -> _Response:
@@ -28,17 +32,13 @@ def create_car_states() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _log_error_and_respond(
-            "Tenant not received in the request.", 401, "Unspecified tenant"
-        )
-    car_states = [_models.CarState.from_dict(s) for s in request.data]  # noqa: E501
-    return create_car_states_from_argument_and_post(request.tenant, car_states)
+    tenant = _TenantFromToken(request, "")
+    car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
+    return create_car_states_from_argument_and_post(tenant, car_states)
 
 
 def create_car_states_from_argument_and_post(
-    tenant: str,
-    car_states: list[_models.CarState],
+    tenant: _TenantFromToken, car_states: list[_CarState]
 ) -> _Response:
     """Post new car states using list passed as argument.
 
@@ -60,7 +60,7 @@ def create_car_states_from_argument_and_post(
         for model in inserted_models:
             code, msg = 200, f"Car state (ID={model.id}) was succesfully created."
             _log_info(msg)
-            cleanup_response = _remove_old_states(model.car_id)
+            cleanup_response = _remove_old_states(tenant, model.car_id)
         if cleanup_response.status_code != 200:
             code, cleanup_error_msg = (
                 cleanup_response.status_code,
@@ -91,8 +91,13 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
     :param wait: If True, wait for new states if there are no states yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
+
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
+        _TenantFromToken(request, ""),
         _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -120,7 +125,11 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
     try:
         if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
+        request = _RequestEmpty.load()
+        if not request:
+            return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
+            _TenantFromToken(request, ""),
             base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,
@@ -143,9 +152,9 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
-def _remove_old_states(car_id: int) -> _Response:
+def _remove_old_states(tenant: _TenantFromToken, car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
-        _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
+        tenant, _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
     )
     curr_n_of_states = len(car_state_db_models)
     delta = curr_n_of_states - _db_models.CarStateDB.max_n_of_stored_states()

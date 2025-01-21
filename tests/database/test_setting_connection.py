@@ -9,7 +9,8 @@ import fleet_management_api.database.db_models as _db_models
 from tests.database.models import TestItem as _TestBase  # type: ignore
 from tests.database.models import initialize_test_tables as _initialize_test_tables
 from tests._utils.logs import clear_logs
-from tests._utils.constants import TEST_TENANT
+from tests._utils.constants import TEST_TENANT_NAME
+from tests._utils.setup_utils import TenantFromTokenMock
 
 
 class Test_Creating_Database_URL(unittest.TestCase):
@@ -57,6 +58,7 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
         clear_logs()
         if os.path.isfile("test_db_file.db"):
             os.remove("test_db_file.db")
+        self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_setting_up_a_test_database(self):
         db_file_path = os.path.abspath("test_db_file.db")
@@ -68,16 +70,16 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
     ):
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
-        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT))
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT_NAME))
         test_obj = _TestBase(test_str="test_name", test_int=1)
-        response = _db_access.add(TEST_TENANT, test_obj)
+        response = _db_access.add(self.tenant, test_obj)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(_db_access.get(tenant=TEST_TENANT, base=_TestBase)), 1)
+        self.assertEqual(len(_db_access.get(tenant=self.tenant, base=_TestBase)), 1)
 
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
 
-        self.assertEqual(len(_db_access.get(tenant=TEST_TENANT, base=_TestBase)), 0)
+        self.assertEqual(len(_db_access.get(tenant=self.tenant, base=_TestBase)), 0)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):
@@ -116,9 +118,9 @@ class Test_Setting_Up_Database(unittest.TestCase):
                 },
             )
         )
-        self.assertEqual(_db_models.CarStateDBModel.max_n_of_stored_states(), 18)
-        self.assertEqual(_db_models.CarActionStateDBModel.max_n_of_stored_states(), 22)
-        self.assertEqual(_db_models.OrderStateDBModel.max_n_of_stored_states(), 124)
+        self.assertEqual(_db_models.CarStateDB.max_n_of_stored_states(), 18)
+        self.assertEqual(_db_models.CarActionStateDB.max_n_of_stored_states(), 22)
+        self.assertEqual(_db_models.OrderStateDB.max_n_of_stored_states(), 124)
 
     @patch("fleet_management_api.database.connection._set_connection")
     def test_setting_up_database_without_connection_being_set_raises_exception(
@@ -151,11 +153,12 @@ class Test_Setting_Up_Database(unittest.TestCase):
 class Test_Calling_DB_Access_Methods_Without_Setting_Connection(unittest.TestCase):
     def test_calling_add_method_without_setting_connection_raises_runtime_error(self):
         clear_logs()
+        self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
         _connection.unset_connection_source()
         self.assertIsNone(_connection.current_connection_source())
         test_obj = _TestBase(id=1, test_str="test_name", test_int=1)
         with self.assertRaises(RuntimeError):
-            _db_access.add(TEST_TENANT, test_obj)
+            _db_access.add(self.tenant, test_obj)
 
 
 class Test_Getting_Connection_Source_As_A_Variable(unittest.TestCase):

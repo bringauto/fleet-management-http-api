@@ -7,9 +7,9 @@ from sqlalchemy import create_engine as _create_engine
 
 from fleet_management_api.database.db_models import (
     Base as _Base,
-    CarStateDBModel as _CarStateDBModel,
-    CarActionStateDBModel as _CarActionStateDBModel,
-    OrderStateDBModel as _OrderStateDBModel,
+    CarStateDB as _CarStateDB,
+    CarActionStateDB as _CarActionStateDB,
+    OrderStateDB as _OrderStateDB,
 )
 from fleet_management_api.script_args.configs import Database as _Database
 from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
@@ -163,11 +163,9 @@ def set_up_database(config: _Database) -> None:
         )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
-    _OrderStateDBModel.set_max_n_of_stored_states(
-        config.maximum_number_of_table_rows["order_states"]
-    )
-    _CarActionStateDBModel.set_max_n_of_stored_states(
+    _CarStateDB.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
+    _OrderStateDB.set_max_n_of_stored_states(config.maximum_number_of_table_rows["order_states"])
+    _CarActionStateDB.set_max_n_of_stored_states(
         config.maximum_number_of_table_rows["car_action_states"]
     )
     src = current_connection_source()

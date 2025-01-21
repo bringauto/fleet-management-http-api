@@ -5,7 +5,7 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone, GNSSPosition
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
-from tests._utils.constants import TEST_TENANT
+from tests._utils.constants import TEST_TENANT_NAME
 
 
 POSITION = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
@@ -16,9 +16,9 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
     def setUp(self) -> None:
         _connection.set_connection_source_test("test.db")
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app, 2)
-        create_stops(TEST_TENANT, self.app, 2)
-        create_route(TEST_TENANT, self.app, stop_ids=(1, 2))
+        create_platform_hws(self.app, 2)
+        create_stops(self.app, 2)
+        create_route(self.app, stop_ids=(1, 2))
         self.car = Car(
             platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
         )
@@ -36,7 +36,7 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
             car_id=1,
             notification_phone=MobilePhone(phone="123456789"),
         )
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[self.car])
             assert response.json is not None
             self.car = Car.from_dict(response.json[0])
@@ -48,11 +48,11 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
     def test_order_is_returned_with_its_last_state(self):
         state_1 = OrderState(status="to_accept", order_id=self.order_1.id)
         state_2 = OrderState(status="in_progress", order_id=self.order_1.id)
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/orderstate", json=[state_1])
             c.post("/v2/management/orderstate", json=[state_2])
 
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(f"/v2/management/order/{self.car.id}/{self.order_1.id}")
             self.assertEqual(200, response.status_code)
             self.assertEqual(response.json["lastState"]["status"], state_2.status)
@@ -62,9 +62,9 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
         state_2 = OrderState(status="done", order_id=self.order_1.id)
         state_3 = OrderState(status="accepted", order_id=self.order_2.id)
         state_4 = OrderState(status="in_progress", order_id=self.order_2.id)
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/orderstate", json=[state_1, state_2, state_3, state_4])
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(f"/v2/management/order/{self.car.id}")
             self.assertEqual(200, response.status_code)
             self.assertEqual(len(response.json), 2)
@@ -76,9 +76,9 @@ class Test_Order_Is_Returned_With_Its_Last_State(unittest.TestCase):
         state_2 = OrderState(status="done", order_id=self.order_1.id)
         state_3 = OrderState(status="accepted", order_id=self.order_2.id)
         state_4 = OrderState(status="in_progress", order_id=self.order_2.id)
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/orderstate", json=[state_1, state_2, state_3, state_4])
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(f"/v2/management/order")
             self.assertEqual(200, response.status_code)
             self.assertEqual(len(response.json), 2)

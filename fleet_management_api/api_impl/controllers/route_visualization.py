@@ -16,14 +16,21 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import RequestJSON as _RequestJSON
+from fleet_management_api.api_impl.load_request import (
+    RequestEmpty as _RequestEmpty,
+    RequestJSON as _RequestJSON,
+)
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 
 def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    tenant = _TenantFromToken(request, "")
     rp_db_models = _db_access.get(
-        _RouteVisDB,
-        criteria={"route_id": lambda x: x == route_id},
+        tenant, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
         return _error(
@@ -50,8 +57,7 @@ def redefine_route_visualizations() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    if not request.tenant:
-        return _error(401, "Tenant not received in the request.", title="Unspecified tenant")
+    tenant = _TenantFromToken(request, "")
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):
@@ -61,7 +67,7 @@ def redefine_route_visualizations() -> _Response:
                 title=_OBJ_NOT_FOUND,
             )
 
-    existing_vis: list[_RouteVisDB] = _db_access.get(_RouteVisDB)
+    existing_vis: list[_RouteVisDB] = _db_access.get(tenant, _RouteVisDB)
     existing_vis_dict: dict[int, _RouteVisDB] = {v.route_id: v for v in existing_vis}
     for v in vis:
         if v.route_id in existing_vis_dict:
@@ -75,7 +81,7 @@ def redefine_route_visualizations() -> _Response:
             )
 
     vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
-    response = _db_access.update(request.tenant, *vis_db_models)
+    response = _db_access.update(tenant, *vis_db_models)
     if response.status_code == 200:
         inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
         for v in inserted_vis:

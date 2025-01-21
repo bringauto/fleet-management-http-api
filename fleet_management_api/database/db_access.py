@@ -24,7 +24,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.security import TenantFromToken
+from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
 
 from ..logs import LOGGER_NAME
 
@@ -41,7 +41,7 @@ Order = Literal["asc", "desc"]
 ColumnName = str
 
 
-class EmptyTenant(TenantFromToken):
+class EmptyTenant(_TenantFromToken):
 
     def __init__(self, *args):
         self._tenant_name = "empty_tenant"
@@ -68,7 +68,7 @@ class UnspecifiedTenant(Exception):
     pass
 
 
-class TennantDoesNotExist(Exception):
+class TenantDoesNotExist(Exception):
     """Raised when the tenant does not exist in the database."""
 
     pass
@@ -138,7 +138,7 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
     @_functools.wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         try:
-            response = func(*args, **kwargs)
+            response: _Response = func(*args, **kwargs)
             if hasattr(response, "status_code") and (
                 response.status_code == 503 or response.status_code == 500
             ):
@@ -189,7 +189,7 @@ def delete_without_tenant(base: type[_Base], id_: int) -> _Response:
 
 @db_access_method
 def add(
-    tenant: TenantFromToken,
+    tenant: _TenantFromToken,
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
@@ -204,14 +204,23 @@ def add(
     - An optional `connection_source` may be specified to replace the otherwise used global connection source
     (an sqlalchemy Engine object).
     """
+
     global _wait_mg
+    source = _get_current_connection_source(connection_source)
+
     if not tenant.name:
         return _error(401, "Tenant not received in the request.", title="Tenant not received.")
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
-    _set_tenant_id_to_all_objs(tenant.name, *added)
-    source = _get_current_connection_source(connection_source)
+    try:
+        _set_tenant_id_to_all_objs(tenant.name, *added)
+    except TenantDoesNotExist:
+        return _error(
+            404, f"Tenant '{tenant.name}' does not exist in the database", title="Tenant not found"
+        )
+    except Exception as e:
+        return _error(500, f"Error: {e}", title="Cannot create object due to unexpected error")
     with _Session(source) as session:
         try:
             if checked is not None:
@@ -252,12 +261,13 @@ def add(
 
 
 @db_access_method
-def delete(tenant: str, base: type[_Base], id_: Any) -> _Response:
+def delete(tenant: _TenantFromToken, base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
-    response = _check_and_set_tenant(tenant, base(id=id_))
-    if response.status_code != 200:
-        return response
+    if base is not _TenantDB:
+        response = _check_and_set_tenant(tenant.name, base(id=id_))
+        if response.status_code != 200:
+            return response
     with _Session(source) as session:
         try:
             inst = session.get_one(base, id_)
@@ -361,7 +371,7 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
 
 @db_access_method
 def get(
-    tenant: TenantFromToken,
+    tenant: _TenantFromToken,
     base: type[_Base],
     first_n: int = 0,
     sort_result_by: Optional[dict[ColumnName, Order]] = None,
@@ -398,14 +408,14 @@ def get(
             criteria[attr_label](getattr(table.columns, attr_label))
             for attr_label in criteria.keys()
         ]
-        if tenant.name:
-            stmt = (
-                _sqa.select(getattr(_TenantDB.__table__.c, base.__tablename__))
-                .where(_TenantDB.name == tenant.name)
-                .where(*clauses)
-            )  # type: ignore
-        else:
-            stmt = _sqa.select(base).where(*clauses)  # type: ignore
+        stmt = _sqa.select(base).where(*clauses)  # type: ignore
+        if tenant.name and tenant is not EMPTY_TENANT:
+            tenant_objs: list[_TenantDB] = get(
+                EMPTY_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant.name}
+            )
+            if not tenant_objs:
+                return []
+            stmt = stmt.where(table.c.tenant_id == tenant_objs[0].id)
         for (
             attr_label,
             order,
@@ -421,8 +431,8 @@ def get(
         if omitted_relationships is not None:
             for item in omitted_relationships:
                 stmt = stmt.options(_noload(item))
-        result = [item.copy() for item in session.scalars(stmt).all()]
-
+        items = session.scalars(stmt).all()
+        result = [item.copy() for item in items]
     if not result and wait:
         result = _wait_mg.wait_for_content(
             base.__tablename__,
@@ -465,7 +475,7 @@ def get_children(
 
 
 @db_access_method
-def update(tenant: str, *updated: _Base) -> _Response:
+def update(tenant: _TenantFromToken, *updated: _Base) -> _Response:
     """Updates an existing record in the database with the same ID as the updated_obj.
 
     The updated_obj is an instance of the ORM mapped class related to a table in database.
@@ -473,9 +483,10 @@ def update(tenant: str, *updated: _Base) -> _Response:
     if not updated:
         return _text_response("Empty request body. Nothing to update in the database.")
     source = _get_current_connection_source()
-    response = _check_and_set_tenant(tenant, *updated)
-    if response.status_code != 200:
-        return response
+    if type(updated[0]) is not _TenantDB:
+        response = _check_and_set_tenant(tenant.name, *updated)
+        if response.status_code != 200:
+            return response
     with _Session(source) as session, session.begin():
         try:
             for item in updated:
@@ -572,20 +583,20 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
     """Check if the tenant exists and set the `tenant` attribute to all the `objs`."""
     if not objs:
         return _json_response([])
-    if "tenant_name" not in objs[0].__table__.columns.keys():
+    if "tenant_id" not in objs[0].__table__.columns.keys():
         if tenant_name == EMPTY_TENANT:
             # correct adding of an object, that is not assigned to any tenant
             return _json_response([])
         else:
             return _error(
                 500,
-                f"Database model {objs[0].__class__.__name__} does not have a 'tenant_name' attribute.",
+                f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute.",
                 title="Unexpected error when accessing database.",
             )
     if not tenant_name:
         return _error(400, "Tenant not received in the request.", title="Tenant not received.")
 
-    tenants = get(_TenantDB, criteria={"name": lambda x: x == tenant_name})
+    tenants = get(EMPTY_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name})
     if not tenants:
         return _error(
             404,
@@ -602,9 +613,11 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> None:
     """Set tenant_id attribute to all the objs."""
     if "tenant_id" not in objs[0].__table__.columns.keys():
         return
-    tenants: list[_TenantDB] = get(_TenantDB, criteria={"name": lambda x: x == tenant_name})
+    tenants: list[_TenantDB] = get(
+        EMPTY_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name}
+    )
     if not tenants:
-        raise TennantDoesNotExist(f"Tenant {tenant_name} does not exist in the database.")
+        raise TenantDoesNotExist(f"Tenant {tenant_name} does not exist in the database.")
     for obj in objs:
         assert hasattr(obj, "tenant_id")
         obj.tenant_id = tenants[0].id

@@ -1,28 +1,83 @@
 from __future__ import annotations
 import dataclasses
-from typing import Any, Optional
+from typing import Any
+import abc
 
 import connexion  # type: ignore
+from flask.wrappers import Request as _Request
 
 
 @dataclasses.dataclass
-class RequestJSON:
+class Request(abc.ABC):
     data: Any
-    tenant: Optional[str] = None
+    headers: dict[str, Any]
+    cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
+    query: dict[str, Any] = dataclasses.field(default_factory=dict)
 
-    @staticmethod
-    def load() -> RequestJSON | None:
-        if not connexion.request.is_json:
+    @classmethod
+    def load(cls) -> Request | None:
+        request = connexion.request
+        if not cls.ok(request):
             return None
-        tenant = connexion.request.cookies.get("tenant", None)
-        return RequestJSON(data=connexion.request.get_json(), tenant=tenant)
+        try:
+            authorization = request.headers.environ.get("HTTP_AUTHORIZATION", "")
+            headers = {"Authorization": authorization}
+        except RuntimeError:
+            headers = {"Authorization": ""}
+        return cls(
+            data=cls.get_data(request),
+            headers=headers,
+            cookies=request.cookies,
+            query=request.args,
+        )
+
+    @classmethod
+    @abc.abstractmethod
+    def get_data(cls, request: _Request) -> bool:
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def ok(cls, request: _Request) -> bool:
+        pass
+
+
+class RequestJSON(Request):
+
+    @classmethod
+    def get_data(cls, request: _Request) -> Any:
+        try:
+            return request.get_json()
+        except RuntimeError:
+            return None
+
+    @classmethod
+    def ok(cls, request: _Request) -> bool:
+        return request.is_json
+
+
+class RequestNoData(Request):
+
+    @classmethod
+    def get_data(cls, request: _Request) -> Any:
+        return None
+
+    @classmethod
+    def ok(cls, request: _Request) -> bool:
+        return True
 
 
 @dataclasses.dataclass
-class RequestEmpty:
-    tenant: Optional[str] = None
+class RequestEmpty(Request):
+    data: Any = None
+    headers: dict[str, Any] = dataclasses.field(default_factory=dict)
+    cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
+    query: dict[str, Any] = dataclasses.field(default_factory=dict)
 
-    @staticmethod
-    def load() -> RequestJSON:
-        tenant = connexion.request.cookies.get("tenant", None)
-        return RequestEmpty(tenant=tenant)
+    @classmethod
+    def get_data(cls, *args, **kwargs) -> Any:
+        return None
+
+    @classmethod
+    def ok(cls, *args, **kwargs) -> bool:
+        return True

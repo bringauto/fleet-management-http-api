@@ -8,11 +8,16 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.app as _app
 from fleet_management_api.models import Car, Order, OrderState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms, delete
-from fleet_management_api.database.db_models import OrderStateDBModel
+from fleet_management_api.database.db_models import OrderStateDB
 
 import tests._utils.api_test as api_test
-from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
-from tests._utils.constants import TEST_TENANT
+from tests._utils.setup_utils import (
+    create_platform_hws,
+    create_stops,
+    create_route,
+    TenantFromTokenMock,
+)
+from tests._utils.constants import TEST_TENANT_NAME
 
 
 class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
@@ -20,9 +25,9 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app)
-        create_stops(TEST_TENANT, self.app, 3)
-        create_route(TEST_TENANT, self.app, stop_ids=(1, 2))
+        create_platform_hws(self.app)
+        create_stops(self.app, 3)
+        create_route(self.app, stop_ids=(1, 2))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order = Order(
             priority="high",
@@ -32,24 +37,24 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
             stop_route_id=1,
             notification_phone={},
         )
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order])
 
     def test_requesting_order_state_without_wait_mechanism_enabled_immediatelly_returns_empty_list_even_if_no_state_was_sent_yet(
         self,
     ):
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(f"/v2/management/orderstate?since={default_state_timestamp+1}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
     def test_waiting_for_order_state_when_no_state_was_sent_yet(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 time.sleep(0.01)
@@ -60,7 +65,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_1 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
@@ -81,9 +86,9 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
         _connection.set_connection_source_test("test_db.db")
         set_content_timeout_ms(1000)
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app)
-        create_stops(TEST_TENANT, self.app, 1)
-        create_route(TEST_TENANT, self.app, stop_ids=(1,))
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         car = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
@@ -102,14 +107,14 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
             stop_route_id=1,
             notification_phone={},
         )
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order_1])
             c.post("/v2/management/order", json=[order_2])
 
     def test_waiting_for_order_state_for_given_order(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/orderstate/1?wait=true&since=0")
@@ -134,9 +139,9 @@ class Test_Timeouts(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app)
-        create_stops(TEST_TENANT, self.app, 1)
-        create_route(TEST_TENANT, self.app, stop_ids=(1,))
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         car = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
@@ -148,17 +153,17 @@ class Test_Timeouts(unittest.TestCase):
             stop_route_id=1,
             notification_phone={},
         )
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order])
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
         set_content_timeout_ms(150)
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate?&since=0")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(
@@ -191,9 +196,9 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app)
-        create_stops(TEST_TENANT, self.app, 1)
-        create_route(TEST_TENANT, self.app, stop_ids=(1,))
+        create_platform_hws(self.app)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
             priority="high",
@@ -212,7 +217,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
             notification_phone={},
         )
         mock_timestamp_ms.return_value = 0
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
             c.post("/v2/management/order", json=[order_1])
             c.post("/v2/management/order", json=[order_2])
@@ -221,7 +226,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     def test_filtering_order_state_by_since_parameter(self, mock_timestamp_ms: Mock):
         order_state_1 = OrderState(order_id=1, status="accepted")
         order_state_2 = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mock_timestamp_ms.return_value = 50
             c.post("/v2/management/orderstate", json=[order_state_1])
             mock_timestamp_ms.return_value = 100
@@ -242,7 +247,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
         order_state_1 = OrderState(order_id=1, status="accepted")
         order_state_2 = OrderState(order_id=1, status="in_progress")
         order_state_3 = OrderState(order_id=2, status="accepted")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mock_timestamp_ms.return_value = 50
             c.post("/v2/management/orderstate", json=[order_state_1])
             mock_timestamp_ms.return_value = 100
@@ -266,7 +271,7 @@ class Test_Filtering_Order_State_By_Since_Parameter(unittest.TestCase):
     ):
         order_state_1 = OrderState(order_id=1, status="accepted")
         order_state_2 = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate/1")
 
             self.assertEqual(len(response.json), 1)  # type: ignore
@@ -290,9 +295,9 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app()
-        create_platform_hws(TEST_TENANT, self.app, 3)
-        create_stops(TEST_TENANT, self.app, 1)
-        create_route(TEST_TENANT, self.app, stop_ids=(1,))
+        create_platform_hws(self.app, 3)
+        create_stops(self.app, 1)
+        create_route(self.app, stop_ids=(1,))
         car_1 = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="1234567890"))
         order_1 = Order(
@@ -312,7 +317,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
             notification_phone={},
         )
         mock_timestamp_ms.return_value = 0
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1])
             c.post("/v2/management/car", json=[car_2])
             c.post("/v2/management/order", json=[order_1])
@@ -323,7 +328,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
             self.since = tstamp + 1
 
     def test_filtering_existing_order_states_by_car_id(self):
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate?carId=1")
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["orderId"], 1)
@@ -332,14 +337,14 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
             self.assertEqual(response.json[0]["orderId"], 2)
 
     def test_getting_order_states_for_nonexistent_car_yields_empty_list(self):
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate?carId=3")
             self.assertEqual(response.json, [])
 
     def test_waiting_for_order_states_for_given_car(self):
         order_state_1 = OrderState(order_id=1, status="in_progress")
         order_state_2 = OrderState(order_id=2, status="accepted")
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor() as executor:
                 future_1 = executor.submit(
                     c.get, f"/v2/management/orderstate?carId=2&wait=true&since={self.since}"
@@ -354,7 +359,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
                 self.assertEqual(response.json[0]["status"], "accepted")
 
     def test_waiting_for_order_states_for_car_created_after_sending_request_for_states(self):
-        with self.app.app.test_client(TEST_TENANT) as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor() as executor:
                 future_1 = executor.submit(
                     c.get, f"/v2/management/orderstate?carId=3&wait=true&since={self.since}"
@@ -403,7 +408,7 @@ class Test_Retrieving_Order_With_States_Deleted(api_test.TestCase):
                 "/v2/management/order", json=[Order(car_id=1, target_stop_id=1, stop_route_id=1)]
             )
             # delete only existing car state (using the database-access method delete instead of the API, which does not provide the delete method for car states)
-            delete(OrderStateDBModel, 1)
+            delete(TenantFromTokenMock(TEST_TENANT_NAME), OrderStateDB, 1)
             response = c.get("/v2/management/orderstate/1")
             # there are now no order states for order with ID=1
             self.assertEqual(response.json, [])

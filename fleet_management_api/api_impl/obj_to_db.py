@@ -3,9 +3,9 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.timestamp as _tstamp
 
 
-def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
+def car_to_db_model(car: _models.Car) -> _db_models.CarDB:
     car_admin_phone = car.car_admin_phone.to_dict() if car.car_admin_phone is not None else None
-    return _db_models.CarDBModel(
+    return _db_models.CarDB(
         id=car.id,
         name=car.name,
         platform_hw_id=car.platform_hw_id,
@@ -66,8 +66,8 @@ def car_state_from_db_model(
 
 def car_action_state_to_db_model(
     car_action_state: _models.CarActionState,
-) -> _db_models.CarActionStateDBModel:
-    return _db_models.CarActionStateDBModel(
+) -> _db_models.CarActionStateDB:
+    return _db_models.CarActionStateDB(
         id=car_action_state.id,
         status=str(car_action_state.action_status),
         car_id=car_action_state.car_id,
@@ -76,10 +76,10 @@ def car_action_state_to_db_model(
 
 
 def car_action_state_from_db_model(
-    car_action_state_db_model: _db_models.CarActionStateDBModel,
+    car_action_state_db_model: _db_models.CarActionStateDB,
 ) -> _models.CarActionState:
-    assert isinstance(car_action_state_db_model, _db_models.CarActionStateDBModel), (
-        f"Expected car_action_state_db_model to be of type _db_models.CarActionStateDBModel, "
+    assert isinstance(car_action_state_db_model, _db_models.CarActionStateDB), (
+        f"Expected car_action_state_db_model to be of type _db_models.CarActionStateDB, "
         f"but got {type(car_action_state_db_model)}"
     )
     return _models.CarActionState(
@@ -162,8 +162,8 @@ def hw_from_db_model(
     return _models.PlatformHW(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
 
 
-def route_to_db_model(route: _models.Route) -> _db_models.RouteDBModel:
-    return _db_models.RouteDBModel(id=route.id, name=route.name, stop_ids=route.stop_ids)
+def route_to_db_model(route: _models.Route) -> _db_models.RouteDB:
+    return _db_models.RouteDB(id=route.id, name=route.name, stop_ids=route.stop_ids)
 
 
 def route_from_db_model(route_db_model: _db_models.RouteDB) -> _models.Route:
@@ -230,6 +230,6 @@ def tenant_to_db_model(
 
 
 def tenant_from_db_model(
-    platform_hw_db_model: _db_models.PlatformHWDB,
-) -> _models.PlatformHW:
-    return _models.PlatformHW(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
+    platform_hw_db_model: _db_models.TenantDB,
+) -> _models.Tenant:
+    return _models.Tenant(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
