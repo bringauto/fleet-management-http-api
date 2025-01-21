@@ -1,61 +1,19 @@
 import unittest
 import sys
-import jwt
 
 sys.path.append(".")
 
-from connexion.lifecycle import ConnexionRequest
-
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import TenantDB
-from fleet_management_api.api_impl.security import TenantFromToken
 import tests.database.models as models
 import tests._utils.api_test as api_test
+from tests._utils.setup_utils import TenantFromTokenMock
 
 
-TENANT_FROM_EMPTY_TOKEN = TenantFromToken(
-    ConnexionRequest("http://example.com", method="GET"), key=""
-)
-token = jwt.encode(
-    {
-        "Payload": '{"group": ["/customers/tenant_1", "/customers/tenant_2", "/customers/nonexistent-tenant"]}'
-    },
-    "test_key",
-    algorithm="HS256",
-)
-TENANT_EMPTY = TenantFromToken(
-    ConnexionRequest(
-        "http://example.com", method="GET", headers={"Authorization": f"Bearer {token}"}
-    ),
-    key="test_key",
-)
-TENANT_1 = TenantFromToken(
-    ConnexionRequest(
-        "http://example.com",
-        method="GET",
-        cookies={"tenant": "tenant_1"},
-        headers={"Authorization": f"Bearer {token}"},
-    ),
-    key="test_key",
-)
-TENANT_2 = TenantFromToken(
-    ConnexionRequest(
-        "http://example.com",
-        method="GET",
-        cookies={"tenant": "tenant_2"},
-        headers={"Authorization": f"Bearer {token}"},
-    ),
-    key="test_key",
-)
-NONEXISTENT_TENANT = TenantFromToken(
-    ConnexionRequest(
-        "http://example.com",
-        method="GET",
-        cookies={"tenant": "nonexistent-tenant"},
-        headers={"Authorization": f"Bearer {token}"},
-    ),
-    key="test_key",
-)
+TENANT_EMPTY = TenantFromTokenMock(name="")
+TENANT_1 = TenantFromTokenMock(name="tenant_1")
+TENANT_2 = TenantFromTokenMock(name="tenant_2")
+NONEXISTENT_TENANT = TenantFromTokenMock(name="nonexistent-tenant")
 
 
 class Test_Creating_Objects(api_test.TestCase):
@@ -65,7 +23,7 @@ class Test_Creating_Objects(api_test.TestCase):
 
     def test_creating_object_with_empty_tenant_yields_401_error(self) -> None:
         obj = models.TestItem(test_str="test", test_int=4)
-        response = _db_access.add(TENANT_FROM_EMPTY_TOKEN, obj)
+        response = _db_access.add(TENANT_EMPTY, obj)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.body["title"], "Tenant not received.")
 

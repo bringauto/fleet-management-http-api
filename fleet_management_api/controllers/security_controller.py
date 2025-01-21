@@ -28,12 +28,15 @@ def info_from_oAuth2AuthCode(token):
     :return: Decoded token information or None if token is invalid
     :rtype: dict | None
     """
+    global _public_key
     try:
-        decoded_token = jwt.decode(token, _public_key, algorithms=["RS256"], audience="account")
+        public_key = _public_key
+        decoded_token: dict = jwt.decode(
+            token, public_key, algorithms=["RS256"], audience="account"
+        )
     except:
         return None
-
-    for origin in decoded_token["allowed-origins"]:
+    for origin in decoded_token.get("allowed-origins", []):
         if origin == _client_id:
             return {"scopes": {}, "uid": ""}
 

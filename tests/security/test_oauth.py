@@ -3,8 +3,12 @@ import os
 
 import fleet_management_api.api_impl.security as _security
 import fleet_management_api.database.connection as _connection
+import fleet_management_api.database.db_access as _db_access
+import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.app as _app
 from fleet_management_api.models import PlatformHW
+from fleet_management_api.app import get_token
+from fleet_management_api.controllers import security_controller as _security_controller
 
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT_NAME
@@ -98,19 +102,22 @@ TEST_TOKEN_PAYLOAD = {
     "group": [],
 }
 TEST_TOKEN = {"Header": TEST_TOKEN_HEADER, "Payload": TEST_TOKEN_PAYLOAD, "Signature": {}}
-
-
 TEST_TENANT_1 = "test_tenant_1"
 TEST_TENANT_2 = "test_tenant_2"
+TEST_TENANT_3 = "test_tenant_3"
 
 
 class Test_Setting_Tenant_Cookie(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
+        _security.generate_test_keys()
+        public_key = _security.get_test_public_key()
+        _security_controller.set_auth_params(public_key, "test_client")
         self.app = _app.get_test_app(
-            "testKey", tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
+            "testKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
         )
+        _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT_3))
         with self.app.app.test_client() as client:
             self.hw_1 = PlatformHW(name="test_hw_1")
             client.set_cookie("", "tenant", TEST_TENANT_1)
@@ -118,20 +125,31 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             self.hw_2 = PlatformHW(name="test_hw_2")
             client.set_cookie("", "tenant", TEST_TENANT_2)
             client.post("/v2/management/platformhw?api_key=testKey", json=[self.hw_2])
+            self.hw_3 = PlatformHW(name="test_hw_3")
+            client.set_cookie("", "tenant", TEST_TENANT_3)
+            client.post("/v2/management/platformhw?api_key=testKey", json=[self.hw_3])
 
-    def test_no_api_key_authentication_yields_401_response(self) -> None:
+    def test_no_api_key_yields_access_only_to_accessible_tenants(self) -> None:
         with self.app.app.test_client() as client:
-            response = client.get("/v2/management/platformhw")
-            self.assertEqual(response.status_code, 401)
-
-    def test_api_key_used_returns_data_for_all_tenants(self) -> None:
-        with self.app.app.test_client() as client:
-            response = client.get("/v2/management/platformhw?api_key=testKey")
-            self.assertEqual(response.status_code, 200)
+            response = client.get(
+                "/v2/management/platformhw",
+                headers={"Authorization": f"Bearer {get_token(TEST_TENANT_1, TEST_TENANT_2)}"},
+            )
+            print(response.json)
             assert isinstance(response.json, list)
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["name"], self.hw_1.name)
             self.assertEqual(response.json[1]["name"], self.hw_2.name)
+
+    def test_api_key_used_yields_data_for_all_tenants(self) -> None:
+        with self.app.app.test_client() as client:
+            response = client.get("/v2/management/platformhw?api_key=testKey")
+            self.assertEqual(response.status_code, 200)
+            assert isinstance(response.json, list)
+            self.assertEqual(len(response.json), 3)
+            self.assertEqual(response.json[0]["name"], self.hw_1.name)
+            self.assertEqual(response.json[1]["name"], self.hw_2.name)
+            self.assertEqual(response.json[2]["name"], self.hw_3.name)
 
     def test_setting_tenant_cookie_yields_data_for_that_tenant_only(self) -> None:
         with self.app.app.test_client() as client:

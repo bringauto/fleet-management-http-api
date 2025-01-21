@@ -31,6 +31,10 @@ class Request(abc.ABC):
             query=request.args,
         )
 
+    @property
+    def api_key(self) -> str:
+        return self.query.get("api_key", "")
+
     @classmethod
     @abc.abstractmethod
     def get_data(cls, request: _Request) -> bool:

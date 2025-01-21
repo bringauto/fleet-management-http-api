@@ -1,11 +1,14 @@
 from typing import Optional
 import json
 import urllib.parse as _url
+import re
 
 from connexion.lifecycle import ConnexionRequest  # type: ignore
 from connexion.exceptions import Unauthorized
 import jwt
 from keycloak import KeycloakOpenID  # type: ignore
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
 from fleet_management_api.api_impl.load_request import Request as _Request
 
@@ -18,16 +21,48 @@ class NoHeaderWithJWTToken(Exception):
     pass
 
 
-_key = ""
+_test_public_key: str = ""
+_test_private_key: str = ""
 
 
-def set_key(key: str) -> None:
-    global _key
-    _key = key
+def get_test_public_key() -> str:
+    if not _test_public_key:
+        print("Test public key not set.")
+    return _test_public_key
 
 
-def get_key() -> str:
-    return _key
+def get_test_private_key() -> str:
+    if not _test_private_key:
+        print("Test private key not set.")
+    return _test_private_key
+
+
+def generate_test_keys() -> None:
+    # Generate a private key
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    # Serialize the private key to PEM format
+    private_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    # Generate the corresponding public key
+    public_key = private_key.public_key()
+    # Serialize the public key to PEM format
+    public_pem = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    global _test_public_key, _test_private_key
+    _test_public_key = _strip_footer_and_header(public_pem.decode())
+    _test_private_key = private_pem.decode()
+
+
+def _strip_footer_and_header(key: str) -> str:
+    stripped_key = re.sub(r"-----.+-----\n?", "", key)
+    stripped_key = re.sub(r"\n?-----.+-----", "", stripped_key)
+    # Remove any remaining newlines
+    stripped_key = stripped_key.replace("\n", "")
+    return stripped_key
 
 
 class TenantFromToken:
@@ -42,16 +77,20 @@ class TenantFromToken:
     If the tenant cookie is not specified, the tenant name will be an empty string.
     """
 
-    algorithm = "HS256"
+    algorithm = "RS256"
 
     def __init__(self, request: _Request, key: str = "") -> None:
         if not key.strip():
-            key = get_key()
-        self._tenant_name = self._check_and_read(request, key)
+            key = get_test_public_key()
+        self._current_tenant = self._check_and_read(request, key)
 
     @property
     def name(self) -> str:
-        return self._tenant_name
+        return self._current_tenant
+
+    @property
+    def accessible_tenants(self) -> list[str]:
+        return self._accessible_tenants
 
     @staticmethod
     def _check_and_read(request: ConnexionRequest, key: str) -> str:

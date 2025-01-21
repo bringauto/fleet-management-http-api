@@ -3,16 +3,11 @@ import dataclasses
 import fleet_management_api.models as _models
 from fleet_management_api.app import _TestApp, TEST_TENANT_NAME
 from fleet_management_api.database.timestamp import timestamp_ms
-from fleet_management_api.api_impl.security import set_key as _set_key
 
 
 @dataclasses.dataclass
 class TenantFromTokenMock:
     name: str
-
-
-def set_key(key: str) -> None:
-    _set_key(key)
 
 
 def create_platform_hws(app: _TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME) -> None:
