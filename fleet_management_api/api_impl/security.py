@@ -127,12 +127,9 @@ class AccessibleTenants:
                 raise Unauthorized("No valid JWT token or API key provided.")
             if not key.strip():
                 raise MissingRSAKey("RSA public key is not set.")
-            try:
-                decoded_str = jwt.decode(
-                    bearer, key, audience=audience, algorithms=[AccessibleTenants.algorithm]
-                )["Payload"]
-            except jwt.exceptions.DecodeError:
-                raise TenantNotAccessible("Invalid JWT token.")
+            decoded_str = jwt.decode(
+                bearer, key, audience=audience, algorithms=[AccessibleTenants.algorithm]
+            )["Payload"]
             payload = json.loads(decoded_str)
 
             if "group" not in payload:

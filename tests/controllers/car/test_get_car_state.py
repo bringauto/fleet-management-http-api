@@ -14,7 +14,6 @@ from tests._utils.constants import TEST_TENANT_NAME
 
 class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
-
         _connection.set_connection_source_test("test_db.db")
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)

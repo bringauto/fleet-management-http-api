@@ -159,12 +159,13 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def add_tenants(*names: str) -> None:
+def add_tenants(*names: str) -> _Response:
     """Add tenants to the database."""
     tenants = [_TenantDB(name=name) for name in names]
     response = add_without_tenant(*tenants)
     if response.status_code != 200:
         raise RuntimeError(f"Error when adding tenants: {response.body}")
+    return response
 
 
 def add_without_tenant(
@@ -190,7 +191,7 @@ def delete_without_tenant(base: type[_Base], id_: int) -> _Response:
 
 @db_access_method
 def add(
-    tenant: _AccessibleTenants,
+    tenants: _AccessibleTenants,
     *added: _Base,
     checked: Optional[Iterable[CheckBeforeAdd]] = None,
     connection_source: Optional[_sqa.Engine] = None,
@@ -209,17 +210,17 @@ def add(
     global _wait_mg
     source = _get_current_connection_source(connection_source)
 
-    if not tenant.current:
+    if not tenants.current:
         return _error(401, "Tenant not received in the request.", title="Tenant not received.")
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
     try:
-        _set_tenant_id_to_all_objs(tenant.current, *added)
+        _set_tenant_id_to_all_objs(tenants.current, *added)
     except TenantDoesNotExist:
         return _error(
             404,
-            f"Tenant '{tenant.current}' does not exist in the database",
+            f"Tenant '{tenants.current}' does not exist in the database",
             title="Tenant not found",
         )
     except Exception as e:
@@ -638,7 +639,12 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> None:
         NO_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name}
     )
     if not tenants:
-        raise TenantDoesNotExist(f"Tenant {tenant_name} does not exist in the database.")
+        response = add_tenants(tenant_name)
+        if response.status_code != 200:
+            raise TenantDoesNotExist(
+                f"Failed to create tenant '{tenant_name}' when adding items to the database."
+            )
+        tenants = response.body
     for obj in objs:
         assert hasattr(obj, "tenant_id")
         obj.tenant_id = tenants[0].id

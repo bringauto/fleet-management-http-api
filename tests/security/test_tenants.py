@@ -38,6 +38,9 @@ def tenants_from_token(request: ConnexionRequest, key: str, audience: str) -> Ac
 
 class Test_RSA_Key_Accessibility(unittest.TestCase):
 
+    def setUp(self):
+        clear_test_keys()
+
     def test_not_generatred_rsa_private_key_raises_missing_rsa_key_error(self):
         with self.assertRaises(MissingRSAKey):
             AccessibleTenants(
@@ -166,7 +169,6 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-
         generate_test_keys()
         set_auth_params(get_test_public_key(strip=True), "test_client")
         self.app = get_test_app(
@@ -220,6 +222,38 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             assert isinstance(response.json, list)
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["name"], self.hw_2.name)
+
+
+class Test_Adding_Tenants_To_Database(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+        self.app = get_test_app(
+            "testAPIKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
+        )
+
+    def test_initially_no_tenants_are_present_on_the_server(self):
+        with self.app.app.test_client() as client:
+            response = client.get("/v2/management/tenant?api_key=testAPIKey")
+            assert isinstance(response.json, list)
+            self.assertEqual(len(response.json), 0)
+
+    def test_tenant_is_added_automatically_when_posting_new_object_under_this_tenant(self) -> None:
+        with self.app.app.test_client() as client:
+            client.set_cookie("", "tenant", TEST_TENANT_1)
+            hw = PlatformHW(name="test_hw_1")
+            client.post(
+                "/v2/management/platformhw",
+                json=[hw],
+                headers={"Authorization": f"Bearer {get_token(TEST_TENANT_1, TEST_TENANT_2)}"},
+            )
+            tenants: list[_db_models.TenantDB] = client.get(
+                "/v2/management/tenant",
+                headers={"Authorization": f"Bearer {get_token(TEST_TENANT_1, TEST_TENANT_2)}"},
+            ).json
+            self.assertListEqual([t["name"] for t in tenants], [TEST_TENANT_1])
 
 
 if __name__ == "__main__":  # pragma: no cover

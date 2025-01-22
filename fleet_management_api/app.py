@@ -82,9 +82,9 @@ class _TestFlaskApp:
             return self._app.test_client(TEST_TENANT_NAME)
 
     def def_accessible_tenants(self, *tenants: str) -> None:
-        db_tenants = [_TenantDB(name=tenant) for tenant in tenants]
+        # db_tenants = [_TenantDB(name=tenant) for tenant in tenants]
         self._accessible_tenants = list(tenants)
-        _db_access.add_without_tenant(*db_tenants)
+        # _db_access.add_without_tenant(*db_tenants)
 
 
 class _TestClient(_FlaskClient):
@@ -154,7 +154,6 @@ def get_test_app(
     if accessible_tenants is None:
         accessible_tenants = []
 
-    accessible_tenants.append(TEST_TENANT_NAME)
     clear_active_orders()
     clear_inactive_orders()
     app = _TestApp(predef_api_key, use_previous=use_previous)
