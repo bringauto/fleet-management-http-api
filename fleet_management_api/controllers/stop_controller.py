@@ -8,7 +8,7 @@ from fleet_management_api.models.stop import Stop  # noqa: E501
 from fleet_management_api import util
 
 
-def create_stops(TEST_TENANT, stop):  # noqa: E501
+def create_stops(stop):  # noqa: E501
     """Create new Stops.
 
      # noqa: E501
@@ -20,7 +20,7 @@ def create_stops(TEST_TENANT, stop):  # noqa: E501
     """
     if connexion.request.is_json:
         stop = [Stop.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return "do some magic!"
+    return 'do some magic!'
 
 
 def delete_stop(stop_id):  # noqa: E501
@@ -33,7 +33,7 @@ def delete_stop(stop_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    return "do some magic!"
+    return 'do some magic!'
 
 
 def get_stop(stop_id):  # noqa: E501
@@ -46,7 +46,7 @@ def get_stop(stop_id):  # noqa: E501
 
     :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
     """
-    return "do some magic!"
+    return 'do some magic!'
 
 
 def get_stops():  # noqa: E501
@@ -57,7 +57,7 @@ def get_stops():  # noqa: E501
 
     :rtype: Union[List[Stop], Tuple[List[Stop], int], Tuple[List[Stop], int, Dict[str, str]]
     """
-    return "do some magic!"
+    return 'do some magic!'
 
 
 def update_stops(stop):  # noqa: E501
@@ -72,4 +72,4 @@ def update_stops(stop):  # noqa: E501
     """
     if connexion.request.is_json:
         stop = [Stop.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return "do some magic!"
+    return 'do some magic!'

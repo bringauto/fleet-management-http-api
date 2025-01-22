@@ -1,111 +1,109 @@
-  openapi: 3.0.0
-  info:
-    title: BringAuto Fleet Management v2 API
-    description: Specification for BringAuto fleet backend HTTP API
-    version: 3.4.4
-    contact:
-      name: BringAuto s.r.o
-      url: https://bringauto.com
-      email: fleet@bringauto.com
-    license:
-      name: AGPLv3
-      url: https://www.gnu.org/licenses/agpl-3.0.en.html
+openapi: 3.0.0
+info:
+  title: BringAuto Fleet Management v2 API
+  description: Specification for BringAuto fleet backend HTTP API
+  version: 3.4.4
+  contact:
+    name: BringAuto s.r.o
+    url: https://bringauto.com
+    email: fleet@bringauto.com
+  license:
+    name: AGPLv3
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
 
-  servers:
-    - url: /v2/management
+servers:
+  - url: /v2/management
 
-  security:
-    - APIKeyAuth: []
-    - oAuth2AuthCode: []
+security:
+  - APIKeyAuth: []
+  - oAuth2AuthCode: []
 
-  tags:
-    - name: api
-      description: API health check
-    - name: car
-      description: Car related functions
-    - name: carState
-      description: Car state-related functions
-    - name: carAction
-      description: Car action-related functions
-    - name: order
-      description: Order-related functions
-    - name: orderState
-      description: Order state-related functions
-    - name: platformHW
-      description: Platform hardware-related functions
-    - name: route
-      description: Route state-related functions
-    - name: stop
-      description: Stop state-related functions
-    - name: security
-      description: Authentication-related functions
-    - name: tenant
-      description: Tenant-related functions
+tags:
+  - name: api
+    description: API health check
+  - name: car
+    description: Car related functions
+  - name: carState
+    description: Car state-related functions
+  - name: carAction
+    description: Car action-related functions
+  - name: order
+    description: Order-related functions
+  - name: orderState
+    description: Order state-related functions
+  - name: platformHW
+    description: Platform hardware-related functions
+  - name: route
+    description: Route state-related functions
+  - name: stop
+    description: Stop state-related functions
+  - name: security
+    description: Authentication-related functions
+  - name: tenant
+    description: Tenant-related functions
 
-  paths:
-    /apialive:
-      $ref: 'check_api.yaml#/paths/~1apialive'
+paths:
+  /apialive:
+    $ref: "check_api.yaml#/paths/~1apialive"
 
-    /car:
-      $ref: 'car.yaml#/paths/~1car'
-    /car/{carId}:
-      $ref: 'car.yaml#/paths/~1car~1{carId}'
-    /carstate:
-      $ref: 'car.yaml#/paths/~1carstate'
-    /carstate/{carId}:
-      $ref: 'car.yaml#/paths/~1carstate~1{carId}'
-    /action/car/{carId}:
-      $ref: 'car.yaml#/paths/~1action~1car~1{carId}'
-    /action/car/{carId}/pause:
-      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1pause'
-    /action/car/{carId}/unpause:
-      $ref: 'car.yaml#/paths/~1action~1car~1{carId}~1unpause'
+  /car:
+    $ref: "car.yaml#/paths/~1car"
+  /car/{carId}:
+    $ref: "car.yaml#/paths/~1car~1{carId}"
+  /carstate:
+    $ref: "car.yaml#/paths/~1carstate"
+  /carstate/{carId}:
+    $ref: "car.yaml#/paths/~1carstate~1{carId}"
+  /action/car/{carId}:
+    $ref: "car.yaml#/paths/~1action~1car~1{carId}"
+  /action/car/{carId}/pause:
+    $ref: "car.yaml#/paths/~1action~1car~1{carId}~1pause"
+  /action/car/{carId}/unpause:
+    $ref: "car.yaml#/paths/~1action~1car~1{carId}~1unpause"
 
-    /order:
-      $ref: 'order.yaml#/paths/~1order'
-    /order/{carId}:
-      $ref: 'order.yaml#/paths/~1order~1{carId}'
-    /order/{carId}/{orderId}:
-      $ref: 'order.yaml#/paths/~1order~1{carId}~1{orderId}'
-    /orderstate:
-      $ref: 'order.yaml#/paths/~1orderstate'
-    /orderstate/{orderId}:
-      $ref: 'order.yaml#/paths/~1orderstate~1{orderId}'
+  /order:
+    $ref: "order.yaml#/paths/~1order"
+  /order/{carId}:
+    $ref: "order.yaml#/paths/~1order~1{carId}"
+  /order/{carId}/{orderId}:
+    $ref: "order.yaml#/paths/~1order~1{carId}~1{orderId}"
+  /orderstate:
+    $ref: "order.yaml#/paths/~1orderstate"
+  /orderstate/{orderId}:
+    $ref: "order.yaml#/paths/~1orderstate~1{orderId}"
 
-    /platformhw:
-      $ref: 'platform_hw.yaml#/paths/~1platformhw'
-    /platformhw/{platformHwId}:
-      $ref: 'platform_hw.yaml#/paths/~1platformhw~1{platformHwId}'
+  /platformhw:
+    $ref: "platform_hw.yaml#/paths/~1platformhw"
+  /platformhw/{platformHwId}:
+    $ref: "platform_hw.yaml#/paths/~1platformhw~1{platformHwId}"
 
-    /route:
-      $ref: 'route.yaml#/paths/~1route'
-    /route/{routeId}:
-      $ref: 'route.yaml#/paths/~1route~1{routeId}'
-    /route-visualization:
-      $ref: 'route.yaml#/paths/~1route-visualization'
-    /route-visualization/{routeId}:
-      $ref: 'route.yaml#/paths/~1route-visualization~1{routeId}'
+  /route:
+    $ref: "route.yaml#/paths/~1route"
+  /route/{routeId}:
+    $ref: "route.yaml#/paths/~1route~1{routeId}"
+  /route-visualization:
+    $ref: "route.yaml#/paths/~1route-visualization"
+  /route-visualization/{routeId}:
+    $ref: "route.yaml#/paths/~1route-visualization~1{routeId}"
 
-    /stop:
-      $ref: 'stop.yaml#/paths/~1stop'
-    /stop/{stopId}:
-      $ref: 'stop.yaml#/paths/~1stop~1{stopId}'
+  /stop:
+    $ref: "stop.yaml#/paths/~1stop"
+  /stop/{stopId}:
+    $ref: "stop.yaml#/paths/~1stop~1{stopId}"
 
-    /login:
-      $ref: 'security.yaml#/paths/~1login'
-    /token_get:
-      $ref: 'security.yaml#/paths/~1token_get'
-    /token_refresh:
-      $ref: 'security.yaml#/paths/~1token_refresh'
+  /login:
+    $ref: "security.yaml#/paths/~1login"
+  /token_get:
+    $ref: "security.yaml#/paths/~1token_get"
+  /token_refresh:
+    $ref: "security.yaml#/paths/~1token_refresh"
 
-    /tenant:
-      $ref: 'tenant.yaml#/paths/~1tenant'
-    /tenant/{tenantId}:
-      $ref: 'tenant.yaml#/paths/~1tenant~1{tenantId}'
+  /tenant:
+    $ref: "tenant.yaml#/paths/~1tenant"
 
-  components:
-    securitySchemes:
-      APIKeyAuth:
-        $ref: 'security.yaml#/components/securitySchemes/APIKeyAuth'
-      oAuth2AuthCode:
-        $ref: 'security.yaml#/components/securitySchemes/oAuth2AuthCode'
+components:
+  securitySchemes:
+    APIKeyAuth:
+      $ref: "security.yaml#/components/securitySchemes/APIKeyAuth"
+    oAuth2AuthCode:
+      $ref: "security.yaml#/components/securitySchemes/oAuth2AuthCode"

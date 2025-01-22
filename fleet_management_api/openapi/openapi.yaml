@@ -2790,127 +2790,6 @@ paths:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
   /tenant:
-    get:
-      operationId: get_tenants
-      responses:
-        "200":
-          content:
-            application/json:
-              example:
-              - id: 1
-                name: ABCD1234EF56
-              schema:
-                items:
-                  $ref: '#/components/schemas/Tenant'
-                type: array
-          description: All the currently existing Tenants have been returned.
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Find and return all existing Tenant.
-      tags:
-      - tenant
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-    post:
-      operationId: create_tenants
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/Tenant'
-              type: array
-        description: A list of Tenant models in JSON format.
-        required: true
-        x-body-name: tenants
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Tenant'
-                type: array
-          description: The Tenants have been successfully created.
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Create new Tenants.
-      tags:
-      - tenant
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-  /tenant/{tenantId}:
     delete:
       operationId: delete_tenant
       parameters:
@@ -2998,34 +2877,19 @@ paths:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
     get:
-      operationId: get_tenant
-      parameters:
-      - description: ID of the Tenant to return.
-        example: 1
-        in: path
-        name: tenantId
-        required: true
-        schema:
-          format: int32
-          type: integer
+      operationId: get_tenants
       responses:
         "200":
           content:
             application/json:
+              example:
+              - id: 1
+                name: ABCD1234EF56
               schema:
-                $ref: '#/components/schemas/Tenant'
-          description: The Tenant with the specified ID has been found and returned.
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
+                items:
+                  $ref: '#/components/schemas/Tenant'
+                type: array
+          description: All the currently existing Tenants have been returned.
         "401":
           content:
             application/json:
@@ -3048,17 +2912,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Forbidden
-        "404":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "404"
-                    message: Resource not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Not found
         default:
           content:
             application/json:
@@ -3070,7 +2923,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Find Tenant with the given ID.
+      summary: Find and return all existing Tenant.
       tags:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
