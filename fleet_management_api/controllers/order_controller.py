@@ -20,7 +20,7 @@ def create_orders(order):  # noqa: E501
     """
     if connexion.request.is_json:
         order = [Order.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def delete_order(car_id, order_id):  # noqa: E501
@@ -35,7 +35,7 @@ def delete_order(car_id, order_id):  # noqa: E501
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_car_orders(car_id, since=None):  # noqa: E501
@@ -50,7 +50,7 @@ def get_car_orders(car_id, since=None):  # noqa: E501
 
     :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_order(car_id, order_id):  # noqa: E501
@@ -65,7 +65,7 @@ def get_order(car_id, order_id):  # noqa: E501
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]
     """
-    return 'do some magic!'
+    return "do some magic!"
 
 
 def get_orders(since=None):  # noqa: E501
@@ -78,4 +78,4 @@ def get_orders(since=None):  # noqa: E501
 
     :rtype: Union[List[Order], Tuple[List[Order], int], Tuple[List[Order], int, Dict[str, str]]
     """
-    return 'do some magic!'
+    return "do some magic!"
