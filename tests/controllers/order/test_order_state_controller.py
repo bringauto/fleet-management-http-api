@@ -548,7 +548,6 @@ class Test_Returning_Last_N_Order_States(unittest.TestCase):
             response = c.get("/v2/management/orderstate?lastN=100000")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), 3)
-            print(response.json)
             self.assertEqual(response.json[0]["status"], "to_accept")
             self.assertEqual(response.json[1]["status"], "accepted")
             self.assertEqual(response.json[2]["status"], "in_progress")

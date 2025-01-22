@@ -22,7 +22,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 def create_stops() -> _Response:
@@ -36,7 +36,7 @@ def create_stops() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.add(tenant, *stop_db_models)
@@ -62,7 +62,7 @@ def delete_stop(stop_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     routes_response = _get_routes_referencing_stop(tenant, stop_id)
     if routes_response.status_code != 200:
         return _log_error_and_respond(
@@ -87,7 +87,7 @@ def get_stop(stop_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
         tenant, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
@@ -104,7 +104,7 @@ def get_stops() -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     stop_db_models = _db_access.get(tenant, _db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
@@ -125,7 +125,7 @@ def update_stops() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.update(tenant, *stop_db_models)
@@ -143,7 +143,7 @@ def update_stops() -> _Response:
         )
 
 
-def _get_routes_referencing_stop(tenant: _TenantFromToken, stop_id: int) -> _Response:
+def _get_routes_referencing_stop(tenant: _AccessibleTenants, stop_id: int) -> _Response:
     route_db_models = [
         m for m in _db_access.get(tenant, _db_models.RouteDB) if stop_id in m.stop_ids
     ]

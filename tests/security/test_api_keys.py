@@ -15,14 +15,14 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 
     def test_verifying_nonexistent_key_yields_code_401(self):
         nonexistent_key = "123456789_nonexistent_key"
-        code, data = _api_keys.verify_key_and_return_key_info(nonexistent_key, self.src)
+        code, _ = _api_keys.verify_key_and_return_key_info(nonexistent_key, self.src)
         self.assertEqual(code, 401)
 
     @patch("fleet_management_api.api_impl.api_keys._generate_key")
     def test_creating_and_verifying_API_key(self, mock_generate_key: Mock):
         key_name = "test_key"
         mock_generate_key.return_value = "abcd"
-        code, msg = _api_keys.create_key(key_name, self.src)
+        code, _ = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 200)
 
         code, data = _api_keys.verify_key_and_return_key_info("abcd", self.src)
@@ -33,9 +33,9 @@ class Test_Creating_And_Veriying_API_Key(unittest.TestCase):
 
     def test_creating_duplicate_key_yields_code_400(self):
         key_name = "test_key"
-        code, msg = _api_keys.create_key(key_name, self.src)
+        code, _ = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 200)
-        code, msg = _api_keys.create_key(key_name, self.src)
+        code, _ = _api_keys.create_key(key_name, self.src)
         self.assertEqual(code, 400)
 
     def tearDown(self) -> None:  # pragma: no cover

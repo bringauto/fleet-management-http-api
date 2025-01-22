@@ -20,7 +20,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestEmpty as _RequestEmpty,
     RequestJSON as _RequestJSON,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 def get_route_visualization(route_id: int) -> _Response:
@@ -28,7 +28,7 @@ def get_route_visualization(route_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     rp_db_models = _db_access.get(
         tenant, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
@@ -57,7 +57,7 @@ def redefine_route_visualizations() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):

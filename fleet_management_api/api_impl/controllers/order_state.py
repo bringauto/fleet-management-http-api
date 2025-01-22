@@ -25,7 +25,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestEmpty as _RequestEmpty,
     RequestJSON as _RequestJSON,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 OrderId = int
@@ -43,7 +43,7 @@ def create_order_states() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     try:
         order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
@@ -54,7 +54,9 @@ def create_order_states() -> _Response:
 
 
 def create_order_states_from_argument_and_post(
-    tenant: _TenantFromToken, order_states: list[_models.OrderState], check_final_state: bool = True
+    tenant: _AccessibleTenants,
+    order_states: list[_models.OrderState],
+    check_final_state: bool = True,
 ) -> _Response:
     """Create new states of existing orders. The Order State models are passed as an argument.
 
@@ -154,7 +156,7 @@ def get_all_order_states(
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     _log_info("Getting all order states for all orders.")
     if car_id is not None:
         return _get_order_states(tenant, {"car_id": lambda x: x == car_id}, wait, since, last_n)
@@ -179,7 +181,7 @@ def get_order_states(
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     if _existing_orders(tenant, order_id)[order_id] is None:
         _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
@@ -189,7 +191,7 @@ def get_order_states(
 
 
 def _existing_orders(
-    tenant: _TenantFromToken, *order_ids: int
+    tenant: _AccessibleTenants, *order_ids: int
 ) -> dict[int, _db_models.OrderDB | None]:
     order_ids = tuple(dict.fromkeys(order_ids).keys())
     models: dict[int, _db_models.OrderDB | None] = dict()
@@ -205,7 +207,7 @@ def _existing_orders(
 
 
 def _get_order_states(
-    tenant: _TenantFromToken,
+    tenant: _AccessibleTenants,
     criteria: dict[str, Callable[[Any], bool]],
     wait: bool,
     since: int,
@@ -228,7 +230,7 @@ def _get_order_states(
     return _json_response(order_states)
 
 
-def _remove_old_states(tenant: _TenantFromToken, order_id: int) -> _Response:
+def _remove_old_states(tenant: _AccessibleTenants, order_id: int) -> _Response:
     order_state_db_models = _db_access.get(
         tenant, _db_models.OrderStateDB, criteria={"order_id": lambda x: x == order_id}
     )

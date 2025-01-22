@@ -74,12 +74,12 @@ class Test_Creating_A_Test_Database(unittest.TestCase):
         test_obj = _TestBase(test_str="test_name", test_int=1)
         response = _db_access.add(self.tenant, test_obj)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(_db_access.get(tenant=self.tenant, base=_TestBase)), 1)
+        self.assertEqual(len(_db_access.get(tenants=self.tenant, base=_TestBase)), 1)
 
         _connection.set_connection_source_test("test_db_file.db")
         _initialize_test_tables(_connection.current_connection_source())
 
-        self.assertEqual(len(_db_access.get(tenant=self.tenant, base=_TestBase)), 0)
+        self.assertEqual(len(_db_access.get(tenants=self.tenant, base=_TestBase)), 0)
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test_db_file.db"):

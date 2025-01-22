@@ -1,5 +1,3 @@
-from typing import Optional
-
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 from fleet_management_api.models.car_action_state import (
     CarActionState,
@@ -20,7 +18,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 CarId = int
@@ -52,7 +50,7 @@ def get_car_action_states(
     if not request:
         return _log_invalid_request_body_format()
     db_models = _db_access.get(
-        _TenantFromToken(request, ""),
+        _AccessibleTenants(request, ""),
         _db_models.CarActionStateDB,
         criteria={"timestamp": lambda x: x >= since, "car_id": lambda x: x == car_id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -80,7 +78,7 @@ def pause_car(car_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     state = CarActionState(car_id=car_id, action_status="paused")
     return create_car_action_states_from_argument_and_save_to_db(tenant, [state])
 
@@ -98,13 +96,13 @@ def unpause_car(car_id):  # noqa: E501
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     state = CarActionState(car_id=car_id, action_status="normal")
     return create_car_action_states_from_argument_and_save_to_db(tenant, [state])
 
 
 def create_car_action_states_from_argument_and_save_to_db(
-    tenant: _TenantFromToken,
+    tenant: _AccessibleTenants,
     states: list[CarActionState],
 ) -> _Response:
     """Post new car action states using list passed as argument.
@@ -193,7 +191,7 @@ def check_for_invalid_car_action_state_transitions(
     return invalid_state_transitions
 
 
-def get_last_action_states(tenant: _TenantFromToken, *car_ids: int) -> list[CarActionState]:
+def get_last_action_states(tenant: _AccessibleTenants, *car_ids: int) -> list[CarActionState]:
     """Get last action state for each car in car_ids."""
     states = []
     for car_id in car_ids:
@@ -209,7 +207,7 @@ def get_last_action_states(tenant: _TenantFromToken, *car_ids: int) -> list[CarA
     return states
 
 
-def _remove_old_states(tenant: _TenantFromToken, car_id: int) -> _Response:
+def _remove_old_states(tenant: _AccessibleTenants, car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
         tenant,
         _db_models.CarActionStateDB,

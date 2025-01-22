@@ -18,7 +18,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 def create_car_states() -> _Response:
@@ -32,13 +32,13 @@ def create_car_states() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
     return create_car_states_from_argument_and_post(tenant, car_states)
 
 
 def create_car_states_from_argument_and_post(
-    tenant: _TenantFromToken, car_states: list[_CarState]
+    tenant: _AccessibleTenants, car_states: list[_CarState]
 ) -> _Response:
     """Post new car states using list passed as argument.
 
@@ -97,7 +97,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
         return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
-        _TenantFromToken(request, ""),
+        _AccessibleTenants(request, ""),
         _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -129,7 +129,7 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         if not request:
             return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
-            _TenantFromToken(request, ""),
+            _AccessibleTenants(request, ""),
             base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,
@@ -152,7 +152,7 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
-def _remove_old_states(tenant: _TenantFromToken, car_id: int) -> _Response:
+def _remove_old_states(tenant: _AccessibleTenants, car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
         tenant, _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
     )

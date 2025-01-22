@@ -11,18 +11,18 @@ from tests._utils.constants import TEST_TENANT_NAME
 from tests._utils.setup_utils import TenantFromTokenMock
 
 
+DB_NAME = "test_management_api"
+
+
 def wait_for_db(max_retries=50, delay=0.1):
     retries = 0
     while retries < max_retries:
         try:
             conn = psycopg2.connect(
-                dbname="test_management_api",
-                user="postgres",
-                password="1234",
-                host="localhost",
-                port=5432,
+                dbname=DB_NAME, user="postgres", password="1234", host="localhost", port=5432
             )
             conn.close()
+            print(f"Connection to the test database '{DB_NAME}' has been created.")
             return
         except OperationalError:
             retries += 1
@@ -65,7 +65,7 @@ class Test_Database_Cleanup(unittest.TestCase):
         restart_database()
 
         _db_access.add_tenants(TEST_TENANT_NAME)
-        cars = _db_access.get(tenant=self.tenant, base=_db_models.CarDB)
+        cars = _db_access.get(tenants=self.tenant, base=_db_models.CarDB)
         self.assertFalse(cars)
 
     def test_object_can_be_added_after_database_cleanup(self):

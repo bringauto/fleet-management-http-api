@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch, Mock
-import dataclasses
 import time
 
 import concurrent.futures as _futures
@@ -35,7 +34,7 @@ class Test_Creating_Car_Action_State(api_test.TestCase):
     def test_for_nonexistent_car_yields_404_error(self):
         state = CarActionState(car_id=1, action_status=CarActionStatus.NORMAL)
         with self.app.app.test_client(TEST_TENANT_NAME):
-            tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+            tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
             response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
             self.assertEqual(response.status_code, 404)
 
@@ -46,9 +45,8 @@ class Test_Creating_Car_Action_State(api_test.TestCase):
             c.post("/v2/management/car", json=[car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
             response = create_car_action_states_from_argument_and_save_to_db(
-                TenantFromTokenMock(name=TEST_TENANT_NAME), [state]
+                TenantFromTokenMock(current=TEST_TENANT_NAME), [state]
             )
-            print(response.body)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
 
@@ -72,17 +70,17 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.NORMAL)
 
-    def _test_pausing_existing_car_with_normal_action_state_pauses_the_car(self):
+    def test_pausing_existing_car_with_normal_action_state_pauses_the_car(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/action/car/1/pause")
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json["actionStatus"], CarActionStatus.PAUSED)
+            self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
 
     def test_creating_action_state_for_existing_car_yields_200_response(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
-            tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+            tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
             response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
@@ -145,10 +143,9 @@ class Test_Getting_Last_Action_States(api_test.TestCase):
         self.car_2 = Car(
             name="Test Car 2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789")
         )
-        self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+        self.tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
-            print(response.json)
 
     def test_getting_last_action_states_after_car_creation_yields_default_states(self):
         states = get_last_action_states(self.tenant, 1, 2)
@@ -180,11 +177,10 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
         self.car = Car(
             name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
         )
-        self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+        self.tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
             response = c.get("/v2/management/action/car/1?lastN=1")
-            print(response.json)
             assert response.json is not None
             self.last_timestamp = response.json[-1]["timestamp"]
 
@@ -195,7 +191,6 @@ class Test_Pausing_And_Unpausing_Car(api_test.TestCase):
             response = c.post("/v2/management/action/car/1/pause")
             self.assertEqual(response.status_code, 200)
             assert response.json is not None
-            print(response.json)
             self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
             self.assertEqual(response.json[0]["timestamp"], self.last_timestamp + 1000)
 

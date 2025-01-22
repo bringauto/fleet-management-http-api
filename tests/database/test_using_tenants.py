@@ -10,10 +10,10 @@ import tests._utils.api_test as api_test
 from tests._utils.setup_utils import TenantFromTokenMock
 
 
-TENANT_EMPTY = TenantFromTokenMock(name="")
-TENANT_1 = TenantFromTokenMock(name="tenant_1")
-TENANT_2 = TenantFromTokenMock(name="tenant_2")
-NONEXISTENT_TENANT = TenantFromTokenMock(name="nonexistent-tenant")
+TENANT_EMPTY = TenantFromTokenMock(current="")
+TENANT_1 = TenantFromTokenMock(current="tenant_1")
+TENANT_2 = TenantFromTokenMock(current="tenant_2")
+NONEXISTENT_TENANT = TenantFromTokenMock(current="nonexistent-tenant")
 
 
 class Test_Creating_Objects(api_test.TestCase):
@@ -49,23 +49,23 @@ class Test_Retrieving_Objects(api_test.TestCase):
         _db_access.add(TENANT_2, obj_2)
 
     def test_retrieving_objects_with_empty_tenant_yields_all_objects(self) -> None:
-        response = _db_access.get(tenant=TENANT_EMPTY, base=models.TestItem)
+        response = _db_access.get(tenants=TENANT_EMPTY, base=models.TestItem)
         self.assertEqual(response[0].test_str, "test1")
         self.assertEqual(response[1].test_str, "test2")
 
     def test_retrieving_objects_with_specified_existing_tenant_yields_objects_owned_by_tenant(
         self,
     ) -> None:
-        response = _db_access.get(tenant=TENANT_1, base=models.TestItem)
+        response = _db_access.get(tenants=TENANT_1, base=models.TestItem)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].test_str, "test1")
 
-        response = _db_access.get(tenant=TENANT_2, base=models.TestItem)
+        response = _db_access.get(tenants=TENANT_2, base=models.TestItem)
         self.assertEqual(len(response), 1)
         self.assertEqual(response[0].test_str, "test2")
 
     def test_retrieving_objects_with_nonexistent_tenant_yields_empty_list(self) -> None:
-        response = _db_access.get(tenant=NONEXISTENT_TENANT, base=models.TestItem)
+        response = _db_access.get(tenants=NONEXISTENT_TENANT, base=models.TestItem)
         self.assertEqual(response, [])
 
 

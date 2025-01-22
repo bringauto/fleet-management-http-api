@@ -30,9 +30,8 @@ def info_from_oAuth2AuthCode(token):
     """
     global _public_key
     try:
-        public_key = _public_key
         decoded_token: dict = jwt.decode(
-            token, public_key, algorithms=["RS256"], audience="account"
+            token, _public_key, algorithms=["RS256"], audience="account"
         )
     except:
         return None

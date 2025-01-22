@@ -21,20 +21,30 @@ class NoHeaderWithJWTToken(Exception):
     pass
 
 
-_test_public_key: str = ""
-_test_private_key: str = ""
+_testing_public_key: str = ""
+_testing_private_key: str = ""
 
 
-def get_test_public_key() -> str:
-    if not _test_public_key:
+def get_test_public_key(strip: bool = False) -> str:
+    if not _testing_public_key:
         print("Test public key not set.")
-    return _test_public_key
+    if strip:
+        return _strip_footer_and_header(_testing_public_key)
+    return _testing_public_key
 
 
-def get_test_private_key() -> str:
-    if not _test_private_key:
+def get_test_private_key(strip: bool = False) -> str:
+    if not _testing_private_key:
         print("Test private key not set.")
-    return _test_private_key
+    if strip:
+        return _strip_footer_and_header(_testing_private_key)
+    return _testing_private_key
+
+
+def clear_test_keys() -> None:
+    global _testing_public_key, _testing_private_key
+    _testing_public_key = ""
+    _testing_private_key = ""
 
 
 def generate_test_keys() -> None:
@@ -52,9 +62,9 @@ def generate_test_keys() -> None:
     public_pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-    global _test_public_key, _test_private_key
-    _test_public_key = _strip_footer_and_header(public_pem.decode())
-    _test_private_key = private_pem.decode()
+    global _testing_public_key, _testing_private_key
+    _testing_public_key = public_pem.decode()
+    _testing_private_key = private_pem.decode()
 
 
 def _strip_footer_and_header(key: str) -> str:
@@ -65,7 +75,7 @@ def _strip_footer_and_header(key: str) -> str:
     return stripped_key
 
 
-class TenantFromToken:
+class TenantsFromToken:
     """
     Each instance of the class is initialized with tenant name read from JWT token
     in the Authorization header of the request, given the key for decoding the token.
@@ -79,51 +89,60 @@ class TenantFromToken:
 
     algorithm = "RS256"
 
-    def __init__(self, request: _Request, key: str = "") -> None:
+    def __init__(self, request: _Request, key: str = "", audience: str = "account") -> None:
         if not key.strip():
             key = get_test_public_key()
-        self._current_tenant = self._check_and_read(request, key)
+        self._current, self._all_accessible = self._check_and_read(request, key, audience)
 
     @property
-    def name(self) -> str:
-        return self._current_tenant
+    def current(self) -> str:
+        return self._current
 
     @property
-    def accessible_tenants(self) -> list[str]:
-        return self._accessible_tenants
+    def all_accessible(self) -> list[str]:
+        return self._all_accessible
+
+    @property
+    def unrestricted(self) -> bool:
+        return self._current == "" and not bool(self._all_accessible)
 
     @staticmethod
-    def _check_and_read(request: ConnexionRequest, key: str) -> str:
-        if not hasattr(request, "cookies"):
-            return ""
-        tenant = request.cookies.get("tenant", None)
-        if not tenant:
-            return ""
-        if "Authorization" not in request.headers:
-            raise NoHeaderWithJWTToken
-        bearer = str(request.headers["Authorization"]).split(" ")[-1]
+    def _check_and_read(
+        request: ConnexionRequest, key: str, audience: str
+    ) -> tuple[str, list[str]]:
+        if not hasattr(request, "cookies") or "tenant" not in request.cookies:
+            tenant = ""
+        else:
+            tenant = str(request.cookies.get("tenant", "")).strip()
 
-        if not bearer.strip():
-            if request.query.get("api_key", ""):
-                return tenant
-            raise Unauthorized("No valid JWT token or API key provided.")
+        if "api_key" in request.query:
+            return tenant, []
+        else:
+            # api key is not provided - read tenants from JWT
+            if "Authorization" not in request.headers:
+                raise NoHeaderWithJWTToken
+            bearer = str(request.headers["Authorization"]).split(" ")[-1]
+            if not bearer.strip():
+                raise Unauthorized("No valid JWT token or API key provided.")
+            try:
+                decoded_str = jwt.decode(
+                    bearer, key, audience=audience, algorithms=[TenantsFromToken.algorithm]
+                )["Payload"]
+            except jwt.exceptions.DecodeError:
+                raise TenantNotAccessible("Invalid JWT token.")
+            payload = json.loads(decoded_str)
 
-        try:
-            decoded_str = jwt.decode(bearer, key, algorithms=[TenantFromToken.algorithm])["Payload"]
-        except jwt.exceptions.DecodeError:
-            raise TenantNotAccessible("Invalid JWT token.")
-        payload = json.loads(decoded_str)
-        if "group" not in payload:
-            raise TenantNotAccessible("No item group in token. Token does not contain tenants.")
-        group: list[str] = payload["group"]
-        tenants = [item.split("/")[-1] for item in group if item.startswith("/customers/")]
-        if not tenants:
-            return tenant
-        if tenant not in tenants:
-            raise TenantNotAccessible(
-                f"Tenant {tenant} sent in a cookie is not among accessible tenants sent in JWT token ({tenants})."
-            )
-        return tenant
+            if "group" not in payload:
+                raise TenantNotAccessible("No item group in token. Token does not contain tenants.")
+            group: list[str] = payload["group"]
+            tenants = [item.split("/")[-1] for item in group if item.startswith("/customers/")]
+            if not tenants:
+                raise TenantNotAccessible("No item group in token. Token does not contain tenants.")
+            if tenant != "" and tenant not in tenants:
+                raise TenantNotAccessible(
+                    f"Tenant {tenant} sent in a cookie is not among accessible tenants sent in JWT token ({tenants})."
+                )
+            return tenant, tenants
 
 
 class SecurityObj:

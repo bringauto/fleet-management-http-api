@@ -35,7 +35,10 @@ def get_token(*tenants: str) -> str:
         "allowed-origins": ["test_client"],
     }
     private = _get_test_private_key()
-    encoded = jwt.encode(payload, private, algorithm="RS256")
+    try:
+        encoded = jwt.encode(payload, private, algorithm="RS256")
+    except:
+        encoded = ""
     return encoded
 
 

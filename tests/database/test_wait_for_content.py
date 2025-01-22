@@ -123,7 +123,7 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
         with ThreadPoolExecutor(max_workers=2) as executor:
             future = executor.submit(
                 _db_access.get,
-                tenant=self.tenant,
+                tenants=self.tenant,
                 base=models.TestItem,
                 criteria={"test_int": lambda x: x == 456},
                 wait=True,

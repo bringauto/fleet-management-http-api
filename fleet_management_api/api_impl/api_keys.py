@@ -26,7 +26,7 @@ def create_key(key_name: str, connection_source: _Engine) -> tuple[int, str]:
     key = _generate_key()
     now = _timestamp_ms()
     already_existing_keys = _db_access.get(
-        _db_access.EMPTY_TENANT,
+        _db_access.NO_TENANT,
         _ApiKeyDB,
         criteria={"name": lambda x: x == key_name},
         connection_source=connection_source,
@@ -53,7 +53,7 @@ def verify_key_and_return_key_info(
         connection_source = _connection.current_connection_source()
     try:
         _key_db_models = _db_access.get(
-            _db_access.EMPTY_TENANT,
+            _db_access.NO_TENANT,
             _ApiKeyDB,
             criteria={"key": lambda x: x == api_key},
             connection_source=connection_source,

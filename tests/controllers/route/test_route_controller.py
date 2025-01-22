@@ -168,7 +168,7 @@ class Test_Updating_Route(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/route", json=[self.route])
 
-    def test_updating_existing_route(self):
+    def test_updating_existing_route_yiels_code_200(self):
         updated_route = Route(id=1, name="better_name")
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.put("/v2/management/route", json=[updated_route])

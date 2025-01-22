@@ -22,9 +22,8 @@ from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestNoData as _RequestNoData,
-    RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 CarId = int
@@ -175,7 +174,7 @@ def create_orders() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     order_db_models: list[_db_models.OrderDB] = []
     checked: list[_db_access.CheckBeforeAdd] = []
     if not isinstance(request.data, list):
@@ -252,7 +251,7 @@ def delete_order(car_id: int, order_id: int) -> _Response:
     request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     response = _db_access.delete(tenant, _db_models.OrderDB, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
@@ -276,7 +275,7 @@ def get_order(car_id: int, order_id: int) -> _Response:
     request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     order_db_models = _db_access.get(
         tenant,
         base=_db_models.OrderDB,
@@ -302,7 +301,7 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
     request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     db_orders: list[_db_models.OrderDB] = _db_access.get_children(  # type: ignore
         parent_base=_db_models.CarDB,
         parent_id=car_id,
@@ -323,7 +322,7 @@ def get_orders(since: int = 0) -> _Response:
     request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     _log_info("Listing all existing orders.")
     db_orders = _db_access.get(
         tenant, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
@@ -341,7 +340,7 @@ def _car_exist(car_id: int) -> bool:
 
 
 def _get_order_with_last_state(
-    tenant: _TenantFromToken,
+    tenant: _AccessibleTenants,
     order_db_model: _db_models.OrderDB,
 ) -> _models.Order | None:
     last_state = _get_last_order_state(tenant, order_db_model)
@@ -359,7 +358,7 @@ def _group_new_orders_by_car(
 
 
 def _get_last_order_state(
-    tenant: _TenantFromToken, order_model_db: _db_models.OrderDB
+    tenant: _AccessibleTenants, order_model_db: _db_models.OrderDB
 ) -> _models.OrderState | None:
     db_last_states = _db_access.get(
         tenant,
@@ -378,7 +377,7 @@ def _default_order_state(order_id: int) -> _models.OrderState:
     return _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
 
 
-def _post_default_order_states(tenant: _TenantFromToken, order_ids: list[int]) -> _Response:
+def _post_default_order_states(tenant: _AccessibleTenants, order_ids: list[int]) -> _Response:
     order_states = [_default_order_state(id_) for id_ in order_ids]
     response = _order_state.create_order_states_from_argument_and_post(
         tenant, order_states, check_final_state=False

@@ -30,7 +30,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.security import TenantFromToken as _TenantFromToken
+from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
 
 
 def create_cars() -> _Response:  # noqa: E501
@@ -47,7 +47,7 @@ def create_cars() -> _Response:  # noqa: E501
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     cars: list[_models.Car] = []
     for car_dict in request.data:
         car_dict["lastState"] = None
@@ -99,7 +99,7 @@ def delete_car(car_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     response = _db_access.delete(tenant, _db_models.CarDB, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
@@ -114,7 +114,7 @@ def get_car(car_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     db_cars = _db_access.get(
         tenant,
         _db_models.CarDB,
@@ -136,7 +136,7 @@ def get_cars() -> _Response:  # noqa: E501
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     db_cars = _db_access.get(
         tenant, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
     )
@@ -166,7 +166,7 @@ def update_cars() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _TenantFromToken(request, "")
+    tenant = _AccessibleTenants(request, "")
     cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
     car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
     response = _db_access.update(tenant, *car_db_model)
@@ -179,7 +179,7 @@ def update_cars() -> _Response:
 
 
 def _get_car_with_last_state(
-    tenant: _TenantFromToken, car_db_model: _db_models.CarDB
+    tenant: _AccessibleTenants, car_db_model: _db_models.CarDB
 ) -> _models.Car:
     last_state = _get_last_car_state(tenant, car_db_model)
     car = _obj_to_db.car_from_db_model(car_db_model, last_state)
@@ -187,7 +187,7 @@ def _get_car_with_last_state(
 
 
 def _get_last_car_state(
-    tenant: _TenantFromToken, car_db_model: _db_models.CarDB
+    tenant: _AccessibleTenants, car_db_model: _db_models.CarDB
 ) -> _CarState | None:
     db_last_states = _db_access.get(
         tenant,
@@ -203,13 +203,13 @@ def _get_last_car_state(
     return last_state
 
 
-def _post_default_car_state(tenant: _TenantFromToken, car_ids: list[int]) -> _Response:
+def _post_default_car_state(tenant: _AccessibleTenants, car_ids: list[int]) -> _Response:
     car_states = [_CarState(car_id=id_, status=_CarStatus.OUT_OF_ORDER) for id_ in car_ids]
     response = _create_car_state_from_argument_and_post(tenant, car_states)
     return response
 
 
-def _post_default_car_action_state(tenant: _TenantFromToken, car_ids: list[int]) -> _Response:
+def _post_default_car_action_state(tenant: _AccessibleTenants, car_ids: list[int]) -> _Response:
     car_action_states = [
         _CarActionState(car_id=id_, action_status=_CarActionStatus.NORMAL) for id_ in car_ids
     ]

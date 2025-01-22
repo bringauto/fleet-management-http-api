@@ -134,7 +134,6 @@ class Test_Creating_And_Getting_Cars(api_test.TestCase):
         with app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1], content_type="application/json")
             response = c.post("/v2/management/car", json=[car_2], content_type="application/json")
-            print(response)
             self.assertEqual(response.status_code, 400)
 
     def test_creating_car_using_invalid_json_returns_400_error_code(self):
@@ -328,7 +327,7 @@ class Test_Retrieving_Car_With_States_Deleted(api_test.TestCase):
     def setUp(self, *args) -> None:
         super().setUp()
         self.app = _app.get_test_app(use_previous=True)
-        self.tenant = TenantFromTokenMock(name=TEST_TENANT_NAME)
+        self.tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
         create_platform_hws(self.app)
 
     def test_car_state_is_none_for_car_whose_states_have_been_deleted(self):
