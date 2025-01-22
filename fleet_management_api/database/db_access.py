@@ -24,7 +24,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
+from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
 
 from ..logs import LOGGER_NAME
 
@@ -372,33 +372,6 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
             raise _NoResultFound(f"{base.model_name} with ID={id_value} not found. {e}")
 
 
-def _tenants_to_filter_by(tenants: _AccessibleTenants) -> list[str]:
-    if tenants.current:
-        assert tenants.current in tenants.all_accessible or tenants.all_accessible == []
-        return [tenants.current]
-    else:
-        return tenants.all_accessible
-
-
-def _add_filter_by_tenant(
-    session: _Session,
-    stmt: _sqa.Select,
-    table: _sqa.Table,
-    tenants: _AccessibleTenants,
-    require_single_tenant: bool = True,
-) -> _sqa.Select:
-    if tenants is NO_TENANT or tenants.unrestricted:
-        return stmt
-    tenant_names = _tenants_to_filter_by(tenants)
-    if require_single_tenant and len(tenant_names) != 1:
-        raise ValueError(f"{len(tenant_names)} tenants provided, but only one is expected.")
-    tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
-    tenant_objs = session.execute(tenant_stmt).scalars().all()
-    ids = [tenant.id for tenant in tenant_objs]
-    stmt = stmt.where(table.c.tenant_id.in_(ids))
-    return stmt
-
-
 @db_access_method
 def get(
     tenants: _AccessibleTenants,
@@ -567,6 +540,33 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
     """
     global _wait_mg
     _wait_mg.set_default_timeout(timeout_ms)
+
+
+def _tenants_to_filter_by(tenants: _AccessibleTenants) -> list[str]:
+    if tenants.current:
+        assert tenants.current in tenants.all_accessible or tenants.all_accessible == []
+        return [tenants.current]
+    else:
+        return tenants.all_accessible
+
+
+def _add_filter_by_tenant(
+    session: _Session,
+    stmt: _sqa.Select,
+    table: _sqa.Table,
+    tenants: _AccessibleTenants,
+    require_single_tenant: bool = True,
+) -> _sqa.Select:
+    if tenants is NO_TENANT or tenants.unrestricted:
+        return stmt
+    tenant_names = _tenants_to_filter_by(tenants)
+    if require_single_tenant and len(tenant_names) != 1:
+        raise ValueError(f"{len(tenant_names)} tenants provided, but only one is expected.")
+    tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
+    tenant_objs = session.execute(tenant_stmt).scalars().all()
+    ids = [tenant.id for tenant in tenant_objs]
+    stmt = stmt.where(table.c.tenant_id.in_(ids))
+    return stmt
 
 
 def _check_common_base_for_all_objs(*objs: _Base) -> None:

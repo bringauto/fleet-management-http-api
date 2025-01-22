@@ -3,8 +3,9 @@ import jwt
 from connexion.lifecycle import ConnexionRequest
 
 from fleet_management_api.api_impl.security import (
+    MissingRSAKey,
     NoHeaderWithJWTToken,
-    TenantsFromToken,
+    AccessibleTenants,
     TenantNotAccessible,
     generate_test_keys,
     clear_test_keys,
@@ -19,7 +20,6 @@ import tests._utils.api_test as api_test
 
 
 TEST_URL = "http://example.com"
-TEST_KEY = "key"
 ALGORITHM = "RS256"
 
 
@@ -28,12 +28,57 @@ def testing_auth_header(*tenants: str) -> str:
     return f"Bearer {token}"
 
 
-def tenants_from_token(request: ConnexionRequest, key: str, audience: str) -> TenantsFromToken:
+def tenants_from_token(request: ConnexionRequest, key: str, audience: str) -> AccessibleTenants:
     try:
-        return TenantsFromToken(request, key, audience)
+        return AccessibleTenants(request, key, audience)
     except jwt.exceptions.InvalidKeyError:
         print(f"Could not parse key:\n{key}")
         raise
+
+
+class Test_RSA_Key_Accessibility(unittest.TestCase):
+
+    def test_not_generatred_rsa_private_key_raises_missing_rsa_key_error(self):
+        with self.assertRaises(MissingRSAKey):
+            AccessibleTenants(
+                ConnexionRequest(
+                    TEST_URL,
+                    method="GET",
+                    headers={"Authorization": testing_auth_header("tenant_x", "tenant_y")},
+                ),
+                "",
+                "account",
+            )
+
+    def test_not_set_auth_raises_error(self):
+        generate_test_keys()
+        with self.assertRaises(MissingRSAKey):
+            AccessibleTenants(
+                ConnexionRequest(
+                    TEST_URL,
+                    method="GET",
+                    headers={"Authorization": testing_auth_header("tenant_x", "tenant_y")},
+                ),
+                "",
+                "account",
+            )
+
+    def test_generated_keys_and_set_auth_params_allow_for_reading_tenants_from_token(self):
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+        tenants = AccessibleTenants(
+            ConnexionRequest(
+                TEST_URL,
+                method="GET",
+                headers={"Authorization": testing_auth_header("tenant_x", "tenant_y")},
+            ),
+            "",
+            "account",
+        )
+        self.assertEqual(tenants.all_accessible, ["tenant_x", "tenant_y"])
+
+    def tearDown(self):
+        clear_test_keys()
 
 
 class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
@@ -49,7 +94,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
         request.cookies["tenant"] = "test_tenant"
         assert "Authorization" not in request.headers
         with self.assertRaises(NoHeaderWithJWTToken):
-            TenantsFromToken(request, get_test_public_key(), "account")
+            AccessibleTenants(request, get_test_public_key(), "account")
 
     def test_tenant_not_set_in_cookies_yields_empty_tenant_name(self):
         request = ConnexionRequest(
@@ -69,7 +114,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
             cookies={"tenant": "test_tenant"},
             headers={"Authorization": testing_auth_header("test_tenant")},
         )
-        tenant = TenantsFromToken(request, get_test_public_key(), "account")
+        tenant = AccessibleTenants(request, get_test_public_key(), "account")
         self.assertEqual(tenant.current, "test_tenant")
 
     def test_tenant_in_cookies_not_matching_tenants_from_jwt_raises_exception(self):
@@ -82,7 +127,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
             },
         )
         with self.assertRaises(TenantNotAccessible):
-            TenantsFromToken(request, get_test_public_key(), "account")
+            AccessibleTenants(request, get_test_public_key(), "account")
 
     def test_tenant_in_cookies_without_any_tenant_in_jwt_token_raises_error(self) -> None:
         request = ConnexionRequest(
@@ -94,7 +139,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
             },
         )
         with self.assertRaises(TenantNotAccessible):
-            TenantsFromToken(request, get_test_public_key(), "account")
+            AccessibleTenants(request, get_test_public_key(), "account")
 
     def test_no_tenant_in_cookies_with_no_tenant_in_jwt_token_raises_error(self) -> None:
         request = ConnexionRequest(
@@ -106,7 +151,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
             },
         )
         with self.assertRaises(TenantNotAccessible):
-            TenantsFromToken(request, get_test_public_key(), "account")
+            AccessibleTenants(request, get_test_public_key(), "account")
 
     def tearDown(self):
         clear_test_keys()

@@ -89,4 +89,4 @@ __pycache__
 /dummy.py
 
 /restart.sh
-/*.db
+/*.db*

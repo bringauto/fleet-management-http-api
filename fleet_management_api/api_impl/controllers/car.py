@@ -30,7 +30,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
+from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
 
 
 def create_cars() -> _Response:  # noqa: E501

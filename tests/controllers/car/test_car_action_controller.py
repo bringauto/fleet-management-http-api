@@ -145,7 +145,7 @@ class Test_Getting_Last_Action_States(api_test.TestCase):
         )
         self.tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
-            response = c.post("/v2/management/car", json=[self.car_1, self.car_2])
+            c.post("/v2/management/car", json=[self.car_1, self.car_2])
 
     def test_getting_last_action_states_after_car_creation_yields_default_states(self):
         states = get_last_action_states(self.tenant, 1, 2)

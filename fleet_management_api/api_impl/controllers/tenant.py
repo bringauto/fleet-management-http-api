@@ -17,7 +17,7 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 from fleet_management_api.database.db_access import NO_TENANT
-from fleet_management_api.api_impl.security import TenantsFromToken as _AccessibleTenants
+from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
 
 
 def create_tenants() -> _Response:

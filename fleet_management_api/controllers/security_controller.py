@@ -5,8 +5,13 @@ from fleet_management_api.api_impl.api_keys import (
 )
 
 
-_public_key: str
-_client_id: str
+_public_key: str = ""
+_client_id: str = ""
+
+
+def get_public_key() -> str:
+    global _public_key
+    return _public_key
 
 
 def set_auth_params(public_key: str, client_id: str) -> None:

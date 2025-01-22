@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
 from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.controllers.security_controller import get_public_key
 
 
 class TenantNotAccessible(Exception):
@@ -21,21 +22,21 @@ class NoHeaderWithJWTToken(Exception):
     pass
 
 
+class MissingRSAKey(Exception):
+    pass
+
+
 _testing_public_key: str = ""
 _testing_private_key: str = ""
 
 
 def get_test_public_key(strip: bool = False) -> str:
-    if not _testing_public_key:
-        print("Test public key not set.")
     if strip:
         return _strip_footer_and_header(_testing_public_key)
     return _testing_public_key
 
 
 def get_test_private_key(strip: bool = False) -> str:
-    if not _testing_private_key:
-        print("Test private key not set.")
     if strip:
         return _strip_footer_and_header(_testing_private_key)
     return _testing_private_key
@@ -75,7 +76,7 @@ def _strip_footer_and_header(key: str) -> str:
     return stripped_key
 
 
-class TenantsFromToken:
+class AccessibleTenants:
     """
     Each instance of the class is initialized with tenant name read from JWT token
     in the Authorization header of the request, given the key for decoding the token.
@@ -91,7 +92,7 @@ class TenantsFromToken:
 
     def __init__(self, request: _Request, key: str = "", audience: str = "account") -> None:
         if not key.strip():
-            key = get_test_public_key()
+            key = get_public_key()
         self._current, self._all_accessible = self._check_and_read(request, key, audience)
 
     @property
@@ -124,9 +125,11 @@ class TenantsFromToken:
             bearer = str(request.headers["Authorization"]).split(" ")[-1]
             if not bearer.strip():
                 raise Unauthorized("No valid JWT token or API key provided.")
+            if not key.strip():
+                raise MissingRSAKey("RSA public key is not set.")
             try:
                 decoded_str = jwt.decode(
-                    bearer, key, audience=audience, algorithms=[TenantsFromToken.algorithm]
+                    bearer, key, audience=audience, algorithms=[AccessibleTenants.algorithm]
                 )["Payload"]
             except jwt.exceptions.DecodeError:
                 raise TenantNotAccessible("Invalid JWT token.")

@@ -17,7 +17,10 @@ from fleet_management_api.api_impl.controllers.order import (
     clear_inactive_orders,
 )
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.security import get_test_private_key as _get_test_private_key
+from fleet_management_api.api_impl.security import (
+    get_test_private_key as _get_test_private_key,
+    MissingRSAKey as _MissingRSAKey,
+)
 
 
 TEST_TENANT_NAME = "test-tenant"
@@ -35,6 +38,8 @@ def get_token(*tenants: str) -> str:
         "allowed-origins": ["test_client"],
     }
     private = _get_test_private_key()
+    if not private:
+        raise _MissingRSAKey("RSA private key is not set.")
     try:
         encoded = jwt.encode(payload, private, algorithm="RS256")
     except:
@@ -121,7 +126,11 @@ class _TestClient(_FlaskClient):
 
     def _get_headers(self) -> dict[str, str]:
         accessible_tenants = self._app._accessible_tenants
-        return {"Authorization": f"Bearer {get_token(*accessible_tenants)}"}
+        try:
+            token = get_token(*accessible_tenants)
+        except:
+            token = ""
+        return {"Authorization": f"Bearer {token}"}
 
 
 def get_test_app(
