@@ -6,7 +6,7 @@ from sqlalchemy.pool.impl import QueuePool
 
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDB, TestItem
+from fleet_management_api.database.db_models import TestItem
 import tests.database.models as models
 import fleet_management_api.database.wait as wait
 import tests._utils.api_test as api_test
@@ -62,16 +62,15 @@ class Test_Waiting_For_Content(api_test.TestCase):
 
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
     ):
         test_obj = models.TestItem(test_str="test", test_int=123)
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor() as executor:
             future = executor.submit(_db_access.get, self.tenant, base=models.TestItem, wait=True)
-            executor.submit(_db_access.add, self.tenant, test_obj)
+            _db_access.add(self.tenant, test_obj)
             retrieved_objs: list[TestItem] = future.result()
             self.assertEqual(retrieved_objs[0].test_str, test_obj.test_str)
 
@@ -79,15 +78,15 @@ class Test_Waiting_For_Content(api_test.TestCase):
         self,
     ):
         test_obj = models.TestItem(test_str="test", test_int=123)
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor() as executor:
             future = executor.submit(_db_access.get, self.tenant, base=models.TestItem, wait=False)
             time.sleep(0.05)
-            executor.submit(_db_access.add, self.tenant, test_obj)
+            _db_access.add(self.tenant, test_obj)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [])
 
     def test_exceeding_timeout_makes_the_db_to_stop_waiting_and_return_empty_list(self):
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor() as executor:
             future = executor.submit(
                 _db_access.get, self.tenant, base=models.TestItem, wait=True, timeout_ms=100
             )
@@ -96,7 +95,7 @@ class Test_Waiting_For_Content(api_test.TestCase):
 
     def test_response_is_sent_to_multiple_waiters(self):
         test_obj = models.TestItem(test_str="test_x", test_int=123)
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor() as executor:
             future1 = executor.submit(
                 _db_access.get, self.tenant, base=models.TestItem, wait=True, timeout_ms=1000
             )
@@ -104,7 +103,7 @@ class Test_Waiting_For_Content(api_test.TestCase):
                 _db_access.get, self.tenant, base=models.TestItem, wait=True, timeout_ms=1000
             )
             time.sleep(0.05)
-            executor.submit(_db_access.add, self.tenant, test_obj)
+            _db_access.add(self.tenant, test_obj)
             retrieved_objs1 = future1.result()
             retrieved_objs2 = future2.result()
             self.assertEqual(retrieved_objs1[0].test_str, test_obj.test_str)
@@ -116,7 +115,6 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
-        _db_access.add_tenants(TEST_TENANT_NAME)
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
         test_obj = models.TestItem(id=5, test_str="test", test_int=123)
@@ -151,10 +149,10 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
                 timeout_ms=500,
             )
             time.sleep(0.01)
-            executor.submit(_db_access.add, self.tenant, test_obj_1)
+            _db_access.add(self.tenant, test_obj_1)
             time.sleep(0.01)
             value = 123
-            executor.submit(_db_access.add, self.tenant, test_obj_2)
+            _db_access.add(self.tenant, test_obj_2)
             time.sleep(0.01)
             retrieved_objs = future.result()
             self.assertListEqual(retrieved_objs, [test_obj_2])

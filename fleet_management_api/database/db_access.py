@@ -399,28 +399,14 @@ def get(
     the globally defined Engine is used.
     """
     global _wait_mg
-
-    if criteria is None:
-        criteria = {}
-    if sort_result_by is None:
-        sort_result_by = {}
     table = base.__table__
     source = _get_current_connection_source(connection_source)
     result = []
     with _Session(source) as session, session.begin():
-        clauses = [
-            criteria[attr_label](getattr(table.columns, attr_label))
-            for attr_label in criteria.keys()
-        ]
-        stmt = _sqa.select(base).where(*clauses)  # type: ignore
+        stmt = _sqa.select(base)
+        stmt = _apply_criteria_for_select(stmt, table, criteria)
         stmt = _add_filter_by_tenant(session, stmt, table, tenants, require_single_tenant=False)
-        for attr_label, order in sort_result_by.items():
-            if attr_label in table.columns.keys():
-                if order == "desc":
-                    stmt = stmt.order_by(table.c.__getattr__(attr_label).desc())
-                if order == "asc":
-                    stmt = stmt.order_by(table.c.__getattr__(attr_label).asc())
-
+        stmt = _sort_results(stmt, table, sort_result_by)
         if first_n > 0:
             stmt = stmt.limit(first_n)
         if omitted_relationships is not None:
@@ -435,6 +421,33 @@ def get(
             validation=_functools.partial(_is_awaited_result_valid, criteria),
         )
     return result
+
+
+def _apply_criteria_for_select(
+    stmt: _sqa.Select, table: _sqa.Table, criteria: dict[str, Callable[[Any], bool]]
+) -> _sqa.Select:
+    if criteria is None:
+        criteria = {}
+    clauses = [
+        criteria[attr_label](getattr(table.columns, attr_label)) for attr_label in criteria.keys()
+    ]
+    return stmt.where(*clauses)
+
+
+def _sort_results(
+    stmt: _sqa.Select,
+    table: _sqa.Table,
+    sort_result_by: Optional[dict[ColumnName, Order]] = None,
+) -> _sqa.Select:
+    if sort_result_by is None:
+        sort_result_by = {}
+    for attr_label, order in sort_result_by.items():
+        if attr_label in table.columns.keys():
+            if order == "desc":
+                stmt = stmt.order_by(table.c.__getattr__(attr_label).desc())
+            if order == "asc":
+                stmt = stmt.order_by(table.c.__getattr__(attr_label).asc())
+    return stmt
 
 
 def get_children(
@@ -587,6 +600,8 @@ def _is_awaited_result_valid(
     result_attr_criteria: dict[str, Callable[[Any], bool]], item: Any
 ) -> bool:
     """Return True if the `item` meets all the conditions expressed by the `attribute_criteria`"""
+    if not result_attr_criteria:
+        return True
     for attr_label, attr_criterion in result_attr_criteria.items():
         if not hasattr(item, attr_label):
             return False
