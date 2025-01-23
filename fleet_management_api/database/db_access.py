@@ -122,15 +122,9 @@ class CheckBeforeAdd:
         (and nullable=False) or if some of the conditions is not met.
 
         """
-        if self._nullable and self._id is None:
-            return
-        else:
+        if not self._nullable or self._id is not None:
             result = session.get_one(self._base, self._id)
-            if self._conditions is None:
-                return
-            else:
-                for condition in self._conditions:
-                    condition.check(result)
+            all(condition.check(result) for condition in self._conditions)
 
 
 def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
@@ -222,18 +216,11 @@ def add(
     with _Session(source) as session:
         try:
             if checked is not None:
-                for check_obj in checked:
-                    try:
-                        check_obj.check(session)
-                    except _NoResultFound as e:
-                        msg = f"{check_obj._base.model_name} (ID={check_obj._id}) does not exist in the database."
-                        return _error(
-                            404,
-                            msg,
-                            title="Cannot create object as some referenced objects do not exist",
-                        )
+                result = _check_before_add(session, checked)
+                if result.status_code != 200:
+                    return result
             if auto_id:
-                _set_id_to_none(added)
+                _set_id_to_none(list(added))
             session.add_all(added)
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
@@ -241,21 +228,31 @@ def add(
         except DatabaseRecordValueError as e:
             return _error(
                 400,
-                f"Nothing added to the database. {e}",
-                title="Cannot create object due to unmet conditions on this or referenced object",
+                f"Cannot create object. Nothing added to the database. {e}",
+                title="Unmet conditions on the added or or referenced object",
             )
         except _sqaexc.IntegrityError as e:
             return _error(
                 400,
-                f"Nothing added to the database. {e.orig}",
-                title="Cannot create object due to ID conflict in the database",
+                f"Cannot create object. Nothing added to the database. {e.orig}",
+                title="ID conflict in the database",
             )
         except Exception as e:
             return _error(
                 500,
-                f"Nothing added to the database. {e}",
-                title="Cannot create object due to unexpected error",
+                f"Cannot create object. Nothing added to the database. {e}",
+                title="Unexpected error",
             )
+
+
+def _check_before_add(session: _Session, checked: Iterable[CheckBeforeAdd]) -> _Response:
+    for obj in checked:
+        try:
+            obj.check(session)
+        except _NoResultFound:
+            msg = f"{obj._base.model_name} (ID={obj._id}) does not exist in the database."
+            return _error(404, msg, "Cannot create object as some referenced objects do not exist.")
+    return _json_response([])
 
 
 @db_access_method
@@ -420,11 +417,12 @@ def _sort_results(
     if sort_result_by is None:
         sort_result_by = {}
     for attr_label, order in sort_result_by.items():
-        if attr_label in table.columns.keys():
-            if order == "desc":
-                stmt = stmt.order_by(table.c.__getattr__(attr_label).desc())
-            if order == "asc":
-                stmt = stmt.order_by(table.c.__getattr__(attr_label).asc())
+        if order not in ["asc", "desc"]:
+            continue  # skip invalid order
+        column = table.c.get(attr_label, None)
+        if column is not None:
+            order_by = column.asc() if order == "asc" else column.desc()
+            stmt = stmt.order_by(order_by)
     return stmt
 
 
@@ -480,15 +478,14 @@ def update(tenant: _AccessibleTenants, *updated: _Base) -> _Response:
                 session.merge(item)
             return _json_response(updated)
         except _sqaexc.IntegrityError as e:
-            session.rollback()
-            return _error(400, str(e.orig), title="Cannot update object with invalid data")
+            response = _error(400, str(e.orig), title="Cannot update object with invalid data")
         except _sqaexc.NoResultFound as e:
-            session.rollback()
             msg = f"{item.model_name} (ID={item.id}) was not found. Nothing to update."
-            return _error(404, msg, title="Cannot update nonexistent object")
+            response = _error(404, msg, title="Cannot update nonexistent object")
         except Exception as e:
-            session.rollback()
-            return _error(500, str(e), title="Cannot update object due to unexpected error")
+            response = _error(500, str(e), title="Cannot update object due to unexpected error")
+        session.rollback()
+        return response
 
 
 def db_object_check(
@@ -557,7 +554,7 @@ def _add_filter_by_tenant(
     tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
     tenant_objs = session.execute(tenant_stmt).scalars().all()
     ids = [tenant.id for tenant in tenant_objs]
-    stmt = stmt.where(table.c.tenant_id.in_(ids))
+    stmt = stmt.where(table.c["tenant_id"].in_(ids))
     return stmt
 
 
@@ -585,7 +582,7 @@ def _criterion(item: Any, func: Callable[[Any], bool], item_attr_name: str) -> b
     return hasattr(item, item_attr_name) and func(item.__dict__[item_attr_name])
 
 
-def _set_id_to_none(db_model_instances: tuple[_Base, ...]) -> None:
+def _set_id_to_none(db_model_instances: list[_Base]) -> None:
     """Set "id" attribute of all the db_model_instances to None."""
     for obj in db_model_instances:
         obj.id = None  # type: ignore
@@ -596,25 +593,18 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
     if not objs:
         return _json_response([])
     if "tenant_id" not in objs[0].__table__.columns.keys():
-        if tenant_name == NO_TENANT:
-            # correct adding of an object, that is not assigned to any tenant
+        if tenant_name == NO_TENANT:  # object is not owned by a tenant, return empty response
             return _json_response([])
         else:
-            return _error(
-                500,
-                f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute.",
-                title="Unexpected error when accessing database.",
-            )
+            msg = f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute."
+            return _error(500, msg, title="Unexpected error when accessing database.")
     if not tenant_name:
         return _error(400, "Tenant not received in the request.", title="Tenant not received.")
 
     tenants = get(NO_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name})
     if not tenants:
-        return _error(
-            404,
-            f"Tenant '{tenant_name}' does not exist in the database.",
-            title="Tenant not found.",
-        )
+        msg = f"Tenant '{tenant_name}' does not exist in the database."
+        return _error(404, msg, title="Tenant not found.")
 
     for obj in objs:
         obj.tenant_name = tenant_name  # type: ignore
@@ -623,7 +613,7 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
 
 def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
     """Set tenant_id attribute to all the objs."""
-    if "tenant_id" not in objs[0].__table__.columns.keys():
+    if not hasattr(objs[0], "tenant_id"):
         return 200
     id_ = _get_tenant_id(tenant_name)
     if id_ is None:
