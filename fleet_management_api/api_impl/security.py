@@ -11,7 +11,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
 from fleet_management_api.api_impl.load_request import Request as _Request
-from fleet_management_api.controllers.security_controller import get_public_key
 
 
 class TenantNotAccessible(Exception):
@@ -24,6 +23,34 @@ class NoHeaderWithJWTToken(Exception):
 
 class MissingRSAKey(Exception):
     pass
+
+
+_public_key: str = ""
+_client_id: str = ""
+
+
+def get_public_key() -> str:
+    global _public_key
+    return _public_key
+
+
+def get_client_id() -> str:
+    global _client_id
+    return _client_id
+
+
+def set_auth_params(public_key: str, client_id: str) -> None:
+    global _public_key
+    _public_key = "-----BEGIN PUBLIC KEY-----\n" + public_key + "\n-----END PUBLIC KEY-----"
+    global _client_id
+    _client_id = client_id
+
+
+def clear_auth_params() -> None:
+    global _public_key
+    _public_key = ""
+    global _client_id
+    _client_id = ""
 
 
 _testing_public_key: str = ""

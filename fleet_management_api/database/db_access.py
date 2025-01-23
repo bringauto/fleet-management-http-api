@@ -26,6 +26,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
 
+
 from ..logs import LOGGER_NAME
 
 

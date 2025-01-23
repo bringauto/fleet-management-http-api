@@ -3,22 +3,7 @@ import jwt
 from fleet_management_api.api_impl.api_keys import (
     verify_key_and_return_key_info as _verify_key_and_return_key_info,
 )
-
-
-_public_key: str = ""
-_client_id: str = ""
-
-
-def get_public_key() -> str:
-    global _public_key
-    return _public_key
-
-
-def set_auth_params(public_key: str, client_id: str) -> None:
-    global _public_key
-    _public_key = "-----BEGIN PUBLIC KEY-----\n" + public_key + "\n-----END PUBLIC KEY-----"
-    global _client_id
-    _client_id = client_id
+from fleet_management_api.api_impl.security import get_public_key, get_client_id
 
 
 def info_from_oAuth2AuthCode(token):
@@ -33,15 +18,14 @@ def info_from_oAuth2AuthCode(token):
     :return: Decoded token information or None if token is invalid
     :rtype: dict | None
     """
-    global _public_key
     try:
         decoded_token: dict = jwt.decode(
-            token, _public_key, algorithms=["RS256"], audience="account"
+            token, get_public_key(), algorithms=["RS256"], audience="account"
         )
     except:
         return None
     for origin in decoded_token.get("allowed-origins", []):
-        if origin == _client_id:
+        if origin == get_client_id():
             return {"scopes": {}, "uid": ""}
 
     return None  # type: ignore

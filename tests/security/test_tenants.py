@@ -10,12 +10,13 @@ from fleet_management_api.api_impl.security import (
     generate_test_keys,
     clear_test_keys,
     get_test_public_key,
+    set_auth_params,
+    clear_auth_params,
 )
 from fleet_management_api.app import get_token, get_test_app
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import TenantDB
 from fleet_management_api.models import PlatformHW
-from fleet_management_api.controllers.security_controller import set_auth_params
 import tests._utils.api_test as api_test
 
 
@@ -82,6 +83,7 @@ class Test_RSA_Key_Accessibility(unittest.TestCase):
 
     def tearDown(self):
         clear_test_keys()
+        clear_auth_params()
 
 
 class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
