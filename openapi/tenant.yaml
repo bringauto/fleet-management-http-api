@@ -15,7 +15,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Tenant"
-              example: [{ "id": 1, "name": "ABCD1234EF56" }]
+              example: [{ "id": 1, "name": "bring_auto" }]
         "401":
           $ref: "errors.yaml#/components/responses/Unauthorized"
         "403":
@@ -67,5 +67,8 @@ components:
         id:
           $ref: "common_models.yaml#/components/schemas/Id"
         name:
+          description: "Tenant name, following a pattern ^[0-9a-z_]+$"
+          example: test_tenant
+          pattern: "^[0-9a-z_]+$"
+          title: tenant_name
           type: string
-          example: "AbcD1234EF56"

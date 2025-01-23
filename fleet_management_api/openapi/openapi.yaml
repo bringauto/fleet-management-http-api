@@ -2884,7 +2884,7 @@ paths:
             application/json:
               example:
               - id: 1
-                name: ABCD1234EF56
+                name: bring_auto
               schema:
                 items:
                   $ref: '#/components/schemas/Tenant'
@@ -3579,7 +3579,7 @@ components:
     Tenant:
       description: Tenant owning a subset of the entities on the server.
       example:
-        name: AbcD1234EF56
+        name: test_tenant
         id: 1
       properties:
         id:
@@ -3588,8 +3588,10 @@ components:
           title: Id
           type: integer
         name:
-          example: AbcD1234EF56
-          title: name
+          description: "Tenant name, following a pattern ^[0-9a-z_]+$"
+          example: test_tenant
+          pattern: "^[0-9a-z_]+$"
+          title: tenant_name
           type: string
       required:
       - name
