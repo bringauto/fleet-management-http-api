@@ -13,6 +13,7 @@ from sqlalchemy.orm import (
 )
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
+from fleet_management_api.logs import LOGGER_NAME
 from fleet_management_api.database.db_models import Base as _Base, TenantDB as _TenantDB
 from fleet_management_api.database.connection import (
     get_current_connection_source as _get_current_connection_source,
@@ -25,9 +26,6 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
 )
 from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
-
-
-from ..logs import LOGGER_NAME
 
 
 P = ParamSpec("P")
@@ -216,16 +214,10 @@ def add(
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
-    try:
-        _set_tenant_id_to_all_objs(tenants.current, *added)
-    except TenantDoesNotExist:
-        return _error(
-            404,
-            f"Tenant '{tenants.current}' does not exist in the database",
-            title="Tenant not found",
-        )
-    except Exception as e:
-        return _error(500, f"Error: {e}", title="Cannot create object due to unexpected error")
+    code = _set_tenant_id_to_all_objs(tenants.current, *added)
+    if code != 200:
+        msg = f"Tenant '{tenants.current}' does not exist and could not be created."
+        return _error(500, msg, title="Tenant does not exist.")
     with _Session(source) as session:
         try:
             if checked is not None:
@@ -280,17 +272,11 @@ def delete(tenant: _AccessibleTenants, base: type[_Base], id_: Any) -> _Response
             session.commit()
             return _text_response(f"{base.model_name} (ID={id_}) has been deleted.")
         except _NoResultFound as e:
-            return _error(
-                404,
-                f"{base.model_name} (ID={id_}) not found. {e}",
-                title="Object to delete not found",
-            )
+            msg = f"{base.model_name} (ID={id_}) not found. {e}"
+            return _error(404, msg, title="Object to delete not found")
         except _sqaexc.IntegrityError as e:
-            return _error(
-                400,
-                f"Could not delete {base.model_name} (ID={id_}). {e.orig}",
-                title="Cannot delete object due to integrity error",
-            )
+            msg = f"Could not delete {base.model_name} (ID={id_}). {e.orig}"
+            return _error(400, msg, title="Cannot delete object due to integrity error")
         except Exception as e:
             return _error(500, f"Error: {e}", "Cannot delete object due to unexpected error.")
 
@@ -647,20 +633,26 @@ def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
     return _json_response([])
 
 
-def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> None:
+def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
     """Set tenant_id attribute to all the objs."""
     if "tenant_id" not in objs[0].__table__.columns.keys():
-        return
-    tenants: list[_TenantDB] = get(
-        NO_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name}
-    )
+        return 200
+    id_ = _get_tenant_id(tenant_name)
+    if id_ is None:
+        return 500
+    else:
+        for obj in objs:
+            assert hasattr(obj, "tenant_id")
+            obj.tenant_id = id_
+        return 200
+
+
+def _get_tenant_id(tenant_name: str) -> int | None:
+    criteria = {"name": lambda x: x == tenant_name}
+    tenants: list[_TenantDB] = get(NO_TENANT, _TenantDB, criteria=criteria)
     if not tenants:
         response = add_tenants(tenant_name)
-        if response.status_code != 200:
-            raise TenantDoesNotExist(
-                f"Failed to create tenant '{tenant_name}' when adding items to the database."
-            )
+        if response.status_code != 200 or not response.body:
+            return None
         tenants = response.body
-    for obj in objs:
-        assert hasattr(obj, "tenant_id")
-        obj.tenant_id = tenants[0].id
+    return tenants[0].id

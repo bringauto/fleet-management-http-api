@@ -119,7 +119,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/orderstate/1?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/orderstate/2?wait=true&since=0")
-                time.sleep(0.01)
+                time.sleep(0.05)
                 executor.submit(c.post, "/v2/management/orderstate", json=[order_state])
 
                 response = future.result()
