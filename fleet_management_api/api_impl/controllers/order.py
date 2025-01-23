@@ -23,7 +23,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestNoData as _RequestNoData,
 )
-from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
 CarId = int

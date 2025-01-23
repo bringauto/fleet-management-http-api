@@ -18,7 +18,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
-from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
 CarId = int

@@ -25,7 +25,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
 P = ParamSpec("P")
@@ -134,21 +134,17 @@ def db_access_method(func: Callable[P, T]) -> Callable[P, T]:
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         try:
             response: _Response = func(*args, **kwargs)
-            if hasattr(response, "status_code") and (
-                response.status_code == 503 or response.status_code == 500
-            ):
+            if hasattr(response, "status_code") and (response.status_code in (503, 500)):
                 raise RuntimeError(response.body)
             return response
         except _sqaexc.OperationalError as e:
             _logging.warning(
-                f"Restarting connection source due to a probable deletion of database tables. Error: {e}"
+                f"Restarting connection source due to a likely deletion of database tables. Error: {e}"
             )
-            _restart_connection_source()
-            return func(*args, **kwargs)
         except Exception as e:
             _logging.warning(f"Restarting connection source due to an database error. Error: {e}")
-            _restart_connection_source()
-            return func(*args, **kwargs)
+        _restart_connection_source()
+        return func(*args, **kwargs)
 
     return wrapper
 
@@ -475,7 +471,9 @@ def update(tenant: _AccessibleTenants, *updated: _Base) -> _Response:
         try:
             for item in updated:
                 session.get_one(item.__class__, item.id)
-                session.merge(item)
+                session.merge(
+                    item
+                )  # copies updated item onto the item already existing in the database
             return _json_response(updated)
         except _sqaexc.IntegrityError as e:
             response = _error(400, str(e.orig), title="Cannot update object with invalid data")
@@ -532,11 +530,7 @@ def set_content_timeout_ms(timeout_ms: int) -> None:
 
 
 def _tenants_to_filter_by(tenants: _AccessibleTenants) -> list[str]:
-    if tenants.current:
-        assert tenants.current in tenants.all_accessible or tenants.all_accessible == []
-        return [tenants.current]
-    else:
-        return tenants.all_accessible
+    return [tenants.current] if tenants.current else tenants.all
 
 
 def _add_filter_by_tenant(

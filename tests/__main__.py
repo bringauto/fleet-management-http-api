@@ -35,7 +35,6 @@ def _report_coverage(cov: coverage.Coverage, html) -> None:
             print(f"Problem reporting coverage. {e}")
 
 
-@profile
 def _run_tests(show_test_names: bool = True) -> None:
     possible_paths = [os.path.join(TEST_DIR_NAME, path) for path in sys.argv[1:]]
     if not possible_paths:

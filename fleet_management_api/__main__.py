@@ -2,7 +2,7 @@ import requests  # type: ignore
 
 import fleet_management_api.script_args as _args
 import fleet_management_api.app as app
-from fleet_management_api.api_impl.auth_controller import init_security
+from fleet_management_api.api_impl.security.auth_controller import init_security
 from fleet_management_api.controllers.security_controller import set_auth_params
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from fleet_management_api.database.connection import set_up_database

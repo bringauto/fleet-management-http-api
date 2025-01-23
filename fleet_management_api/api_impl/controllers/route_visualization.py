@@ -20,7 +20,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestEmpty as _RequestEmpty,
     RequestJSON as _RequestJSON,
 )
-from fleet_management_api.api_impl.security import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
 def get_route_visualization(route_id: int) -> _Response:

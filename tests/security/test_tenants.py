@@ -2,16 +2,18 @@ import unittest
 import jwt
 from connexion.lifecycle import ConnexionRequest
 
-from fleet_management_api.api_impl.security import (
-    MissingRSAKey,
-    NoHeaderWithJWTToken,
-    AccessibleTenants,
-    TenantNotAccessible,
+from fleet_management_api.api_impl.auth_controller import (
     generate_test_keys,
     clear_test_keys,
     get_test_public_key,
     set_auth_params,
     clear_auth_params,
+)
+from fleet_management_api.api_impl.tenants import (
+    MissingRSAKey,
+    NoHeaderWithJWTToken,
+    AccessibleTenants,
+    NoAccessibleTenants,
 )
 from fleet_management_api.app import get_token, get_test_app
 import fleet_management_api.database.db_access as _db_access
@@ -79,7 +81,7 @@ class Test_RSA_Key_Accessibility(unittest.TestCase):
             "",
             "account",
         )
-        self.assertEqual(tenants.all_accessible, ["tenant_x", "tenant_y"])
+        self.assertEqual(tenants.all, ["tenant_x", "tenant_y"])
 
     def tearDown(self):
         clear_test_keys()
@@ -110,7 +112,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
             },
         )
         tenant = tenants_from_token(request, get_test_public_key(), "account")
-        self.assertEqual(tenant.all_accessible, ["test_tenant"])
+        self.assertEqual(tenant.all, ["test_tenant"])
 
     def test_tenant_in_cookies_matching_tenants_from_jwt_yields_tenant_name(self):
         request = ConnexionRequest(
@@ -131,7 +133,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
                 "Authorization": testing_auth_header("test_tenant"),
             },
         )
-        with self.assertRaises(TenantNotAccessible):
+        with self.assertRaises(NoAccessibleTenants):
             AccessibleTenants(request, get_test_public_key(), "account")
 
     def test_tenant_in_cookies_without_any_tenant_in_jwt_token_raises_error(self) -> None:
@@ -143,7 +145,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
                 "Authorization": testing_auth_header(),  # No tenant in JWT token
             },
         )
-        with self.assertRaises(TenantNotAccessible):
+        with self.assertRaises(NoAccessibleTenants):
             AccessibleTenants(request, get_test_public_key(), "account")
 
     def test_no_tenant_in_cookies_with_no_tenant_in_jwt_token_raises_error(self) -> None:
@@ -155,7 +157,7 @@ class Test_Tenants_From_JWT_Without_API_Key(unittest.TestCase):
                 "Authorization": testing_auth_header(),  # No tenant in JWT token
             },
         )
-        with self.assertRaises(TenantNotAccessible):
+        with self.assertRaises(NoAccessibleTenants):
             AccessibleTenants(request, get_test_public_key(), "account")
 
     def tearDown(self):

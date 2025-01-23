@@ -3,7 +3,7 @@ import jwt
 from fleet_management_api.api_impl.api_keys import (
     verify_key_and_return_key_info as _verify_key_and_return_key_info,
 )
-from fleet_management_api.api_impl.security import get_public_key, get_client_id
+from fleet_management_api.api_impl.auth_controller import get_client_id, get_public_key
 
 
 def info_from_oAuth2AuthCode(token):

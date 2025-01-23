@@ -7,20 +7,17 @@ from flask.testing import FlaskClient as _FlaskClient  # type: ignore
 from connexion.apps.flask_app import FlaskApp as _FlaskApp
 from .encoder import JSONEncoder
 
-from fleet_management_api.database.db_models import (
-    ApiKeyDB as _ApiKeyDB,
-    TenantDB as _TenantDB,
-)
+from fleet_management_api.database.db_models import ApiKeyDB as _ApiKeyDB
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
 from fleet_management_api.api_impl.controllers.order import (
     clear_active_orders,
     clear_inactive_orders,
 )
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.security import (
+from fleet_management_api.api_impl.auth_controller import (
     get_test_private_key as _get_test_private_key,
-    MissingRSAKey as _MissingRSAKey,
 )
+from fleet_management_api.api_impl.tenants import MissingRSAKey as _MissingRSAKey
 
 
 TEST_TENANT_NAME = "test-tenant"
