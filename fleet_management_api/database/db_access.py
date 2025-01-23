@@ -308,16 +308,9 @@ def delete_n(
     table = base.__table__
     source = _get_current_connection_source()
     with _Session(source) as session, session.begin():
-        clauses = [
-            criteria[attr_label](getattr(table.columns, attr_label))
-            for attr_label in criteria.keys()
-        ]
-        query = _sqa.select(table.c.id).where(*clauses)  # type: ignore
-        if start_from == "minimum":
-            query = query.order_by(table.c.id)
-        else:
-            query = query.order_by(table.c.id.desc())
-        query = query.limit(n)
+        clauses = [criteria[name](getattr(table.columns, name)) for name in criteria.keys()]
+        order_by = table.c.id if start_from == "minimum" else table.c.id.desc()
+        query = _sqa.select(table.c.id).where(*clauses).order_by(order_by).limit(n)
         stmt = _sqa.delete(base).where(table.c.id.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
         return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
