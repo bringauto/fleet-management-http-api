@@ -129,18 +129,18 @@ def replace_connection_source(source: Optional[_Engine]) -> None:
     _db_connection = source
 
 
-def get_connection_source_test(db_file_path: str = "") -> _Engine:
+def get_connection_source_test(db_file_path: str = "", echo: bool = False) -> _Engine:
     """Return a new connection source (sqlalchemy Engine object) (distinct from the one stored in the module variable)."""
     url = db_url_test(db_file_path)
-    return _get_connection(url)
+    return _get_connection(url, echo=echo)
 
 
-def set_connection_source_test(db_file_path: str = "") -> str:
+def set_connection_source_test(db_file_path: str = "", echo: bool = False) -> str:
     """Set the module variable storing the connection source (sqlalchemy Engine object) to a sqlite database."""
     url = db_url_test(db_file_path)
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
-    _set_connection(url)
+    _set_connection(url, echo=echo)
     _log_info(f"Using sqlite database stored in file '{db_file_path}'.")
     return db_file_path
 
@@ -185,22 +185,22 @@ def unset_connection_source() -> None:
     _db_connection = None
 
 
-def _set_connection(url: str) -> None:
+def _set_connection(url: str, echo: bool = False) -> None:
     global _db_connection
-    _db_connection = _new_connection(url)
+    _db_connection = _new_connection(url, echo=echo)
     _Base.metadata.create_all(_db_connection)
 
 
-def _get_connection(url: str) -> _Engine:
+def _get_connection(url: str, echo: bool = False) -> _Engine:
     global _db_connection
-    connection_src = _new_connection(url)
+    connection_src = _new_connection(url, echo)
     _Base.metadata.create_all(connection_src)
     return connection_src
 
 
-def _new_connection(url: str) -> _Engine:
+def _new_connection(url: str, echo: bool = False) -> _Engine:
     try:
-        engine = _create_engine(url, pool_size=100)
+        engine = _create_engine(url, pool_size=100, echo=echo)
         if engine is None:
             raise InvalidConnectionArguments(
                 f"Could not create new connection source (url='{url}')."
