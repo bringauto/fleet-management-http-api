@@ -207,6 +207,16 @@ class Test_Deleting_N_Database_Records(api_test.TestCase):
         self.assertEqual(len(retrieved_objs), 1)
         self.assertEqual(retrieved_objs[0].test_str, test_obj_2.test_str)
 
+    def test_deleting_n_records_with_least_attribute_other_than_id(self):
+        test_obj_1 = models.TestItem(test_str="aaa", test_int=9)
+        test_obj_2 = models.TestItem(test_str="bbb", test_int=4)
+        test_obj_3 = models.TestItem(test_str="ccc", test_int=5)
+        _db_access.add(self.tenant, test_obj_1, test_obj_2, test_obj_3)
+        _db_access.delete_n(base=models.TestItem, n=2, column_name="test_int", start_from="maximum")
+        retrieved_objs = _db_access.get(tenants=self.tenant, base=models.TestItem)
+        self.assertEqual(len(retrieved_objs), 1)
+        self.assertEqual(retrieved_objs[0].test_str, test_obj_2.test_str)
+
     def test_deleting_n_records_with_highest_ids(self):
         test_obj_1 = models.TestItem(id=7, test_str="abc", test_int=2)
         test_obj_2 = models.TestItem(id=8, test_str="def", test_int=3)

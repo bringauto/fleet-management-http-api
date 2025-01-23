@@ -38,6 +38,7 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 
 Order = Literal["asc", "desc"]
 ColumnName = str
+Criteria = dict[str, Callable[[Any], bool]]
 
 
 class EmptyTenant(_AccessibleTenants):
@@ -287,7 +288,7 @@ def delete_n(
     n: int,
     column_name: str,
     start_from: Literal["minimum", "maximum"],
-    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
+    criteria: Optional[Criteria] = None,
 ) -> _Response:
     """Delete multiple instances of the `base`.
 
@@ -297,27 +298,23 @@ def delete_n(
     are deleted.
     """
 
-    if column_name not in base.__table__.columns.keys():
-        return _error(
-            500,
-            f"Column {column_name} not found in table {base.__tablename__}.",
-            title="Invalid request to the server' database",
-        )
-    if criteria is None:
-        criteria = {}
     table = base.__table__
+    sort_col = table.c.get(column_name, None)
+    if sort_col is None:
+        msg = f"Column {column_name} not found in table {base.__tablename__}."
+        return _error(500, msg, title="Invalid request to the server' database")
     source = _get_current_connection_source()
     with _Session(source) as session, session.begin():
-        clauses = [criteria[name](getattr(table.columns, name)) for name in criteria.keys()]
-        order_by = table.c.id if start_from == "minimum" else table.c.id.desc()
-        query = _sqa.select(table.c.id).where(*clauses).order_by(order_by).limit(n)
-        stmt = _sqa.delete(base).where(table.c.id.in_(query))
+        id_col = table.c["id"]
+        order_by = table.c[column_name] if start_from == "minimum" else table.c[column_name].desc()
+        query = _sqa.select(id_col).where(*_clauses(criteria, table)).order_by(order_by).limit(n)
+        stmt = _sqa.delete(base).where(id_col.in_(query))
         n_of_deleted_items = session.execute(stmt).rowcount
         return _text_response(f"{n_of_deleted_items} objects deleted from the database.")
 
 
 @db_access_method
-def exists(base: type[_Base], criteria: Optional[dict[str, Callable[[Any], bool]]] = None) -> bool:
+def exists(base: type[_Base], criteria: Optional[Criteria] = None) -> bool:
     """Check if an object with the given ID exists in the database."""
     source = _get_current_connection_source()
     table = base.__table__
@@ -359,7 +356,7 @@ def get(
     base: type[_Base],
     first_n: int = 0,
     sort_result_by: Optional[dict[ColumnName, Order]] = None,
-    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
+    criteria: Optional[Criteria] = None,
     wait: bool = False,
     timeout_ms: Optional[int] = None,
     omitted_relationships: Optional[list[_InstrumentedAttribute]] = None,
@@ -404,14 +401,15 @@ def get(
 
 
 def _apply_criteria_for_select(
-    stmt: _sqa.Select, table: _sqa.Table, criteria: dict[str, Callable[[Any], bool]]
+    stmt: _sqa.Select, table: _sqa.Table, criteria: Criteria
 ) -> _sqa.Select:
+    return stmt.where(*_clauses(criteria, table))
+
+
+def _clauses(criteria: Criteria, table: _sqa.Table) -> list:
     if criteria is None:
         criteria = {}
-    clauses = [
-        criteria[attr_label](getattr(table.columns, attr_label)) for attr_label in criteria.keys()
-    ]
-    return stmt.where(*clauses)
+    return [criteria[name](getattr(table.columns, name)) for name in criteria.keys()]
 
 
 def _sort_results(
@@ -435,7 +433,7 @@ def get_children(
     parent_id: int,
     children_col_name: str,
     connection_source: Optional[_sqa.Engine] = None,
-    criteria: Optional[dict[str, Callable[[Any], bool]]] = None,
+    criteria: Optional[Criteria] = None,
 ) -> list[_Base]:
     """Get children of an instance of an ORM mapped class `parent_base` with `parent_id` from its `children_col_name`.
 
@@ -568,26 +566,23 @@ def _check_common_base_for_all_objs(*objs: _Base) -> None:
 
     If not, raise TypeError, otherwise do nothing.
     """
-    if not objs:
-        return
-    tablename = objs[0].__tablename__
-    for obj in objs[1:]:
-        if obj.__tablename__ != tablename:
-            raise TypeError("Object being added to database must belong to the same table.")
+    if objs and any(obj.__tablename__ != objs[0].__tablename__ for obj in objs[1:]):
+        raise TypeError("Object being added to database must belong to the same table.")
 
 
-def _is_awaited_result_valid(
-    result_attr_criteria: dict[str, Callable[[Any], bool]], item: Any
-) -> bool:
+def _is_awaited_result_valid(result_attr_criteria: Criteria, item: Any) -> bool:
     """Return True if the `item` meets all the conditions expressed by the `attribute_criteria`"""
     if not result_attr_criteria:
-        return True
-    for attr_label, attr_criterion in result_attr_criteria.items():
-        if not hasattr(item, attr_label):
-            return False
-        if not attr_criterion(item.__dict__[attr_label]):
-            return False
-    return True
+        result_attr_criteria = {}
+    return all(
+        _criterion(item, criterion, attr_label)
+        for attr_label, criterion in result_attr_criteria.items()
+    )
+
+
+def _criterion(item: Any, func: Callable[[Any], bool], item_attr_name: str) -> bool:
+    """Return True if the `item` meets the condition expressed by the `func`"""
+    return hasattr(item, item_attr_name) and func(item.__dict__[item_attr_name])
 
 
 def _set_id_to_none(db_model_instances: tuple[_Base, ...]) -> None:
@@ -635,7 +630,6 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
         return 500
     else:
         for obj in objs:
-            assert hasattr(obj, "tenant_id")
             obj.tenant_id = id_
         return 200
 
