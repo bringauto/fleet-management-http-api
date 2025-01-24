@@ -25,7 +25,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants, NO_TENANT
 
 
 P = ParamSpec("P")
@@ -39,16 +39,6 @@ _wait_mg: wait.WaitObjManager = wait.WaitObjManager()
 Order = Literal["asc", "desc"]
 ColumnName = str
 Criteria = dict[str, Callable[[Any], bool]]
-
-
-class EmptyTenant(_AccessibleTenants):
-
-    def __init__(self, *args):
-        self._current = "empty_tenant"
-        self._all_accessible = ["empty_tenant"]
-
-
-NO_TENANT = EmptyTenant()
 
 
 class ParentNotFound(Exception):
@@ -199,16 +189,18 @@ def add(
 
     global _wait_mg
     source = _get_current_connection_source(connection_source)
-
-    if not tenants.current:
-        return _error(401, "Tenant not received in the request.", title="Tenant not received.")
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
-    code = _set_tenant_id_to_all_objs(tenants.current, *added)
-    if code != 200:
-        msg = f"Tenant '{tenants.current}' does not exist and could not be created."
-        return _error(500, msg, title="Tenant does not exist.")
+
+    if tenants is not NO_TENANT:
+        if not tenants.current:
+            return _error(401, "Tenant not received in the request.", title="Tenant not received.")
+        code = _set_tenant_id_to_all_objs(tenants.current, *added)
+        if code != 200:
+            msg = f"Tenant '{tenants.current}' does not exist and could not be created."
+            return _error(500, msg, title="Tenant does not exist.")
+
     with _Session(source) as session:
         try:
             if checked is not None:
@@ -255,8 +247,8 @@ def _check_before_add(session: _Session, checked: Iterable[CheckBeforeAdd]) -> _
 def delete(tenant: _AccessibleTenants, base: type[_Base], id_: Any) -> _Response:
     """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
     source = _get_current_connection_source()
-    if base is not _TenantDB:
-        response = _check_and_set_tenant(tenant.current, base(id=id_))
+    if base.owned_by_tenant:
+        response = _check_and_set_tenant(tenant, base(id=id_))
         if response.status_code != 200:
             return response
     with _Session(source) as session:
@@ -463,8 +455,8 @@ def update(tenant: _AccessibleTenants, *updated: _Base) -> _Response:
     if not updated:
         return _text_response("Empty request body. Nothing to update in the database.")
     source = _get_current_connection_source()
-    if type(updated[0]) is not _TenantDB:
-        response = _check_and_set_tenant(tenant.current, *updated)
+    if updated[0].owned_by_tenant:
+        response = _check_and_set_tenant(tenant, *updated)
         if response.status_code != 200:
             return response
     with _Session(source) as session, session.begin():
@@ -582,26 +574,27 @@ def _set_id_to_none(db_model_instances: list[_Base]) -> None:
         obj.id = None  # type: ignore
 
 
-def _check_and_set_tenant(tenant_name: str, *objs: _Base) -> _Response:
+def _check_and_set_tenant(tenant: _AccessibleTenants, *objs: _Base) -> _Response:
     """Check if the tenant exists and set the `tenant` attribute to all the `objs`."""
-    if not objs:
+    if not (objs and objs[0].owned_by_tenant):
         return _json_response([])
-    if "tenant_id" not in objs[0].__table__.columns.keys():
-        if tenant_name == NO_TENANT:  # object is not owned by a tenant, return empty response
-            return _json_response([])
-        else:
-            msg = f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute."
-            return _error(500, msg, title="Unexpected error when accessing database.")
-    if not tenant_name:
+
+    if tenant is NO_TENANT:
+        msg = f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute."
+        return _error(500, msg, title="Unexpected error when accessing database.")
+
+    if not tenant.current:
         return _error(400, "Tenant not received in the request.", title="Tenant not received.")
 
-    tenants = get(NO_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant_name})
+    tenants: list[_TenantDB] = get(
+        NO_TENANT, _TenantDB, criteria={"name": lambda x: x == tenant.current}
+    )
     if not tenants:
-        msg = f"Tenant '{tenant_name}' does not exist in the database."
+        msg = f"Tenant '{tenant.current}' does not exist in the database."
         return _error(404, msg, title="Tenant not found.")
 
     for obj in objs:
-        obj.tenant_name = tenant_name  # type: ignore
+        obj.tenant_id = tenants[0].id  # type: ignore
     return _json_response([])
 
 

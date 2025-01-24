@@ -7,6 +7,12 @@ from fleet_management_api.api_impl.load_request import Request as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
 
 
+class UsingEmptyTenant(Exception):
+    """Raise when trying use an empty tenant."""
+
+    pass
+
+
 class NoAccessibleTenants(Exception):
     """Raise when no accessible tenants are found in a JWT token."""
 
@@ -75,6 +81,25 @@ class AccessibleTenants:
     def unrestricted(self) -> bool:
         """Return True if all tenants existing in the database (regardless of permissions) can be accessed for reading."""
         return self._current == "" and not bool(self._all_accessible)
+
+
+class _EmptyTenant(AccessibleTenants):
+    """This class is used when tenant is intentionally not set."""
+
+    def __init__(self, *args, **kwargs):
+        """The empty tenant object does not have any accessible tenants or a current tenant."""
+        pass
+
+    @property
+    def current(self) -> str:
+        raise UsingEmptyTenant("Empty tenant object does not have a current tenant.")
+
+    @property
+    def all(self) -> list[str]:
+        raise UsingEmptyTenant("Empty tenant object does not have any accessible tenants.")
+
+
+NO_TENANT = _EmptyTenant()
 
 
 def _check_and_read(request: ConnexionRequest, key: str, audience: str) -> tuple[str, list[str]]:
