@@ -61,6 +61,9 @@ class _TestApp:
         self._app = get_app(use_previous=use_previous)
         self._flask_app = _TestFlaskApp(api_key, self._app.app)
 
+    def run(self, *args, **kwargs) -> None:
+        self._app.run(*args, **kwargs)
+
     @property
     def app(self) -> _TestFlaskApp:
         return self._flask_app
@@ -132,6 +135,7 @@ def get_test_app(
     predef_api_key: str = "",
     accessible_tenants: Optional[list[str]] = None,
     use_previous: bool = False,
+    
 ) -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 
