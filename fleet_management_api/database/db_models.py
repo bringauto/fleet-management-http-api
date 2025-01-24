@@ -46,6 +46,10 @@ class Base(DeclarativeBase):
             **{col.name: getattr(self, col.name) for col in self.__table__.columns}
         )
 
+    @property
+    def owned_by_tenant(self) -> bool:
+        return hasattr(self, "tenant_id")
+
 
 class TenantDB(Base):
     """ORM-mapped class representing a tenant in the database."""
