@@ -25,9 +25,8 @@ CASCADE = "save-update, merge, delete"
 
 
 def _unique_name_under_tenant(table_name: str) -> UniqueConstraint:
-    """Return a UniqueConstraint for a table with a name column. The table contains items owned by a tenant.
-
-    This constraint ensures that the name of an item is unique under a tenant, but can be repeated across tenants.
+    """Return a UniqueConstraint for a table that contains items owned by a tenant and that has a `name` column.
+    The item name must be unique under a tenant and can be repeated across tenants.
     """
     return UniqueConstraint(TENANT_ID_NAME, "name", name=f"name_under_tenant_{table_name}")
 
