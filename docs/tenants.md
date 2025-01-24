@@ -33,3 +33,9 @@ The current tenant is extracted from the request in the following way:
 - otherwise, if the cookie is not set, the current tenant is left empty.
 
 If the current tenant is not empty, it is further checked against the accessible tenants. If the accessible tenants is not empty, the current tenant must be among accessible tenants, otherwise an authentication error is returned.
+
+# Storing tenants by the server
+
+The tenants have their own table in the server's database. Each tenant is added to the database in the moment it is used for adding data it owns.
+
+The API then provides endpoints for listing the accessible tenants and for deleting an existing tenant specified by its ID.
