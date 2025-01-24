@@ -67,8 +67,7 @@ components:
         id:
           $ref: "common_models.yaml#/components/schemas/Id"
         name:
-          description: "Tenant name, following a pattern ^[0-9a-z_]+$"
-          example: test_tenant
-          pattern: "^[0-9a-z_]+$"
+          description: "Tenant name"
+          example: "Tenant 1"
           title: tenant_name
           type: string

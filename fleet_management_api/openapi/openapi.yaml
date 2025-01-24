@@ -3579,7 +3579,7 @@ components:
     Tenant:
       description: Tenant owning a subset of the entities on the server.
       example:
-        name: test_tenant
+        name: Tenant 1
         id: 1
       properties:
         id:
@@ -3588,9 +3588,8 @@ components:
           title: Id
           type: integer
         name:
-          description: "Tenant name, following a pattern ^[0-9a-z_]+$"
-          example: test_tenant
-          pattern: "^[0-9a-z_]+$"
+          description: Tenant name
+          example: Tenant 1
           title: tenant_name
           type: string
       required:

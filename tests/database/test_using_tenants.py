@@ -140,6 +140,7 @@ class Test_Deleting_Tenants(api_test.TestCase):
         _db_access.add(TENANT_1, obj)
         response = _db_access.delete_without_tenant(TenantDB, id_=1)
         self.assertEqual(response.status_code, 400)
+        print(response.body)
 
 
 if __name__ == "__main__":
