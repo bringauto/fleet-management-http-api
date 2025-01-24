@@ -57,6 +57,7 @@ Example:
 - [Route](#route)
 - [Route Visualization](#route-visualization)
 - [Stop](#stop)
+- [Tenant](#tenant)
 
 API automatically assigns an ID to each entity passed to a POST method.
 
@@ -121,7 +122,6 @@ Example:
   "status": "paused"
 }
 ```
-
 
 ## Car State
 
@@ -319,5 +319,26 @@ Example:
     "altitude": 430
   },
   "notificationPhone": "+420123456789"
+}
+```
+
+## Tenant
+
+Tenant represents a data owner on the server.
+
+Required data:
+
+- name: UTF-8 encoded string
+
+Data assigned by API:
+
+- id: unsigned integer
+
+Example:
+
+```json
+{
+  "id": 12,
+  "name": "Company X"
 }
 ```

@@ -15,6 +15,7 @@
 - [Route Visualization](#route-visualization-endpoints)
 - [Stop](#stop-endpoints)
 - [Security](#endpoints---keycloak-login)
+- [Tenant](#tenant-endpoints)
 
 # API endpoints
 
@@ -93,7 +94,6 @@ Response codes:
 - 400: Bad request. The carId is not a valid integer.
 - 404: Not found. The Car with the given ID does not exist.
 
-
 # Car Action endpoints
 
 Car Action State [description](definitions.md#car-action-state).
@@ -134,7 +134,6 @@ Response codes:
 - 400: Bad request. Either the carId is not a valid integer or the car is not in state that allows pausing.
 - 404: Not found. The Car with the given ID does not exist.
 
-
 ## /action/car/{carId}/unpause
 
 ### POST
@@ -146,7 +145,6 @@ Response codes:
 - 200: Successfully unpaused the car.
 - 400: Bad request. Either the carId is not a valid integer or the car is not in state that allows unpausing.
 - 404: Not found. The Car with the given ID does not exist.
-
 
 # Car State endpoints
 
@@ -643,3 +641,35 @@ Query options:
 - required
 - type: string
 - example: eyJhbGciOiJIUzI1NiIsI...
+
+# Tenant endpoints
+
+Tenant [description](definitions.md#tenant).
+
+More on endpoints [here](entity_manipulations.md#tenant).
+
+## /tenant
+
+### GET
+
+Return all accessible tenants depending on the client's authorization.
+
+Response format: JSON array of Tenant objects.
+
+Response codes:
+
+- 200: Successfully found tenants.
+- 500: Internal server error.
+
+## /tenant/{tenantId}
+
+### DELETE
+
+Delete a tenant specified by the tenant ID.
+
+Response codes:
+
+- 200: Successful tenant removal.
+- 400: Bad request. The tenantId is not a valid integer.
+- 404: Not found. The Tenant with the given ID does not exist.
+- 500: Internal server error.

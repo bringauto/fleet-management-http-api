@@ -9,6 +9,7 @@
 - [Route](#route)
 - [Route Visualization](#route-visualization)
 - [Stop](#stop)
+- [Tenant](#tenant)
 
 # Manipulation of API Entities
 
@@ -61,7 +62,6 @@ Result:
 
 - The Car is deleted.
 - All the [Car States](#car-state) referencing the Car are deleted.
-
 
 ## Car Action State
 
@@ -322,3 +322,17 @@ Requirements:
 Result
 
 - The Stop is deleted.
+
+## Tenant
+
+Entity [description](definitions.md#tenant).
+
+### Delete
+
+Requirements:
+
+- There must be no item on the server owned by the Tenant
+
+Result
+
+- The Tenant is deleted.
