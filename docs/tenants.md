@@ -23,6 +23,7 @@ The accessible tenants are extracted from the request in the following way:
 
 - if API key is provided, the list of accessible tenants is set to empty list, making them unrestricted.
 - otherwise, if OAuth authorization is used, the accessible tenants are extracted from the JWT token.
+- then, if the request does not contain JWT token containing the accessible tenants, an error is returned.
 
 ## Current tenant
 
@@ -32,5 +33,3 @@ The current tenant is extracted from the request in the following way:
 - otherwise, if the cookie is not set, the current tenant is left empty.
 
 If the current tenant is not empty, it is further checked against the accessible tenants. If the accessible tenants is not empty, the current tenant must be among accessible tenants, otherwise an authentication error is returned.
-
-
