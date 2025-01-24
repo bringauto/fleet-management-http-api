@@ -10,15 +10,16 @@ import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT_NAME
 
 
+PHONE = MobilePhone(phone="123456789")
+
+
 class Test_Adding_State_Of_Existing_Car(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
-        self.car = Car(
-            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
-        )
+        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
 
@@ -55,9 +56,7 @@ class Test_Adding_State_Using_Example_From_Spec(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
-        self.car = Car(
-            name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
-        )
+        self.car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[self.car])
             example = c.get("/v2/management/openapi.json").json["components"]["schemas"][
@@ -73,8 +72,8 @@ class Test_Getting_All_Car_States(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
-        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
-        car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789"))
+        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1])
             c.post("/v2/management/car", json=[car_2])
@@ -111,13 +110,13 @@ class Test_Getting_Car_State_For_Given_Car(unittest.TestCase):
         car_1 = Car(
             platform_hw_id=1,
             name="car1",
-            car_admin_phone=MobilePhone(phone="123456789"),
+            car_admin_phone=PHONE,
             under_test=False,
         )
         car_2 = Car(
             platform_hw_id=2,
             name="car2",
-            car_admin_phone=MobilePhone(phone="123456789"),
+            car_admin_phone=PHONE,
             under_test=False,
         )
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
@@ -187,7 +186,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
         super().setUp()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
-        car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(name="car1", platform_hw_id=1, car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
 
@@ -244,7 +243,7 @@ class Test_Maximum_Number_Of_States_Stored(api_test.TestCase):
         self,
     ):
         test_position = GNSSPosition(latitude=48.8606111, longitude=2.337644, altitude=50)
-        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="123456789"))
+        car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_2])
         _db_models.CarStateDB.set_max_n_of_stored_states(5)
@@ -278,7 +277,7 @@ class Test_List_Of_States_Is_Deleted_If_Car_Is_Deleted(api_test.TestCase):
         super().setUp()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 1)
-        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car])
             assert response.json is not None
@@ -322,7 +321,7 @@ class Test_Filtering_Car_States_By_Timestamp(api_test.TestCase):
         super().setUp()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 1)
-        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mocked_timestamp.return_value = 0
             response = c.post("/v2/management/car", json=[car])
@@ -379,7 +378,7 @@ class Test_Returning_Last_N_Car_States(api_test.TestCase):
         super().setUp()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
-        car = Car(platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789"))
+        car = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mocked_timestamp.return_value = 0
             response = c.post("/v2/management/car", json=[car])
@@ -449,12 +448,8 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
         _connection.set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
-        self.car_1 = Car(
-            platform_hw_id=1, name="car1", car_admin_phone=MobilePhone(phone="123456789")
-        )
-        self.car_2 = Car(
-            platform_hw_id=2, name="car2", car_admin_phone=MobilePhone(phone="123456789")
-        )
+        self.car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        self.car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=PHONE)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mocked_timestamp.return_value = 0
             response = c.post("/v2/management/car", json=[self.car_1, self.car_2])

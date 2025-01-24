@@ -11,8 +11,17 @@ from fleet_management_api.models import (
     GNSSPosition,
     MobilePhone,
 )
+from fleet_management_api.api_impl.auth_controller import (
+    generate_test_keys,
+    set_auth_params,
+    clear_auth_params,
+    clear_test_keys,
+    get_test_public_key,
+)
+
 from tests._utils.setup_utils import create_stops, create_route
 from tests._utils.constants import TEST_TENANT_NAME
+import tests._utils.api_test as api_test
 
 
 class Test_Creating_Route(unittest.TestCase):
@@ -39,6 +48,64 @@ class Test_Creating_Route(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/route", json=[{"id": 1}])
             self.assertEqual(response.status_code, 400)
+
+
+class Test_Identical_Route_Names(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+        self.app = _app.get_test_app(
+            "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
+        )
+        with self.app.app.test_client() as client:
+            position = GNSSPosition(latitude=1, longitude=1, altitude=1)
+            client.set_cookie("", "tenant", "tenant_1")
+            response_a = client.post(
+                "/v2/management/stop?api_key=testAPIKey",
+                json=[Stop(name="stop_a", position=position)],
+            )
+            self.assertEqual(response_a.status_code, 200)
+            response_b = client.post(
+                "/v2/management/stop?api_key=testAPIKey",
+                json=[Stop(name="stop_b", position=position)],
+            )
+            self.assertEqual(response_b.status_code, 200)
+            client.set_cookie("", "tenant", "tenant_2")
+            response_c = client.post(
+                "/v2/management/stop?api_key=testAPIKey",
+                json=[Stop(name="stop_c", position=position)],
+            )
+            self.assertEqual(response_c.status_code, 200)
+
+    def test_creating_two_routes_ith_identical_names_under_the_same_tenant_returns_error(
+        self,
+    ) -> None:
+
+        with self.app.app.test_client() as client:
+            route_1 = Route(name="Route", stop_ids=[1])
+            route_2 = Route(name="Route", stop_ids=[2])
+            client.set_cookie("", "tenant", "tenant_1")
+            client.post("/v2/management/route?api_key=testAPIKey", json=[route_1])
+            response = client.post("/v2/management/route?api_key=testAPIKey", json=[route_2])
+            self.assertEqual(response.status_code, 400)
+
+    def test_creating_two_routes_with_identical_names_under_different_tenants_returns_success(
+        self,
+    ):
+        with self.app.app.test_client() as client:
+            route_1 = Route(name="Route", stop_ids=[1])
+            route_2 = Route(name="Route", stop_ids=[3])
+            client.set_cookie("", "tenant", "tenant_1")
+            client.post("/v2/management/route?api_key=testAPIKey", json=[route_1])
+            client.set_cookie("", "tenant", "tenant_2")
+            response = client.post("/v2/management/route?api_key=testAPIKey", json=[route_2])
+            self.assertEqual(response.status_code, 200)
+
+    def tearDown(self):
+        clear_test_keys()
+        clear_auth_params()
 
 
 class Test_Adding_Route_Using_Example_From_Spec(unittest.TestCase):

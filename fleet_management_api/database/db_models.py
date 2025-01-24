@@ -1,7 +1,17 @@
 from __future__ import annotations
 from typing import Optional
 
-from sqlalchemy import Boolean, BigInteger, Float, ForeignKey, Integer, JSON, PickleType, String
+from sqlalchemy import (
+    Boolean,
+    BigInteger,
+    Float,
+    ForeignKey,
+    Integer,
+    JSON,
+    PickleType,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 
 
@@ -9,8 +19,13 @@ OrderId = int
 
 
 TENANT_ID = "tenants.id"
+TENANT_ID_NAME = "tenant_id"
 TENANT_NAME = "tenants.name"
 CASCADE = "save-update, merge, delete"
+
+
+def _unique_name_under_tenant(table_name: str) -> UniqueConstraint:
+    return UniqueConstraint(TENANT_ID_NAME, "name", name=f"name_under_tenant_{table_name}")
 
 
 class Base(DeclarativeBase):
@@ -60,11 +75,13 @@ class TenantDB(Base):
 class PlatformHWDB(Base):
     model_name = "PlatformHW"
     __tablename__ = "platform_hw"
+    __table_args__ = (_unique_name_under_tenant(__tablename__),)
+
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="platform_hw", lazy="noload", foreign_keys=[tenant_id]
     )
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
     cars: Mapped[list[CarDB]] = relationship("CarDB", lazy="noload")
 
     def __repr__(self) -> str:
@@ -74,11 +91,13 @@ class PlatformHWDB(Base):
 class CarDB(Base):
     model_name = "Car"
     __tablename__ = "cars"
+    __table_args__ = (_unique_name_under_tenant(__tablename__),)
+
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="cars", lazy="noload", foreign_keys=[tenant_id]
     )
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
     platform_hw_id: Mapped[int] = mapped_column(
         ForeignKey("platform_hw.id"), nullable=False, unique=True
     )
@@ -218,11 +237,13 @@ class OrderStateDB(Base):
 class StopDB(Base):
     model_name = "Stop"
     __tablename__ = "stops"
+    __table_args__ = (_unique_name_under_tenant(__tablename__),)
+
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="stops", lazy="noload", foreign_keys=[tenant_id]
     )
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
     position: Mapped[dict] = mapped_column(JSON)
     notification_phone: Mapped[dict] = mapped_column(JSON)
     is_auto_stop: Mapped[bool] = mapped_column(Boolean)
@@ -235,11 +256,13 @@ class StopDB(Base):
 class RouteDB(Base):
     model_name = "Route"
     __tablename__ = "routes"
+    __table_args__ = (_unique_name_under_tenant(__tablename__),)
+
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="routes", lazy="noload", foreign_keys=[tenant_id]
     )
-    name: Mapped[str] = mapped_column(String, unique=True)
+    name: Mapped[str] = mapped_column(String)
     stop_ids: Mapped[object] = mapped_column(PickleType)
     cars: Mapped[list[CarDB]] = relationship("CarDB", back_populates="default_route")
     visualization: Mapped[object] = relationship(

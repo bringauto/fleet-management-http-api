@@ -267,6 +267,10 @@ class Test_Adding_Tenants_To_Database(api_test.TestCase):
             # the platform HW has been created
             self.assertEqual(response.status_code, 200)
 
+    def tearDown(self):
+        clear_auth_params()
+        clear_test_keys()
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

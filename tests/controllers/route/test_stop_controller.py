@@ -5,10 +5,19 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
 import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.models import Stop, GNSSPosition
 import fleet_management_api.database.db_access as _db_access
+from fleet_management_api.api_impl.auth_controller import (
+    generate_test_keys,
+    set_auth_params,
+    get_test_public_key,
+    clear_test_keys,
+    clear_auth_params,
+)
 
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
 from tests._utils.constants import TEST_TENANT_NAME
+import tests._utils.api_test as api_test
 
 
 class Test_Creating_Stops(unittest.TestCase):
@@ -66,6 +75,52 @@ class Test_Creating_Stops(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
             response = c.post("/v2/management/stop", json={"id": 1, "name": "stop_1"})
             self.assertEqual(response.status_code, 400)
+
+
+class Test_Identical_Stop_Names(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+        self.app = _app.get_test_app(
+            "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
+        )
+
+    def test_creating_two_stops_ith_identical_names_under_the_same_tenant_returns_error(
+        self,
+    ) -> None:
+
+        position = GNSSPosition(latitude=1, longitude=1, altitude=1)
+        with self.app.app.test_client() as client:
+            stop_a = Stop(name="Stop", position=position)
+            stop_b = Stop(name="Stop", position=position)
+            client.set_cookie("", "tenant", "tenant_1")
+            client.post("/v2/management/stop?api_key=testAPIKey", json=[stop_a])
+            response = client.post("/v2/management/stop?api_key=testAPIKey", json=[stop_b])
+            self.assertEqual(response.status_code, 400)
+
+    def test_creating_two_platform_hw_ith_identical_names_under_different_tenants_returns_success(
+        self,
+    ):
+        position = GNSSPosition(latitude=1, longitude=1, altitude=1)
+        with self.app.app.test_client() as client:
+            stop_a = Stop(name="Stop", position=position)
+            stop_b = Stop(name="Stop", position=position)
+            client.set_cookie("", "tenant", "tenant_1")
+            client.post("/v2/management/stop?api_key=testAPIKey", json=[stop_a])
+            client.set_cookie("", "tenant", "tenant_2")
+            response = client.post("/v2/management/stop?api_key=testAPIKey", json=[stop_b])
+            self.assertEqual(response.status_code, 200)
+            client.set_cookie("", "tenant", "")
+            response = client.get("/v2/management/stop?api_key=testAPIKey")
+            self.assertEqual(len(response.json), 2)
+            self.assertEqual(response.json[0]["name"], "Stop")
+            self.assertEqual(response.json[1]["name"], "Stop")
+
+    def tearDown(self):
+        clear_test_keys()
+        clear_auth_params()
 
 
 class Test_Adding_Stop_Using_Example_From_Spec(unittest.TestCase):
