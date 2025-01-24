@@ -25,10 +25,18 @@ CASCADE = "save-update, merge, delete"
 
 
 def _unique_name_under_tenant(table_name: str) -> UniqueConstraint:
+    """Return a UniqueConstraint for a table with a name column. The table contains items owned by a tenant.
+
+    This constraint ensures that the name of an item is unique under a tenant, but can be repeated across tenants.
+    """
     return UniqueConstraint(TENANT_ID_NAME, "name", name=f"name_under_tenant_{table_name}")
 
 
 class Base(DeclarativeBase):
+    """Base class for all ORM-mapped classes. It applies declarative mapping to all the subclasses
+    derived from this class.
+    """
+
     model_name: str = "Base"
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, unique=True, nullable=False
@@ -41,6 +49,8 @@ class Base(DeclarativeBase):
 
 
 class TenantDB(Base):
+    """ORM-mapped class representing a tenant in the database."""
+
     model_name = "Tenant"
     __tablename__ = "tenants"
     name: Mapped[str] = mapped_column(String, unique=True)
@@ -73,6 +83,8 @@ class TenantDB(Base):
 
 
 class PlatformHWDB(Base):
+    """ORM-mapped class representing a platform hardware in the database."""
+
     model_name = "PlatformHW"
     __tablename__ = "platform_hw"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
@@ -89,6 +101,8 @@ class PlatformHWDB(Base):
 
 
 class CarDB(Base):
+    """ORM-mapped class representing a car in the database."""
+
     model_name = "Car"
     __tablename__ = "cars"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
@@ -121,6 +135,8 @@ class CarDB(Base):
 
 
 class CarStateDB(Base):
+    """ORM-mapped class representing a car state in the database."""
+
     model_name = "CarState"
     __tablename__ = "car_states"
     _max_n_of_states: int = 50
@@ -153,6 +169,8 @@ class CarStateDB(Base):
 
 
 class CarActionStateDB(Base):
+    """ORM-mapped class representing a car action state in the database."""
+
     model_name = "CarActionState"
     __tablename__ = "car_action_states"
     _max_n_of_states: int = 50
@@ -180,6 +198,8 @@ class CarActionStateDB(Base):
 
 
 class OrderDB(Base):
+    """ORM-mapped class representing an order in the database."""
+
     model_name = "Order"
     __tablename__ = "orders"
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
@@ -208,6 +228,8 @@ class OrderDB(Base):
 
 
 class OrderStateDB(Base):
+    """ORM-mapped class representing an order state in the database."""
+
     model_name = "OrderState"
     __tablename__ = "order_states"
     _max_n_of_states: int = 50
@@ -235,6 +257,8 @@ class OrderStateDB(Base):
 
 
 class StopDB(Base):
+    """ORM-mapped class representing a stop in the database."""
+
     model_name = "Stop"
     __tablename__ = "stops"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
@@ -254,6 +278,8 @@ class StopDB(Base):
 
 
 class RouteDB(Base):
+    """ORM-mapped class representing a route in the database."""
+
     model_name = "Route"
     __tablename__ = "routes"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
@@ -276,6 +302,8 @@ class RouteDB(Base):
 
 
 class RouteVisualizationDB(Base):
+    """ORM-mapped class representing a route visualization in the database."""
+
     model_name = "RouteVisualization"
     __tablename__ = "route_visualization"
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
@@ -292,6 +320,8 @@ class RouteVisualizationDB(Base):
 
 
 class ApiKeyDB(Base):
+    """ORM-mapped class representing an API key in the database."""
+
     model_name = "ApiKey"
     __tablename__ = "api_keys"
     name: Mapped[str] = mapped_column(String, unique=True)
@@ -305,6 +335,8 @@ class ApiKeyDB(Base):
 
 
 class TestItem(Base):
+    """ORM-mapped class representing a test item in the database."""
+
     model_name = "TestItem"
     __tablename__ = "test_item"
     tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
