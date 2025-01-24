@@ -79,9 +79,7 @@ class _TestFlaskApp:
             return self._app.test_client(TEST_TENANT_NAME)
 
     def def_accessible_tenants(self, *tenants: str) -> None:
-        # db_tenants = [_TenantDB(name=tenant) for tenant in tenants]
         self._accessible_tenants = list(tenants)
-        # _db_access.add_without_tenant(*db_tenants)
 
 
 class _TestClient(_FlaskClient):
