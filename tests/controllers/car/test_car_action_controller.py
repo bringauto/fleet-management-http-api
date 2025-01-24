@@ -78,7 +78,6 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
 
     def test_creating_action_state_for_existing_car_yields_200_response(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
-            c.post("/v2/management/car", json=[self.car])
             state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
             tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
             response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
