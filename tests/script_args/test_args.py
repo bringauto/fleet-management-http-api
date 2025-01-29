@@ -14,9 +14,10 @@ RUN_CONTENT = [
 
 
 class Test_Running_New_API_Key_Script(unittest.TestCase):
+
     def test_adding_new_api_key_yields_code_0(self):
         process = subprocess.run(RUN_CONTENT, stdout=True)
-        # self.assertEqual(process.returncode, 0)
+        self.assertEqual(process.returncode, 0)
 
     def test_adding_new_api_key_with_already_existing_name_yields_return_code_1(self):
         subprocess.run(RUN_CONTENT, capture_output=True)

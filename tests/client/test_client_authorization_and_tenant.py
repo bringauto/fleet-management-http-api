@@ -1,6 +1,5 @@
 import multiprocessing
 
-import jwt
 from fleet_management_api.models import PlatformHW
 import fleet_management_api.app as _app
 from fleet_management_api.api_impl.auth_controller import (
