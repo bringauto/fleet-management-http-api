@@ -8,13 +8,15 @@ from fleet_management_api.models.order_state import OrderState  # noqa: E501
 from fleet_management_api import util
 
 
-def create_order_states(order_state):  # noqa: E501
+def create_order_states(order_state, tenant=None):  # noqa: E501
     """Add new Order States.
 
      # noqa: E501
 
     :param order_state: A list of Order State models in JSON format.
     :type order_state: list | bytes
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
 
     :rtype: Union[List[OrderState], Tuple[List[OrderState], int], Tuple[List[OrderState], int, Dict[str, str]]
     """
@@ -23,11 +25,13 @@ def create_order_states(order_state):  # noqa: E501
     return 'do some magic!'
 
 
-def get_all_order_states(wait=None, since=None, last_n=None, car_id=None):  # noqa: E501
+def get_all_order_states(tenant=None, wait=None, since=None, last_n=None, car_id=None):  # noqa: E501
     """Find Order States for all existing Orders.
 
      # noqa: E501
 
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
@@ -42,13 +46,15 @@ def get_all_order_states(wait=None, since=None, last_n=None, car_id=None):  # no
     return 'do some magic!'
 
 
-def get_order_states(order_id, wait=None, since=None, last_n=None):  # noqa: E501
+def get_order_states(order_id, tenant=None, wait=None, since=None, last_n=None):  # noqa: E501
     """Find all Order States for a particular Order specified by its ID.
 
      # noqa: E501
 
-    :param order_id: ID of the Order for which to find the Order States.
+    :param order_id: The order ID.
     :type order_id: int
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).

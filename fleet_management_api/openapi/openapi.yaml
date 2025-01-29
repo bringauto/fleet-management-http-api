@@ -43,14 +43,19 @@ paths:
     get:
       operationId: get_car_action_states
       parameters:
-      - description: ID of the Car for which to return the action states.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -141,14 +146,19 @@ paths:
     post:
       operationId: pause_car
       parameters:
-      - description: ID of the Car which should be paused.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -211,14 +221,19 @@ paths:
     post:
       operationId: unpause_car
       parameters:
-      - description: ID of the Car which should be unpaused.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -314,6 +329,14 @@ paths:
   /car:
     get:
       operationId: get_cars
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -370,6 +393,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     post:
       operationId: create_cars
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -439,6 +470,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     put:
       operationId: update_cars
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -517,14 +556,19 @@ paths:
     delete:
       operationId: delete_car
       parameters:
-      - description: The ID of the Car to be deleted.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -604,14 +648,19 @@ paths:
     get:
       operationId: get_car
       parameters:
-      - description: An ID of the Car to be returned.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -682,6 +731,13 @@ paths:
     get:
       operationId: get_all_car_states
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -759,6 +815,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
       operationId: create_car_states
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -826,6 +890,13 @@ paths:
     get:
       operationId: get_car_states
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -854,14 +925,12 @@ paths:
           default: 0
           format: int32
           type: integer
-      - description: ID of the Car for which to find the Car States.
-        example: 1
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -937,6 +1006,13 @@ paths:
     get:
       operationId: get_orders
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: "A Unix timestamp in milliseconds. If specified, only objects\
           \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
@@ -1004,6 +1080,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     post:
       operationId: create_orders
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -1075,6 +1159,13 @@ paths:
     get:
       operationId: get_car_orders
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: "A Unix timestamp in milliseconds. If specified, only objects\
           \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
@@ -1083,14 +1174,12 @@ paths:
         schema:
           format: int64
           type: integer
-      - description: ID of the Car for which Orders shall be returned.
-        example: 1
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -1165,22 +1254,25 @@ paths:
     delete:
       operationId: delete_order
       parameters:
-      - description: ID of the Car to which the Order is assigned.
-        example: 1
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
-      - description: ID of the Order to be returned.
-        example: 1
+          $ref: '#/components/schemas/Id'
+      - description: The order ID.
         in: path
         name: orderId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -1260,22 +1352,25 @@ paths:
     get:
       operationId: get_order
       parameters:
-      - description: ID of the Car to which the Order is assigned.
-        example: 1
+      - description: The car ID.
         in: path
         name: carId
         required: true
         schema:
-          format: int32
-          type: integer
-      - description: ID of the Order to be returned.
-        example: 1
+          $ref: '#/components/schemas/Id'
+      - description: The order ID.
         in: path
         name: orderId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -1347,6 +1442,13 @@ paths:
     get:
       operationId: get_all_order_states
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -1434,6 +1536,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
     post:
       operationId: create_order_states
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -1516,14 +1626,19 @@ paths:
     get:
       operationId: get_order_states
       parameters:
-      - description: ID of the Order for which to find the Order States.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The order ID.
         in: path
         name: orderId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -1614,6 +1729,14 @@ paths:
   /platformhw:
     get:
       operationId: get_hws
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -1665,6 +1788,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     post:
       operationId: create_hws
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -1736,14 +1867,19 @@ paths:
     delete:
       operationId: delete_hw
       parameters:
-      - description: ID of Platform HW to delete.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The Platform HW ID.
         in: path
         name: platformHwId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -1822,14 +1958,19 @@ paths:
     get:
       operationId: get_hw
       parameters:
-      - description: ID of the Platform HW to return.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The Platform HW ID.
         in: path
         name: platformHwId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -1899,6 +2040,14 @@ paths:
   /route:
     get:
       operationId: get_routes
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -1955,6 +2104,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     post:
       operationId: create_routes
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -2024,6 +2181,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     put:
       operationId: update_routes
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -2101,6 +2266,14 @@ paths:
   /route-visualization:
     post:
       operationId: redefine_route_visualizations
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -2183,6 +2356,13 @@ paths:
     get:
       operationId: get_route_visualization
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2262,6 +2442,13 @@ paths:
     delete:
       operationId: delete_route
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2348,6 +2535,13 @@ paths:
     get:
       operationId: get_route
       parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2425,6 +2619,14 @@ paths:
   /stop:
     get:
       operationId: get_stops
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       responses:
         "200":
           content:
@@ -2482,6 +2684,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     post:
       operationId: create_stops
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -2551,6 +2761,14 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     put:
       operationId: update_stops
+      parameters:
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
       requestBody:
         content:
           application/json:
@@ -2629,14 +2847,19 @@ paths:
     delete:
       operationId: delete_stop
       parameters:
-      - description: ID of the Stop to be deleted.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The Stop ID.
         in: path
         name: stopId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -2715,14 +2938,19 @@ paths:
     get:
       operationId: get_stop
       parameters:
-      - description: ID of Stop to be returned.
-        example: 1
+      - description: A parameter for reading and writing only the data related to
+          a given tenant.
+        in: cookie
+        name: tenant
+        schema:
+          example: tenant_name
+          type: string
+      - description: The Stop ID.
         in: path
         name: stopId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -3002,6 +3230,21 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 components:
   parameters:
+    TenantName:
+      description: A parameter for reading and writing only the data related to a
+        given tenant.
+      in: cookie
+      name: tenant
+      schema:
+        example: tenant_name
+        type: string
+    CarId:
+      description: The car ID.
+      in: path
+      name: carId
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
     Wait:
       description: "Applies to GET methods when no objects would be returned at the\
         \ moment of request. If wait=true, \\ the request will wait for the next object\
@@ -3032,11 +3275,25 @@ components:
         default: 0
         format: int32
         type: integer
-    CarId:
+    OrderId:
+      description: The order ID.
+      in: path
+      name: orderId
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    CarIdQuery:
       description: An optional parameter for filtering only objects related to a car
         with the specified ID.
       in: query
       name: carId
+      schema:
+        $ref: '#/components/schemas/Id'
+    PlatformHwId:
+      description: The Platform HW ID.
+      in: path
+      name: platformHwId
+      required: true
       schema:
         $ref: '#/components/schemas/Id'
     RouteId:
@@ -3048,6 +3305,13 @@ components:
       schema:
         format: int32
         type: integer
+    StopId:
+      description: The Stop ID.
+      in: path
+      name: stopId
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
   responses:
     ServiceUnavailable:
       content:
@@ -3264,6 +3528,11 @@ components:
       example: idle
       title: CarStatus
       type: string
+    Id:
+      example: 1
+      format: int32
+      title: Id
+      type: integer
     CarActionState:
       description: Car Action State object structure
       example:
@@ -3423,11 +3692,6 @@ components:
       example: to_accept
       title: OrderStatus
       type: string
-    Id:
-      example: 1
-      format: int32
-      title: Id
-      type: integer
     PlatformHW:
       description: PlatformHW object structure.
       example:

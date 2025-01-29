@@ -8,13 +8,15 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def create_car_states(car_state):  # noqa: E501
+def create_car_states(car_state, tenant=None):  # noqa: E501
     """Add new Car States.
 
      # noqa: E501
 
     :param car_state: A list of Car State model in JSON format.
     :type car_state: list | bytes
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
@@ -23,11 +25,13 @@ def create_car_states(car_state):  # noqa: E501
     return 'do some magic!'
 
 
-def get_all_car_states(wait=None, since=None, last_n=None):  # noqa: E501
+def get_all_car_states(tenant=None, wait=None, since=None, last_n=None):  # noqa: E501
     """Find one or all Car States for all existing Cars.
 
      # noqa: E501
 
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
@@ -40,13 +44,15 @@ def get_all_car_states(wait=None, since=None, last_n=None):  # noqa: E501
     return 'do some magic!'
 
 
-def get_car_states(car_id, wait=None, since=None, last_n=None):  # noqa: E501
+def get_car_states(car_id, tenant=None, wait=None, since=None, last_n=None):  # noqa: E501
     """Find one or all Car States for a Car with given ID.
 
      # noqa: E501
 
-    :param car_id: ID of the Car for which to find the Car States.
+    :param car_id: The car ID.
     :type car_id: int
+    :param tenant: A parameter for reading and writing only the data related to a given tenant.
+    :type tenant: str
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
