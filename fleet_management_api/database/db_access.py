@@ -341,6 +341,28 @@ def get_by_id(base: type[_Base], *ids: int, engine: Optional[_sqa.Engine] = None
 
 
 @db_access_method
+def get_tenants(
+    accessible_tenants: Tenants,
+    connection_source: Optional[_sqa.Engine] = None,
+) -> list[_TenantDB]:
+    """Get tenants from the database corresponding to the tenant names in accessible tenants.
+
+    If the accessible tenants are unrestricted, all tenants are returned.
+    """
+    global _wait_mg
+    source = _get_current_connection_source(connection_source)
+    with _Session(source) as session, session.begin():
+        if accessible_tenants.unrestricted:
+            tenant_objs: list[_TenantDB] = list(session.scalars(_sqa.select(_TenantDB)).all())
+        else:
+            tenant_names = _tenants_to_filter_by(accessible_tenants)
+            tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
+            tenant_objs: list[_TenantDB] = list(session.execute(tenant_stmt).scalars().all())
+        tenants = [tenant.copy() for tenant in tenant_objs]
+        return tenants
+
+
+@db_access_method
 def get(
     tenants: Tenants,
     base: type[_Base],
@@ -531,13 +553,17 @@ def _add_filter_by_tenant(
 ) -> _sqa.Select:
     if tenants is NO_TENANTS or tenants.unrestricted:
         return stmt
+
     tenant_names = _tenants_to_filter_by(tenants)
+
     if require_single_tenant and len(tenant_names) != 1:
         raise ValueError(f"{len(tenant_names)} tenants provided, but only one is expected.")
+
     tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
     tenant_objs = session.execute(tenant_stmt).scalars().all()
     ids = [tenant.id for tenant in tenant_objs]
-    stmt = stmt.where(base.__table__.c["tenant_id"].in_(ids))
+    if "tenant_id" in base.__table__.c:
+        stmt = stmt.where(base.__table__.c["tenant_id"].in_(ids))
     return stmt
 
 

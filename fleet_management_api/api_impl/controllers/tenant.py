@@ -1,4 +1,3 @@
-from fleet_management_api.models import Tenant as _Tenant
 from fleet_management_api.database import db_models as _db_models, db_access as _db_access
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_logging import (
@@ -10,19 +9,42 @@ from fleet_management_api.api_impl.api_logging import (
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
+    text_response as _text_response,
 )
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
+def set_tenant_cookie(tenant_id: int) -> _Response:
+    """Set a cookie with the tenant ID."""
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    accessible_tenants = _AccessibleTenants(request)
+    accessible_tenants_in_db = _db_access.get_tenants(accessible_tenants)
+    for t in accessible_tenants_in_db:
+        if t.id == tenant_id:
+            response = _text_response(
+                f"Tenant '{t.name}' does exist and is included in Set-Cookie."
+            )
+            response.headers["Set-Cookie"] = f"tenant={tenant_id}"
+            return response
+    return _log_error_and_respond(
+        f"Tenant with ID={tenant_id} is not accessible", 401, title="Unauthorized"
+    )
+
+
 def get_tenants() -> _Response:
     """Get all existing tenants."""
-    tenant_id_models = _db_access.get(_db_access.NO_TENANTS, _db_models.TenantDB)
-    tenant_ids: list[_Tenant] = [
-        _obj_to_db.tenant_from_db_model(tenant_id_model) for tenant_id_model in tenant_id_models
+    request = _RequestEmpty.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    accessible_tenants = _AccessibleTenants(request)
+    tenants = [
+        _obj_to_db.tenant_from_db_model(t) for t in _db_access.get_tenants(accessible_tenants)
     ]
-    _log_info(f"Found {len(tenant_ids)} tenants.")
-    return _json_response(tenant_ids)
+    _log_info(f"Found {len(tenants)} tenants.")
+    return _json_response(tenants)
 
 
 def delete_tenant(tenant_id: int) -> _Response:

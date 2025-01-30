@@ -3155,6 +3155,73 @@ paths:
       tags:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+  /tenant/{tenantId}:
+    head:
+      operationId: set_tenant_cookie
+      responses:
+        "200":
+          description: The tenant with tenantId is accessible and its name is included
+            in the Set-Cookie header.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "404"
+                    message: Resource not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Not found
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Make the server to send back response with set-cookie header to set
+        cookie equal to the name of the tenand with the tenantId.
+      tags:
+      - tenant
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
   /token_get:
     get:
       description: Callback endpoint for the Keycloak to receive JWT token.

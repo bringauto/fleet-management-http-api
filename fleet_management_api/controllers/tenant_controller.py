@@ -30,3 +30,14 @@ def get_tenants():  # noqa: E501
     :rtype: Union[List[Tenant], Tuple[List[Tenant], int], Tuple[List[Tenant], int, Dict[str, str]]
     """
     return 'do some magic!'
+
+
+def set_tenant_cookie():  # noqa: E501
+    """Make the server to send back response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
+
+     # noqa: E501
+
+
+    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    """
+    return 'do some magic!'
