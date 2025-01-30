@@ -107,7 +107,7 @@ class Test_Deleting_Objects(api_test.TestCase):
         _db_access.add(TENANT_1, obj_1)
 
     def test_deleting_objects_with_empty_tenant_yields_400_error(self) -> None:
-        response = _db_access.delete(tenant=TENANT_EMPTY, base=models.TestItem, id_=1)
+        response = _db_access.delete(TENANT_EMPTY, base=models.TestItem, id_=1)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.body["title"], "Tenant not received.")
 

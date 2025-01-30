@@ -18,35 +18,46 @@ class Test_Object_Existence(api_test.TestCase):
     def test_object_exists_after_it_is_added_to_the_database(self):
         test_obj = models.TestItem(test_str="test_string", test_int=5)
         self.assertFalse(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
         _db_access.add(self.tenant, test_obj)
         self.assertTrue(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
 
     def test_object_does_not_exist_after_it_is_deleted_from_the_database(self):
         test_obj = models.TestItem(test_str="test_string", test_int=5)
         _db_access.add(self.tenant, test_obj)
         self.assertTrue(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
-        _db_access.delete(tenant=self.tenant, base=models.TestItem, id_=test_obj.id)
+        _db_access.delete(self.tenant, base=models.TestItem, id_=test_obj.id)
         self.assertFalse(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
 
     def test_object_still_exists_after_being_updated(self):
         test_obj = models.TestItem(test_str="test_string", test_int=5)
         _db_access.add(self.tenant, test_obj)
-
         self.assertTrue(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
         test_obj.test_str = "new_string"
         _db_access.update(self.tenant, test_obj)
         self.assertTrue(
-            _db_access.exists(base=models.TestItem, criteria={"id": lambda x: x == test_obj.id})
+            _db_access.exists(
+                self.tenant, base=models.TestItem, criteria={"id": lambda x: x == test_obj.id}
+            )
         )
 
 

@@ -160,7 +160,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-def create_orders() -> _Response:
+def create_orders(tenant: str = "") -> _Response:
     """Post new orders.
 
     If some of the orders' creation fails, no orders are added to the server.
@@ -171,10 +171,10 @@ def create_orders() -> _Response:
     - the route exists and contains the target stop,
     - the maximum number of active orders for any referenced car has not been reached.
     """
-    request = _RequestJSON.load()
+    request = _RequestJSON.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     order_db_models: list[_db_models.OrderDB] = []
     checked: list[_db_access.CheckBeforeAdd] = []
     if not isinstance(request.data, list):
@@ -195,7 +195,7 @@ def create_orders() -> _Response:
     for order in orders:
         order.last_state = None  # type: ignore
         car_id = order.car_id
-        if not _car_exist(car_id):
+        if not _car_exist(tenants, car_id):
             return _log_error_and_respond(
                 f"Car with ID={car_id} does not exist.", 404, _OBJ_NOT_FOUND
             )
@@ -217,7 +217,7 @@ def create_orders() -> _Response:
         )
         order_db_models.append(_obj_to_db.order_to_db_model(order))
 
-    response = _db_access.add(tenant, *order_db_models, checked=checked)
+    response = _db_access.add(tenants, *order_db_models, checked=checked)
 
     if response.status_code == 200:
         # orders are created in the database, now log them
@@ -228,7 +228,7 @@ def create_orders() -> _Response:
             ids.append(model.id)
             _log_info(f"Order (ID={model.id}) has been created.")
 
-        db_states = _post_default_order_states(tenant, ids).body
+        db_states = _post_default_order_states(tenants, ids).body
         states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
 
         posted_orders: list[_models.Order] = []
@@ -270,14 +270,14 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
     delete_order(car_id, oldest_inactive_order_id)
 
 
-def get_order(car_id: int, order_id: int) -> _Response:
+def get_order(car_id: int, order_id: int, tenant: str = "") -> _Response:
     """Get an existing order."""
-    request = _RequestNoData.load()
+    request = _RequestNoData.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     order_db_models = _db_access.get(
-        tenant,
+        tenants,
         base=_db_models.OrderDB,
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
@@ -287,21 +287,23 @@ def get_order(car_id: int, order_id: int) -> _Response:
         return _error(404, msg, _OBJ_NOT_FOUND)
     else:
         db_order = order_db_models[0]
-        order = _get_order_with_last_state(tenant, db_order)
+        order = _get_order_with_last_state(tenants, db_order)
         _log_info(f"Found order with ID={order_id} of car with ID={car_id}.")
         return _json_response(order)  # type: ignore
 
 
-def get_car_orders(car_id: int, since: int = 0) -> _Response:
+def get_car_orders(car_id: int, since: int = 0, tenant: str = "") -> _Response:
     """Get all orders for a given car."""
-    if not _car_exist(car_id):
+
+    request = _RequestNoData.load(tenant)
+    if not request:
+        return _log_invalid_request_body_format()
+    tenants = _AccessibleTenants(request, "")
+    if not _car_exist(tenants, car_id):
         return _log_error_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title=_OBJ_NOT_FOUND
         )
-    request = _RequestNoData.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+
     db_orders: list[_db_models.OrderDB] = _db_access.get_children(  # type: ignore
         parent_base=_db_models.CarDB,
         parent_id=car_id,
@@ -310,40 +312,40 @@ def get_car_orders(car_id: int, since: int = 0) -> _Response:
     )
     orders: list[_models.Order] = list()
     for db_order in db_orders:
-        order = _get_order_with_last_state(tenant, db_order)
+        order = _get_order_with_last_state(tenants, db_order)
         if order is not None:
             orders.append(order)
     _log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
     return _json_response(orders)
 
 
-def get_orders(since: int = 0) -> _Response:
+def get_orders(since: int = 0, tenant: str = "") -> _Response:
     """Get all existing orders."""
-    request = _RequestNoData.load()
+    request = _RequestNoData.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     _log_info("Listing all existing orders.")
     db_orders = _db_access.get(
-        tenant, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
+        tenants, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
     )
     orders: list[_models.Order] = list()
     for db_order in db_orders:
-        order = _get_order_with_last_state(tenant, db_order)
+        order = _get_order_with_last_state(tenants, db_order)
         if order is not None:
             orders.append(order)
     return _json_response(orders)
 
 
-def _car_exist(car_id: int) -> bool:
-    return bool(_db_access.exists(_db_models.CarDB, {"id": lambda x: x == car_id}))
+def _car_exist(tenants: _AccessibleTenants, car_id: int) -> bool:
+    return bool(_db_access.exists(tenants, _db_models.CarDB, {"id": lambda x: x == car_id}))
 
 
 def _get_order_with_last_state(
-    tenant: _AccessibleTenants,
+    tenants: _AccessibleTenants,
     order_db_model: _db_models.OrderDB,
 ) -> _models.Order | None:
-    last_state = _get_last_order_state(tenant, order_db_model)
+    last_state = _get_last_order_state(tenants, order_db_model)
     order = _obj_to_db.order_from_db_model(order_db_model=order_db_model, last_state=last_state)
     return order
 
@@ -358,10 +360,10 @@ def _group_new_orders_by_car(
 
 
 def _get_last_order_state(
-    tenant: _AccessibleTenants, order_model_db: _db_models.OrderDB
+    tenants: _AccessibleTenants, order_model_db: _db_models.OrderDB
 ) -> _models.OrderState | None:
     db_last_states = _db_access.get(
-        tenant,
+        tenants,
         _db_models.OrderStateDB,
         criteria={"order_id": lambda x: x == order_model_db.id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -377,9 +379,9 @@ def _default_order_state(order_id: int) -> _models.OrderState:
     return _models.OrderState(order_id=order_id, status=DEFAULT_STATUS)
 
 
-def _post_default_order_states(tenant: _AccessibleTenants, order_ids: list[int]) -> _Response:
+def _post_default_order_states(tenants: _AccessibleTenants, order_ids: list[int]) -> _Response:
     order_states = [_default_order_state(id_) for id_ in order_ids]
     response = _order_state.create_order_states_from_argument_and_post(
-        tenant, order_states, check_final_state=False
+        tenants, order_states, check_final_state=False
     )
     return response

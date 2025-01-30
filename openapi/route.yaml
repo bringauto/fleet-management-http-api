@@ -8,7 +8,6 @@ paths:
       summary: Create new Routes.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: A list of Route models in JSON format.
         x-body-name: routes
@@ -69,7 +68,6 @@ paths:
       summary: Update already existing Routes.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: JSON representation of a list of the Routes with updated data.
         x-body-name: routes
@@ -132,7 +130,6 @@ paths:
       summary: Delete a Route with the specified ID.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "#/components/parameters/RouteId"
       responses:
         "200":
@@ -189,7 +186,6 @@ paths:
       summary: Redefine Route Visualizations for existing Routes.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: A list of Route Visualization models in JSON format.
         x-body-name: RouteVisualizations

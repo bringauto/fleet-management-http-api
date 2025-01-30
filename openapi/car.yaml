@@ -8,7 +8,6 @@ paths:
       summary: Create new Car objects.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         x-body-name: cars
         description: A list of Car models in JSON format.
@@ -44,7 +43,6 @@ paths:
       summary: Find and return all existing Cars.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
       responses:
         "200":
           description: All the currently existing Cars have been returned.
@@ -79,7 +77,6 @@ paths:
       summary: Update already existing Cars.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: JSON representation of a list of the Cars with updated data.
         x-body-name: cars
@@ -142,7 +139,6 @@ paths:
       summary: Delete a Car identified by its ID.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/CarId"
           description: The ID of the Car to be deleted.
       responses:
@@ -201,7 +197,6 @@ paths:
       operationId: getAllCarStates
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/LastN"
@@ -297,7 +292,6 @@ paths:
       summary: Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
         "200":
@@ -326,7 +320,6 @@ paths:
       summary: Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/CarId"
 
       responses:

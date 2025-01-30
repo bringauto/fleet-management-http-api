@@ -8,7 +8,6 @@ paths:
       summary: Create new Orders.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: A list of Order models in JSON format.
         x-body-name: orders
@@ -84,7 +83,6 @@ paths:
       summary: Find existing Orders by the corresponding Car ID and return them.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
@@ -147,7 +145,6 @@ paths:
       summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       responses:
         "200":
           description: The Order with the specified ID has been successfully deleted.
@@ -176,7 +173,6 @@ paths:
       summary: Add new Order States.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: A list of Order State models in JSON format.
         x-body-name: orderStates

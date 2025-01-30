@@ -21,7 +21,7 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def create_car_states() -> _Response:
+def create_car_states(tenant: str = "") -> _Response:
     """Post new car states.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -29,16 +29,16 @@ def create_car_states() -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    request = _RequestJSON.load()
+    request = _RequestJSON.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
-    return create_car_states_from_argument_and_post(tenant, car_states)
+    return create_car_states_from_argument_and_post(tenants, car_states)
 
 
 def create_car_states_from_argument_and_post(
-    tenant: _AccessibleTenants, car_states: list[_CarState]
+    tenants: _AccessibleTenants, car_states: list[_CarState]
 ) -> _Response:
     """Post new car states using list passed as argument.
 
@@ -51,7 +51,7 @@ def create_car_states_from_argument_and_post(
         return _json_response([])
     state_db_models = [_obj_to_db.car_state_to_db_model(s) for s in car_states]
     response = _db_access.add(
-        tenant,
+        tenants,
         *state_db_models,
         checked=[_db_access.db_object_check(_db_models.CarDB, id_=car_states[0].car_id)],
     )
@@ -60,7 +60,7 @@ def create_car_states_from_argument_and_post(
         for model in inserted_models:
             code, msg = 200, f"Car state (ID={model.id}) was succesfully created."
             _log_info(msg)
-            cleanup_response = _remove_old_states(tenant, model.car_id)
+            cleanup_response = _remove_old_states(tenants, model.car_id)
         if cleanup_response.status_code != 200:
             code, cleanup_error_msg = (
                 cleanup_response.status_code,
@@ -81,7 +81,9 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
-def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
+def get_all_car_states(
+    since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+) -> _Response:
     """Get all car states for all the cars.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -92,7 +94,7 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
 
-    request = _RequestEmpty.load()
+    request = _RequestEmpty.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
@@ -112,7 +114,9 @@ def get_all_car_states(since: int = 0, wait: bool = False, last_n: int = 0) -> _
     return _json_response(car_states)
 
 
-def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int = 0) -> _Response:
+def get_car_states(
+    car_id: int, since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+) -> _Response:
     """Get car states for a car idenfified by 'car_id' of an existing car.
 
     :param since: Only states with timestamp greater or equal to 'since' will be returned. If 'wait' is True
@@ -125,7 +129,7 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
     try:
         if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
-        request = _RequestEmpty.load()
+        request = _RequestEmpty.load(tenant)
         if not request:
             return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
@@ -152,9 +156,9 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
-def _remove_old_states(tenant: _AccessibleTenants, car_id: int) -> _Response:
+def _remove_old_states(tenants: _AccessibleTenants, car_id: int) -> _Response:
     car_state_db_models = _db_access.get(
-        tenant, _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
+        tenants, _db_models.CarStateDB, criteria={"car_id": lambda x: x == car_id}
     )
     curr_n_of_states = len(car_state_db_models)
     delta = curr_n_of_states - _db_models.CarStateDB.max_n_of_stored_states()

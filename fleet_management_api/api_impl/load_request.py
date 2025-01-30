@@ -15,7 +15,7 @@ class Request(abc.ABC):
     query: dict[str, Any] = dataclasses.field(default_factory=dict)
 
     @classmethod
-    def load(cls) -> Request | None:
+    def load(cls, current_tenant: str = "") -> Request | None:
         request = connexion.request
         if not cls.ok(request):
             return None
@@ -24,10 +24,14 @@ class Request(abc.ABC):
             headers = {"Authorization": authorization}
         except RuntimeError:
             headers = {"Authorization": ""}
+
+        cookies = dict(request.cookies.copy())
+        if current_tenant:
+            cookies["tenant"] = current_tenant
         return cls(
             data=cls.get_data(request),
             headers=headers,
-            cookies=request.cookies,
+            cookies=cookies,
             query=request.args,
         )
 

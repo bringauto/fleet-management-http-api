@@ -8,7 +8,6 @@ paths:
       summary: Create new Stops.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: A list of Stop models in JSON format.
         x-body-name: stops
@@ -82,7 +81,6 @@ paths:
       summary: Update already existing Stops.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
       requestBody:
         description: JSON representation of a list of the Stops with updated data.
         x-body-name: stops
@@ -145,7 +143,6 @@ paths:
       summary: Delete a Stop with the specified ID.
       parameters:
         - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: true
         - $ref: "common_models.yaml#/components/parameters/StopId"
       responses:
         "200":

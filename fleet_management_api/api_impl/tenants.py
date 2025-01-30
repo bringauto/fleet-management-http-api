@@ -62,9 +62,13 @@ class AccessibleTenants:
     If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
     """
 
-    def __init__(self, request: _Request, key: str = "", audience: str = "account") -> None:
+    def __init__(
+        self, request: _Request, key: str = "", audience: str = "account", current_tenant: str = ""
+    ) -> None:
         if not key.strip():
             key = get_public_key()
+        if current_tenant:
+            request.cookies["tenant"] = current_tenant
         self._current, self._all_accessible = _check_and_read(request, key, audience)
 
     @property
@@ -99,7 +103,7 @@ class _EmptyTenant(AccessibleTenants):
         raise UsingEmptyTenant("Empty tenant object does not have any accessible tenants.")
 
 
-NO_TENANT = _EmptyTenant()
+NO_TENANTS = _EmptyTenant()
 
 
 def _check_and_read(request: ConnexionRequest, key: str, audience: str) -> tuple[str, list[str]]:

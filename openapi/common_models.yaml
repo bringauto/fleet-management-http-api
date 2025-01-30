@@ -40,7 +40,7 @@ components:
     TenantName:
       name: tenant
       description: A parameter for reading and writing only the data related to a given tenant.
-      in: cookie
+      in: query
       schema:
         type: string
         example: "tenant_name"

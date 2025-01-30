@@ -135,7 +135,6 @@ def get_test_app(
     predef_api_key: str = "",
     accessible_tenants: Optional[list[str]] = None,
     use_previous: bool = False,
-    
 ) -> _TestApp:
     """Creates a test app that can be used for testing purposes.
 

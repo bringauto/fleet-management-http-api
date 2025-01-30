@@ -8,11 +8,11 @@ from fleet_management_api.database.timestamp import timestamp_ms
 @dataclasses.dataclass
 class TenantFromTokenMock:
     current: str = ""
-    all_accessible: list[str] = dataclasses.field(default_factory=list)
+    all: list[str] = dataclasses.field(default_factory=list)
 
     @property
     def unrestricted(self) -> bool:
-        return not self.current and not self.all_accessible
+        return not self.current and not self.all
 
 
 def create_platform_hws(app: _TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME) -> None:

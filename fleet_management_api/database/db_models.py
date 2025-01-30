@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Protocol
 
 from sqlalchemy import (
     Boolean,
@@ -18,7 +18,8 @@ from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
 OrderId = int
 
 
-TENANT_ID = "tenants.id"
+TENANTS_ID_COLUMN = "tenants.id"
+CARS_ID_COLUMN = "cars.id"
 TENANT_ID_NAME = "tenant_id"
 TENANT_NAME = "tenants.name"
 CASCADE = "save-update, merge, delete"
@@ -46,9 +47,9 @@ class Base(DeclarativeBase):
             **{col.name: getattr(self, col.name) for col in self.__table__.columns}
         )
 
-    @property
-    def owned_by_tenant(self) -> bool:
-        return hasattr(self, "tenant_id")
+    @classmethod
+    def owned_by_tenant(cls) -> bool:
+        return hasattr(cls, "tenant_id")
 
 
 class TenantDB(Base):
@@ -92,7 +93,7 @@ class PlatformHWDB(Base):
     __tablename__ = "platform_hw"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
 
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="platform_hw", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -110,7 +111,7 @@ class CarDB(Base):
     __tablename__ = "cars"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
 
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="cars", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -143,11 +144,11 @@ class CarStateDB(Base):
     model_name = "CarState"
     __tablename__ = "car_states"
     _max_n_of_states: int = 50
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="car_states", lazy="noload", foreign_keys=[tenant_id]
     )
-    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
     status: Mapped[str] = mapped_column(String)
     speed: Mapped[float] = mapped_column(Float)
     fuel: Mapped[int] = mapped_column(Integer)
@@ -177,11 +178,11 @@ class CarActionStateDB(Base):
     model_name = "CarActionState"
     __tablename__ = "car_action_states"
     _max_n_of_states: int = 50
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="car_action_states", lazy="noload", foreign_keys=[tenant_id]
     )
-    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
     status: Mapped[str] = mapped_column(String)
     timestamp: Mapped[int] = mapped_column(BigInteger)
 
@@ -205,7 +206,7 @@ class OrderDB(Base):
 
     model_name = "Order"
     __tablename__ = "orders"
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="orders", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -214,7 +215,7 @@ class OrderDB(Base):
     target_stop_id: Mapped[int] = mapped_column(ForeignKey("stops.id"), nullable=False)
     stop_route_id: Mapped[int] = mapped_column(Integer)
     notification_phone: Mapped[dict] = mapped_column(JSON)
-    car_id: Mapped[int] = mapped_column(ForeignKey("cars.id"), nullable=False)
+    car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
     is_visible: Mapped[bool] = mapped_column(Boolean)
     states: Mapped[list[OrderStateDB]] = relationship(
         "OrderStateDB", cascade=CASCADE, back_populates="order"
@@ -236,7 +237,7 @@ class OrderStateDB(Base):
     model_name = "OrderState"
     __tablename__ = "order_states"
     _max_n_of_states: int = 50
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="order_states", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -266,7 +267,7 @@ class StopDB(Base):
     __tablename__ = "stops"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
 
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="stops", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -287,7 +288,7 @@ class RouteDB(Base):
     __tablename__ = "routes"
     __table_args__ = (_unique_name_under_tenant(__tablename__),)
 
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="routes", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -309,7 +310,7 @@ class RouteVisualizationDB(Base):
 
     model_name = "RouteVisualization"
     __tablename__ = "route_visualization"
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="route_visualizations", lazy="noload", foreign_keys=[tenant_id]
     )
@@ -342,7 +343,7 @@ class TestItem(Base):
 
     model_name = "TestItem"
     __tablename__ = "test_item"
-    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANT_ID), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="test_items", lazy="noload", foreign_keys=[tenant_id]
     )

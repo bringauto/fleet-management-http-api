@@ -25,7 +25,7 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def create_stops() -> _Response:
+def create_stops(tenant: str = "") -> _Response:
     """Create new stops.
 
     If some of the stops' creation fails, no stops are added to the server.
@@ -33,13 +33,13 @@ def create_stops() -> _Response:
     The stop creation can succeed only if:
     - there is no stop with the same name.
     """
-    request = _RequestJSON.load()
+    request = _RequestJSON.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.add(tenant, *stop_db_models)
+    response = _db_access.add(tenants, *stop_db_models)
     if response.status_code == 200:
         posted_db_models: list[_db_models.StopDB] = response.body
         for stop in posted_db_models:
@@ -54,23 +54,23 @@ def create_stops() -> _Response:
         )
 
 
-def delete_stop(stop_id: int) -> _Response:
+def delete_stop(stop_id: int, tenant: str = "") -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    request = _RequestEmpty.load()
+    request = _RequestEmpty.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
-    routes_response = _get_routes_referencing_stop(tenant, stop_id)
+    tenants = _AccessibleTenants(request, "")
+    routes_response = _get_routes_referencing_stop(tenants, stop_id)
     if routes_response.status_code != 200:
         return _log_error_and_respond(
             routes_response.body["title"],
             routes_response.status_code,
             routes_response.body["title"],
         )
-    response = _db_access.delete(tenant, _db_models.StopDB, stop_id)
+    response = _db_access.delete(tenants, _db_models.StopDB, stop_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
@@ -82,14 +82,14 @@ def delete_stop(stop_id: int) -> _Response:
         )
 
 
-def get_stop(stop_id: int) -> _Response:
+def get_stop(stop_id: int, tenant: str = "") -> _Response:
     """Get an existing stop identified by 'stop_id'."""
-    request = _RequestEmpty.load()
+    request = _RequestEmpty.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
-        tenant, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
+        tenants, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
     stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
@@ -99,13 +99,13 @@ def get_stop(stop_id: int) -> _Response:
         return _Response(body=stops[0], status_code=200, content_type="application/json")
 
 
-def get_stops() -> _Response:
+def get_stops(tenant: str = "") -> _Response:
     """Get all existing stops."""
-    request = _RequestEmpty.load()
+    request = _RequestEmpty.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
-    stop_db_models = _db_access.get(tenant, _db_models.StopDB)
+    tenants = _AccessibleTenants(request, "")
+    stop_db_models = _db_access.get(tenants, _db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
@@ -113,7 +113,7 @@ def get_stops() -> _Response:
     return _json_response(stops)
 
 
-def update_stops() -> _Response:
+def update_stops(tenant: str = "") -> _Response:
     """Update an existing stop.
 
     If some of the stops' update fails, no stops are updated.
@@ -122,13 +122,13 @@ def update_stops() -> _Response:
     - all stops exist,
     - there is no stop with the same name.
     """
-    request = _RequestJSON.load()
+    request = _RequestJSON.load(tenant)
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request, "")
     stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.update(tenant, *stop_db_models)
+    response = _db_access.update(tenants, *stop_db_models)
     if response.status_code == 200:
         updated_stops: list[_db_models.StopDB] = response.body
         for s in updated_stops:
@@ -143,9 +143,9 @@ def update_stops() -> _Response:
         )
 
 
-def _get_routes_referencing_stop(tenant: _AccessibleTenants, stop_id: int) -> _Response:
+def _get_routes_referencing_stop(tenants: _AccessibleTenants, stop_id: int) -> _Response:
     route_db_models = [
-        m for m in _db_access.get(tenant, _db_models.RouteDB) if stop_id in m.stop_ids
+        m for m in _db_access.get(tenants, _db_models.RouteDB) if stop_id in m.stop_ids
     ]
     if len(route_db_models) > 0:
         return _log_error_and_respond(
