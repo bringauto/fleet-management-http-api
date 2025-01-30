@@ -1,3 +1,7 @@
+security:
+  - APIKeyAuth: []
+  - oAuth2AuthCode: []
+
 paths:
   /tenant:
     get:

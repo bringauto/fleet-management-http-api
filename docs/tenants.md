@@ -10,9 +10,16 @@ The list of tenants, which the user can read. It can be unrestricted, meaning th
 
 The tenant, under which the data is accessed or modified.
 
-- if the current tenant is empty, the user can read data from all accessible tenants, but cannot write data to the database.
-- if the current tenant is not empty, the user can read and write data for the current tenant only.
+If no current tenant is set:
 
+- Users can read data from all accessible tenants
+- Users cannot write data to the database
+
+If a current tenant is set:
+
+- Users can read and write data only for that tenant
+
+If the current tenant is set and accessible tenants are restricted, the current tenant must be one of the accessible tenants.
 If the accessible tenants list is not empty and the current tenant is set, the current tenant must be among accessible tenants.
 
 # Implementation

@@ -332,6 +332,7 @@ Entity [description](definitions.md#tenant).
 Requirements:
 
 - There must be no item on the server owned by the Tenant
+- The Tenant must exist
 
 Result
 
