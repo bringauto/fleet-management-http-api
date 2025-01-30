@@ -1,6 +1,6 @@
 import unittest
 import jwt
-from connexion.lifecycle import ConnexionRequest
+from connexion.lifecycle import ConnexionRequest  # type: ignore
 
 from fleet_management_api.api_impl.auth_controller import (
     generate_test_keys,
@@ -22,7 +22,7 @@ from fleet_management_api.models import PlatformHW
 import tests._utils.api_test as api_test
 
 
-TEST_URL = "http://example.com"
+TEST_URL = "https://example.com"
 ALGORITHM = "RS256"
 
 
