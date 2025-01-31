@@ -6,8 +6,6 @@ import unittest
 import coverage
 import coverage.exceptions as _cov_exceptions
 
-from tests._utils.profile import profile
-
 
 TEST_DIR_NAME = "tests"
 OMITTED_FILES = [

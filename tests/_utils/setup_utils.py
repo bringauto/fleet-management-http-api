@@ -16,7 +16,7 @@ class TenantFromTokenMock:
 
 
 def create_platform_hws(app: _TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME) -> None:
-    with app.app.test_client() as c:
+    with app.app.test_client(tenant) as c:
         c.set_cookie("localhost", "tenant", tenant)
         for i in range(count):
             platformhw = _models.PlatformHW(name=f"Test Platform Hw {timestamp_ms()+i}")
