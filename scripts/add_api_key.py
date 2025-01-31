@@ -15,7 +15,6 @@ def _add_key_if_key_name_not_already_in_db(connection_source: Engine, api_key_na
     message about already existing key name."""
     code, msg = _create_key(key_name=api_key_name, connection_source=connection_source)
     print(msg)
-    print(code, msg)
     if code == 200:
         return 0
     else:
