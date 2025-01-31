@@ -179,7 +179,7 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
             response = client.post("/v2/management/car?api_key=testAPIKey", json=[car_b])
             self.assertEqual(response.status_code, 400)
 
-    def test_creating_two_cars_ith_identical_naems_under_different_tenants_returns_error(
+    def test_creating_two_cars_with_identical_naems_under_different_tenants_is_allowed(
         self,
     ) -> None:
 
@@ -191,6 +191,8 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
             client.set_cookie("", "tenant", "tenant_2")
             response_2 = client.post("/v2/management/car?api_key=testAPIKey", json=[car_b])
             self.assertEqual(response_2.status_code, 200)
+            assert response_1.json is not None
+            assert response_2.json is not None
             self.assertEqual(response_1.json[0]["name"], "Car")
             self.assertEqual(response_2.json[0]["name"], "Car")
 
@@ -249,14 +251,14 @@ class Test_Logging_Car_Creation(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
-        app = _app.get_test_app(use_previous=True)
-        create_platform_hws(app)
+        self.app = _app.get_test_app(use_previous=True)
+        create_platform_hws(self.app, api_key=self.app.predef_api_key)
 
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs(LOGGER_NAME, level="INFO") as logs:
             car = Car(name="test_car", platform_hw_id=1, car_admin_phone=PHONE)
-            app = _app.get_test_app(use_previous=True)
-            with app.app.test_client(TEST_TENANT_NAME) as c:
+            with self.app.app.test_client(TEST_TENANT_NAME) as c:
+                c.set_cookie("", "tenant", TEST_TENANT_NAME)
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 # there should be three logs - one for a car, another for the car state and the last one for the car action state
                 self.assertEqual(len(logs.output), 3)
