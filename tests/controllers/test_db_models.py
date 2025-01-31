@@ -238,7 +238,7 @@ class Test_Creating_Platform_HW_DB_Model(unittest.TestCase):
 
 
 class Test_Creating_Tenant_DB_Model(unittest.TestCase):
-    def test_creating_db_model_from_tenant_hw_id_preserves_attribute_values(self):
+    def test_creating_db_model_from_tenant_preserves_attribute_values(self):
         tenant = Tenant(name="test_tenant")
         tenant_db_model = _obj_to_db.tenant_to_db_model(tenant)
         self.assertEqual(tenant_db_model.id, tenant.id)
