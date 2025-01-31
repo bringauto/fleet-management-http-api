@@ -230,6 +230,6 @@ def tenant_to_db_model(
 
 
 def tenant_from_db_model(
-    platform_hw_db_model: _db_models.TenantDB,
+    tenant_db_model: _db_models.TenantDB,
 ) -> _models.Tenant:
-    return _models.Tenant(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
+    return _models.Tenant(id=tenant_db_model.id, name=tenant_db_model.name)
