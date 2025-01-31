@@ -186,7 +186,7 @@ class Test_Waiting_Mechanism_Releases_Connection_To_Pool(api_test.TestCase):
             executor.submit(get_and_count_connections)
             time.sleep(0.02)
             executor.submit(_db_access.add, tenant, test_obj)
-            time.sleep(0.05)
+            time.sleep(0.5)
             self.assertEqual(src.pool.checkedin(), 1)
 
 

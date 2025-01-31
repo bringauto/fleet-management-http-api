@@ -33,7 +33,7 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def create_cars(tenant: str = "") -> _Response:  # noqa: E501
+def create_cars() -> _Response:  # noqa: E501
     """Create new cars.
 
     If some of the cars' creation fails, no cars are added to the server.
@@ -44,10 +44,10 @@ def create_cars(tenant: str = "") -> _Response:  # noqa: E501
     - the car name is unique.
     - the platform HW is not referenced by any existing car.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     cars: list[_models.Car] = []
     for car_dict in request.data:
         car_dict["lastState"] = None
@@ -91,15 +91,15 @@ def create_cars(tenant: str = "") -> _Response:  # noqa: E501
         )
 
 
-def delete_car(car_id: int, tenant: str = "") -> _Response:
+def delete_car(car_id: int) -> _Response:
     """Deletes an existing car identified by 'car_id'.
 
     :param car_id: ID of the car to be deleted.
     """
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     response = _db_access.delete(tenants, _db_models.CarDB, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
@@ -109,12 +109,12 @@ def delete_car(car_id: int, tenant: str = "") -> _Response:
         return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
-def get_car(car_id: int, tenant: str = "") -> _Response:
+def get_car(car_id: int) -> _Response:
     """Get a car identified by 'car_id'."""
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     db_cars = _db_access.get(
         tenants,
         _db_models.CarDB,
@@ -131,12 +131,12 @@ def get_car(car_id: int, tenant: str = "") -> _Response:
         return _json_response(car)
 
 
-def get_cars(tenant: str = "") -> _Response:  # noqa: E501
+def get_cars() -> _Response:  # noqa: E501
     """List all cars."""
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     db_cars = _db_access.get(
         tenants, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
     )
@@ -151,7 +151,7 @@ def get_cars(tenant: str = "") -> _Response:  # noqa: E501
     return _json_response(cars)
 
 
-def update_cars(tenant: str = "") -> _Response:
+def update_cars() -> _Response:
     """Update existing cars.
 
     If any of the cars' update fails, no cars are updated on the server.
@@ -163,10 +163,10 @@ def update_cars(tenant: str = "") -> _Response:
     - the car name is unique.
     - the platform HW is not referenced by any other existing car.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
     car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
     response = _db_access.update(tenants, *car_db_model)

@@ -6,8 +6,6 @@ paths:
       tags:
         - car
       summary: Create new Car objects.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         x-body-name: cars
         description: A list of Car models in JSON format.
@@ -41,8 +39,6 @@ paths:
       tags:
         - car
       summary: Find and return all existing Cars.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       responses:
         "200":
           description: All the currently existing Cars have been returned.
@@ -75,8 +71,6 @@ paths:
       tags:
         - car
       summary: Update already existing Cars.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         description: JSON representation of a list of the Cars with updated data.
         x-body-name: cars
@@ -111,8 +105,6 @@ paths:
         - car
       summary: Find a single Car by its ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
         "200":
@@ -138,7 +130,6 @@ paths:
         - car
       summary: Delete a Car identified by its ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/CarId"
           description: The ID of the Car to be deleted.
       responses:
@@ -167,8 +158,6 @@ paths:
       tags:
         - carState
       summary: Add new Car States.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         description: A list of Car State model in JSON format.
         x-body-name: carStates
@@ -196,7 +185,6 @@ paths:
     get:
       operationId: getAllCarStates
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/LastN"
@@ -228,8 +216,6 @@ paths:
         - carState
       summary: Find one or all Car States for a Car with given ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/LastN"
@@ -260,8 +246,6 @@ paths:
         - carAction
       summary: Finds car action states for a Car with given carId.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/CarId"
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"
@@ -291,7 +275,6 @@ paths:
         - carAction
       summary: Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
         "200":
@@ -319,9 +302,7 @@ paths:
         - carAction
       summary: Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/CarId"
-
       responses:
         "200":
           description: Successfully unpaused the Car.

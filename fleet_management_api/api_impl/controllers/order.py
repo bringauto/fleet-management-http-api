@@ -160,7 +160,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-def create_orders(tenant: str = "") -> _Response:
+def create_orders() -> _Response:
     """Post new orders.
 
     If some of the orders' creation fails, no orders are added to the server.
@@ -171,10 +171,10 @@ def create_orders(tenant: str = "") -> _Response:
     - the route exists and contains the target stop,
     - the maximum number of active orders for any referenced car has not been reached.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     order_db_models: list[_db_models.OrderDB] = []
     checked: list[_db_access.CheckBeforeAdd] = []
     if not isinstance(request.data, list):
@@ -251,7 +251,7 @@ def delete_order(car_id: int, order_id: int) -> _Response:
     request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenant = _AccessibleTenants(request)
     response = _db_access.delete(tenant, _db_models.OrderDB, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
@@ -270,12 +270,12 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
     delete_order(car_id, oldest_inactive_order_id)
 
 
-def get_order(car_id: int, order_id: int, tenant: str = "") -> _Response:
+def get_order(car_id: int, order_id: int) -> _Response:
     """Get an existing order."""
-    request = _RequestNoData.load(tenant)
+    request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     order_db_models = _db_access.get(
         tenants,
         base=_db_models.OrderDB,
@@ -292,13 +292,13 @@ def get_order(car_id: int, order_id: int, tenant: str = "") -> _Response:
         return _json_response(order)  # type: ignore
 
 
-def get_car_orders(car_id: int, since: int = 0, tenant: str = "") -> _Response:
+def get_car_orders(car_id: int, since: int = 0) -> _Response:
     """Get all orders for a given car."""
 
-    request = _RequestNoData.load(tenant)
+    request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     if not _car_exist(tenants, car_id):
         return _log_error_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title=_OBJ_NOT_FOUND
@@ -319,12 +319,12 @@ def get_car_orders(car_id: int, since: int = 0, tenant: str = "") -> _Response:
     return _json_response(orders)
 
 
-def get_orders(since: int = 0, tenant: str = "") -> _Response:
+def get_orders(since: int = 0) -> _Response:
     """Get all existing orders."""
-    request = _RequestNoData.load(tenant)
+    request = _RequestNoData.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     _log_info("Listing all existing orders.")
     db_orders = _db_access.get(
         tenants, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}

@@ -17,17 +17,18 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 
 def set_tenant_cookie(tenant_id: int) -> _Response:
     """Set a cookie with the tenant ID."""
+    assert isinstance(tenant_id, int), "Tenant ID must be an integer"
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    accessible_tenants = _AccessibleTenants(request)
+    accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
     accessible_tenants_in_db = _db_access.get_tenants(accessible_tenants)
     for t in accessible_tenants_in_db:
         if t.id == tenant_id:
             response = _text_response(
                 f"Tenant '{t.name}' does exist and is included in Set-Cookie."
             )
-            response.headers["Set-Cookie"] = f"tenant={tenant_id}"
+            response.headers["Set-Cookie"] = f"tenant={t.name}; Path=/"
             return response
     return _log_error_and_respond(
         f"Tenant with ID={tenant_id} is not accessible", 401, title="Unauthorized"
@@ -39,7 +40,7 @@ def get_tenants() -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    accessible_tenants = _AccessibleTenants(request)
+    accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
     tenants = [
         _obj_to_db.tenant_from_db_model(t) for t in _db_access.get_tenants(accessible_tenants)
     ]
@@ -61,7 +62,7 @@ def delete_tenant(tenant_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request, "")
+    tenant = _AccessibleTenants(request)
     response = _db_access.delete(tenant, _db_models.TenantDB, tenant_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Tenant with ID={tenant_id} has been deleted.")

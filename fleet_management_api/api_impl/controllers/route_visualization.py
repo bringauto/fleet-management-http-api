@@ -23,12 +23,12 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def get_route_visualization(route_id: int, tenant: str = "") -> _Response:
+def get_route_visualization(route_id: int) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     rp_db_models = _db_access.get(
         tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
@@ -44,7 +44,7 @@ def get_route_visualization(route_id: int, tenant: str = "") -> _Response:
         return _json_response(rp)
 
 
-def redefine_route_visualizations(tenant: str = "") -> _Response:
+def redefine_route_visualizations() -> _Response:
     """Redefine route visualizations for existing routes.
 
     If a route visualization for a route already exists, it will be replaced.
@@ -54,10 +54,10 @@ def redefine_route_visualizations(tenant: str = "") -> _Response:
     The visualization can be redefined only if:
     - the route exists.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):

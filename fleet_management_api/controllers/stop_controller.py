@@ -8,15 +8,13 @@ from fleet_management_api.models.stop import Stop  # noqa: E501
 from fleet_management_api import util
 
 
-def create_stops(stop, tenant=None):  # noqa: E501
+def create_stops(stop):  # noqa: E501
     """Create new Stops.
 
      # noqa: E501
 
     :param stop: A list of Stop models in JSON format.
     :type stop: list | bytes
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[List[Stop], Tuple[List[Stop], int], Tuple[List[Stop], int, Dict[str, str]]
     """
@@ -25,58 +23,50 @@ def create_stops(stop, tenant=None):  # noqa: E501
     return 'do some magic!'
 
 
-def delete_stop(stop_id, tenant=None):  # noqa: E501
+def delete_stop(stop_id):  # noqa: E501
     """Delete a Stop with the specified ID.
 
      # noqa: E501
 
     :param stop_id: The Stop ID.
     :type stop_id: int
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def get_stop(stop_id, tenant=None):  # noqa: E501
+def get_stop(stop_id):  # noqa: E501
     """Find and return a single Stop by its ID.
 
      # noqa: E501
 
     :param stop_id: The Stop ID.
     :type stop_id: int
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def get_stops(tenant=None):  # noqa: E501
+def get_stops():  # noqa: E501
     """Find and return all existing Stops.
 
      # noqa: E501
 
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[List[Stop], Tuple[List[Stop], int], Tuple[List[Stop], int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def update_stops(stop, tenant=None):  # noqa: E501
+def update_stops(stop):  # noqa: E501
     """Update already existing Stops.
 
      # noqa: E501
 
     :param stop: JSON representation of a list of the Stops with updated data.
     :type stop: list | bytes
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """

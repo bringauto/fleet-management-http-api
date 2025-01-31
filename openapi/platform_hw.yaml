@@ -6,8 +6,6 @@ paths:
       tags:
         - platformHW
       summary: Create new Platform HW objects.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         description: A list of Platform HW models in JSON format.
         x-body-name: platformHWs
@@ -41,9 +39,6 @@ paths:
       tags:
         - platformHW
       summary: Find and return all existing Platform HW.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
       responses:
         "200":
           description: All the currently existing Platform HWs have been returned.
@@ -68,8 +63,6 @@ paths:
         - platformHW
       summary: Find Platform HW with the given ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/PlatformHwId"
       responses:
         "200":
@@ -95,7 +88,6 @@ paths:
         - platformHW
       summary: Delete Platform HW with the given ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/PlatformHwId"
       responses:
         "200":

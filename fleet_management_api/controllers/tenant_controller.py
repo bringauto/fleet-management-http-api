@@ -13,7 +13,7 @@ def delete_tenant(tenant_id):  # noqa: E501
 
      # noqa: E501
 
-    :param tenant_id: ID of Tenant to delete.
+    :param tenant_id: Tenant ID
     :type tenant_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -32,11 +32,13 @@ def get_tenants():  # noqa: E501
     return 'do some magic!'
 
 
-def set_tenant_cookie():  # noqa: E501
+def set_tenant_cookie(tenant_id):  # noqa: E501
     """Make the server to send back response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
 
      # noqa: E501
 
+    :param tenant_id: Tenant ID
+    :type tenant_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
     """

@@ -19,7 +19,7 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def create_hws(tenant: str = "") -> _Response:
+def create_hws() -> _Response:
     """Create new platform HWs.
 
     If some of the HWs' creation fails, no objects are added to the server.
@@ -27,7 +27,7 @@ def create_hws(tenant: str = "") -> _Response:
     The HW creation can succeed only if:
     - there is no HW with the same name.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
     tenants = _AccessibleTenants(request)
@@ -50,12 +50,12 @@ def create_hws(tenant: str = "") -> _Response:
         )
 
 
-def get_hws(tenant: str = "") -> _Response:
+def get_hws() -> _Response:
     """Get all existing platform HWs."""
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     hw_id_models = _db_access.get(tenants, _db_models.PlatformHWDB)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
@@ -64,12 +64,12 @@ def get_hws(tenant: str = "") -> _Response:
     return _json_response(platform_hw_ids)
 
 
-def get_hw(platform_hw_id: int, tenant: str = "") -> _Response:
+def get_hw(platform_hw_id: int) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     hw_models = _db_access.get(
         tenants, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
@@ -85,15 +85,15 @@ def get_hw(platform_hw_id: int, tenant: str = "") -> _Response:
         return _json_response(hws[0])
 
 
-def delete_hw(platform_hw_id: int, tenant: str = "") -> _Response:
+def delete_hw(platform_hw_id: int) -> _Response:
     """Delete an existing platform HW identified by 'platformhw_id'.
 
     The platform HW cannot be deleted if assigned to a Car.
     """
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
 
     if _db_access.exists(tenants, _db_models.CarDB, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
         return _log_error_and_respond(

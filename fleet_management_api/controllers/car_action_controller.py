@@ -8,15 +8,13 @@ from fleet_management_api.models.error import Error  # noqa: E501
 from fleet_management_api import util
 
 
-def get_car_action_states(car_id, tenant=None, wait=None, since=None, last_n=None):  # noqa: E501
+def get_car_action_states(car_id, wait=None, since=None, last_n=None):  # noqa: E501
     """Finds car action states for a Car with given carId.
 
      # noqa: E501
 
     :param car_id: The car ID.
     :type car_id: int
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
@@ -29,30 +27,26 @@ def get_car_action_states(car_id, tenant=None, wait=None, since=None, last_n=Non
     return 'do some magic!'
 
 
-def pause_car(car_id, tenant=None):  # noqa: E501
+def pause_car(car_id):  # noqa: E501
     """Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
 
      # noqa: E501
 
     :param car_id: The car ID.
     :type car_id: int
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[List[CarActionState], Tuple[List[CarActionState], int], Tuple[List[CarActionState], int, Dict[str, str]]
     """
     return 'do some magic!'
 
 
-def unpause_car(car_id, tenant=None):  # noqa: E501
+def unpause_car(car_id):  # noqa: E501
     """Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
 
      # noqa: E501
 
     :param car_id: The car ID.
     :type car_id: int
-    :param tenant: A parameter for reading and writing only the data related to a given tenant.
-    :type tenant: str
 
     :rtype: Union[List[CarActionState], Tuple[List[CarActionState], int], Tuple[List[CarActionState], int, Dict[str, str]]
     """

@@ -1,10 +1,17 @@
+from __future__ import annotations
 import json
+import logging
 
 import jwt
+import connexion  # type: ignore
 from connexion.lifecycle import ConnexionRequest  # type: ignore
-from connexion.exceptions import Unauthorized
+from connexion.exceptions import Unauthorized  # type: ignore
 from fleet_management_api.api_impl.load_request import Request as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
+from fleet_management_api.logs import LOGGER_NAME
+
+
+_logger = logging.getLogger(LOGGER_NAME)
 
 
 class UsingEmptyTenant(Exception):
@@ -32,6 +39,8 @@ class MissingRSAKey(Exception):
 
 
 _ALGORITHM = "RS256"
+
+TenantName = str
 
 
 class AccessibleTenants:
@@ -63,13 +72,21 @@ class AccessibleTenants:
     """
 
     def __init__(
-        self, request: _Request, key: str = "", audience: str = "account", current_tenant: str = ""
+        self,
+        request: _Request,
+        key: str = "",
+        audience: str = "account",
+        ignore_cookie: bool = False,
     ) -> None:
-        if not key.strip():
+
+        if "api_key" not in request.query and not key.strip():
             key = get_public_key()
-        if current_tenant:
-            request.cookies["tenant"] = current_tenant
-        self._current, self._all_accessible = _check_and_read(request, key, audience)
+        self._current, self._all_accessible = _extract_current_and_accessible_tenants_from_request(
+            request,
+            key,
+            audience,
+            ignore_cookie=ignore_cookie,
+        )
 
     @property
     def current(self) -> str:
@@ -106,28 +123,39 @@ class _EmptyTenant(AccessibleTenants):
 NO_TENANTS = _EmptyTenant()
 
 
-def _check_and_read(request: ConnexionRequest, key: str, audience: str) -> tuple[str, list[str]]:
-    tenant = _tenant_from_cookie(request)
+def _extract_current_and_accessible_tenants_from_request(
+    request: ConnexionRequest, key: str, audience: str, ignore_cookie: bool = False
+) -> tuple[str, list[str]]:
+
+    if ignore_cookie:
+        current_tenant = ""
+    else:
+        current_tenant = _get_current_tenant(request)
     if "api_key" in request.query:
-        return tenant, []
+        accessible_tenants = []
     else:
         # api key is not provided - read tenants from JWT
-        tenants = _accessible_tenants_from_jwt(request, key, audience)
-        if tenant and tenant not in tenants:
-            raise NoAccessibleTenants(
-                f"Tenant '{tenant}' set in a cookie is not among accessible tenants ({tenants})."
-            )
-        return tenant, tenants
+        tenants = _accessible_tenants(request, key, audience)
+        _check_current_tenant_is_accessible(current_tenant, tenants)
+        accessible_tenants = tenants
+    return current_tenant, accessible_tenants
 
 
-def _tenant_from_cookie(request: ConnexionRequest) -> str:
+def _check_current_tenant_is_accessible(current: TenantName, accessible: list[TenantName]) -> None:
+    if current and current not in accessible:
+        raise NoAccessibleTenants(
+            f"Current tenant '{current}' set in cookie is not among accessible tenants ({accessible})."
+        )
+
+
+def _get_current_tenant(request: ConnexionRequest) -> TenantName:
     """Return the tenant name from a cookie. If the cookie is not set, return an empty string."""
     if hasattr(request, "cookies") and "tenant" in request.cookies:
         return str(request.cookies.get("tenant", "")).strip()
     return ""
 
 
-def _accessible_tenants_from_jwt(request: ConnexionRequest, key: str, audience: str) -> list[str]:
+def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> list[str]:
     """Return the list of accessible tenants extracted from a JWT token.
 
     If the token is missing or does not contain any tenants, raise an exception.

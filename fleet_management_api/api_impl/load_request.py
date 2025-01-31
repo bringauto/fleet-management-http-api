@@ -13,9 +13,12 @@ class Request(abc.ABC):
     headers: dict[str, Any]
     cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
     query: dict[str, Any] = dataclasses.field(default_factory=dict)
+    url: str = ""
+    method: str = ""
 
     @classmethod
     def load(cls, current_tenant: str = "") -> Request | None:
+
         request = connexion.request
         if not cls.ok(request):
             return None
@@ -33,6 +36,8 @@ class Request(abc.ABC):
             headers=headers,
             cookies=cookies,
             query=request.args,
+            url=request.url,
+            method=request.method,
         )
 
     @property

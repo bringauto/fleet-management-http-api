@@ -31,7 +31,7 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 OrderId = int
 
 
-def create_order_states(tenant: str = "") -> _Response:
+def create_order_states() -> _Response:
     """Post new states of existing orders.
 
     If some of the order states's creation fails, no states are added to the server.
@@ -40,10 +40,10 @@ def create_order_states(tenant: str = "") -> _Response:
     - the order exists,
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     try:
         order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
@@ -157,10 +157,10 @@ def get_all_order_states(
     If None, return states of all orders. If the car with the specified 'car_id' does not exist,
     return empty list.
     """
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     _log_info("Getting all order states for all orders.")
     if car_id is not None:
         return _get_order_states(tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n)
@@ -182,10 +182,10 @@ def get_order_states(
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     if _existing_orders(tenants, order_id)[order_id] is None:
         _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)

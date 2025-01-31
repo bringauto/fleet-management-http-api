@@ -6,8 +6,6 @@ paths:
       tags:
         - order
       summary: Create new Orders.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         description: A list of Order models in JSON format.
         x-body-name: orders
@@ -42,8 +40,6 @@ paths:
         - order
       summary: Find all currently existing Orders.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/Since"
       responses:
         "200":
@@ -82,7 +78,6 @@ paths:
         - order
       summary: Find existing Orders by the corresponding Car ID and return them.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
@@ -116,9 +111,6 @@ paths:
       tags:
         - order
       summary: Find an existing Order by the car ID and the order ID and return it.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
       responses:
         "200":
           description: The Order with the specified car ID and order ID has been found and returned.
@@ -143,8 +135,6 @@ paths:
       tags:
         - order
       summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       responses:
         "200":
           description: The Order with the specified ID has been successfully deleted.
@@ -171,8 +161,6 @@ paths:
       tags:
         - orderState
       summary: Add new Order States.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
       requestBody:
         description: A list of Order State models in JSON format.
         x-body-name: orderStates
@@ -209,8 +197,6 @@ paths:
         - orderState
       summary: Find Order States for all existing Orders.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"
         - $ref: "common_models.yaml#/components/parameters/LastN"
@@ -239,8 +225,6 @@ paths:
         - orderState
       summary: Find all Order States for a particular Order specified by its ID.
       parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantName"
-          required: false
         - $ref: "common_models.yaml#/components/parameters/OrderId"
         - $ref: "common_models.yaml#/components/parameters/Wait"
         - $ref: "common_models.yaml#/components/parameters/Since"

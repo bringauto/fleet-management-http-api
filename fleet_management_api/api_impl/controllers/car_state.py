@@ -21,7 +21,7 @@ from fleet_management_api.api_impl.load_request import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def create_car_states(tenant: str = "") -> _Response:
+def create_car_states() -> _Response:
     """Post new car states.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -29,10 +29,10 @@ def create_car_states(tenant: str = "") -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    request = _RequestJSON.load(tenant)
+    request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request, "")
+    tenants = _AccessibleTenants(request)
     car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
     return create_car_states_from_argument_and_post(tenants, car_states)
 
@@ -94,12 +94,12 @@ def get_all_car_states(
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
 
-    request = _RequestEmpty.load(tenant)
+    request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
-        _AccessibleTenants(request, ""),
+        _AccessibleTenants(request),
         _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -129,11 +129,11 @@ def get_car_states(
     try:
         if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
-        request = _RequestEmpty.load(tenant)
+        request = _RequestEmpty.load()
         if not request:
             return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
-            _AccessibleTenants(request, ""),
+            _AccessibleTenants(request),
             base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,

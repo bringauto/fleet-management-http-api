@@ -250,7 +250,8 @@ class Test_Adding_Tenants_To_Database(api_test.TestCase):
             hw = PlatformHW(name="test_hw_1")
             headers = {"Authorization": f"Bearer {get_token(TEST_TENANT_1, TEST_TENANT_2)}"}
             client.post("/v2/management/platformhw", json=[hw], headers=headers)
-            tenants: list[TenantDB] = client.get("/v2/management/tenant", headers=headers).json
+            tenants = client.get("/v2/management/tenant", headers=headers).json
+            assert tenants is not None
             # only the tenant 1 is added to the database
             self.assertListEqual([t["name"] for t in tenants], [TEST_TENANT_1])
 

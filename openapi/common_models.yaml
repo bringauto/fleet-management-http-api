@@ -37,13 +37,6 @@ components:
       example: 1616425275913
 
   parameters:
-    TenantName:
-      name: tenant
-      description: A parameter for reading and writing only the data related to a given tenant.
-      in: query
-      schema:
-        type: string
-        example: "tenant_name"
     Wait:
       name: wait
       description:
@@ -101,6 +94,12 @@ components:
     StopId:
       name: stopId
       description: The Stop ID.
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"
+    TenantId:
+      name: tenantId
+      description: Tenant ID
       in: path
       schema:
         $ref: "#/components/schemas/Id"

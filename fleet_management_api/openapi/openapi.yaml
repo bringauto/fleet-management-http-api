@@ -43,13 +43,6 @@ paths:
     get:
       operationId: get_car_action_states
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The car ID.
         in: path
         name: carId
@@ -146,13 +139,6 @@ paths:
     post:
       operationId: pause_car
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The car ID.
         in: path
         name: carId
@@ -221,13 +207,6 @@ paths:
     post:
       operationId: unpause_car
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The car ID.
         in: path
         name: carId
@@ -329,14 +308,6 @@ paths:
   /car:
     get:
       operationId: get_cars
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -393,14 +364,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     post:
       operationId: create_cars
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -470,14 +433,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
     put:
       operationId: update_cars
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -556,13 +511,6 @@ paths:
     delete:
       operationId: delete_car
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The car ID.
         in: path
         name: carId
@@ -648,13 +596,6 @@ paths:
     get:
       operationId: get_car
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The car ID.
         in: path
         name: carId
@@ -731,13 +672,6 @@ paths:
     get:
       operationId: get_all_car_states
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -815,14 +749,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
     post:
       operationId: create_car_states
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -890,13 +816,6 @@ paths:
     get:
       operationId: get_car_states
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -1006,13 +925,6 @@ paths:
     get:
       operationId: get_orders
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: "A Unix timestamp in milliseconds. If specified, only objects\
           \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
@@ -1080,14 +992,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
     post:
       operationId: create_orders
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -1159,13 +1063,6 @@ paths:
     get:
       operationId: get_car_orders
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: "A Unix timestamp in milliseconds. If specified, only objects\
           \ created at the time or later will be returned. If unspecified, all objects\
           \ are returned (since is set to 0 in that case)."
@@ -1266,13 +1163,6 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/Id'
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -1364,13 +1254,6 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/Id'
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -1442,13 +1325,6 @@ paths:
     get:
       operationId: get_all_order_states
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: "Applies to GET methods when no objects would be returned at\
           \ the moment of request. If wait=true, \\ the request will wait for the\
           \ next object to be created and then returns it. If wait=False or unspecified,\
@@ -1536,14 +1412,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
     post:
       operationId: create_order_states
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -1626,13 +1494,6 @@ paths:
     get:
       operationId: get_order_states
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The order ID.
         in: path
         name: orderId
@@ -1729,14 +1590,6 @@ paths:
   /platformhw:
     get:
       operationId: get_hws
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -1788,14 +1641,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
     post:
       operationId: create_hws
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -1867,13 +1712,6 @@ paths:
     delete:
       operationId: delete_hw
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The Platform HW ID.
         in: path
         name: platformHwId
@@ -1958,13 +1796,6 @@ paths:
     get:
       operationId: get_hw
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The Platform HW ID.
         in: path
         name: platformHwId
@@ -2040,14 +1871,6 @@ paths:
   /route:
     get:
       operationId: get_routes
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -2104,14 +1927,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     post:
       operationId: create_routes
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -2181,14 +1996,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
     put:
       operationId: update_routes
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -2266,14 +2073,6 @@ paths:
   /route-visualization:
     post:
       operationId: redefine_route_visualizations
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -2356,13 +2155,6 @@ paths:
     get:
       operationId: get_route_visualization
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2442,13 +2234,6 @@ paths:
     delete:
       operationId: delete_route
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2535,13 +2320,6 @@ paths:
     get:
       operationId: get_route
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: An ID a the Route
         example: 1
         in: path
@@ -2619,14 +2397,6 @@ paths:
   /stop:
     get:
       operationId: get_stops
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       responses:
         "200":
           content:
@@ -2684,14 +2454,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     post:
       operationId: create_stops
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -2761,14 +2523,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
     put:
       operationId: update_stops
-      parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       requestBody:
         content:
           application/json:
@@ -2847,13 +2601,6 @@ paths:
     delete:
       operationId: delete_stop
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The Stop ID.
         in: path
         name: stopId
@@ -2938,13 +2685,6 @@ paths:
     get:
       operationId: get_stop
       parameters:
-      - description: A parameter for reading and writing only the data related to
-          a given tenant.
-        in: query
-        name: tenant
-        schema:
-          example: tenant_name
-          type: string
       - description: The Stop ID.
         in: path
         name: stopId
@@ -3021,14 +2761,12 @@ paths:
     delete:
       operationId: delete_tenant
       parameters:
-      - description: ID of Tenant to delete.
-        example: 1
+      - description: Tenant ID
         in: path
         name: tenantId
         required: true
         schema:
-          format: int32
-          type: integer
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           content:
@@ -3158,6 +2896,13 @@ paths:
   /tenant/{tenantId}:
     head:
       operationId: set_tenant_cookie
+      parameters:
+      - description: Tenant ID
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Id'
       responses:
         "200":
           description: The tenant with tenantId is accessible and its name is included
@@ -3297,14 +3042,6 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.auth_controller
 components:
   parameters:
-    TenantName:
-      description: A parameter for reading and writing only the data related to a
-        given tenant.
-      in: query
-      name: tenant
-      schema:
-        example: tenant_name
-        type: string
     CarId:
       description: The car ID.
       in: path
@@ -3376,6 +3113,13 @@ components:
       description: The Stop ID.
       in: path
       name: stopId
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    TenantId:
+      description: Tenant ID
+      in: path
+      name: tenantId
       required: true
       schema:
         $ref: '#/components/schemas/Id'

@@ -7,6 +7,8 @@ paths:
     head:
       operationId: setTenantCookie
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      parameters:
+        - $ref: "common_models.yaml#/components/parameters/TenantId"
       tags:
         - tenant
       summary: Make the server to send back response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
@@ -54,14 +56,7 @@ paths:
         - tenant
       summary: Delete Tenant with the given ID.
       parameters:
-        - name: tenantId
-          in: path
-          description: ID of Tenant to delete.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/TenantId"
       responses:
         "200":
           description: The Tenant with the specified ID has been deleted.
