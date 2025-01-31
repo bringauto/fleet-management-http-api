@@ -22,6 +22,11 @@ def log_debug(message: str) -> None:
     logger.debug(message)
 
 
+def log_warning(message: str) -> None:
+    """Pass a custom warning message to the API logger."""
+    logger.warning(message)
+
+
 def log_error(message: str) -> None:
     """Pass a custom error message to the API logger."""
     logger.error(message)

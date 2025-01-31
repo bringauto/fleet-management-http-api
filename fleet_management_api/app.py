@@ -17,6 +17,7 @@ import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.auth_controller import (
     get_test_private_key as _get_test_private_key,
 )
+from fleet_management_api.api_impl.api_logging import log_error as _log_error
 from fleet_management_api.api_impl.tenants import MissingRSAKey as _MissingRSAKey
 
 
@@ -39,8 +40,9 @@ def get_token(*tenants: str) -> str:
         raise _MissingRSAKey("RSA private key is not set.")
     try:
         encoded = jwt.encode(payload, private, algorithm="RS256")
-    except:
-        encoded = ""
+    except jwt.PyJWTError as e:
+        _log_error(f"Failed to encode JWT token: {str(e)}")
+        return ""
     return encoded
 
 
@@ -126,8 +128,12 @@ class _TestClient(_FlaskClient):
         accessible_tenants = self._app._accessible_tenants
         try:
             token = get_token(*accessible_tenants)
-        except:
+        except _MissingRSAKey as e:
+            _log_error(f"Failed to generate token: {str(e)}")
             token = ""
+        except Exception as e:
+            _log_error(f"Unexpected error generating token: {str(e)}")
+            raise
         return {"Authorization": f"Bearer {token}"}
 
 

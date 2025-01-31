@@ -4,6 +4,7 @@ from fleet_management_api.api_impl.api_keys import (
     verify_key_and_return_key_info as _verify_key_and_return_key_info,
 )
 from fleet_management_api.api_impl.auth_controller import get_client_id, get_public_key
+from fleet_management_api.api_impl.api_logging import log_warning
 
 
 def info_from_oAuth2AuthCode(token):
@@ -19,10 +20,11 @@ def info_from_oAuth2AuthCode(token):
     :rtype: dict | None
     """
     try:
-        decoded_token: dict = jwt.decode(
+        decoded_token = jwt.decode(
             token, get_public_key(), algorithms=["RS256"], audience="account"
         )
-    except:
+    except Exception as e:
+        log_warning(f"Failed to decode JWT token: {str(e)}")
         return None
     for origin in decoded_token.get("allowed-origins", []):
         if origin == get_client_id():

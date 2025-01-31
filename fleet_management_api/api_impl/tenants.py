@@ -169,7 +169,16 @@ def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> l
     if not key.strip():
         raise MissingRSAKey("RSA public key is not set.")
     decoded_key = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
-    payload = dict(json.loads(decoded_key["Payload"]))
+
+    try:
+        payload = dict(json.loads(decoded_key["Payload"]))
+    except KeyError:
+        raise NoAccessibleTenants(
+            "No tenants could be extracted from the token. Token is missing the payload."
+        )
+    except Exception as e:
+        raise Unauthorized("Invalid JWT token.") from e
+
     group: list[str] = payload.get("group", [])
     tenants = [item.split("/")[-1] for item in group if item.startswith("/customers/")]
     tenants = [tenant for tenant in tenants if tenant]
