@@ -77,12 +77,11 @@ class Test_Adding_Action_State_Of_Existing_Car(api_test.TestCase):
             self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
 
     def test_creating_action_state_for_existing_car_yields_200_response(self):
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
-            state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
-            tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
-            response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
+        state = CarActionState(car_id=1, action_status=CarActionStatus.PAUSED)
+        tenant = TenantFromTokenMock(current=TEST_TENANT_NAME)
+        response = create_car_action_states_from_argument_and_save_to_db(tenant, [state])
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.body[0].action_status, CarActionStatus.PAUSED)
 
     def test_after_pause_is_car_last_action_state_equal_to_paused(self):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
