@@ -58,8 +58,8 @@ def get_app(use_previous: bool = False) -> _FlaskApp:
         return app
 
 
-class _TestApp:
-    def __init__(self, api_key: str = "", use_previous: bool = False) -> None:
+class TestApp:
+    def __init__(self, api_key: Optional[str] = "", use_previous: bool = False) -> None:
         self._app = get_app(use_previous=use_previous)
         self._flask_app = _TestFlaskApp(api_key, self._app.app)
 
@@ -67,15 +67,23 @@ class _TestApp:
         self._app.run(*args, **kwargs)
 
     @property
+    def predef_api_key(self) -> str | None:
+        return self._flask_app.api_key
+
+    @property
     def app(self) -> _TestFlaskApp:
         return self._flask_app
 
 
 class _TestFlaskApp:
-    def __init__(self, api_key: str, flask_app: _FlaskApp, *args, **kwargs) -> None:
+    def __init__(self, api_key: Optional[str], flask_app: _FlaskApp, *args, **kwargs) -> None:
         self._app = flask_app
         self._api_key = api_key
         self._accessible_tenants: list[str] = []
+
+    @property
+    def api_key(self) -> None | str:
+        return self._api_key
 
     def test_client(self, tenant: str = TEST_TENANT_NAME) -> _FlaskClient:
         if self._api_key == "":
@@ -89,7 +97,7 @@ class _TestFlaskApp:
 
 class _TestClient(_FlaskClient):
     def __init__(
-        self, application: _TestFlaskApp, api_key: str, tenant: str, *args, **kwargs
+        self, application: _TestFlaskApp, api_key: Optional[str], tenant: str, *args, **kwargs
     ) -> None:
         super().__init__(application._app, *args, **kwargs)
         if tenant:
@@ -126,6 +134,8 @@ class _TestClient(_FlaskClient):
 
     def _get_headers(self) -> dict[str, str]:
         accessible_tenants = self._app._accessible_tenants
+        if self._app.api_key is not None:
+            return {"Authorization": ""}
         try:
             token = get_token(*accessible_tenants)
         except _MissingRSAKey as e:
@@ -141,7 +151,7 @@ def get_test_app(
     predef_api_key: str = "",
     accessible_tenants: Optional[list[str]] = None,
     use_previous: bool = False,
-) -> _TestApp:
+) -> TestApp:
     """Creates a test app that can be used for testing purposes.
 
     It enables to surpass the API key verification by providing a predefined API key.
@@ -160,6 +170,6 @@ def get_test_app(
 
     clear_active_orders()
     clear_inactive_orders()
-    app = _TestApp(predef_api_key, use_previous=use_previous)
+    app = TestApp(predef_api_key, use_previous=use_previous)
     app.app.def_accessible_tenants(*accessible_tenants)
     return app
