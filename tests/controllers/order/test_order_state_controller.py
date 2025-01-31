@@ -17,6 +17,9 @@ from tests._utils.setup_utils import create_platform_hws, create_stops, create_r
 from tests._utils.constants import TEST_TENANT_NAME
 
 
+MAX_STORED_STATES = 50
+
+
 class Test_Adding_State_Of_Existing_Order(unittest.TestCase):
     def setUp(self) -> None:
 
@@ -411,7 +414,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
 
     def test_sending_large_number_of_order_states_before_done_state(self):
         some_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
-        _db_models.OrderStateDB.set_max_n_of_stored_states(50)
+        _db_models.OrderStateDB.set_max_n_of_stored_states(MAX_STORED_STATES)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             for _ in range(60):
                 response = c.post("/v2/management/orderstate", json=[some_state])
