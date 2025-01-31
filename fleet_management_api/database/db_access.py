@@ -25,7 +25,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.tenants import NO_TENANTS
+from fleet_management_api.api_impl.tenants import NO_TENANTS as _NO_TENANTS
 
 
 P = ParamSpec("P")
@@ -174,13 +174,13 @@ def add_without_tenant(
     """
 
     return add(
-        NO_TENANTS, *added, checked=checked, connection_source=connection_source, auto_id=auto_id
+        _NO_TENANTS, *added, checked=checked, connection_source=connection_source, auto_id=auto_id
     )
 
 
 def delete_without_tenant(base: type[_Base], id_: int) -> _Response:
     """Delete an object with the given ID from the database without specifying a tenant."""
-    return delete(NO_TENANTS, base, id_)
+    return delete(_NO_TENANTS, base, id_)
 
 
 @db_access_method
@@ -207,7 +207,7 @@ def add(
         return _json_response([])
     _check_common_base_for_all_objs(*added)
 
-    if tenants is not NO_TENANTS:
+    if tenants is not _NO_TENANTS:
         if not tenants.current:
             return _error(401, "Tenant not received in the request.", title="Tenant not received.")
         code = _set_tenant_id_to_all_objs(tenants.current, *added)
@@ -551,7 +551,7 @@ def _add_filter_by_tenant(
     tenants: Tenants,
     require_single_tenant: bool = True,
 ) -> _sqa.Select:
-    if tenants is NO_TENANTS or tenants.unrestricted:
+    if tenants is _NO_TENANTS or tenants.unrestricted:
         return stmt
 
     tenant_names = _tenants_to_filter_by(tenants)
@@ -619,7 +619,7 @@ def _check_and_set_tenant(tenants: Tenants, *objs: _Base) -> _Response:
     if not (objs and objs[0].owned_by_tenant()):
         return _json_response([])
 
-    if tenants is NO_TENANTS:
+    if tenants is _NO_TENANTS:
         msg = f"Database model {objs[0].__class__.__name__} does not have a 'tenant_id' attribute."
         return _error(500, msg, title="Unexpected error when accessing database.")
 
@@ -627,7 +627,7 @@ def _check_and_set_tenant(tenants: Tenants, *objs: _Base) -> _Response:
         return _error(400, "Tenant not received in the request.", title="Tenant not received.")
 
     tenants_db: list[_TenantDB] = get(
-        NO_TENANTS, _TenantDB, criteria={"name": lambda x: x == tenants.current}
+        _NO_TENANTS, _TenantDB, criteria={"name": lambda x: x == tenants.current}
     )
     if not tenants_db:
         msg = f"Tenant '{tenants.current}' does not exist in the database."
@@ -653,7 +653,7 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
 
 def _get_tenant_id(tenant_name: str) -> int | None:
     criteria = {"name": lambda x: x == tenant_name}
-    tenants: list[_TenantDB] = get(NO_TENANTS, _TenantDB, criteria=criteria)
+    tenants: list[_TenantDB] = get(_NO_TENANTS, _TenantDB, criteria=criteria)
     if not tenants:
         response = add_tenants(tenant_name)
         if response.status_code != 200 or not response.body:

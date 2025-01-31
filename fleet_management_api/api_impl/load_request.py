@@ -17,24 +17,19 @@ class Request(abc.ABC):
     method: str = ""
 
     @classmethod
-    def load(cls, current_tenant: str = "") -> Request | None:
-
+    def load(cls) -> Request | None:
         request = connexion.request
-        if not cls.ok(request):
+        if not cls.is_valid(request):
             return None
         try:
-            authorization = request.headers.environ.get("HTTP_AUTHORIZATION", "")
-            headers = {"Authorization": authorization}
+            headers = {"Authorization": request.headers.environ.get("HTTP_AUTHORIZATION", "")}
         except RuntimeError:
             headers = {"Authorization": ""}
 
-        cookies = dict(request.cookies.copy())
-        if current_tenant:
-            cookies["tenant"] = current_tenant
         return cls(
             data=cls.get_data(request),
             headers=headers,
-            cookies=cookies,
+            cookies=dict(request.cookies.copy()),
             query=request.args,
             url=request.url,
             method=request.method,
@@ -51,12 +46,11 @@ class Request(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def ok(cls, request: _Request) -> bool:
+    def is_valid(cls, request: _Request) -> bool:
         pass
 
 
 class RequestJSON(Request):
-
     @classmethod
     def get_data(cls, request: _Request) -> Any:
         try:
@@ -65,7 +59,7 @@ class RequestJSON(Request):
             return None
 
     @classmethod
-    def ok(cls, request: _Request) -> bool:
+    def is_valid(cls, request: _Request) -> bool:
         return request.is_json
 
 
@@ -76,7 +70,7 @@ class RequestNoData(Request):
         return None
 
     @classmethod
-    def ok(cls, request: _Request) -> bool:
+    def is_valid(cls, request: _Request) -> bool:
         return True
 
 
@@ -92,5 +86,5 @@ class RequestEmpty(Request):
         return None
 
     @classmethod
-    def ok(cls, *args, **kwargs) -> bool:
+    def is_valid(cls, *args, **kwargs) -> bool:
         return True
