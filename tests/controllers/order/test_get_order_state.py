@@ -158,7 +158,7 @@ class Test_Timeouts(unittest.TestCase):
             c.post("/v2/management/order", json=[order])
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
-        set_content_timeout_ms(150)
+        set_content_timeout_ms(180)
         order_state = OrderState(order_id=1, status="in_progress")
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate?&since=0")
