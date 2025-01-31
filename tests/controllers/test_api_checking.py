@@ -9,7 +9,7 @@ from fleet_management_api.database.connection import (
 from tests._utils.constants import TEST_TENANT_NAME
 
 
-class Test_Api_Checking(unittest.TestCase):
+class Test_API_Checking(unittest.TestCase):
     def test_unavailable_api_yields_code_404(self):
         set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True)
@@ -30,7 +30,7 @@ class Test_Api_Checking(unittest.TestCase):
     ):
         set_connection_source_test()
         mock_info_from_APIKeyAuth.return_value = {"name": "Admin"}
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         unset_connection_source()
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.head("/v2/management/apialive")
