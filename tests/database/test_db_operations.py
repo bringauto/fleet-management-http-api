@@ -207,7 +207,7 @@ class Test_Deleting_N_Database_Records(api_test.TestCase):
         self.assertEqual(len(retrieved_objs), 1)
         self.assertEqual(retrieved_objs[0].test_str, test_obj_2.test_str)
 
-    def test_deleting_n_records_with_least_attribute_other_than_id(self):
+    def test_deleting_n_records_with_highest_attribute_other_than_id(self):
         test_obj_1 = models.TestItem(test_str="aaa", test_int=9)
         test_obj_2 = models.TestItem(test_str="bbb", test_int=4)
         test_obj_3 = models.TestItem(test_str="ccc", test_int=5)
