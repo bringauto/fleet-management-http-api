@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Protocol
+from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -11,8 +11,9 @@ from sqlalchemy import (
     PickleType,
     String,
     UniqueConstraint,
+    event,
 )
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
+from sqlalchemy.orm import Session, Mapped, DeclarativeBase, mapped_column, relationship
 
 
 OrderId = int
@@ -38,6 +39,8 @@ class Base(DeclarativeBase):
     """
 
     model_name: str = "Base"
+    state: bool = False
+
     id: Mapped[Optional[int]] = mapped_column(
         Integer, primary_key=True, unique=True, nullable=False
     )
@@ -142,19 +145,23 @@ class CarStateDB(Base):
     """ORM-mapped class representing a car state in the database."""
 
     model_name = "CarState"
+    state = True
     __tablename__ = "car_states"
     _max_n_of_states: int = 50
+
     tenant_id: Mapped[int] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="car_states", lazy="noload", foreign_keys=[tenant_id]
     )
+
     car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
+    car: Mapped[CarDB] = relationship("CarDB", back_populates="states", lazy="select")
+
     status: Mapped[str] = mapped_column(String)
     speed: Mapped[float] = mapped_column(Float)
     fuel: Mapped[int] = mapped_column(Integer)
     position: Mapped[dict] = mapped_column(JSON)
     timestamp: Mapped[int] = mapped_column(BigInteger)
-    car: Mapped[CarDB] = relationship("CarDB", back_populates="states", lazy="select")
 
     @classmethod
     def max_n_of_stored_states(cls) -> int:
@@ -176,12 +183,15 @@ class CarActionStateDB(Base):
     """ORM-mapped class representing a car action state in the database."""
 
     model_name = "CarActionState"
+    state = True
     __tablename__ = "car_action_states"
     _max_n_of_states: int = 50
+
     tenant_id: Mapped[int] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="car_action_states", lazy="noload", foreign_keys=[tenant_id]
     )
+
     car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
     status: Mapped[str] = mapped_column(String)
     timestamp: Mapped[int] = mapped_column(BigInteger)
@@ -206,16 +216,19 @@ class OrderDB(Base):
 
     model_name = "Order"
     __tablename__ = "orders"
+
     tenant_id: Mapped[int] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="orders", lazy="noload", foreign_keys=[tenant_id]
     )
+
     priority: Mapped[str] = mapped_column(String)
     timestamp: Mapped[int] = mapped_column(BigInteger)
     target_stop_id: Mapped[int] = mapped_column(ForeignKey("stops.id"), nullable=False)
     stop_route_id: Mapped[int] = mapped_column(Integer)
     notification_phone: Mapped[dict] = mapped_column(JSON)
     car_id: Mapped[int] = mapped_column(ForeignKey(CARS_ID_COLUMN), nullable=False)
+
     is_visible: Mapped[bool] = mapped_column(Boolean)
     states: Mapped[list[OrderStateDB]] = relationship(
         "OrderStateDB", cascade=CASCADE, back_populates="order"
@@ -235,12 +248,15 @@ class OrderStateDB(Base):
     """ORM-mapped class representing an order state in the database."""
 
     model_name = "OrderState"
+    state = True
     __tablename__ = "order_states"
     _max_n_of_states: int = 50
+
     tenant_id: Mapped[int] = mapped_column(ForeignKey(TENANTS_ID_COLUMN), nullable=False)
     tenant: Mapped[TenantDB] = relationship(
         "TenantDB", back_populates="order_states", lazy="noload", foreign_keys=[tenant_id]
     )
+
     status: Mapped[str] = mapped_column(String)
     timestamp: Mapped[int] = mapped_column(BigInteger)
     car_id: Mapped[int] = mapped_column(Integer)
@@ -352,3 +368,31 @@ class TestItem(Base):
 
     def __repr__(self) -> str:
         return f"TestItem(ID={self.id}, test_str={self.test_str}, test_int={self.test_int})"
+
+
+# Event listener to set tenant_id before insert or update
+@event.listens_for(CarStateDB, "before_insert")
+@event.listens_for(CarStateDB, "before_update")
+def set_car_state_tenant_id(mapper, connection, target):
+    _use_ref_tenant_id(mapper, connection, target, "car_id")
+
+
+# Event listener to set tenant_id before insert or update
+@event.listens_for(CarActionStateDB, "before_insert")
+@event.listens_for(CarActionStateDB, "before_update")
+def set_car_state_tenant_id(mapper, connection, target):
+    _use_ref_tenant_id(mapper, connection, target, "car_id")
+
+
+# Event listener to set tenant_id before insert or update
+@event.listens_for(OrderStateDB, "before_insert")
+@event.listens_for(OrderStateDB, "before_update")
+def set_car_state_tenant_id(mapper, connection, target):
+    _use_ref_tenant_id(mapper, connection, target, "order_id")
+
+
+def _use_ref_tenant_id(mapper: Base, connection, target, ref_id: str):
+    session = Session.object_session(target)
+    if session:
+        car = session.query(CarDB).filter_by(id=getattr(target, ref_id)).one()
+        target.tenant_id = car.tenant_id

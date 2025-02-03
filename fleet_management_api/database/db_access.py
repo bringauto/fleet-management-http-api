@@ -201,20 +201,21 @@ def add(
     (an sqlalchemy Engine object).
     """
 
-    global _wait_mg
     source = _get_current_connection_source(connection_source)
     if not added:
         return _json_response([])
     _check_common_base_for_all_objs(*added)
 
-    if tenants is not _NO_TENANTS:
+    if tenants is not _NO_TENANTS and not added[0].state:
         if not tenants.current:
             return _error(401, "Tenant not received in the request.", title="Tenant not received.")
+
         code = _set_tenant_id_to_all_objs(tenants.current, *added)
         if code != 200:
             msg = f"Tenant '{tenants.current}' does not exist and could not be created."
             return _error(500, msg, title="Tenant does not exist.")
 
+    global _wait_mg
     with _Session(source) as session:
         try:
             if checked is not None:
@@ -358,7 +359,7 @@ def get_tenants(
             tenant_names = _tenants_to_filter_by(accessible_tenants)
             tenant_stmt = _sqa.select(_TenantDB).where(_TenantDB.name.in_(tenant_names))
             tenant_objs: list[_TenantDB] = list(session.execute(tenant_stmt).scalars().all())
-        tenants = [tenant.copy() for tenant in tenant_objs]
+        tenants: list[_TenantDB] = [tenant.copy() for tenant in tenant_objs]
         return tenants
 
 

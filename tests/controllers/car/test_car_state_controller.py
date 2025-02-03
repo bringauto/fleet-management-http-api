@@ -5,7 +5,14 @@ import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, GNSSPosition, MobilePhone
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
-from tests._utils.setup_utils import create_platform_hws
+from fleet_management_api.api_impl.auth_controller import (
+    get_test_public_key,
+    get_client_id,
+    set_auth_params,
+    generate_test_keys,
+)
+
+from tests._utils.setup_utils import create_platform_hws, TenantFromTokenMock
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT_NAME
 
@@ -488,6 +495,71 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(unittest.TestCase):
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["status"], "idle")
             self.assertEqual(response.json[1]["status"], "charging")
+
+
+class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
+
+    def setUp(self, *args) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app(use_previous=True, predef_api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_A", api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_B", api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_C", api_key="test_key")
+
+        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=PHONE)
+        car_3 = Car(platform_hw_id=3, name="car3", car_admin_phone=PHONE)
+        car_4 = Car(platform_hw_id=4, name="car4", car_admin_phone=PHONE)
+        car_5 = Car(platform_hw_id=5, name="car5", car_admin_phone=PHONE)
+        car_6 = Car(platform_hw_id=6, name="car6", car_admin_phone=PHONE)
+
+        with self.app.app.test_client("tenant_A") as c:
+            c.set_cookie("", "tenant", "tenant_A")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_1, car_2])
+            assert response.status_code == 200, response.json
+        with self.app.app.test_client("tenant_B") as c:
+            c.set_cookie("", "tenant", "tenant_B")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_3, car_4])
+            assert response.status_code == 200, response.json
+        with self.app.app.test_client("tenant_C") as c:
+            c.set_cookie("", "tenant", "tenant_C")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_5, car_6])
+            assert response.status_code == 200, response.json
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+
+    def test_accessing_all_car_states_without_specifying_tenant_yields_states_of_cars_owned_by_accessible_tenants(
+        self,
+    ) -> None:
+        with self.app.app.test_client() as c:
+            response = c.get(
+                "/v2/management/carstate",
+                headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(len(response.json), 4)
+            for state in response.json:
+                self.assertEqual(state["status"], "out_of_order")
+
+    def test_posting_car_state_to_tenant_is_allowed_even_without_cookie_being_set_if_state_is_for_car_owned_by_accessible_tenant(
+        self,
+    ) -> None:
+
+        # car with id 1 is owned by tenant_A
+        state = CarState(status="idle", car_id=1)
+        with self.app.app.test_client() as c:
+            c.set_cookie("", "tenant", "")
+            # post to car owned by tenant_A, that is accessible (present in the token)
+            response = c.post(
+                "/v2/management/carstate?api_key=test_key",
+                headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
+                json=[state],
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None, response.json
+            self.assertEqual(response.json[0]["status"], "idle")
+            self.assertEqual(response.json[0]["carId"], 1)
 
 
 if __name__ == "__main__":  # pragma: no coverage
