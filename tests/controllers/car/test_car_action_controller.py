@@ -17,12 +17,21 @@ from fleet_management_api.api_impl.controllers.car_action import (
     check_for_invalid_car_action_state_transitions,
     get_last_action_states,
 )
+import fleet_management_api.database.connection as _connection
 from fleet_management_api.database.timestamp import timestamp_ms
+from fleet_management_api.api_impl.auth_controller import (
+    get_test_public_key,
+    set_auth_params,
+    generate_test_keys,
+)
 
 from tests._utils.setup_utils import create_platform_hws
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT_NAME
 from tests._utils.setup_utils import TenantFromTokenMock
+
+
+PHONE = MobilePhone(phone="123456789")
 
 
 class Test_Creating_Car_Action_State(api_test.TestCase):
@@ -481,6 +490,74 @@ class Test_Returning_Last_N_Car_States_For_Given_Car(api_test.TestCase):
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["actionStatus"], CarActionStatus.PAUSED)
             self.assertEqual(response.json[1]["actionStatus"], CarActionStatus.NORMAL)
+
+
+class Test_Car_Action_States_Without_Tenant_In_Cookies(unittest.TestCase):
+
+    def setUp(self, *args) -> None:
+        _connection.set_connection_source_test()
+        self.app = _app.get_test_app(use_previous=True, predef_api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_A", api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_B", api_key="test_key")
+        create_platform_hws(self.app, 2, tenant="tenant_C", api_key="test_key")
+
+        car_1 = Car(platform_hw_id=1, name="car1", car_admin_phone=PHONE)
+        car_2 = Car(platform_hw_id=2, name="car2", car_admin_phone=PHONE)
+        car_3 = Car(platform_hw_id=3, name="car3", car_admin_phone=PHONE)
+        car_4 = Car(platform_hw_id=4, name="car4", car_admin_phone=PHONE)
+        car_5 = Car(platform_hw_id=5, name="car5", car_admin_phone=PHONE)
+        car_6 = Car(platform_hw_id=6, name="car6", car_admin_phone=PHONE)
+
+        with self.app.app.test_client("tenant_A") as c:
+            c.set_cookie("", "tenant", "tenant_A")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_1, car_2])
+            assert response.status_code == 200, response.json
+        with self.app.app.test_client("tenant_B") as c:
+            c.set_cookie("", "tenant", "tenant_B")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_3, car_4])
+            assert response.status_code == 200, response.json
+        with self.app.app.test_client("tenant_C") as c:
+            c.set_cookie("", "tenant", "tenant_C")
+            response = c.post("/v2/management/car?api_key=test_key", json=[car_5, car_6])
+            assert response.status_code == 200, response.json
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+
+    def test_pausing_car_is_allowed_without_cookie_set_if_car_owned_by_accessible_tenant(
+        self,
+    ) -> None:
+
+        # car with id 1 is owned by tenant_A
+        with self.app.app.test_client() as c:
+            c.set_cookie("", "tenant", "")  # no tenant in cookies
+            # post to car owned by tenant_A, that is accessible (present in the token)
+            response = c.post(
+                "/v2/management/action/car/1/pause",
+                headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
+            )
+            self.assertEqual(response.status_code, 200)
+            response = c.get("/v2/management/action/car/1?api_key=test_key")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None, "No json in response"
+            self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.PAUSED)
+
+    def test_posting_car_state_to_tenant_is_not_allowed_if_car_is_owned_by_inaccessible_tenant(
+        self,
+    ) -> None:
+
+        # car with id 1 is owned by tenant_A
+        with self.app.app.test_client() as c:
+            c.set_cookie("", "tenant", "")  # no tenant in cookies
+            # post to car owned by tenant_C, that is inaccessible (missing from the token)
+            response = c.post(
+                "/v2/management/action/car/5/pause",
+                headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
+            )
+            self.assertEqual(response.status_code, 401)
+            response = c.get("/v2/management/action/car/5?api_key=test_key")
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None, "No json in response"
+            self.assertEqual(response.json[-1]["actionStatus"], CarActionStatus.NORMAL)
 
 
 if __name__ == "__main__":  # pragma: no coverage

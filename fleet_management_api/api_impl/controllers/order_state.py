@@ -65,8 +65,22 @@ def create_order_states_from_argument_and_post(
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
     order_ids = [order_state.order_id for order_state in order_states]
-    orders: dict[int, _db_models.OrderDB | None] = _existing_orders(tenants, *order_ids)
-    for id_, order in orders.items():
+    unrestricted = _AccessibleTenants.from_dict({"current": "", "all": []})
+
+    all_orders = _existing_orders(unrestricted, *order_ids)
+    accessible_orders = _existing_orders(tenants, *order_ids)
+
+    all_order_ids = {order.id for order in all_orders.values() if order is not None}
+    accessible_order_ids = {order.id for order in accessible_orders.values() if order is not None}
+
+    inaccessible_order_ids = all_order_ids - accessible_order_ids
+    if inaccessible_order_ids:
+        return _log_error_and_respond(
+            f"Order with IDs={inaccessible_order_ids} are not accessible.",
+            401,
+            title="Unauthorized",
+        )
+    for id_, order in accessible_orders.items():
         if order is None:
             return _log_error_and_respond(
                 f"Order with id='{id_}' was not found.", 404, _OBJ_NOT_FOUND
@@ -78,7 +92,7 @@ def create_order_states_from_argument_and_post(
             last_states: list[_db_models.OrderStateDB] = _db_access.get(
                 tenants,
                 _db_models.OrderStateDB,
-                criteria={"order_id": lambda x: x == order_id},
+                criteria={"order_id": lambda x, order_id=order_id: x == order_id},
                 sort_result_by={"timestamp": "desc", "id": "desc"},
                 first_n=1,
             )
@@ -105,7 +119,7 @@ def create_order_states_from_argument_and_post(
     db_models: list[_db_models.OrderStateDB] = []
     for state in order_states:
         db_model = _obj_to_db.order_state_to_db_model(state)
-        order = orders[state.order_id]
+        order = accessible_orders[state.order_id]
         assert order is not None
         db_model.car_id = order.car_id
         db_models.append(db_model)
@@ -198,16 +212,14 @@ def _existing_orders(
     tenants: _AccessibleTenants, *order_ids: int
 ) -> dict[int, _db_models.OrderDB | None]:
     order_ids = tuple(dict.fromkeys(order_ids).keys())
-    models: dict[int, _db_models.OrderDB | None] = dict()
+    orders: dict[int, _db_models.OrderDB | None] = dict()
+
     for id_ in order_ids:
-        models_with_id = _db_access.get(
-            tenants, _db_models.OrderDB, criteria={"id": lambda x: x == id_}
+        orders_with_id = _db_access.get(
+            tenants, _db_models.OrderDB, criteria={"id": lambda x, id_=id_: x == id_}
         )
-        if models_with_id:
-            models[id_] = models_with_id[0]
-        else:
-            models[id_] = None
-    return models
+        orders[id_] = orders_with_id[0] if orders_with_id else None
+    return orders
 
 
 def _get_order_states(

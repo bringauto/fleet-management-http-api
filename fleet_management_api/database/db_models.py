@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Protocol
 
 from sqlalchemy import (
     Boolean,
@@ -14,6 +14,8 @@ from sqlalchemy import (
     event,
 )
 from sqlalchemy.orm import Session, Mapped, DeclarativeBase, mapped_column, relationship
+
+from fleet_management_api.api_impl.tenants import TenantNotAccessible as _TenantNotAccessible
 
 
 OrderId = int
@@ -31,6 +33,36 @@ def _unique_name_under_tenant(table_name: str) -> UniqueConstraint:
     The item name must be unique under a tenant and can be repeated across tenants.
     """
     return UniqueConstraint(TENANT_ID_NAME, "name", name=f"name_under_tenant_{table_name}")
+
+
+class SessionWithTenants(Session):
+
+    def __init__(self, *args, tenants: Tenants, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._tenants = tenants
+
+    @property
+    def tenants(self) -> Tenants:
+        return self._tenants
+
+    @classmethod
+    def object_session(cls, instance) -> SessionWithTenants:
+        return super().object_session(instance)
+
+
+class Tenants(Protocol):
+    """Protocol for a class that provides the current tenant and all accessible tenants."""
+
+    @property
+    def current(self) -> str: ...
+
+    @property
+    def all(self) -> list[str]: ...
+
+    @property
+    def unrestricted(self) -> bool: ...
+
+    def is_accessible(self, tenant_name: str) -> bool: ...
 
 
 class Base(DeclarativeBase):
@@ -372,27 +404,33 @@ class TestItem(Base):
 
 # Event listener to set tenant_id before insert or update
 @event.listens_for(CarStateDB, "before_insert")
-@event.listens_for(CarStateDB, "before_update")
 def set_car_state_tenant_id(mapper, connection, target):
-    _use_ref_tenant_id(mapper, connection, target, "car_id")
+    _use_ref_tenant_id(mapper, connection, target, "car_id", CarDB)
 
 
 # Event listener to set tenant_id before insert or update
 @event.listens_for(CarActionStateDB, "before_insert")
-@event.listens_for(CarActionStateDB, "before_update")
-def set_car_state_tenant_id(mapper, connection, target):
-    _use_ref_tenant_id(mapper, connection, target, "car_id")
+def set_car_action_state_tenant_id(mapper, connection, target):
+    _use_ref_tenant_id(mapper, connection, target, "car_id", CarDB)
 
 
 # Event listener to set tenant_id before insert or update
 @event.listens_for(OrderStateDB, "before_insert")
-@event.listens_for(OrderStateDB, "before_update")
-def set_car_state_tenant_id(mapper, connection, target):
-    _use_ref_tenant_id(mapper, connection, target, "order_id")
+def set_order_state_tenant_id(mapper, connection, target):
+    _use_ref_tenant_id(mapper, connection, target, "order_id", OrderDB)
 
 
-def _use_ref_tenant_id(mapper: Base, connection, target, ref_id: str):
-    session = Session.object_session(target)
+def _use_ref_tenant_id(mapper: Base, connection, target, ref_id: str, ref_base: type[Base]):
+    session = SessionWithTenants.object_session(target)
     if session:
-        car = session.query(CarDB).filter_by(id=getattr(target, ref_id)).one()
-        target.tenant_id = car.tenant_id
+        ref = session.query(ref_base).filter_by(id=getattr(target, ref_id)).one()
+        assert hasattr(ref, "tenant_id"), f"Reference {ref_base} does not have tenant_id."
+        tenant_id = ref.tenant_id
+        tenant = session.query(TenantDB).filter_by(id=tenant_id).one()
+        if tenant:
+            if session.tenants.is_accessible(tenant.name):
+                target.tenant_id = ref.tenant_id
+            else:
+                raise _TenantNotAccessible(f"Tenant '{tenant.name}' is not accessible.")
+        else:
+            raise ValueError(f"Tenant with ID {tenant_id} not found.")

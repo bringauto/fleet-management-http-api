@@ -14,7 +14,12 @@ from sqlalchemy.orm import (
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 
 from fleet_management_api.logs import LOGGER_NAME
-from fleet_management_api.database.db_models import Base as _Base, TenantDB as _TenantDB
+from fleet_management_api.database.db_models import (
+    Base as _Base,
+    TenantDB as _TenantDB,
+    Tenants as Tenants,
+    SessionWithTenants as _SessionWithTenants,
+)
 from fleet_management_api.database.connection import (
     get_current_connection_source as _get_current_connection_source,
     restart_connection_source as _restart_connection_source,
@@ -25,7 +30,10 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
 )
-from fleet_management_api.api_impl.tenants import NO_TENANTS as _NO_TENANTS
+from fleet_management_api.api_impl.tenants import (
+    NO_TENANTS as _NO_TENANTS,
+    TenantNotAccessible as _TenantNotAccessible,
+)
 
 
 P = ParamSpec("P")
@@ -63,19 +71,6 @@ class TenantDoesNotExist(Exception):
     """Raised when the tenant does not exist in the database."""
 
     pass
-
-
-class Tenants(Protocol):
-    """Protocol for a class that provides the current tenant and all accessible tenants."""
-
-    @property
-    def current(self) -> str: ...
-
-    @property
-    def all(self) -> list[str]: ...
-
-    @property
-    def unrestricted(self) -> bool: ...
 
 
 @dataclasses.dataclass(frozen=True)
@@ -216,7 +211,7 @@ def add(
             return _error(500, msg, title="Tenant does not exist.")
 
     global _wait_mg
-    with _Session(source) as session:
+    with _SessionWithTenants(source, tenants=tenants) as session:
         try:
             if checked is not None:
                 result = _check_before_add(session, checked)
@@ -228,6 +223,8 @@ def add(
             session.commit()
             _wait_mg.notify_about_content(added[0].__tablename__, added)
             return _json_response([obj.copy() for obj in added])
+        except _TenantNotAccessible as e:
+            return _error(401, str(e), title="Tenant not accessible")
         except DatabaseRecordValueError as e:
             return _error(
                 400,

@@ -7,12 +7,11 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
 from fleet_management_api.api_impl.auth_controller import (
     get_test_public_key,
-    get_client_id,
     set_auth_params,
     generate_test_keys,
 )
 
-from tests._utils.setup_utils import create_platform_hws, TenantFromTokenMock
+from tests._utils.setup_utils import create_platform_hws
 import tests._utils.api_test as api_test
 from tests._utils.constants import TEST_TENANT_NAME
 
@@ -542,10 +541,9 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
             for state in response.json:
                 self.assertEqual(state["status"], "out_of_order")
 
-    def test_posting_car_state_to_tenant_is_allowed_even_without_cookie_being_set_if_state_is_for_car_owned_by_accessible_tenant(
+    def test_posting_car_state_is_allowed_without_cookie_set_if_car_is_owned_by_accessible_tenant(
         self,
-    ) -> None:
-
+    ):
         # car with id 1 is owned by tenant_A
         state = CarState(status="idle", car_id=1)
         with self.app.app.test_client() as c:
@@ -560,6 +558,19 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
             assert response.json is not None, response.json
             self.assertEqual(response.json[0]["status"], "idle")
             self.assertEqual(response.json[0]["carId"], 1)
+
+    def test_posting_car_state_is_not_allowed_if_car_is_owned_by_inaccessible_tenant(self):
+        # car with id 5 is owned by tenant_C
+        state = CarState(status="idle", car_id=5)
+        with self.app.app.test_client() as c:
+            c.set_cookie("", "tenant", "")
+            # post to car owned by tenant_C, that is inaccessible (missing from the token)
+            response = c.post(
+                "/v2/management/carstate",
+                headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
+                json=[state],
+            )
+            self.assertEqual(response.status_code, 401)
 
 
 if __name__ == "__main__":  # pragma: no coverage

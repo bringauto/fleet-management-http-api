@@ -3,7 +3,6 @@ import json
 import logging
 
 import jwt
-import connexion  # type: ignore
 from connexion.lifecycle import ConnexionRequest  # type: ignore
 from connexion.exceptions import Unauthorized  # type: ignore
 from fleet_management_api.api_impl.load_request import Request as _Request
@@ -16,6 +15,12 @@ _logger = logging.getLogger(LOGGER_NAME)
 
 class UsingEmptyTenant(Exception):
     """Raise when trying use an empty tenant."""
+
+    pass
+
+
+class TenantNotAccessible(Exception):
+    """Raise when the tenant is not accessible."""
 
     pass
 
@@ -102,6 +107,26 @@ class AccessibleTenants:
     def unrestricted(self) -> bool:
         """Return True if all tenants existing in the database (regardless of permissions) can be accessed for reading."""
         return self._current == "" and not bool(self._all_accessible)
+
+    @staticmethod
+    def from_dict(data: dict) -> AccessibleTenantsFromDict:
+        """Return an object created from a dictionary."""
+        return AccessibleTenantsFromDict(data)
+
+    def is_accessible(self, tenant_name: str) -> bool:
+        """Return True if the tenant is accessible."""
+        return (tenant_name in self._all_accessible) or not bool(self._all_accessible)
+
+    def copy(self) -> AccessibleTenants:
+        """Return a copy of the current object."""
+        return AccessibleTenants.from_dict({"current": self._current, "all": self._all_accessible})
+
+
+class AccessibleTenantsFromDict(AccessibleTenants):
+
+    def __init__(self, data: dict) -> None:
+        self._current = data.get("current", "")
+        self._all_accessible = data.get("all", [])
 
 
 class _EmptyTenant(AccessibleTenants):
