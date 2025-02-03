@@ -49,7 +49,7 @@ def create_stops() -> _Response:
     else:
         return _error(
             response.status_code,
-            f"Stops (name='{[s.name for s in stop_db_models]})' could not be created. {response.body['detail']}",
+            f"The requested stops could not be created. {response.body['detail']}",
             title=response.body["title"],
         )
 
@@ -133,7 +133,7 @@ def update_stops() -> _Response:
         updated_stops: list[_db_models.StopDB] = response.body
         for s in updated_stops:
             _log_info(f"Stop (ID={s.id}) has been succesfully updated.")
-        return _text_response(f"Stops {[s.name for s in updated_stops]} were succesfully updated.")
+        return _text_response(f"{len(updated_stops)} stop(s) were successfully updated.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(
