@@ -41,7 +41,7 @@ class Request(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def get_data(cls, request: _Request) -> bool:
+    def get_data(cls, request: _Request) -> Any:
         pass
 
     @classmethod

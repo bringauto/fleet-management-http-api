@@ -15,7 +15,7 @@ class TenantFromTokenMock:
         return not self.current and not self.all
 
     def is_accessible(self, tenant_name: str) -> bool:
-        return not (self.all) or tenant_name in self.all
+        return len(self.all) == 0 or tenant_name in self.all
 
 
 def create_platform_hws(
@@ -56,4 +56,6 @@ def create_route(
     with app.app.test_client(tenant) as c:
         c.set_cookie("localhost", "tenant", tenant)
         route = _models.Route(name=f"test_route_{timestamp_ms()}", stop_ids=stop_ids)
-        c.post(f"/v2/management/route?api_key={api_key}", json=[route])
+        response = c.post(f"/v2/management/route?api_key={api_key}", json=[route])
+        assert response.status_code == 200, f"Failed to create route (tenant: {tenant}): {response.json}"
+        assert response.json is not None, "Empty response received"

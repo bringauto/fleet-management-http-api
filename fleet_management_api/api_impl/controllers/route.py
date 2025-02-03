@@ -100,7 +100,7 @@ def delete_route(route_id: int) -> _Response:
         return _log_info_and_respond(route_deletion_msg)
 
 
-def get_route(route_id: int, tenant: str = "") -> _Route:
+def get_route(route_id: int) -> _Route:
     """Get an existing route identified by 'route_id'."""
     request = _RequestEmpty.load()
     if not request:
@@ -194,8 +194,9 @@ def _find_nonexistent_stops(tenants: _AccessibleTenants, *routes: _Route) -> _Re
     for route in routes:
         checked_id_set: set[int] = set(route.stop_ids)
         for id_ in checked_id_set:
-            foo = lambda x, id_: x == id_
-            _db_access.exists(tenants, _StopDB, criteria={"id": partial(foo, id_=id_)})
+            def check_id(x: int, id_: int) -> bool:
+                return x == id_
+            _db_access.exists(tenants, _StopDB, criteria={"id": partial(check_id, id_=id_)})
         existing_ids = set([stop_id.id for stop_id in _db_access.get(tenants, _StopDB)])
         nonexistent_stop_ids = checked_id_set.difference(existing_ids)
         if nonexistent_stop_ids:

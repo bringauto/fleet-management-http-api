@@ -196,6 +196,20 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
             self.assertEqual(response_1.json[0]["name"], "Car")
             self.assertEqual(response_2.json[0]["name"], "Car")
 
+    def test_car_access_across_tenant_boundaries_is_prevented(self):
+        car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
+        with self.app.app.test_client() as client:
+            # Create car in tenant_1
+            client.set_cookie("", "tenant", "tenant_1")
+            response = client.post("/v2/management/car?api_key=testAPIKey", json=[car])
+            self.assertEqual(response.status_code, 200)
+            car_id = response.json[0]["id"]
+
+            # Attempt to access from tenant_2
+            client.set_cookie("", "tenant", "tenant_2")
+            response = client.get(f"/v2/management/car/{car_id}?api_key=testAPIKey")
+            self.assertEqual(response.status_code, 404)
+
     def tearDown(self):
         clear_auth_params()
         clear_test_keys()

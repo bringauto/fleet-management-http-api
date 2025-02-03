@@ -271,6 +271,10 @@ class Test_Adding_Tenants_To_Database(api_test.TestCase):
     def tearDown(self):
         clear_auth_params()
         clear_test_keys()
+        # Clean up test tenants
+        with self.app.app.test_client() as client:
+            for tenant in ["tenant_1", "tenant_2", "other_tenant"]:
+                client.delete(f"/v2/management/tenant/{tenant}?api_key=testAPIKey")
 
 
 if __name__ == "__main__":  # pragma: no cover

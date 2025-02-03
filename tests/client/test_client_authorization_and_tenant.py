@@ -41,7 +41,9 @@ def wait_for_process(app: TestApp, process: multiprocessing.Process, timeout: fl
         try:
             api_api.check_api_is_alive()
             break
-        except:
+        except Exception as e:
+            # Log the error for debugging
+            print(f"Server not ready: {e}")
             time.sleep(retry_interval)
     else:
         process.terminate()

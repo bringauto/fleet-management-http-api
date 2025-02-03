@@ -11,11 +11,15 @@ from tests._utils.setup_utils import TenantFromTokenMock
 from tests._utils.constants import TEST_TENANT_NAME
 
 
+def _set_up_test_data():
+    _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+
+
 class Test_Creating_Records(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_adding_single_record_to_database_succesfully(self):
@@ -46,9 +50,9 @@ class Test_Creating_Records(api_test.TestCase):
 
 class Test_Sending_And_Retrieving_From_Database(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_table_is_initially_empty(self):
@@ -95,9 +99,9 @@ class Test_Sending_And_Retrieving_From_Database(api_test.TestCase):
 
 class Test_Updating_Records(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_updating_an_existing_record(self):
@@ -145,9 +149,9 @@ class Test_Updating_Records(api_test.TestCase):
 
 class Test_Retrieving_Multiple_Records_By_Ids(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_getting_items_by_id(self):
@@ -168,9 +172,9 @@ class Test_Retrieving_Multiple_Records_By_Ids(api_test.TestCase):
 
 class Test_Deleting_Database_Record(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_deleting_an_existing_record(self):
@@ -190,9 +194,9 @@ class Test_Deleting_Database_Record(api_test.TestCase):
 
 class Test_Deleting_N_Database_Records(api_test.TestCase):
 
-    def setUp(self, test_db_path: str = "") -> None:
+    def setUp(self, *args, test_db_path: str = "", **kwargs) -> None:
         super().setUp(test_db_path)
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_NAME))
+        _set_up_test_data()
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def test_deleting_n_records_with_least_ids(self):

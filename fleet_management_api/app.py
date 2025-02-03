@@ -147,6 +147,9 @@ class _TestClient(_FlaskClient):
         return {"Authorization": f"Bearer {token}"}
 
 
+TEST_API_KEY_NAME = "test_key"
+
+
 def get_test_app(
     predef_api_key: str = "",
     accessible_tenants: Optional[list[str]] = None,
@@ -161,10 +164,14 @@ def get_test_app(
     """
     try:
         _db_access.add_without_tenant(
-            _ApiKeyDB(key=predef_api_key, name="test_key", creation_timestamp=_timestamp_ms()),
+            _ApiKeyDB(
+                key=predef_api_key, name=TEST_API_KEY_NAME, creation_timestamp=_timestamp_ms()
+            ),
         )
-    except:
-        print("API key already exists")
+    except _db_access.DuplicateError:
+        print(f"API key under name {TEST_API_KEY_NAME} already exists.")
+    except Exception as e:
+        print(f"Error when adding API key: {e}.")
     if accessible_tenants is None:
         accessible_tenants = []
 
