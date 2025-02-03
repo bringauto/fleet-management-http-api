@@ -49,6 +49,12 @@ ColumnName = str
 Criteria = dict[str, Callable[[Any], bool]] | None
 
 
+class DuplicateError(Exception):
+    """Raised when an object already exists in the database."""
+
+    pass
+
+
 class ParentNotFound(Exception):
     """Raised when the parent object does not exist in the database."""
 
