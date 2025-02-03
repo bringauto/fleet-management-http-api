@@ -61,6 +61,8 @@ def info_from_APIKeyAuth(api_key, *args) -> None | dict:
     :rtype: dict | None
     """
 
+    print("\nVerifying key and returning key info\n")
+
     code, info = _verify_key_and_return_key_info(api_key)
     if code == 200:
         return {"name": info.name}  # type: ignore

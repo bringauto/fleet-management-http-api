@@ -301,6 +301,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
+      security: []
       summary: Check HTTP server is running and accessible.
       tags:
       - api
