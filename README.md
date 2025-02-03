@@ -197,6 +197,24 @@ To get Keycloak authentication working, all parameters in the security section o
 - scope : checking of scopes is not yet implemented (must be `email` for now).
 - realm : realm in which the client belongs (seen on top of the left side panel in Keycloak GUI).
 
+## Multi-tenant support
+
+The API supports multi-tenancy. Each entity except for API keys and Tenants has a Tenant ID attribute representing the Tenant to which the entity belongs.
+
+When creating or updating non-state Entities (including e.g. Car and excluding CarState), the tenant has to be set in a cookie or in the header of the request to inform the server to which tenant the entity belongs.
+
+### Semi-automatic setup of the tenant cookie
+
+The server supports the semi-automatic setup of the tenant cookie for cases, when it cannot be set up directly (an example is the Swagger UI).
+
+This is done by calling the `HEAD` method on the endpoint `/v2/management/tenant/{tenantId}` - the server will then send response including the header `Set-Cookie` with the tenant ID.
+
+The given client should then use this header to set up the tenant cookie.
+
+Note that when the tenant name is known, its corresponding `tenantId` can be found by calling the GET method on the endpoint `/v2/management/tenant`, listing all tenants the client has access to.
+
+See the [docs](docs/tenants.md) for more information on the access to tenants.
+
 # Development
 
 Before contributing to the project, make sure you have read the section (testing)[#testing] and (server re-generation)[#server-re-generation].

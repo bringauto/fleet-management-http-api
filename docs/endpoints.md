@@ -673,3 +673,16 @@ Response codes:
 - 400: Bad request. The tenantId is not a valid integer.
 - 404: Not found. The Tenant with the given ID does not exist.
 - 500: Internal server error.
+
+
+### HEAD
+
+Return response containing `Set-Cookie` header with the tenant ID. It serves for setting the current tenant
+used for creating new entities on the server and for reading data for the specified tenant only.
+
+Response format: JSON array of Tenant objects.
+
+Response codes:
+
+- 200: Successfully found tenants.
+- 500: Internal server error.
