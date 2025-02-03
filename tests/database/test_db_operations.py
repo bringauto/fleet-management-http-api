@@ -1,7 +1,4 @@
 import unittest
-import sys
-
-sys.path.append(".")
 
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import TenantDB
