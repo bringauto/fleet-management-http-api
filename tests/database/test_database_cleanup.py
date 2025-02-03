@@ -11,7 +11,9 @@ from tests._utils.constants import TEST_TENANT_NAME
 from tests._utils.setup_utils import TenantFromTokenMock
 
 
-DB_NAME = "test_management_api"
+DB_NAME = "test_db"
+DOCKER_COMPOSE_FILE_PATH = "tests/_utils/docker-compose.yaml"
+PASSWORD = "1234"
 
 
 def wait_for_db(max_retries=50, delay=0.1):
@@ -19,7 +21,7 @@ def wait_for_db(max_retries=50, delay=0.1):
     while retries < max_retries:
         try:
             conn = psycopg2.connect(
-                dbname=DB_NAME, user="postgres", password="1234", host="localhost", port=5432
+                dbname=DB_NAME, user="postgres", password=PASSWORD, host="localhost", port=5432
             )
             conn.close()
             print(f"Connection to the test database '{DB_NAME}' has been created.")
@@ -32,8 +34,8 @@ def wait_for_db(max_retries=50, delay=0.1):
 
 def restart_database():
     try:
-        subprocess.run(["docker", "compose", "down", "postgresql-database"])
-        subprocess.run(["docker", "compose", "up", "postgresql-database", "-d"])
+        subprocess.run(["docker", "compose", "-f", DOCKER_COMPOSE_FILE_PATH, "down", "-v"])
+        subprocess.run(["docker", "compose", "-f", DOCKER_COMPOSE_FILE_PATH, "up", "-d"])
     except subprocess.CalledProcessError as e:
         print(f"Failed to restart database: {e}")
         raise
@@ -47,47 +49,45 @@ class Test_Database_Cleanup(unittest.TestCase):
 
     def setUp(self):
         restart_database()
-        _connection.set_connection_source(
-            "localhost", 5432, "test_management_api", "postgres", "1234"
-        )
+        _connection.set_connection_source("localhost", 5432, "test_db", "postgres", PASSWORD)
         _db_access.add_without_tenant(_db_models.TenantDB(name=TEST_TENANT_NAME))
-        self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
+        self.tenants = TenantFromTokenMock(TEST_TENANT_NAME)
 
     def _set_up_test_data(self):
-        _db_access.add(self.tenant, _db_models.PlatformHWDB(name="platform1"))
+        _db_access.add(self.tenants, _db_models.PlatformHWDB(name="platform1"))
         _db_access.add(
-            self.tenant, _db_models.CarDB(name="car1", platform_hw_id=1, under_test=True)
+            self.tenants, _db_models.CarDB(name="car1", platform_hw_id=1, under_test=True)
         )
 
     def test_empty_result_is_returned_after_database_is_stopped_and_cleaned_up(self):
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(self.tenant, _db_models.CarDB)[0].name, "car1")
+        self.assertEqual(_db_access.get(self.tenants, _db_models.CarDB)[0].name, "car1")
         restart_database()
 
         _db_access.add_tenants(TEST_TENANT_NAME)
-        cars = _db_access.get(tenants=self.tenant, base=_db_models.CarDB)
+        cars = _db_access.get(tenants=self.tenants, base=_db_models.CarDB)
         self.assertFalse(cars)
 
     def test_object_can_be_added_after_database_cleanup(self):
         restart_database()
         _db_access.add_tenants(TEST_TENANT_NAME)
         self._set_up_test_data()
-        self.assertEqual(_db_access.get(self.tenant, _db_models.CarDB)[0].name, "car1")
+        self.assertEqual(_db_access.get(self.tenants, _db_models.CarDB)[0].name, "car1")
 
     def test_deleting_object_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()
         restart_database()
         _db_access.add_tenants(TEST_TENANT_NAME)
-        response = _db_access.delete(self.tenant, _db_models.CarDB, id_=1)
+        response = _db_access.delete(self.tenants, _db_models.CarDB, id_=1)
         self.assertEqual(response.status_code, 404)
 
     def test_deleting_n_objects_after_database_cleanup_fails_but_the_table_exists(self):
         self._set_up_test_data()
         _db_access.add(
-            self.tenant, _db_models.CarDB(name="car2", platform_hw_id=1, under_test=True)
+            self.tenants, _db_models.CarDB(name="car2", platform_hw_id=1, under_test=True)
         )
         _db_access.add(
-            self.tenant, _db_models.CarDB(name="car3", platform_hw_id=1, under_test=True)
+            self.tenants, _db_models.CarDB(name="car3", platform_hw_id=1, under_test=True)
         )
         restart_database()
         _db_access.add_tenants(TEST_TENANT_NAME)
@@ -105,7 +105,10 @@ class Test_Database_Cleanup(unittest.TestCase):
 
     def tearDown(self) -> None:
         try:
-            subprocess.run(["docker", "compose", "down", "postgresql-database"], check=True)
+            subprocess.run(
+                ["docker", "compose", "-f", DOCKER_COMPOSE_FILE_PATH, "down"],
+                check=True,
+            )
         except subprocess.CalledProcessError as e:
             print(f"Error stopping database: {e}")
 

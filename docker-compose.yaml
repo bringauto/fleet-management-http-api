@@ -1,5 +1,4 @@
 services:
-
   server:
     restart: always
     build:
@@ -13,8 +12,7 @@ services:
       - ./log:/home/bringauto/log/
     networks:
       - api-network
-    command:
-      ["config/config.json", "--location", "postgresql-database"]
+    command: ["config/config.json", "--location", "postgresql-database"]
 
   postgresql-database:
     image: postgres:16
