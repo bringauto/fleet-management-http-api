@@ -6,8 +6,8 @@ This API provides communication between end-users and the Fleet Management syste
 - define new stops and routes and make changes,
 - send orders to the cars and review and manage them.
 
-The data sent to the API are processed in other parts of the Fleet system into commands sent to the respective cars.
-In the other direction, the data from the cars are sent back to the API to make them accessible to the end-users.
+The data sent to the API is processed in other parts of the Fleet system into commands sent to the respective cars.
+In the other direction, the data from the cars is sent back to the API to make it accessible to the end-users.
 
 ## Implementation details
 

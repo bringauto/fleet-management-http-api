@@ -11,7 +11,7 @@ paths:
         - $ref: "common_models.yaml#/components/parameters/TenantId"
       tags:
         - tenant
-      summary: Make the server to send back response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
+      summary: Make the server send back a response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
       responses:
         "200":
           description: The tenant with tenantId is accessible and its name is included in the Set-Cookie header.
@@ -32,7 +32,7 @@ paths:
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
       tags:
         - tenant
-      summary: Find and return all existing Tenant.
+      summary: Find and return all existing Tenants.
       responses:
         "200":
           description: All the currently existing Tenants have been returned.
