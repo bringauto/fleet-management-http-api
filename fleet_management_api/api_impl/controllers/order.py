@@ -12,6 +12,8 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.api_impl.api_logging import (
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
+    log_warning as _log_warning,
+    log_warning_and_respond as _log_warning_and_respond,
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
@@ -193,7 +195,7 @@ def create_orders() -> _Response:
         order.last_state = None  # type: ignore
         car_id = order.car_id
         if not _car_exist(car_id):
-            return _log_error_and_respond(
+            return _log_warning_and_respond(
                 f"Car with ID={car_id} does not exist.", 404, _OBJ_NOT_FOUND
             )
         checked.extend(
@@ -271,7 +273,7 @@ def get_order(car_id: int, order_id: int) -> _Response:
     )
     if len(order_db_models) == 0:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
-        _log_error(msg)
+        _log_warning(msg)
         return _error(404, msg, _OBJ_NOT_FOUND)
     else:
         db_order = order_db_models[0]
@@ -283,7 +285,7 @@ def get_order(car_id: int, order_id: int) -> _Response:
 def get_car_orders(car_id: int, since: int = 0) -> _Response:
     """Get all orders for a given car."""
     if not _car_exist(car_id):
-        return _log_error_and_respond(
+        return _log_warning_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title=_OBJ_NOT_FOUND
         )
     db_orders: list[_db_models.OrderDBModel] = _db_access.get_children(  # type: ignore

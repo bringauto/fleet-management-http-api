@@ -8,6 +8,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
+    log_warning_and_respond as _log_warning_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
@@ -131,7 +132,7 @@ def get_car_states(car_id: int, since: int = 0, wait: bool = False, last_n: int 
         car_states.sort(key=lambda x: x.timestamp)
         return _json_response(car_states)
     except _db_access.ParentNotFound as e:
-        return _log_error_and_respond(
+        return _log_warning_and_respond(
             f"Car with ID={car_id} not found. {e}",
             404,
             title="Referenced object not found",

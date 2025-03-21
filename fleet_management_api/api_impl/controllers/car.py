@@ -23,6 +23,7 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
+    log_warning_and_respond as _log_warning_and_respond,
     log_error_and_respond as _log_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
@@ -115,7 +116,7 @@ def get_car(car_id: int) -> _Response:
         omitted_relationships=[_db_models.CarDBModel.orders],
     )
     if len(db_cars) == 0:
-        return _log_error_and_respond(
+        return _log_warning_and_respond(
             f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
