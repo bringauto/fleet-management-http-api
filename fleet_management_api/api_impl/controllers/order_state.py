@@ -47,7 +47,7 @@ def create_order_states() -> _Response:
     try:
         order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
         )
     return create_order_states_from_argument_and_post(tenants, order_states)
@@ -82,7 +82,7 @@ def create_order_states_from_argument_and_post(
         )
     for id_, order in accessible_orders.items():
         if order is None:
-            return _log_error_and_respond(
+            return _log_info_and_respond(
                 f"Order with id='{id_}' was not found.", 404, _OBJ_NOT_FOUND
             )
         assert order is not None, "Order is None"
@@ -99,14 +99,14 @@ def create_order_states_from_argument_and_post(
             if last_states:
                 last_state = last_states[0]
                 if last_state.status == _models.OrderStatus.DONE:
-                    return _log_error_and_respond(
+                    return _log_info_and_respond(
                         f"Order with id='{last_state.order_id}' has already received status DONE."
                         "No other Order State can be added.",
                         403,
                         title=_CANNOT_CREATE_OBJECT,
                     )
                 elif last_state.status == _models.OrderStatus.CANCELED:
-                    return _log_error_and_respond(
+                    return _log_info_and_respond(
                         f"Order with id='{last_state.order_id}' has already received status CANCELED."
                         "No other Order State can be added.",
                         403,
@@ -201,7 +201,7 @@ def get_order_states(
         return _log_invalid_request_body_format()
     tenants = _AccessibleTenants(request)
     if _existing_orders(tenants, order_id)[order_id] is None:
-        _log_error(f"Order with id='{order_id}' was not found. Cannot get its states.")
+        _log_info(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}

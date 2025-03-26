@@ -122,7 +122,7 @@ def get_car(car_id: int) -> _Response:
         omitted_relationships=[_db_models.CarDB.orders],
     )
     if len(db_cars) == 0:
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
