@@ -10,8 +10,6 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
-    log_warning as _log_warning,
-    log_warning_and_respond as _log_warning_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
@@ -45,7 +43,7 @@ def create_order_states() -> _Response:
             _models.OrderState.from_dict(item) for item in _connexion.request.get_json()
         ]
     except (ValueError, TypeError) as e:
-        return _log_warning_and_respond(
+        return _log_info_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
         )
     return create_order_states_from_argument_and_post(order_states)
@@ -64,7 +62,7 @@ def create_order_states_from_argument_and_post(
     orders: dict[int, _db_models.OrderDBModel | None] = _existing_orders(*order_ids)
     for id_, order in orders.items():
         if order is None:
-            return _log_warning_and_respond(
+            return _log_info_and_respond(
                 f"Order with id='{id_}' was not found.", 404, _OBJ_NOT_FOUND
             )
         assert order is not None
@@ -78,14 +76,14 @@ def create_order_states_from_argument_and_post(
             if last_states:
                 last_state = last_states[0]
                 if last_state.status == _models.OrderStatus.DONE:
-                    return _log_warning_and_respond(
+                    return _log_info_and_respond(
                         f"Order with id='{last_state.order_id}' has already received status DONE."
                         "No other Order State can be added.",
                         403,
                         title=_CANNOT_CREATE_OBJECT,
                     )
                 elif last_state.status == _models.OrderStatus.CANCELED:
-                    return _log_warning_and_respond(
+                    return _log_info_and_respond(
                         f"Order with id='{last_state.order_id}' has already received status CANCELED."
                         "No other Order State can be added.",
                         403,
@@ -168,7 +166,7 @@ def get_order_states(
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
     if _existing_orders(order_id)[order_id] is None:
-        _log_warning(f"Order with id='{order_id}' was not found. Cannot get its states.")
+        _log_info(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}

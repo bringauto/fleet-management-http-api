@@ -14,7 +14,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
-    log_warning_and_respond as _log_warning_and_respond,
+    log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
 )
 
@@ -39,7 +39,7 @@ def get_car_action_states(
     :rtype: ConnexionResponse
     """
     if not _db_access.get_by_id(_db_models.CarDBModel, car_id):
-        return _log_warning_and_respond(
+        return _log_info_and_respond(
             f"Car with ID={car_id} not found. Cannot get car action states.",
             404,
             title="Referenced object not found",
