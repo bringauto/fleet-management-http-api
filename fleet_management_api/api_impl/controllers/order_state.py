@@ -157,7 +157,6 @@ def get_all_order_states(
     since: int = 0,
     last_n: int = 0,
     car_id: Optional[int] = None,
-    tenant: str = "",
 ) -> _Response:
     """Get all order states for all the existing orders.
 
@@ -183,7 +182,7 @@ def get_all_order_states(
 
 
 def get_order_states(
-    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0, tenant: str = ""
+    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0
 ) -> _Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
