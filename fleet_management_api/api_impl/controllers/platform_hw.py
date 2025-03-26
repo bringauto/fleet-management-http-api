@@ -62,7 +62,7 @@ def get_hw(platform_hw_id: int) -> _Response:
     hw_models = _db_access.get(_db_models.PlatformHWDBModel, criteria={"id": lambda x: x == platform_hw_id})
     hws = [_obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
     if len(hws) == 0:
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             f"Platform HW with ID={platform_hw_id} was not found.",
             404,
             title=_OBJ_NOT_FOUND,
@@ -78,7 +78,7 @@ def delete_hw(platform_hw_id: int) -> _Response:
     The platform HW cannot be deleted if assigned to a Car.
     """
     if _db_access.exists(_db_models.CarDBModel, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",
             400,
             title="Cannot delete object",

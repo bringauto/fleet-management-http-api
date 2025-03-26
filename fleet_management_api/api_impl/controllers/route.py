@@ -47,7 +47,7 @@ def create_routes() -> _Response:
         for r in routes:
             check_response = _check_route_model(r)
             if check_response.status_code != 200:
-                return _log_error_and_respond(
+                return _log_info_and_respond(
                     check_response.body["detail"],
                     check_response.status_code,
                     check_response.body["title"],
@@ -76,7 +76,7 @@ def delete_route(route_id: int) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(route_id)
     if related_orders_response.status_code != 200:
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             related_orders_response.status_code,
             related_orders_response.status_code,
             related_orders_response.body,
@@ -104,7 +104,7 @@ def get_route(route_id: int) -> _Route:
         for route_db_model in route_db_models
     ]
     if len(routes) == 0:
-        return _log_error_and_respond(
+        return _log_info_and_respond(
             f"Route with ID={route_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
@@ -138,7 +138,7 @@ def update_routes() -> _Response:
         routes = [_Route.from_dict(item) for item in connexion.request.get_json()]
         check_stops_response = _find_nonexistent_stops(*routes)
         if check_stops_response.status_code != 200:
-            return _log_error_and_respond(
+            return _log_info_and_respond(
                 check_stops_response.body,
                 check_stops_response.status_code,
                 _OBJ_NOT_FOUND,

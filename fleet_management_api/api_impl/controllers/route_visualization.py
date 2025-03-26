@@ -14,6 +14,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
+    log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
@@ -67,7 +68,7 @@ def redefine_route_visualizations() -> _Response:
                 id_ = existing_vis_dict[v.route_id].id
                 v.id = id_  # type: ignore
             else:
-                return _log_error_and_respond(
+                return _log_info_and_respond(
                     f"Route visualization for route with ID={v.route_id} does not exist. Cannot redefine visualizations.",
                     404,
                     title=_OBJ_NOT_FOUND,
