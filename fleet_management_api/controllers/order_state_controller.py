@@ -47,7 +47,7 @@ def get_order_states(order_id, wait=None, since=None, last_n=None):  # noqa: E50
 
      # noqa: E501
 
-    :param order_id: ID of the Order for which to find the Order States.
+    :param order_id: The order ID.
     :type order_id: int
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool

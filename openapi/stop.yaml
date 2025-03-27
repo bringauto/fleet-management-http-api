@@ -14,25 +14,25 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Stop'
+                $ref: "#/components/schemas/Stop"
         required: true
       responses:
-        '200':
+        "200":
           description: The Stops have been successfully created.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Stop'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/Stop"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -40,33 +40,34 @@ paths:
         - stop
       summary: Find and return all existing Stops.
       responses:
-        '200':
+        "200":
           description: All the currently existing Stops have been returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Stop'
+                  $ref: "#/components/schemas/Stop"
               example:
                 [
                   {
                     "id": 1,
-                    "name": 'Lidická',
-                    "position": {
-                      "latitude": 49.204117,
-                      "longitude": 16.606525,
-                      "altitude": 400.25
-                    },
-                    "notificationPhone": {"phone":'+420123456789'}
-                  }
+                    "name": "Lidická",
+                    "position":
+                      {
+                        "latitude": 49.204117,
+                        "longitude": 16.606525,
+                        "altitude": 400.25,
+                      },
+                    "notificationPhone": { "phone": "+420123456789" },
+                  },
                 ]
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     put:
       operationId: updateStops
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -81,24 +82,24 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Stop'
+                $ref: "#/components/schemas/Stop"
         required: true
       responses:
-        '200':
+        "200":
           description: The Stops have been successfully updated.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /stop/{stopId}:
     get:
       operationId: getStop
@@ -107,31 +108,24 @@ paths:
         - stop
       summary: Find and return a single Stop by its ID.
       parameters:
-        - name: stopId
-          in: path
-          description: ID of Stop to be returned.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/StopId"
       responses:
-        '200':
+        "200":
           description: The Stop with the specified ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Stop'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/Stop"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     delete:
       operationId: deleteStop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
@@ -139,32 +133,25 @@ paths:
         - stop
       summary: Delete a Stop with the specified ID.
       parameters:
-        - name: stopId
-          in: path
-          description: ID of the Stop to be deleted.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/StopId"
       responses:
-        '200':
+        "200":
           description: The Stop with the specified ID has been deleted.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 components:
   schemas:
     Stop:
@@ -175,14 +162,14 @@ components:
         - position
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         name:
           type: string
-          example: 'Lidická'
+          example: "Lidická"
         position:
-          $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+          $ref: "common_models.yaml#/components/schemas/GNSSPosition"
         notificationPhone:
-          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+          $ref: "common_models.yaml#/components/schemas/MobilePhone"
         isAutoStop:
           type: boolean
           description: If set to true, an Order to this Stop is always automatically created when creating Orders for the Route containing this Stop.

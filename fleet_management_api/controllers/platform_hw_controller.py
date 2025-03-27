@@ -28,7 +28,7 @@ def delete_hw(platform_hw_id):  # noqa: E501
 
      # noqa: E501
 
-    :param platform_hw_id: ID of Platform HW to delete.
+    :param platform_hw_id: The Platform HW ID.
     :type platform_hw_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -41,7 +41,7 @@ def get_hw(platform_hw_id):  # noqa: E501
 
      # noqa: E501
 
-    :param platform_hw_id: ID of the Platform HW to return.
+    :param platform_hw_id: The Platform HW ID.
     :type platform_hw_id: int
 
     :rtype: Union[PlatformHW, Tuple[PlatformHW, int], Tuple[PlatformHW, int, Dict[str, str]]

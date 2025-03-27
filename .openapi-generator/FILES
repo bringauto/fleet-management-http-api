@@ -9,6 +9,7 @@ fleet_management_api/controllers/order_state_controller.py
 fleet_management_api/controllers/platform_hw_controller.py
 fleet_management_api/controllers/route_controller.py
 fleet_management_api/controllers/stop_controller.py
+fleet_management_api/controllers/tenant_controller.py
 fleet_management_api/encoder.py
 fleet_management_api/models/__init__.py
 fleet_management_api/models/base_model.py
@@ -27,6 +28,7 @@ fleet_management_api/models/platform_hw.py
 fleet_management_api/models/route.py
 fleet_management_api/models/route_visualization.py
 fleet_management_api/models/stop.py
+fleet_management_api/models/tenant.py
 fleet_management_api/openapi/openapi.yaml
 fleet_management_api/test/__init__.py
 fleet_management_api/typing_utils.py

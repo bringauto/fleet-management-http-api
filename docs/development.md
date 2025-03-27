@@ -3,6 +3,7 @@
 The models used by the API include models with assigned states. Current examples are
 
 - Car and Car State,
+- Car and Car Action State,
 - Order and Order State.
 
 ## Entity State
@@ -30,3 +31,14 @@ For both of these, further filtering must be available:
 ### Last State
 
 Each Entity has an attribute "lastState", containing the newest State of the Entity (i.e., State with the largest timestamp, or possibly, largest ID, if some states share the same timestamp).
+
+## Tenant
+
+Each entity except for API keys and Tenants have a Tenant ID attribute representing the Tenant to which the entity belongs.
+
+For non-state Entities, the tenant has to be set in a cookie or in the header of the request to inform the server to which tenant
+the entity belongs.
+
+Entity States are exceptions to this rule. The Tenant ID is automatically set by the server when the entity is created. The Tenant ID is equal to the Tenant ID of the corresponding Entity.
+
+The rule is, the Entity belongs to a tenant to which the client has access.

@@ -28,9 +28,9 @@ def delete_order(car_id, order_id):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: ID of the Car to which the Order is assigned.
+    :param car_id: The car ID.
     :type car_id: int
-    :param order_id: ID of the Order to be returned.
+    :param order_id: The order ID.
     :type order_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -43,7 +43,7 @@ def get_car_orders(car_id, since=None):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: ID of the Car for which Orders shall be returned.
+    :param car_id: The car ID.
     :type car_id: int
     :param since: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified, all objects are returned (since is set to 0 in that case).
     :type since: int
@@ -58,9 +58,9 @@ def get_order(car_id, order_id):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: ID of the Car to which the Order is assigned.
+    :param car_id: The car ID.
     :type car_id: int
-    :param order_id: ID of the Order to be returned.
+    :param order_id: The order ID.
     :type order_id: int
 
     :rtype: Union[Order, Tuple[Order, int], Tuple[Order, int, Dict[str, str]]

@@ -9,32 +9,32 @@ import fleet_management_api.app as _app
 from fleet_management_api.models import Car, CarState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from tests._utils.setup_utils import create_platform_hws
+from tests._utils.constants import TEST_TENANT_NAME
 
 
 class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
     def setUp(self) -> None:
-
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         car = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
 
     def test_requesting_car_state_without_wait_mechanism_enabled_immediatelly_returns_empty_list_even_if_no_state_was_sent_yet(
         self,
     ):
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/carstate")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get(f"/v2/management/carstate?since={default_state_timestamp+1}")
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json, [])
 
     def test_waiting_for_car_state_when_no_state_was_sent_yet(self):
         car_state = CarState(car_id=1, status="in_progress")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 time.sleep(0.01)
@@ -45,7 +45,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         car_state = CarState(car_id=1, status="in_progress")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_1 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
@@ -66,7 +66,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
 
         _connection.set_connection_source_test("test_db.db")
         set_content_timeout_ms(1000)
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         car_1 = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789")
@@ -75,13 +75,13 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
             id=2, name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="987654321")
         )
 
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.post("/v2/management/car", json=[car_1, car_2])
             self.assertEqual(response.status_code, 200)
 
     def test_waiting_for_car_state_for_given_car(self):
         car_state = CarState(car_id=1, status="idle")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/carstate/1?wait=true&since=0")
@@ -105,21 +105,21 @@ class Test_Timeouts(unittest.TestCase):
     def setUp(self) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app)
         car = Car(
             id=1, name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890")
         )
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car])
 
     def test_empty_list_is_sent_in_response_to_requests_with_exceeded_timeout(self):
         set_content_timeout_ms(150)
         car_state = CarState(car_id=1, status="charging")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/carstate?&since=0")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(
@@ -151,19 +151,19 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
     def setUp(self, mock_timestamp_ms: Mock) -> None:
 
         _connection.set_connection_source_test("test_db.db")
-        self.app = _app.get_test_app()
+        self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, 2)
         car_1 = Car(name="car1", platform_hw_id=1, car_admin_phone=MobilePhone(phone="1234567890"))
         car_2 = Car(name="car2", platform_hw_id=2, car_admin_phone=MobilePhone(phone="9876543210"))
         mock_timestamp_ms.return_value = 0
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/car", json=[car_1, car_2])
 
     @patch("fleet_management_api.database.timestamp.timestamp_ms")
     def test_filtering_car_states_by_since_parameter(self, mock_timestamp_ms: Mock):
         car_state_1 = CarState(car_id=1, status="idle")
         car_state_2 = CarState(car_id=1, status="driving")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mock_timestamp_ms.return_value = 50
             c.post("/v2/management/carstate", json=[car_state_1])
             mock_timestamp_ms.return_value = 100
@@ -184,7 +184,7 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
         car_state_1 = CarState(car_id=1, status="idle")
         car_state_2 = CarState(car_id=1, status="driving")
         car_state_3 = CarState(car_id=2, status="out_of_order")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             mock_timestamp_ms.return_value = 50
             c.post("/v2/management/carstate", json=[car_state_1])
             mock_timestamp_ms.return_value = 100
@@ -208,7 +208,7 @@ class Test_Filtering_Car_States_By_Since_Parameter(unittest.TestCase):
     ):
         car_state_1 = CarState(car_id=1, status="idle")
         car_state_2 = CarState(car_id=1, status="idle")
-        with self.app.app.test_client() as c:
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/carstate/1")
 
             self.assertEqual(len(response.json), 1)  # type: ignore

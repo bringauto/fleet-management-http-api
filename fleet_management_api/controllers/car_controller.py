@@ -28,7 +28,7 @@ def delete_car(car_id):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: The ID of the Car to be deleted.
+    :param car_id: The car ID.
     :type car_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -41,7 +41,7 @@ def get_car(car_id):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: An ID of the Car to be returned.
+    :param car_id: The car ID.
     :type car_id: int
 
     :rtype: Union[Car, Tuple[Car, int], Tuple[Car, int, Dict[str, str]]

@@ -65,7 +65,7 @@ class WaitObjManager:
 
         if timeout_ms is None or timeout_ms < 0:
             timeout_ms = self._timeout_ms
-        if not key in self._wait_dict:
+        if key not in self._wait_dict:
             self._wait_dict[key] = list()
         wait_obj = WaitObject(timeout_ms, validation)
         self._wait_dict[key].append(wait_obj)
@@ -73,10 +73,10 @@ class WaitObjManager:
 
     def _remove_wait_obj(self, key: Any, wait_obj: WaitObject) -> None:
         """Remove the WaitObject from the list of WaitObjects."""
-        if not key in self._wait_dict or not wait_obj in self._wait_dict[key]:
-            raise WaitObjManager.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
-        else:
+        if key in self._wait_dict and wait_obj in self._wait_dict[key]:
             self._wait_dict[key].remove(wait_obj)
+        else:
+            raise WaitObjManager.UnknownWaitingObj(f"Wait object for key {key} does not exist.")
         if not self._wait_dict[key]:
             self._wait_dict.pop(key)
 

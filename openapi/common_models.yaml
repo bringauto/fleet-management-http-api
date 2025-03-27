@@ -29,7 +29,7 @@ components:
       properties:
         phone:
           type: string
-          example: '+420123456789'
+          example: "+420123456789"
     Timestamp:
       description: A Unix timestamp in milliseconds. The timestamp is used to determine the time of creation of an object.
       type: integer
@@ -39,7 +39,8 @@ components:
   parameters:
     Wait:
       name: wait
-      description: Applies to GET methods when no objects would be returned at the moment of request. If wait=true, \
+      description:
+        Applies to GET methods when no objects would be returned at the moment of request. If wait=true, \
         the request will wait for the next object to be created and then returns it. If wait=False or unspecified, the request will return \
         an empty list.
       in: query
@@ -48,7 +49,8 @@ components:
         default: false
     Since:
       name: since
-      description: A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified,
+      description:
+        A Unix timestamp in milliseconds. If specified, only objects created at the time or later will be returned. If unspecified,
         all objects are returned (since is set to 0 in that case).
       in: query
       schema:
@@ -56,7 +58,8 @@ components:
         format: int64
     LastN:
       name: lastN
-      description: If specified, only the last N objects will be returned. If unspecified, all objects are returned. \
+      description:
+        If specified, only the last N objects will be returned. If unspecified, all objects are returned. \
         If some states have identical timestamps and they all do not fit into the maximum N states, only those with higher IDs are returned.
         If value smaller than 1 is provided, this filtering is ignored.
       in: query
@@ -64,9 +67,39 @@ components:
         type: integer
         format: int32
         default: 0
-    CarId:
+    CarIdQuery:
       name: carId
       description: An optional parameter for filtering only objects related to a car with the specified ID.
       in: query
       schema:
-        $ref: '#/components/schemas/Id'
+        $ref: "#/components/schemas/Id"
+    CarId:
+      name: carId
+      description: The car ID.
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"
+    OrderId:
+      name: orderId
+      description: The order ID.
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"
+    PlatformHwId:
+      name: platformHwId
+      description: The Platform HW ID.
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"
+    StopId:
+      name: stopId
+      description: The Stop ID.
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"
+    TenantId:
+      name: tenantId
+      description: Tenant ID
+      in: path
+      schema:
+        $ref: "#/components/schemas/Id"

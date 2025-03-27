@@ -14,42 +14,42 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Order'
+                $ref: "#/components/schemas/Order"
         required: true
       responses:
-        '200':
+        "200":
           description: The new Orders have been successfully created.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Order'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getOrders
-      parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Since'
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
       tags:
         - order
       summary: Find all currently existing Orders.
+      parameters:
+        - $ref: "common_models.yaml#/components/parameters/Since"
       responses:
-        '200':
+        "200":
           description: All the currently existing Orders have been sorted by their creation timestamp from the oldest to newest and returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Order'
+                  $ref: "#/components/schemas/Order"
               example:
                 [
                   {
@@ -59,16 +59,16 @@ paths:
                     "targetStopId": 1,
                     "notification": "Order notification",
                     "stopRouteId": 1,
-                    "notificationPhone": {"phone":'+420123456789'},
-                    "isVisible": true
-                  }
+                    "notificationPhone": { "phone": "+420123456789" },
+                    "isVisible": true,
+                  },
                 ]
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
   /order/{carId}:
     get:
@@ -78,53 +78,32 @@ paths:
         - order
       summary: Find existing Orders by the corresponding Car ID and return them.
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - name: carId
-          in: path
-          description: ID of the Car for which Orders shall be returned.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
-        '200':
+        "200":
           description: The Orders assigned to the Car with the given ID have been found, sorted by their creation timestamp from oldest to newest and returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Order'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
   /order/{carId}/{orderId}:
     parameters:
-    - name: carId
-      in: path
-      description: ID of the Car to which the Order is assigned.
-      required: true
-      example: 1
-      schema:
-        type: integer
-        format: int32
-    - name: orderId
-      in: path
-      description: ID of the Order to be returned.
-      required: true
-      example: 1
-      schema:
-        type: integer
-        format: int32
+      - $ref: "common_models.yaml#/components/parameters/CarId"
+      - $ref: "common_models.yaml#/components/parameters/OrderId"
 
     get:
       operationId: getOrder
@@ -133,47 +112,47 @@ paths:
         - order
       summary: Find an existing Order by the car ID and the order ID and return it.
       responses:
-        '200':
+        "200":
           description: The Order with the specified car ID and order ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
     delete:
-        operationId: deleteOrder
-        x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
-        tags:
-          - order
-        summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
-        responses:
-          '200':
-            description: The Order with the specified ID has been successfully deleted.
-            content:
-              text/plain:
-                type: string
-          '400':
-            $ref: 'errors.yaml#/components/responses/BadRequest'
-          '401':
-            $ref: 'errors.yaml#/components/responses/Unauthorized'
-          '403':
-            $ref: 'errors.yaml#/components/responses/Forbidden'
-          '404':
-            $ref: 'errors.yaml#/components/responses/NotFound'
-          '405':
-            $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
-          default:
-            $ref: 'errors.yaml#/components/responses/UnexpectedError'
+      operationId: deleteOrder
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.order
+      tags:
+        - order
+      summary: Delete an Order identified by its ID and ID of a car to which it is assigned.
+      responses:
+        "200":
+          description: The Order with the specified ID has been successfully deleted.
+          content:
+            text/plain:
+              type: string
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
   /orderstate:
     post:
@@ -190,27 +169,27 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/OrderState'
+                $ref: "#/components/schemas/OrderState"
         required: true
       responses:
-        '200':
+        "200":
           description: The new Order States have been successfully posted.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/OrderState'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/OrderState"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getAllOrderStates
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.order_state
@@ -218,33 +197,26 @@ paths:
         - orderState
       summary: Find Order States for all existing Orders.
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - $ref: 'common_models.yaml#/components/parameters/LastN'
-        - $ref: 'common_models.yaml#/components/parameters/CarId'
+        - $ref: "common_models.yaml#/components/parameters/Wait"
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/LastN"
+        - $ref: "common_models.yaml#/components/parameters/CarIdQuery"
       responses:
-        '200':
+        "200":
           description: Successfully found all Order States complying with the request parameters.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/OrderState'
-              example:
-                [
-                  {
-                    "orderId": 1,
-                    "status": "accepted",
-                    "carId": 1
-                  }
-                ]
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/OrderState"
+              example: [{ "orderId": 1, "status": "accepted", "carId": 1 }]
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /orderstate/{orderId}:
     get:
       operationId: getOrderStates
@@ -253,35 +225,29 @@ paths:
         - orderState
       summary: Find all Order States for a particular Order specified by its ID.
       parameters:
-        - name: orderId
-          in: path
-          description: ID of the Order for which to find the Order States.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - $ref: 'common_models.yaml#/components/parameters/LastN'
+        - $ref: "common_models.yaml#/components/parameters/OrderId"
+        - $ref: "common_models.yaml#/components/parameters/Wait"
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/LastN"
       responses:
-        '200':
-          description: Order States for the Order specified by its ID have been found, sorted by their creation timestamp \
+        "200":
+          description:
+            Order States for the Order specified by its ID have been found, sorted by their creation timestamp \
             from the oldest to the newest and returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/OrderState'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/OrderState"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
 components:
   schemas:
@@ -294,24 +260,24 @@ components:
         - stopRouteId
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         priority:
           $ref: "#/components/schemas/Priority"
         timestamp:
-          $ref: 'common_models.yaml#/components/schemas/Timestamp'
+          $ref: "common_models.yaml#/components/schemas/Timestamp"
         carId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         notification:
           type: string
-          example: 'Order notification'
+          example: "Order notification"
         targetStopId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         stopRouteId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         notificationPhone:
-          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+          $ref: "common_models.yaml#/components/schemas/MobilePhone"
         lastState:
-          $ref: '#/components/schemas/OrderState'
+          $ref: "#/components/schemas/OrderState"
         isVisible:
           type: boolean
           default: true
@@ -323,13 +289,13 @@ components:
         - orderId
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         status:
-          $ref: '#/components/schemas/OrderStatus'
+          $ref: "#/components/schemas/OrderStatus"
         orderId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         timestamp:
-          $ref: 'common_models.yaml#/components/schemas/Timestamp'
+          $ref: "common_models.yaml#/components/schemas/Timestamp"
     OrderStatus:
       type: string
       description: OrderStatus (to_accept, accepted, in_progress, done, canceled).
@@ -347,4 +313,3 @@ components:
       description: Priority (low, normal, high)
       pattern: ^(low|normal|high)$
       default: "normal"
-

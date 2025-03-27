@@ -15,3 +15,4 @@ from fleet_management_api.models.platform_hw import PlatformHW
 from fleet_management_api.models.route import Route
 from fleet_management_api.models.route_visualization import RouteVisualization
 from fleet_management_api.models.stop import Stop
+from fleet_management_api.models.tenant import Tenant

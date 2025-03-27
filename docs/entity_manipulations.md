@@ -9,6 +9,7 @@
 - [Route](#route)
 - [Route Visualization](#route-visualization)
 - [Stop](#stop)
+- [Tenant](#tenant)
 
 # Manipulation of API Entities
 
@@ -24,7 +25,7 @@ Requirements:
 
 - [Platform HW](#platformhw) must exist and must not be used by some other Car.
 - [Default route ID](#route) must exist if specified.
-- The name must be unique.
+- The name must be unique under a given tenant.
 
 Result:
 
@@ -43,7 +44,7 @@ Requirements:
 - The Car must exist.
 - [Platform HW](#platformhw) must exist and must not be used by some other Car.
 - [Default route ID](#route) must exist if specified.
-- The name must be unique.
+- The name must be unique under a given tenant.
 
 Result:
 
@@ -61,7 +62,6 @@ Result:
 
 - The Car is deleted.
 - All the [Car States](#car-state) referencing the Car are deleted.
-
 
 ## Car Action State
 
@@ -218,7 +218,7 @@ The method accepts a list of Route objects. The server processes the list in the
 Requirements:
 
 - All [Stops](#stop) referenced by the Route must exist.
-- The name must be unique.
+- The name must be unique under a given tenant.
 
 Result:
 
@@ -234,7 +234,7 @@ The method accepts a list of Route objects. The server processes the list in the
 
 Requirements:
 
-- The Route must exist
+- The Route must exist under the given tenant.
 - All [Stops](#stop) referenced by the Route must exist.
 - The Route name must not be taken by another Route.
 
@@ -266,7 +266,7 @@ The method accepts a list of RouteVisualization objects. The server processes th
 
 Requirements:
 
-- The referenced [Route](#route) must exist.
+- The referenced [Route](#route) must exist under the given tenant.
 
 Result:
 
@@ -289,7 +289,7 @@ The method accepts a list of Stop objects. The server processes the list in the 
 
 Requirements:
 
-- The name must be unique.
+- The name must be unique under a given tenant.
 
 Result:
 
@@ -304,8 +304,8 @@ The method accepts a list of Stop objects. The server processes the list in the 
 
 Requirements:
 
-- The name must be unique.
-- The Stop must exist.
+- The name must be unique under a given tenant.
+- The Stop must exist under the given tenant.
 
 Result:
 
@@ -322,3 +322,18 @@ Requirements:
 Result
 
 - The Stop is deleted.
+
+## Tenant
+
+Entity [description](definitions.md#tenant).
+
+### Delete
+
+Requirements:
+
+- There must be no item on the server owned by the Tenant
+- The Tenant must exist.
+
+Result
+
+- The Tenant is deleted.

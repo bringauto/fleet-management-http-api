@@ -1,7 +1,5 @@
 from typing import Optional
-
 import urllib.parse as _url
-
 from keycloak import KeycloakOpenID  # type: ignore
 
 

@@ -3,9 +3,9 @@ import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.database.timestamp as _tstamp
 
 
-def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
+def car_to_db_model(car: _models.Car) -> _db_models.CarDB:
     car_admin_phone = car.car_admin_phone.to_dict() if car.car_admin_phone is not None else None
-    return _db_models.CarDBModel(
+    return _db_models.CarDB(
         id=car.id,
         name=car.name,
         platform_hw_id=car.platform_hw_id,
@@ -16,8 +16,7 @@ def car_to_db_model(car: _models.Car) -> _db_models.CarDBModel:
 
 
 def car_from_db_model(
-    car_db_model: _db_models.CarDBModel,
-    last_state: _models.CarState | None,
+    car_db_model: _db_models.CarDB, last_state: _models.CarState | None
 ) -> _models.Car:
     return _models.Car(
         id=car_db_model.id,
@@ -30,13 +29,13 @@ def car_from_db_model(
     )
 
 
-def car_state_to_db_model(car_state: _models.CarState) -> _db_models.CarStateDBModel:
+def car_state_to_db_model(car_state: _models.CarState) -> _db_models.CarStateDB:
     if car_state.position is None:
         car_position = None
     else:
         car_position = car_state.position.to_dict()
     timestamp = _tstamp.timestamp_ms()
-    return _db_models.CarStateDBModel(
+    return _db_models.CarStateDB(
         id=car_state.id,
         status=str(car_state.status),
         car_id=car_state.car_id,
@@ -48,7 +47,7 @@ def car_state_to_db_model(car_state: _models.CarState) -> _db_models.CarStateDBM
 
 
 def car_state_from_db_model(
-    car_state_db_model: _db_models.CarStateDBModel,
+    car_state_db_model: _db_models.CarStateDB,
 ) -> _models.CarState:
     if car_state_db_model.position is None:
         car_position = None
@@ -67,8 +66,8 @@ def car_state_from_db_model(
 
 def car_action_state_to_db_model(
     car_action_state: _models.CarActionState,
-) -> _db_models.CarActionStateDBModel:
-    return _db_models.CarActionStateDBModel(
+) -> _db_models.CarActionStateDB:
+    return _db_models.CarActionStateDB(
         id=car_action_state.id,
         status=str(car_action_state.action_status),
         car_id=car_action_state.car_id,
@@ -77,10 +76,10 @@ def car_action_state_to_db_model(
 
 
 def car_action_state_from_db_model(
-    car_action_state_db_model: _db_models.CarActionStateDBModel,
+    car_action_state_db_model: _db_models.CarActionStateDB,
 ) -> _models.CarActionState:
-    assert isinstance(car_action_state_db_model, _db_models.CarActionStateDBModel), (
-        f"Expected car_action_state_db_model to be of type _db_models.CarActionStateDBModel, "
+    assert isinstance(car_action_state_db_model, _db_models.CarActionStateDB), (
+        f"Expected car_action_state_db_model to be of type _db_models.CarActionStateDB, "
         f"but got {type(car_action_state_db_model)}"
     )
     return _models.CarActionState(
@@ -91,12 +90,12 @@ def car_action_state_from_db_model(
     )
 
 
-def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
+def order_to_db_model(order: _models.Order) -> _db_models.OrderDB:
     if order.notification_phone is None:
         notification_phone = None
     else:
         notification_phone = order.notification_phone.to_dict()
-    return _db_models.OrderDBModel(
+    return _db_models.OrderDB(
         id=order.id,
         timestamp=_tstamp.timestamp_ms(),
         priority=order.priority,
@@ -109,7 +108,7 @@ def order_to_db_model(order: _models.Order) -> _db_models.OrderDBModel:
 
 
 def order_from_db_model(
-    order_db_model: _db_models.OrderDBModel, last_state: _models.OrderState | None
+    order_db_model: _db_models.OrderDB, last_state: _models.OrderState | None
 ) -> _models.Order:
 
     if order_db_model.notification_phone is None:
@@ -131,8 +130,8 @@ def order_from_db_model(
 
 def order_state_to_db_model(
     order_state: _models.OrderState,
-) -> _db_models.OrderStateDBModel:
-    return _db_models.OrderStateDBModel(
+) -> _db_models.OrderStateDB:
+    return _db_models.OrderStateDB(
         id=order_state.id,
         status=str(order_state.status),
         order_id=order_state.order_id,
@@ -141,7 +140,7 @@ def order_state_to_db_model(
 
 
 def order_state_from_db_model(
-    order_state_db_model: _db_models.OrderStateDBModel,
+    order_state_db_model: _db_models.OrderStateDB,
 ) -> _models.OrderState:
     return _models.OrderState(
         id=order_state_db_model.id,
@@ -153,21 +152,21 @@ def order_state_from_db_model(
 
 def hw_to_db_model(
     platform_hw: _models.PlatformHW,
-) -> _db_models.PlatformHWDBModel:
-    return _db_models.PlatformHWDBModel(id=platform_hw.id, name=platform_hw.name)
+) -> _db_models.PlatformHWDB:
+    return _db_models.PlatformHWDB(id=platform_hw.id, name=platform_hw.name)
 
 
 def hw_from_db_model(
-    platform_hw_db_model: _db_models.PlatformHWDBModel,
+    platform_hw_db_model: _db_models.PlatformHWDB,
 ) -> _models.PlatformHW:
     return _models.PlatformHW(id=platform_hw_db_model.id, name=platform_hw_db_model.name)
 
 
-def route_to_db_model(route: _models.Route) -> _db_models.RouteDBModel:
-    return _db_models.RouteDBModel(id=route.id, name=route.name, stop_ids=route.stop_ids)
+def route_to_db_model(route: _models.Route) -> _db_models.RouteDB:
+    return _db_models.RouteDB(id=route.id, name=route.name, stop_ids=route.stop_ids)
 
 
-def route_from_db_model(route_db_model: _db_models.RouteDBModel) -> _models.Route:
+def route_from_db_model(route_db_model: _db_models.RouteDB) -> _models.Route:
     return _models.Route(
         id=route_db_model.id, name=route_db_model.name, stop_ids=route_db_model.stop_ids
     )
@@ -175,8 +174,8 @@ def route_from_db_model(route_db_model: _db_models.RouteDBModel) -> _models.Rout
 
 def route_visualization_to_db_model(
     route_visualization: _models.RouteVisualization,
-) -> _db_models.RouteVisualizationDBModel:
-    return _db_models.RouteVisualizationDBModel(
+) -> _db_models.RouteVisualizationDB:
+    return _db_models.RouteVisualizationDB(
         id=route_visualization.id,
         route_id=route_visualization.route_id,
         points=route_visualization.points,
@@ -185,7 +184,7 @@ def route_visualization_to_db_model(
 
 
 def route_visualization_from_db_model(
-    route_visualization_db_model: _db_models.RouteVisualizationDBModel,
+    route_visualization_db_model: _db_models.RouteVisualizationDB,
 ) -> _models.RouteVisualization:
     return _models.RouteVisualization(
         id=route_visualization_db_model.id,
@@ -195,13 +194,13 @@ def route_visualization_from_db_model(
     )
 
 
-def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
+def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDB:
     if stop.notification_phone is None:
         notification_phone = None
     else:
         notification_phone = stop.notification_phone.to_dict()
     position = stop.position.to_dict() if stop.position is not None else None
-    return _db_models.StopDBModel(
+    return _db_models.StopDB(
         id=stop.id,
         name=stop.name,
         position=position,
@@ -210,7 +209,7 @@ def stop_to_db_model(stop: _models.Stop) -> _db_models.StopDBModel:
     )
 
 
-def stop_from_db_model(stop_db_model: _db_models.StopDBModel) -> _models.Stop:
+def stop_from_db_model(stop_db_model: _db_models.StopDB) -> _models.Stop:
     if stop_db_model.notification_phone is None:
         notification_phone = None
     else:
@@ -222,3 +221,15 @@ def stop_from_db_model(stop_db_model: _db_models.StopDBModel) -> _models.Stop:
         notification_phone=notification_phone,
         is_auto_stop=stop_db_model.is_auto_stop,
     )
+
+
+def tenant_to_db_model(
+    tenant: _models.Tenant,
+) -> _db_models.TenantDB:
+    return _db_models.TenantDB(id=tenant.id, name=tenant.name)
+
+
+def tenant_from_db_model(
+    tenant_db_model: _db_models.TenantDB,
+) -> _models.Tenant:
+    return _models.Tenant(id=tenant_db_model.id, name=tenant_db_model.name)

@@ -7,9 +7,9 @@ from sqlalchemy import create_engine as _create_engine
 
 from fleet_management_api.database.db_models import (
     Base as _Base,
-    CarStateDBModel as _CarStateDBModel,
-    CarActionStateDBModel as _CarActionStateDBModel,
-    OrderStateDBModel as _OrderStateDBModel,
+    CarStateDB as _CarStateDB,
+    CarActionStateDB as _CarActionStateDB,
+    OrderStateDB as _OrderStateDB,
 )
 from fleet_management_api.script_args.configs import Database as _Database
 from fleet_management_api.api_impl.api_logging import log_info as _log_info, log_error as _log_error
@@ -129,18 +129,18 @@ def replace_connection_source(source: Optional[_Engine]) -> None:
     _db_connection = source
 
 
-def get_connection_source_test(db_file_path: str = "") -> _Engine:
+def get_connection_source_test(db_file_path: str = "", echo: bool = False) -> _Engine:
     """Return a new connection source (sqlalchemy Engine object) (distinct from the one stored in the module variable)."""
     url = db_url_test(db_file_path)
-    return _get_connection(url)
+    return _get_connection(url, echo=echo)
 
 
-def set_connection_source_test(db_file_path: str = "") -> str:
+def set_connection_source_test(db_file_path: str = "", echo: bool = False) -> str:
     """Set the module variable storing the connection source (sqlalchemy Engine object) to a sqlite database."""
     url = db_url_test(db_file_path)
     if os.path.isfile(db_file_path):
         os.remove(db_file_path)
-    _set_connection(url)
+    _set_connection(url, echo=echo)
     _log_info(f"Using sqlite database stored in file '{db_file_path}'.")
     return db_file_path
 
@@ -163,11 +163,9 @@ def set_up_database(config: _Database) -> None:
         )
     if _db_connection is None:
         raise RuntimeError("Database connection not set up.")
-    _CarStateDBModel.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
-    _OrderStateDBModel.set_max_n_of_stored_states(
-        config.maximum_number_of_table_rows["order_states"]
-    )
-    _CarActionStateDBModel.set_max_n_of_stored_states(
+    _CarStateDB.set_max_n_of_stored_states(config.maximum_number_of_table_rows["car_states"])
+    _OrderStateDB.set_max_n_of_stored_states(config.maximum_number_of_table_rows["order_states"])
+    _CarActionStateDB.set_max_n_of_stored_states(
         config.maximum_number_of_table_rows["car_action_states"]
     )
     src = current_connection_source()
@@ -187,22 +185,22 @@ def unset_connection_source() -> None:
     _db_connection = None
 
 
-def _set_connection(url: str) -> None:
+def _set_connection(url: str, echo: bool = False) -> None:
     global _db_connection
-    _db_connection = _new_connection(url)
+    _db_connection = _new_connection(url, echo=echo)
     _Base.metadata.create_all(_db_connection)
 
 
-def _get_connection(url: str) -> _Engine:
+def _get_connection(url: str, echo: bool = False) -> _Engine:
     global _db_connection
-    connection_src = _new_connection(url)
+    connection_src = _new_connection(url, echo)
     _Base.metadata.create_all(connection_src)
     return connection_src
 
 
-def _new_connection(url: str) -> _Engine:
+def _new_connection(url: str, echo: bool = False) -> _Engine:
     try:
-        engine = _create_engine(url, pool_size=100)
+        engine = _create_engine(url, pool_size=100, echo=echo)
         if engine is None:
             raise InvalidConnectionArguments(
                 f"Could not create new connection source (url='{url}')."

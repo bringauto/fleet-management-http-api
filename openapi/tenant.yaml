@@ -1,0 +1,93 @@
+security:
+  - APIKeyAuth: []
+  - oAuth2AuthCode: []
+
+paths:
+  /tenant/{tenantId}:
+    head:
+      operationId: setTenantCookie
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      parameters:
+        - $ref: "common_models.yaml#/components/parameters/TenantId"
+      tags:
+        - tenant
+      summary: Make the server send back a response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
+      responses:
+        "200":
+          description: The tenant with tenantId is accessible and its name is included in the Set-Cookie header.
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+
+  /tenant:
+    get:
+      operationId: getTenants
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      tags:
+        - tenant
+      summary: Find and return all existing Tenants.
+      responses:
+        "200":
+          description: All the currently existing Tenants have been returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tenant"
+              example: [{ "id": 1, "name": "bring_auto" }]
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+    delete:
+      operationId: deleteTenant
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      tags:
+        - tenant
+      summary: Delete Tenant with the given ID.
+      parameters:
+        - $ref: "common_models.yaml#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: The Tenant with the specified ID has been deleted.
+          content:
+            text/plain:
+              type: string
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+
+components:
+  schemas:
+    Tenant:
+      type: object
+      description: Tenant owning a subset of the entities on the server.
+      required:
+        - name
+      properties:
+        id:
+          $ref: "common_models.yaml#/components/schemas/Id"
+        name:
+          description: "Tenant name"
+          example: "Tenant 1"
+          title: tenant_name
+          type: string

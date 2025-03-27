@@ -1,0 +1,15 @@
+services:
+  postgresql-database:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: test_db
+    networks:
+      - api-network
+    ports:
+      - 5432:5432
+
+networks:
+  api-network:

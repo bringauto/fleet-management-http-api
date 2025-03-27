@@ -14,25 +14,25 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/PlatformHW'
+                $ref: "#/components/schemas/PlatformHW"
         required: true
       responses:
-        '200':
+        "200":
           description: The Platform HWs have been successfully created.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PlatformHW'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/PlatformHW"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getHws
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
@@ -40,27 +40,21 @@ paths:
         - platformHW
       summary: Find and return all existing Platform HW.
       responses:
-        '200':
+        "200":
           description: All the currently existing Platform HWs have been returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PlatformHW'
-              example:
-                [
-                  {
-                    "id": 1,
-                    "name": 'ABCD1234EF56'
-                  }
-                ]
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/PlatformHW"
+              example: [{ "id": 1, "name": "ABCD1234EF56" }]
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /platformhw/{platformHwId}:
     get:
       operationId: getHw
@@ -69,31 +63,24 @@ paths:
         - platformHW
       summary: Find Platform HW with the given ID.
       parameters:
-        - name: platformHwId
-          in: path
-          description: ID of the Platform HW to return.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/PlatformHwId"
       responses:
-        '200':
+        "200":
           description: The Platform HW with the specified ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlatformHW'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/PlatformHW"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     delete:
       operationId: deleteHw
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.platform_hw
@@ -101,32 +88,25 @@ paths:
         - platformHW
       summary: Delete Platform HW with the given ID.
       parameters:
-        - name: platformHwId
-          in: path
-          description: ID of Platform HW to delete.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/PlatformHwId"
       responses:
-        '200':
+        "200":
           description: The Platform HW with the specified ID has been deleted.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
 components:
   schemas:
@@ -137,7 +117,7 @@ components:
         - name
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         name:
           type: string
-          example: 'ABCD1234EF56'
+          example: "ABCD1234EF56"

@@ -45,7 +45,7 @@ def get_car_states(car_id, wait=None, since=None, last_n=None):  # noqa: E501
 
      # noqa: E501
 
-    :param car_id: ID of the Car for which to find the Car States.
+    :param car_id: The car ID.
     :type car_id: int
     :param wait: Applies to GET methods when no objects would be returned at the moment of request. If wait&#x3D;true, \\ the request will wait for the next object to be created and then returns it. If wait&#x3D;False or unspecified, the request will return \\ an empty list.
     :type wait: bool

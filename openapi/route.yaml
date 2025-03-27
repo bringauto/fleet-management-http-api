@@ -14,25 +14,25 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Route'
+                $ref: "#/components/schemas/Route"
         required: true
       responses:
-        '200':
+        "200":
           description: The Routes have been successfully created.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Route'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/Route"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getRoutes
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -40,28 +40,21 @@ paths:
         - route
       summary: Find and return all existing Routes.
       responses:
-        '200':
+        "200":
           description: All the currently existing Routes have been returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Route'
-              example:
-                [
-                  {
-                    "id": 1,
-                    "name": 'Lužánky',
-                    "stopIds": [1, 2, 3, 4]
-                  }
-                ]
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/Route"
+              example: [{ "id": 1, "name": "Lužánky", "stopIds": [1, 2, 3, 4] }]
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     put:
       operationId: updateRoutes
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -76,24 +69,24 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Route'
+                $ref: "#/components/schemas/Route"
         required: true
       responses:
-        '200':
+        "200":
           description: The Routes have been successfully updated.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /route/{routeId}:
     get:
       operationId: getRoute
@@ -102,24 +95,24 @@ paths:
         - route
       summary: Find a single Route with the specified ID.
       parameters:
-      - $ref: '#/components/parameters/RouteId'
+        - $ref: "#/components/parameters/RouteId"
       responses:
-        '200':
+        "200":
           description: The Route with the specified ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/Route"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
     delete:
       operationId: deleteRoute
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.route
@@ -127,25 +120,25 @@ paths:
         - route
       summary: Delete a Route with the specified ID.
       parameters:
-      - $ref: '#/components/parameters/RouteId'
+        - $ref: "#/components/parameters/RouteId"
       responses:
-        '200':
+        "200":
           description: The Route with the specified ID has been deleted.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'errors.yaml#/components/responses/MethodNotAllowed'
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /route-visualization/{routeId}:
     get:
       operationId: getRouteVisualization
@@ -154,24 +147,24 @@ paths:
         - route
       summary: Find Route Visualization for a Route identified by the route's ID.
       parameters:
-        - $ref: '#/components/parameters/RouteId'
+        - $ref: "#/components/parameters/RouteId"
       responses:
-        '200':
+        "200":
           description: The Route Visualization for the specified Route ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouteVisualization'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/RouteVisualization"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
   /route-visualization:
     post:
       operationId: redefineRouteVisualizations
@@ -187,27 +180,27 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/RouteVisualization'
+                $ref: "#/components/schemas/RouteVisualization"
         required: true
       responses:
-        '200':
+        "200":
           description: The Route Visualizations have been successfully redefined.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RouteVisualization'
-        '400':
-          $ref: 'errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: 'errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/RouteVisualization"
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
         default:
-          $ref: 'errors.yaml#/components/responses/UnexpectedError'
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
 
 components:
   parameters:
@@ -228,10 +221,10 @@ components:
         - name
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         name:
           type: string
-          example: 'Lužánky'
+          example: "Lužánky"
         stopIds:
           type: array
           default: []
@@ -246,32 +239,32 @@ components:
         - points
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         routeId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         hexcolor:
-          $ref: '#/components/schemas/Color'
+          $ref: "#/components/schemas/Color"
         points:
           type: array
           default: []
           items:
-            $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+            $ref: "common_models.yaml#/components/schemas/GNSSPosition"
           example:
             [
               {
                 "latitude": 49.204117,
                 "longitude": 16.606525,
-                "altitude": 400.25
+                "altitude": 400.25,
               },
               {
                 "latitude": 49.70425,
                 "longitude": 16.65151,
-                "altitude": 400.78
-              }
+                "altitude": 400.78,
+              },
             ]
     Color:
       type: string
       description: Color in hexadecimal format.
-      pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
-      example: '#FF0000'
-      default: '#FF0000'
+      pattern: "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+      example: "#FF0000"
+      default: "#FF0000"

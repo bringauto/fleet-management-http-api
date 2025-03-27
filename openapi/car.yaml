@@ -14,25 +14,25 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Car'
+                $ref: "#/components/schemas/Car"
         required: true
       responses:
-        '200':
+        "200":
           description: The Cars have been successfully created.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Car'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/Car"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -40,31 +40,31 @@ paths:
         - car
       summary: Find and return all existing Cars.
       responses:
-        '200':
+        "200":
           description: All the currently existing Cars have been returned.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Car'
+                  $ref: "#/components/schemas/Car"
               example:
                 [
                   {
                     "id": 1,
                     "platformHWId": 5,
-                    "name": 'BAT-2022-01',
-                    "carAdminPhone": {"phone":'+420123456789'},
+                    "name": "BAT-2022-01",
+                    "carAdminPhone": { "phone": "+420123456789" },
                     "defaultRouteId": 1,
-                    "underTest": false
-                  }
+                    "underTest": false,
+                  },
                 ]
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
     put:
       operationId: updateCars
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -79,24 +79,24 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Car'
+                $ref: "#/components/schemas/Car"
         required: true
       responses:
-        '200':
+        "200":
           description: The Cars have been successfully updated.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
   /car/{carId}:
     get:
       operationId: getCar
@@ -105,31 +105,24 @@ paths:
         - car
       summary: Find a single Car by its ID.
       parameters:
-        - name: carId
-          in: path
-          description: An ID of the Car to be returned.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
-        '200':
+        "200":
           description: The Car with the specified ID has been found and returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Car'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+                $ref: "#/components/schemas/Car"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
     delete:
       operationId: deleteCar
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car
@@ -137,33 +130,27 @@ paths:
         - car
       summary: Delete a Car identified by its ID.
       parameters:
-        - name: carId
-          in: path
+        - $ref: "common_models.yaml#/components/parameters/CarId"
           description: The ID of the Car to be deleted.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
       responses:
-        '200':
+        "200":
           description: The Car has been successfully deleted.
           content:
             text/plain:
               type: string
               example: 2 cars were successfully removed.
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
-        '405':
-          $ref: './errors.yaml#/components/responses/MethodNotAllowed'
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "./errors.yaml#/components/responses/MethodNotAllowed"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
   /carstate:
     post:
       operationId: createCarStates
@@ -179,47 +166,47 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CarState'
+                $ref: "#/components/schemas/CarState"
         required: true
       responses:
-        '200':
+        "200":
           description: The new Car States have been successfully added.
           content:
             text/plain:
               type: string
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
     get:
       operationId: getAllCarStates
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - $ref: 'common_models.yaml#/components/parameters/LastN'
+        - $ref: "common_models.yaml#/components/parameters/Wait"
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/LastN"
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.car_state
       tags:
         - carState
       summary: Find one or all Car States for all existing Cars.
       responses:
-        '200':
+        "200":
           description: Successfully found all Car States complying with the request parameters.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CarState'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: './errors.yaml#/components/responses/Forbidden'
+                  $ref: "#/components/schemas/CarState"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "./errors.yaml#/components/responses/Forbidden"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
 
   /carstate/{carId}:
     get:
@@ -229,34 +216,27 @@ paths:
         - carState
       summary: Find one or all Car States for a Car with given ID.
       parameters:
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - $ref: 'common_models.yaml#/components/parameters/LastN'
-        - name: carId
-          in: path
-          description: ID of the Car for which to find the Car States.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/Wait"
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/LastN"
+        - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
-        '200':
+        "200":
           description: Successfully found all Car States complying with the request parameters.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CarState'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/CarState"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
 
   /action/car/{carId}:
     get:
@@ -266,34 +246,27 @@ paths:
         - carAction
       summary: Finds car action states for a Car with given carId.
       parameters:
-        - name: carId
-          in: path
-          description: ID of the Car for which to return the action states.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
-        - $ref: 'common_models.yaml#/components/parameters/Wait'
-        - $ref: 'common_models.yaml#/components/parameters/Since'
-        - $ref: 'common_models.yaml#/components/parameters/LastN'
+        - $ref: "common_models.yaml#/components/parameters/CarId"
+        - $ref: "common_models.yaml#/components/parameters/Wait"
+        - $ref: "common_models.yaml#/components/parameters/Since"
+        - $ref: "common_models.yaml#/components/parameters/LastN"
       responses:
-        '200':
+        "200":
           description: Successfully found Car Action States complying with the request parameters.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CarActionState'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/CarActionState"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
   /action/car/{carId}/pause:
     post:
       operationId: pauseCar
@@ -302,31 +275,24 @@ paths:
         - carAction
       summary: Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
       parameters:
-        - name: carId
-          in: path
-          description: ID of the Car which should be paused.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
-        '200':
+        "200":
           description: Successfully paused the Car.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CarActionState'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/CarActionState"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
 
   /action/car/{carId}/unpause:
     post:
@@ -336,31 +302,24 @@ paths:
         - carAction
       summary: Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
       parameters:
-        - name: carId
-          in: path
-          description: ID of the Car which should be unpaused.
-          required: true
-          example: 1
-          schema:
-            type: integer
-            format: int32
+        - $ref: "common_models.yaml#/components/parameters/CarId"
       responses:
-        '200':
+        "200":
           description: Successfully unpaused the Car.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CarActionState'
-        '400':
-          $ref: './errors.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: './errors.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: './errors.yaml#/components/responses/NotFound'
+                  $ref: "#/components/schemas/CarActionState"
+        "400":
+          $ref: "./errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "./errors.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "./errors.yaml#/components/responses/NotFound"
         default:
-          $ref: './errors.yaml#/components/responses/UnexpectedError'
+          $ref: "./errors.yaml#/components/responses/UnexpectedError"
 
 components:
   schemas:
@@ -373,23 +332,23 @@ components:
         - carAdminPhone
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         platformHwId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
           example: 5
         name:
           type: string
-          example: 'BAT-2022-01'
+          example: "BAT-2022-01"
         carAdminPhone:
-          $ref: 'common_models.yaml#/components/schemas/MobilePhone'
+          $ref: "common_models.yaml#/components/schemas/MobilePhone"
         defaultRouteId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         underTest:
           type: boolean
           default: true
           example: false
         lastState:
-          $ref: '#/components/schemas/CarState'
+          $ref: "#/components/schemas/CarState"
     CarState:
       type: object
       description: Car State object structure
@@ -398,25 +357,25 @@ components:
         - carId
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         timestamp:
-          $ref: 'common_models.yaml#/components/schemas/Timestamp'
+          $ref: "common_models.yaml#/components/schemas/Timestamp"
         status:
-          $ref: '#/components/schemas/CarStatus'
+          $ref: "#/components/schemas/CarStatus"
         fuel:
           type: integer
           format: int32
           default: 0
           example: 80
         carId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         speed:
           type: number
           format: float
           default: 0.0
           example: 20.5
         position:
-          $ref: 'common_models.yaml#/components/schemas/GNSSPosition'
+          $ref: "common_models.yaml#/components/schemas/GNSSPosition"
 
     CarStatus:
       type: string
@@ -439,13 +398,13 @@ components:
         - carId
       properties:
         id:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         carId:
-          $ref: 'common_models.yaml#/components/schemas/Id'
+          $ref: "common_models.yaml#/components/schemas/Id"
         timestamp:
-          $ref: 'common_models.yaml#/components/schemas/Timestamp'
+          $ref: "common_models.yaml#/components/schemas/Timestamp"
         actionStatus:
-          $ref: '#/components/schemas/CarActionStatus'
+          $ref: "#/components/schemas/CarActionStatus"
 
     CarActionStatus:
       type: string

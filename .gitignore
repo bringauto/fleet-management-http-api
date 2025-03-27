@@ -71,10 +71,9 @@ Dockerfile
 git_push.sh
 README.md
 setup.py
-test-requirements.txt
 tox.ini
 .dockerignore
-requirements.txt
+!*requirements.txt
 
 fleet_management_api/test/*
 
@@ -89,4 +88,4 @@ __pycache__
 /dummy.py
 
 /restart.sh
-/*.db
+/*.db*

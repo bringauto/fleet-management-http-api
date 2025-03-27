@@ -28,7 +28,7 @@ def delete_stop(stop_id):  # noqa: E501
 
      # noqa: E501
 
-    :param stop_id: ID of the Stop to be deleted.
+    :param stop_id: The Stop ID.
     :type stop_id: int
 
     :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
@@ -41,7 +41,7 @@ def get_stop(stop_id):  # noqa: E501
 
      # noqa: E501
 
-    :param stop_id: ID of Stop to be returned.
+    :param stop_id: The Stop ID.
     :type stop_id: int
 
     :rtype: Union[Stop, Tuple[Stop, int], Tuple[Stop, int, Dict[str, str]]
