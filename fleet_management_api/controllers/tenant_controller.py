@@ -22,7 +22,7 @@ def delete_tenant(tenant_id):  # noqa: E501
 
 
 def get_tenants():  # noqa: E501
-    """Find and return all existing Tenant.
+    """Find and return all existing Tenants.
 
      # noqa: E501
 
@@ -33,7 +33,7 @@ def get_tenants():  # noqa: E501
 
 
 def set_tenant_cookie(tenant_id):  # noqa: E501
-    """Make the server to send back response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
+    """Make the server send back a response with set-cookie header to set cookie equal to the name of the tenand with the tenantId.
 
      # noqa: E501
 

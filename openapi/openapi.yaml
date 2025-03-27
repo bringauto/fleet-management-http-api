@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: BringAuto Fleet Management v2 API
   description: Specification for BringAuto fleet backend HTTP API
-  version: 4.0.0-alpha
+  version: 4.0.0
   contact:
     name: BringAuto s.r.o
     url: https://bringauto.com
