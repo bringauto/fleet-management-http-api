@@ -2895,26 +2895,26 @@ paths:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
     post:
-      operationId: create_tenant
+      operationId: create_tenants
       requestBody:
         content:
           application/json:
             example:
               name: Tenant 1
             schema:
-              $ref: '#/components/schemas/Tenant'
-        description: Tenant to be created.
+              items:
+                $ref: '#/components/schemas/Tenant'
+              type: array
+        description: Tenants to be created.
         required: true
       responses:
         "200":
           content:
             application/json:
               example:
-                id: 1
+              - id: 1
                 name: bring_auto
-              schema:
-                $ref: '#/components/schemas/Tenant'
-          description: The Tenant has been created.
+          description: The Tenants have been created.
         "400":
           content:
             application/json:
@@ -2959,7 +2959,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Unexpected error
-      summary: Create a new Tenant.
+      summary: Create new Tenants.
       tags:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant

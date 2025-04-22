@@ -1,5 +1,6 @@
 from fleet_management_api.database import db_models as _db_models, db_access as _db_access
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
+from fleet_management_api.models import Tenant as _Tenant
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error_and_respond as _log_error_and_respond,
@@ -11,7 +12,10 @@ from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
     text_response as _text_response,
 )
-from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
+from fleet_management_api.api_impl.load_request import (
+    RequestEmpty as _RequestEmpty,
+    RequestJSON as _RequestJSON,
+)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.tenants import NO_TENANTS
 
@@ -34,6 +38,35 @@ def set_tenant_cookie(tenant_id: int) -> _Response:
     return _log_error_and_respond(
         f"Tenant with ID={tenant_id} is not accessible", 401, title="Unauthorized"
     )
+
+
+def create_tenants() -> _Response:
+    """Create a new tenant with the given name.
+
+    The tenant name must be unique.
+    """
+    request = _RequestJSON.load()
+    if not request:
+        return _log_invalid_request_body_format()
+    accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
+    if not accessible_tenants:
+        return _log_error_and_respond("No accessible tenants found.", 401, title="Unauthorized")
+    tenants = [_Tenant.from_dict(t) for t in request.data]
+    tenant_db_models = [_obj_to_db.tenant_to_db_model(t) for t in tenants]
+    response = _db_access.add_without_tenant(*tenant_db_models)
+
+    if response.status_code == 200:
+        posted_db_models: list[_db_models.TenantDB] = response.body
+        for tenant in posted_db_models:
+            _log_info(f"Stop (name='{tenant.name}) has been created.")
+        models = [_obj_to_db.tenant_from_db_model(m) for m in posted_db_models]
+        return _json_response(models)
+    else:
+        return _log_error_and_respond(
+            f"Could not create tenants. {response.body['detail']}",
+            response.status_code,
+            response.body["title"],
+        )
 
 
 def get_tenants() -> _Response:

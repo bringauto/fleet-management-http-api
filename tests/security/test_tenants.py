@@ -16,6 +16,7 @@ from fleet_management_api.api_impl.tenants import (
     NoAccessibleTenants,
 )
 from fleet_management_api.app import get_token, get_test_app
+from fleet_management_api.models import Tenant
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import TenantDB
 from fleet_management_api.models import PlatformHW
@@ -287,10 +288,49 @@ class Test_Creating_A_Tenant(api_test.TestCase):
 
     def test_creating_nonexistent_tenant_with_valid_api_key_creates_the_tenant(self):
         new_tenant = "new_tenant"
+        tenant = Tenant(name=new_tenant)
         with self.app.app.test_client() as c:
-            response = c.post("/v2/management/tenant?apiKey=testAPIKey", json={"name": new_tenant})
+            response = c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json["name"], new_tenant)
+            self.assertEqual(response.json[0]["name"], new_tenant)
+
+    def test_creating_new_tenant_without_valid_api_key_yields_401(self):
+        new_tenant = "new_tenant"
+        tenant = Tenant(name=new_tenant)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/tenant", json=[tenant])
+            self.assertEqual(response.status_code, 401)
+
+    def test_creating_tenant_with_already_existing_name_returns_409_error(self):
+        new_tenant = "new_tenant"
+        tenant = Tenant(name=new_tenant)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json[0]["name"], new_tenant)
+            # Try to create the same tenant again
+            response = c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
+            self.assertEqual(response.status_code, 400)
+
+    def test_creating_tenants_with_identical_names_returns_400_error(self):
+        name = "new_tenant"
+        tenant = Tenant(name=name)
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant, tenant])
+            self.assertEqual(response.status_code, 400)
+
+    def test_creating_object_under_new_tenant_after_the_tenant_creation_is_allowed(self):
+        hw = PlatformHW(name="test_hw_1")
+        name = "new_tenant"
+        tenant = Tenant(name=name)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
+            c.set_cookie("", "tenant", name)
+            c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
+            response = c.get("/v2/management/platformhw?api_key=testAPIKey")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["name"], hw.name)
 
 
 if __name__ == "__main__":  # pragma: no cover

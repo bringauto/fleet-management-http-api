@@ -28,28 +28,32 @@ paths:
 
   /tenant:
     post:
-      operationId: createTenant
+      operationId: createTenants
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
       tags:
         - tenant
-      summary: Create a new Tenant.
+      summary: Create new Tenants.
       requestBody:
-        description: Tenant to be created.
+        description: Tenants to be created.
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Tenant"
+              type: array
+              items:
+                $ref: "#/components/schemas/Tenant"
             example:
               name: "Tenant 1"
       responses:
         "200":
-          description: The Tenant has been created.
+          description: The Tenants have been created.
           content:
             application/json:
               schema:
+              type: array
+              items:
                 $ref: "#/components/schemas/Tenant"
-              example: { "id": 1, "name": "bring_auto" }
+              example: [{ "id": 1, "name": "bring_auto" }]
         "400":
           $ref: "errors.yaml#/components/responses/BadRequest"
         "401":
