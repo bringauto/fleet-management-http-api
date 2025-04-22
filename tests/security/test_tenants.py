@@ -277,5 +277,21 @@ class Test_Adding_Tenants_To_Database(api_test.TestCase):
                 client.delete(f"/v2/management/tenant/{tenant}?api_key=testAPIKey")
 
 
+class Test_Creating_A_Tenant(api_test.TestCase):
+
+    def setUp(self, *args):
+        super().setUp()
+        self.app = get_test_app(
+            "testAPIKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
+        )
+
+    def test_creating_nonexistent_tenant_with_valid_api_key_creates_the_tenant(self):
+        new_tenant = "new_tenant"
+        with self.app.app.test_client() as c:
+            response = c.post("/v2/management/tenant?apiKey=testAPIKey", json={"name": new_tenant})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json["name"], new_tenant)
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

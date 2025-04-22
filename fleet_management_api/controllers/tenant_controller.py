@@ -8,6 +8,21 @@ from fleet_management_api.models.tenant import Tenant  # noqa: E501
 from fleet_management_api import util
 
 
+def create_tenant(tenant):  # noqa: E501
+    """Create a new Tenant.
+
+     # noqa: E501
+
+    :param tenant: Tenant to be created.
+    :type tenant: dict | bytes
+
+    :rtype: Union[Tenant, Tuple[Tenant, int], Tuple[Tenant, int, Dict[str, str]]
+    """
+    if connexion.request.is_json:
+        tenant = Tenant.from_dict(connexion.request.get_json())  # noqa: E501
+    return 'do some magic!'
+
+
 def delete_tenant(tenant_id):  # noqa: E501
     """Delete Tenant with the given ID.
 
