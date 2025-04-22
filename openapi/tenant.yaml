@@ -42,8 +42,8 @@ paths:
               type: array
               items:
                 $ref: "#/components/schemas/Tenant"
-            example:
-              name: "Tenant 1"
+            example: [{ "name": "Tenant 1" }, { "name": "Tenant_2" }]
+
       responses:
         "200":
           description: The Tenants have been created.
@@ -53,7 +53,11 @@ paths:
               type: array
               items:
                 $ref: "#/components/schemas/Tenant"
-              example: [{ "id": 1, "name": "bring_auto" }]
+              example:
+                [
+                  { "id": 1, "name": "Tenant 1" },
+                  { "id": 2, "name": "Tenant_2" },
+                ]
         "400":
           $ref: "errors.yaml#/components/responses/BadRequest"
         "401":

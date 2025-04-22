@@ -2900,7 +2900,8 @@ paths:
         content:
           application/json:
             example:
-              name: Tenant 1
+            - name: Tenant 1
+            - name: Tenant_2
             schema:
               items:
                 $ref: '#/components/schemas/Tenant'
@@ -2913,7 +2914,9 @@ paths:
             application/json:
               example:
               - id: 1
-                name: bring_auto
+                name: Tenant 1
+              - id: 2
+                name: Tenant_2
           description: The Tenants have been created.
         "400":
           content:
