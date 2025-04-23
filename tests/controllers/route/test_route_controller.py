@@ -10,6 +10,7 @@ from fleet_management_api.models import (
     Stop,
     GNSSPosition,
     MobilePhone,
+    Tenant,
 )
 from fleet_management_api.api_impl.auth_controller import (
     generate_test_keys,
@@ -59,6 +60,11 @@ class Test_Identical_Route_Names(api_test.TestCase):
         self.app = _app.get_test_app(
             "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
         )
+        with self.app.app.test_client() as client:
+            client.post(
+                "/v2/management/tenant?api_key=testAPIKey",
+                json=[Tenant(name="tenant_1"), Tenant(name="tenant_2")],
+            )
         with self.app.app.test_client() as client:
             position = GNSSPosition(latitude=1, longitude=1, altitude=1)
             client.set_cookie("", "tenant", "tenant_1")

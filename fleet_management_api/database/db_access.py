@@ -213,8 +213,8 @@ def add(
 
         code = _set_tenant_id_to_all_objs(tenants.current, *added)
         if code != 200:
-            msg = f"Tenant '{tenants.current}' does not exist and could not be created."
-            return _error(500, msg, title="Tenant does not exist.")
+            msg = f"Tenant '{tenants.current}' does not exist."
+            return _error(code, msg, title="Tenant does not exist.")
 
     global _wait_mg
     with _SessionWithTenants(source, tenants=tenants) as session:
@@ -648,7 +648,7 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
         return 200
     id_ = _get_tenant_id(tenant_name)
     if id_ is None:
-        return 500
+        return 401  # tenant does not exist
     else:
         for obj in objs:
             obj.__setattr__("tenant_id", id_)
@@ -656,11 +656,12 @@ def _set_tenant_id_to_all_objs(tenant_name: str, *objs: _Base) -> int:
 
 
 def _get_tenant_id(tenant_name: str) -> int | None:
+    """Get tenant ID from the database by its name.
+
+    If the tenant does not exist, return None.
+    """
     criteria = {"name": lambda x: x == tenant_name}
     tenants: list[_TenantDB] = get(_NO_TENANTS, _TenantDB, criteria=criteria)
     if not tenants:
-        response = add_tenants(tenant_name)
-        if response.status_code != 200 or not response.body:
-            return None
-        tenants = response.body
+        return None
     return tenants[0].id

@@ -1,5 +1,5 @@
 import unittest
-from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
+from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone, Tenant
 import fleet_management_api.app as _app
 from fleet_management_api.database.db_access import delete
 from fleet_management_api.database.db_models import CarStateDB
@@ -154,6 +154,12 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
         self.app = _app.get_test_app(
             "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
         )
+        with self.app.app.test_client() as c:
+            c.post(
+                "/v2/management/tenant?api_key=testAPIKey",
+                json=[Tenant(name="tenant_1"), Tenant(name="tenant_2")],
+            )
+
         with self.app.app.test_client() as client:
             client.set_cookie("", "tenant", "tenant_1")
             client.post(

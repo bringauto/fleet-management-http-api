@@ -10,6 +10,7 @@ from fleet_management_api.models import (
     OrderStatus,
     GNSSPosition,
     MobilePhone,
+    Tenant,
 )
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_models as _db_models
@@ -648,6 +649,12 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
     def setUp(self, *args) -> None:
         _connection.set_connection_source_test()
         self.app = _app.get_test_app(use_previous=True, predef_api_key="test_key")
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="tenant_A"), Tenant(name="tenant_B"), Tenant(name="tenant_C")],
+            )
+
         create_platform_hws(self.app, 1, tenant="tenant_A", api_key="test_key")
         create_platform_hws(self.app, 2, tenant="tenant_B", api_key="test_key")
         create_platform_hws(self.app, 3, tenant="tenant_C", api_key="test_key")

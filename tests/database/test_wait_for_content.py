@@ -63,6 +63,7 @@ class Test_Waiting_For_Content(api_test.TestCase):
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
+        _db_access.add_tenants(TEST_TENANT_NAME)
 
     def test_enabling_wait_mechanism_makes_the_db_request_wait_for_available_content_and_to_return_nonempty_list(
         self,
@@ -115,6 +116,7 @@ class Test_Waiting_For_Specific_Content(api_test.TestCase):
     def setUp(self, test_db_path=""):
         super().setUp(test_db_path)
         self.tenant = TenantFromTokenMock(TEST_TENANT_NAME)
+        _db_access.add_tenants(TEST_TENANT_NAME)
 
     def test_waiting_mechanism_ignores_content_with_properties_not_matching_requested_values(self):
         test_obj = models.TestItem(id=5, test_str="test", test_int=123)

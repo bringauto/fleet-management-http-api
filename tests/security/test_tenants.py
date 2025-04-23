@@ -179,6 +179,15 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
         self.app = get_test_app(
             "testAPIKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
         )
+        with self.app.app.test_client() as c:
+            c.post(
+                "/v2/management/tenant?api_key=testAPIKey",
+                json=[
+                    Tenant(name=TEST_TENANT_1),
+                    Tenant(name=TEST_TENANT_2),
+                    Tenant(name=TEST_TENANT_3),
+                ],
+            )
         _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_3))
         with self.app.app.test_client() as client:
             self.hw_1 = PlatformHW(name="test_hw_1")
@@ -229,62 +238,21 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             self.assertEqual(response.json[0]["name"], self.hw_2.name)
 
 
-class Test_Adding_Tenants_To_Database(api_test.TestCase):
-
-    def setUp(self, *args) -> None:
-        super().setUp()
-        generate_test_keys()
-        set_auth_params(get_test_public_key(strip=True), "test_client")
-        self.app = get_test_app(
-            "testAPIKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
-        )
-
-    def test_initially_no_tenants_are_present_on_the_server(self):
-        with self.app.app.test_client() as client:
-            response = client.get("/v2/management/tenant?api_key=testAPIKey")
-            assert isinstance(response.json, list)
-            self.assertEqual(len(response.json), 0)
-
-    def test_tenant_is_added_automatically_when_posting_new_object_under_this_tenant(self) -> None:
-        with self.app.app.test_client() as client:
-            client.set_cookie("", "tenant", TEST_TENANT_1)
-            hw = PlatformHW(name="test_hw_1")
-            headers = {"Authorization": f"Bearer {get_token(TEST_TENANT_1, TEST_TENANT_2)}"}
-            client.post("/v2/management/platformhw", json=[hw], headers=headers)
-            tenants = client.get("/v2/management/tenant", headers=headers).json
-            assert tenants is not None
-            # only the tenant 1 is added to the database
-            self.assertListEqual([t["name"] for t in tenants], [TEST_TENANT_1])
-
-    def test_tenant_is_added_automatically_even_when_not_specified_in_authorization_header_when_api_key_is_used(
-        self,
-    ):
-        with self.app.app.test_client() as client:
-            client.set_cookie("", "tenant", "other_tenant")
-            hw = PlatformHW(name="test_hw_1")
-            response = client.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
-            tenants: list[TenantDB] = client.get("/v2/management/tenant?api_key=testAPIKey").json
-            # only the tenant 1 is added to the database
-            self.assertListEqual([t["name"] for t in tenants], ["other_tenant"])
-            # the platform HW has been created
-            self.assertEqual(response.status_code, 200)
-
-    def tearDown(self):
-        clear_auth_params()
-        clear_test_keys()
-        # Clean up test tenants
-        with self.app.app.test_client() as client:
-            for tenant in ["tenant_1", "tenant_2", "other_tenant"]:
-                client.delete(f"/v2/management/tenant/{tenant}?api_key=testAPIKey")
-
-
 class Test_Creating_A_Tenant(api_test.TestCase):
 
     def setUp(self, *args):
         super().setUp()
-        self.app = get_test_app(
-            "testAPIKey", accessible_tenants=[TEST_TENANT_1, TEST_TENANT_2], use_previous=True
-        )
+        self.app = get_test_app("testAPIKey", use_previous=True)
+
+    def test_tenant_is_not_automatically_created_when_posting_new_item(self):
+        hw = PlatformHW(name="test_hw_1")
+        with self.app.app.test_client() as c:
+            c.set_cookie("", "tenant", "other_tenant")
+            response = c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
+            self.assertEqual(response.status_code, 401)
+            # Check that the tenant is not created automatically
+            tresponse = c.get("/v2/management/tenant?api_key=testAPIKey")
+            self.assertNotIn("other_tenant", [t["name"] for t in tresponse.json])
 
     def test_creating_nonexistent_tenant_with_valid_api_key_creates_the_tenant(self):
         new_tenant = "new_tenant"
@@ -294,6 +262,19 @@ class Test_Creating_A_Tenant(api_test.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json[0]["name"], new_tenant)
 
+    def test_creating_object_under_new_tenant_after_the_tenant_creation_is_allowed(self):
+        hw = PlatformHW(name="test_hw_1")
+        name = "new_tenant"
+        tenant = Tenant(name=name)
+        with self.app.app.test_client() as c:
+            c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
+            c.set_cookie("", "tenant", name)
+            c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
+            response = c.get("/v2/management/platformhw?api_key=testAPIKey")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.json), 1)
+            self.assertEqual(response.json[0]["name"], hw.name)
+
     def test_creating_new_tenant_without_valid_api_key_yields_401(self):
         new_tenant = "new_tenant"
         tenant = Tenant(name=new_tenant)
@@ -301,7 +282,7 @@ class Test_Creating_A_Tenant(api_test.TestCase):
             response = c.post("/v2/management/tenant", json=[tenant])
             self.assertEqual(response.status_code, 401)
 
-    def test_creating_tenant_with_already_existing_name_returns_409_error(self):
+    def test_creating_tenant_with_already_existing_name_returns_400_error(self):
         new_tenant = "new_tenant"
         tenant = Tenant(name=new_tenant)
         with self.app.app.test_client() as c:
@@ -318,19 +299,6 @@ class Test_Creating_A_Tenant(api_test.TestCase):
         with self.app.app.test_client() as c:
             response = c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant, tenant])
             self.assertEqual(response.status_code, 400)
-
-    def test_creating_object_under_new_tenant_after_the_tenant_creation_is_allowed(self):
-        hw = PlatformHW(name="test_hw_1")
-        name = "new_tenant"
-        tenant = Tenant(name=name)
-        with self.app.app.test_client() as c:
-            c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
-            c.set_cookie("", "tenant", name)
-            c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
-            response = c.get("/v2/management/platformhw?api_key=testAPIKey")
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.json), 1)
-            self.assertEqual(response.json[0]["name"], hw.name)
 
 
 if __name__ == "__main__":  # pragma: no cover

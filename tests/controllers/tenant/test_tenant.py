@@ -20,7 +20,9 @@ class Test_Get_Tenants(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app(use_previous=True, predef_api_key="test_key")
+        self.app = _app.get_test_app(
+            use_previous=True, predef_api_key="test_key", add_test_tenant=False
+        )
         add_tenants("tenant_1", "tenant_2", "tenant_3")
         accessible_tenants_1 = TenantFromTokenMock("tenant_1", [])
         add(accessible_tenants_1, PlatformHWDB(name="hw_owned_by_tenant_1"))
@@ -46,7 +48,7 @@ class Test_Get_Tenants(unittest.TestCase):
             tenants: list[Tenant] = [Tenant(**t) for t in response.json]
             self.assertEqual([t.name for t in tenants], ["tenant_1", "tenant_2"])
 
-    def test_setting_tenant_cookie_does_restricts_only_data_owned_by_tenants_but_not_returned_tenants(
+    def test_setting_tenant_cookie_does_restrict_only_data_owned_by_tenants_but_not_returned_tenants(
         self,
     ) -> None:
         with self.app.app.test_client() as c:
@@ -68,7 +70,9 @@ class Test_Setting_Tenant_Cookie(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
-        self.app = _app.get_test_app(use_previous=True, predef_api_key="test_key")
+        self.app = _app.get_test_app(
+            use_previous=True, predef_api_key="test_key", add_test_tenant=False
+        )
         add_tenants("tenant_1", "tenant_2", "tenant_3")
         accessible_tenants_1 = TenantFromTokenMock("tenant_1", [])
         add(accessible_tenants_1, PlatformHWDB(name="platform_x"))
