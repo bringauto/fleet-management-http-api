@@ -2759,6 +2759,134 @@ paths:
       - stop
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.stop
   /tenant:
+    get:
+      operationId: get_tenants
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: bring_auto
+              schema:
+                items:
+                  $ref: '#/components/schemas/Tenant'
+                type: array
+          description: All the currently existing Tenants have been returned.
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "403"
+                    message: Request forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Find and return all existing Tenants.
+      tags:
+      - tenant
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+    post:
+      operationId: create_tenants
+      requestBody:
+        content:
+          application/json:
+            example:
+            - name: Tenant 1
+            - name: Tenant_2
+            schema:
+              items:
+                $ref: '#/components/schemas/Tenant'
+              type: array
+        description: Tenants to be created.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - id: 1
+                name: Tenant 1
+              - id: 2
+                name: Tenant_2
+              schema:
+                items:
+                  $ref: '#/components/schemas/Tenant'
+                type: array
+          description: The Tenants have been created.
+        "400":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "400"
+                    message: Bad request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request
+        "401":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "401"
+                    message: Unauthorized
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "409":
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "409"
+                    message: Conflict
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Conflict
+        default:
+          content:
+            application/json:
+              examples:
+                error:
+                  value:
+                    code: "500"
+                    message: Unexpected error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unexpected error
+      summary: Create new Tenants.
+      tags:
+      - tenant
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+  /tenant/{tenantId}:
     delete:
       operationId: delete_tenant
       parameters:
@@ -2843,130 +2971,6 @@ paths:
       tags:
       - tenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-    get:
-      operationId: get_tenants
-      responses:
-        "200":
-          content:
-            application/json:
-              example:
-              - id: 1
-                name: bring_auto
-              schema:
-                items:
-                  $ref: '#/components/schemas/Tenant'
-                type: array
-          description: All the currently existing Tenants have been returned.
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "403"
-                    message: Request forbidden
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Find and return all existing Tenants.
-      tags:
-      - tenant
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-    post:
-      operationId: create_tenants
-      requestBody:
-        content:
-          application/json:
-            example:
-            - name: Tenant 1
-            - name: Tenant_2
-            schema:
-              items:
-                $ref: '#/components/schemas/Tenant'
-              type: array
-        description: Tenants to be created.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              example:
-              - id: 1
-                name: Tenant 1
-              - id: 2
-                name: Tenant_2
-          description: The Tenants have been created.
-        "400":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "400"
-                    message: Bad request
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request
-        "401":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "401"
-                    message: Unauthorized
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "409":
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "409"
-                    message: Conflict
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Conflict
-        default:
-          content:
-            application/json:
-              examples:
-                error:
-                  value:
-                    code: "500"
-                    message: Unexpected error
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unexpected error
-      summary: Create new Tenants.
-      tags:
-      - tenant
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-  /tenant/{tenantId}:
     head:
       operationId: set_tenant_cookie
       parameters:

@@ -16,7 +16,7 @@ def create_tenants(tenant):  # noqa: E501
     :param tenant: Tenants to be created.
     :type tenant: list | bytes
 
-    :rtype: Union[None, Tuple[None, int], Tuple[None, int, Dict[str, str]]
+    :rtype: Union[List[Tenant], Tuple[List[Tenant], int], Tuple[List[Tenant], int, Dict[str, str]]
     """
     if connexion.request.is_json:
         tenant = [Tenant.from_dict(d) for d in connexion.request.get_json()]  # noqa: E501

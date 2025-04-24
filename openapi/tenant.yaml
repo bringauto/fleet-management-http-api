@@ -26,6 +26,33 @@ paths:
         default:
           $ref: "errors.yaml#/components/responses/UnexpectedError"
 
+    delete:
+      operationId: deleteTenant
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      tags:
+        - tenant
+      summary: Delete Tenant with the given ID.
+      parameters:
+        - $ref: "common_models.yaml#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: The Tenant with the specified ID has been deleted.
+          content:
+            text/plain:
+              type: string
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "errors.yaml#/components/responses/NotFound"
+        "405":
+          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+
   /tenant:
     post:
       operationId: createTenants
@@ -50,9 +77,9 @@ paths:
           content:
             application/json:
               schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/Tenant"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tenant"
               example:
                 [
                   { "id": 1, "name": "Tenant 1" },
@@ -86,32 +113,6 @@ paths:
           $ref: "errors.yaml#/components/responses/Unauthorized"
         "403":
           $ref: "errors.yaml#/components/responses/Forbidden"
-        default:
-          $ref: "errors.yaml#/components/responses/UnexpectedError"
-    delete:
-      operationId: deleteTenant
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-      tags:
-        - tenant
-      summary: Delete Tenant with the given ID.
-      parameters:
-        - $ref: "common_models.yaml#/components/parameters/TenantId"
-      responses:
-        "200":
-          description: The Tenant with the specified ID has been deleted.
-          content:
-            text/plain:
-              type: string
-        "400":
-          $ref: "errors.yaml#/components/responses/BadRequest"
-        "401":
-          $ref: "errors.yaml#/components/responses/Unauthorized"
-        "403":
-          $ref: "errors.yaml#/components/responses/Forbidden"
-        "404":
-          $ref: "errors.yaml#/components/responses/NotFound"
-        "405":
-          $ref: "errors.yaml#/components/responses/MethodNotAllowed"
         default:
           $ref: "errors.yaml#/components/responses/UnexpectedError"
 
