@@ -25,7 +25,6 @@ paths:
           $ref: "errors.yaml#/components/responses/NotFound"
         default:
           $ref: "errors.yaml#/components/responses/UnexpectedError"
-
     delete:
       operationId: deleteTenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
