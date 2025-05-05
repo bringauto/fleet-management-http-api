@@ -16,7 +16,7 @@ from fleet_management_api.api_impl.load_request import (
     RequestJSON as _RequestJSON,
     RequestEmpty as _RequestEmpty,
 )
-from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.tenants import get_accessible_tenants as _get_accessible_tenants
 
 
 def create_hws() -> _Response:
@@ -30,7 +30,11 @@ def create_hws() -> _Response:
     request = _RequestJSON.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
+
+    tresponse = _get_accessible_tenants(request)
+    if tresponse.status_code != 200:
+        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
+    tenants = tresponse.body
     hws = [_PlatformHW.from_dict(p) for p in request.data]
     hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
     response: _Response = _db_access.add(tenants, *hw_db_model)
@@ -55,7 +59,10 @@ def get_hws() -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
+    tresponse = _get_accessible_tenants(request)
+    if tresponse.status_code != 200:
+        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
+    tenants = tresponse.body
     hw_id_models = _db_access.get(tenants, _db_models.PlatformHWDB)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
@@ -69,7 +76,10 @@ def get_hw(platform_hw_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
+    tresponse = _get_accessible_tenants(request)
+    if tresponse.status_code != 200:
+        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
+    tenants = tresponse.body
     hw_models = _db_access.get(
         tenants, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
@@ -93,8 +103,10 @@ def delete_hw(platform_hw_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-
+    tresponse = _get_accessible_tenants(request)
+    if tresponse.status_code != 200:
+        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
+    tenants = tresponse.body
     if _db_access.exists(tenants, _db_models.CarDB, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
         return _log_info_and_respond(
             f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",

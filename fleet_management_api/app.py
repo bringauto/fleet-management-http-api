@@ -105,25 +105,25 @@ class _TestClient(_FlaskClient):
         self._app = application
         self._key = api_key
 
-    def get(self, url: str, *args, **kwargs) -> Any:
+    def get(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().get(url, *args, **kwargs, headers=self._get_headers())
+        return super().get(url, *args, **kwargs, headers=headers or self._get_headers())
 
-    def head(self, url: str, *args, **kwargs) -> Any:
+    def head(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().head(url, *args, **kwargs, headers=self._get_headers())
+        return super().head(url, *args, **kwargs, headers=headers or self._get_headers())
 
-    def post(self, url: str, *args, **kwargs) -> Any:
+    def post(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().post(url, *args, **kwargs, headers=self._get_headers())
+        return super().post(url, *args, **kwargs, headers=headers or self._get_headers())
 
-    def put(self, url: str, *args, **kwargs) -> Any:
+    def put(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().put(url, *args, **kwargs, headers=self._get_headers())
+        return super().put(url, *args, **kwargs, headers=headers or self._get_headers())
 
-    def delete(self, url: str, *args, **kwargs) -> Any:
+    def delete(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().delete(url, *args, **kwargs, headers=self._get_headers())
+        return super().delete(url, *args, **kwargs, headers=headers or self._get_headers())
 
     def _insert_key(self, uri: str) -> str:
         if "?" in uri:
@@ -161,6 +161,9 @@ def get_test_app(
 
     If the api_key is left empty, no authentication is required.
     The api_key can be set to any value, that can be used as a value for 'api_key' query parameter in the API calls.
+
+    `use previous` parameter is used to determine if an instance of TestApp from previously run test should be user.
+    This can significantly speed up the setUp phase of the tests.
     """
     try:
         _db_access.add_without_tenant(
