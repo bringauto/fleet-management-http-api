@@ -18,7 +18,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
     log_invalid_request_body_format as _log_invalid_request_body_format,
@@ -194,8 +194,10 @@ def _find_nonexistent_stops(tenants: _AccessibleTenants, *routes: _Route) -> _Re
     for route in routes:
         checked_id_set: set[int] = set(route.stop_ids)
         for id_ in checked_id_set:
+
             def check_id(x: int, id_: int) -> bool:
                 return x == id_
+
             _db_access.exists(tenants, _StopDB, criteria={"id": partial(check_id, id_=id_)})
         existing_ids = set([stop_id.id for stop_id in _db_access.get(tenants, _StopDB)])
         nonexistent_stop_ids = checked_id_set.difference(existing_ids)

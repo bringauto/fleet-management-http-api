@@ -32,15 +32,12 @@ def log_error(message: str) -> None:
     logger.error(message)
 
 
-def log_error_and_respond(msg: str, code: int, title: str) -> _Response:
+def log_warning_or_error_and_respond(msg: str, code: int, title: str) -> _Response:
     """Pass a custom error message to the API logger and return a connexion response with the given code, title and detail."""
-    log_error(msg)
-    return _error(code, msg, title)
-
-
-def log_warning_and_respond(msg: str, code: int, title: str) -> _Response:
-    """Pass a custom warning message to the API logger and return a connexion response with the given code, title and detail."""
-    log_warning(msg)
+    if code < 500:
+        log_warning(msg)
+    else:
+        log_error(msg)
     return _error(code, msg, title)
 
 
@@ -53,7 +50,7 @@ def log_info_and_respond(msg: str, code: int = 200, title: str = "") -> _Respons
 
 
 def log_invalid_request_body_format() -> _Response:
-    return log_warning_and_respond(
+    return log_warning_or_error_and_respond(
         f"Invalid request format: {_connexion.request.data}. JSON is required.",
         400,
         title="Invalid request format",

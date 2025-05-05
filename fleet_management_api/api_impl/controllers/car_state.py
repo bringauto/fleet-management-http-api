@@ -8,7 +8,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.models import CarState as _CarState

@@ -19,7 +19,7 @@ class TenantFromTokenMock:
 
 
 def create_platform_hws(
-    app: TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME, api_key: str = ""
+    app: TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME, api_key: str | None = ""
 ) -> None:
     with app.app.test_client(tenant) as c:
         c.set_cookie("localhost", "tenant", tenant)
@@ -57,5 +57,7 @@ def create_route(
         c.set_cookie("localhost", "tenant", tenant)
         route = _models.Route(name=f"test_route_{timestamp_ms()}", stop_ids=stop_ids)
         response = c.post(f"/v2/management/route?api_key={api_key}", json=[route])
-        assert response.status_code == 200, f"Failed to create route (tenant: {tenant}): {response.json}"
+        assert (
+            response.status_code == 200
+        ), f"Failed to create route (tenant: {tenant}): {response.json}"
         assert response.json is not None, "Empty response received"

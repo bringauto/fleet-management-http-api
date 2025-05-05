@@ -249,7 +249,7 @@ class Test_Maximum_Number_Of_States_Stored(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.json), self.max_n - 1)
 
-            order_state = OrderState(status="to_accept", order_id=1)
+            order_state = OrderState(status="to_accept", w=1)
             c.post("/v2/management/orderstate", json=[order_state])
             response = c.get("/v2/management/orderstate/1?since=0")
             self.assertEqual(response.status_code, 200)
