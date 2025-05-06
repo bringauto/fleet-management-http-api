@@ -1,4 +1,4 @@
-from typing import Callable, Any,
+from typing import Callable, Any
 
 from fleet_management_api.api_impl.api_responses import Response as _Response
 from fleet_management_api.api_impl.load_request import (
