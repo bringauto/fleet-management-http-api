@@ -38,7 +38,7 @@ def controller_with_tenants(
 
 
 def controller_with_tenants_and_data(
-    controller: Callable[Concatenate[_AccessibleTenants, dict | list[dict], P], _Response],
+    controller: Callable[Concatenate[_AccessibleTenants, list[dict], P], _Response],
 ) -> Callable[Concatenate[P], _Response]:
 
     def wrapper(*args, **kwargs):

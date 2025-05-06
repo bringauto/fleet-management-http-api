@@ -14,6 +14,9 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.tenants import NO_TENANTS
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants as _controller_with_tenants,
+)
 
 
 def set_tenant_cookie(tenant_id: int) -> _Response:
@@ -49,7 +52,8 @@ def get_tenants() -> _Response:
     return _json_response(tenants)
 
 
-def delete_tenant(tenant_id: int) -> _Response:
+@_controller_with_tenants
+def delete_tenant(tenants: _AccessibleTenants, tenant_id: int) -> _Response:
     """Delete an existing tenant identified by 'tenant_id'.
 
     The tenant cannot be deleted if assigned to a Car.
@@ -60,11 +64,7 @@ def delete_tenant(tenant_id: int) -> _Response:
             400,
             title="Cannot delete object",
         )
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenant = _AccessibleTenants(request)
-    response = _db_access.delete(tenant, _db_models.TenantDB, tenant_id)
+    response = _db_access.delete(tenants, _db_models.TenantDB, tenant_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Tenant with ID={tenant_id} has been deleted.")
     else:
