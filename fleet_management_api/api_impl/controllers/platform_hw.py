@@ -5,21 +5,21 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import (
-    RequestJSON as _RequestJSON,
-    RequestEmpty as _RequestEmpty,
+from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.view_decorators import (
+    view_with_tenants,
+    view_with_tenants_and_data,
 )
-from fleet_management_api.api_impl.tenants import get_accessible_tenants as _get_accessible_tenants
 
 
-def create_hws() -> _Response:
+@view_with_tenants_and_data
+def create_hws(tenants: _AccessibleTenants, hw_data: list[dict], **kwargs) -> _Response:
     """Create new platform HWs.
 
     If some of the HWs' creation fails, no objects are added to the server.
@@ -27,15 +27,7 @@ def create_hws() -> _Response:
     The HW creation can succeed only if:
     - there is no HW with the same name.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-
-    tresponse = _get_accessible_tenants(request)
-    if tresponse.status_code != 200:
-        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-    tenants = tresponse.body
-    hws = [_PlatformHW.from_dict(p) for p in request.data]
+    hws = [_PlatformHW.from_dict(p) for p in hw_data]
     hw_db_model = [_obj_to_db.hw_to_db_model(p) for p in hws]
     response: _Response = _db_access.add(tenants, *hw_db_model)
     if response.status_code == 200:
@@ -54,15 +46,9 @@ def create_hws() -> _Response:
         )
 
 
-def get_hws() -> _Response:
+@view_with_tenants
+def get_hws(tenants: _AccessibleTenants, **kwargs) -> _Response:
     """Get all existing platform HWs."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tresponse = _get_accessible_tenants(request)
-    if tresponse.status_code != 200:
-        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-    tenants = tresponse.body
     hw_id_models = _db_access.get(tenants, _db_models.PlatformHWDB)
     platform_hw_ids: list[_PlatformHW] = [
         _obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_id_models
@@ -71,15 +57,9 @@ def get_hws() -> _Response:
     return _json_response(platform_hw_ids)
 
 
-def get_hw(platform_hw_id: int) -> _Response:
+@view_with_tenants
+def get_hw(tenants: _AccessibleTenants, platform_hw_id: int, **kwargs) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tresponse = _get_accessible_tenants(request)
-    if tresponse.status_code != 200:
-        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-    tenants = tresponse.body
     hw_models = _db_access.get(
         tenants, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
@@ -95,18 +75,12 @@ def get_hw(platform_hw_id: int) -> _Response:
         return _json_response(hws[0])
 
 
-def delete_hw(platform_hw_id: int) -> _Response:
+@view_with_tenants
+def delete_hw(tenants: _AccessibleTenants, platform_hw_id: int, **kwargs) -> _Response:
     """Delete an existing platform HW identified by 'platformhw_id'.
 
     The platform HW cannot be deleted if assigned to a Car.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tresponse = _get_accessible_tenants(request)
-    if tresponse.status_code != 200:
-        return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-    tenants = tresponse.body
     if _db_access.exists(tenants, _db_models.CarDB, criteria={"platform_hw_id": lambda x: x == platform_hw_id}):  # type: ignore
         return _log_info_and_respond(
             f"Platform HW with ID={platform_hw_id} cannot be deleted because it is assigned to a car.",
