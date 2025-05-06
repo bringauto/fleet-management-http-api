@@ -1,0 +1,2 @@
+AUTHORIZATION_HEADER_NAME = "Authorization"
+PAYLOAD_FIELD_NAME = "payload"

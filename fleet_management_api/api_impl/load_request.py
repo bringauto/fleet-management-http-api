@@ -6,6 +6,10 @@ import abc
 import connexion  # type: ignore
 from flask.wrappers import Request as _Request
 
+from fleet_management_api.api_impl.constants import (
+    AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
+)
+
 
 @dataclasses.dataclass
 class Request(abc.ABC):
@@ -22,9 +26,11 @@ class Request(abc.ABC):
         if not cls.is_valid(request):
             return None
         try:
-            headers = {"Authorization": request.headers.environ.get("HTTP_AUTHORIZATION", "")}
+            headers = {
+                _AUTHORIZATION_HEADER_NAME: request.headers.environ.get("HTTP_AUTHORIZATION", "")
+            }
         except RuntimeError:
-            headers = {"Authorization": ""}
+            headers = {_AUTHORIZATION_HEADER_NAME: ""}
 
         return cls(
             data=cls.get_data(request),

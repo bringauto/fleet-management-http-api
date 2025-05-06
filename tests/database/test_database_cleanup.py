@@ -1,6 +1,7 @@
 import unittest
 import subprocess
 import time
+
 import psycopg2  # type: ignore
 from psycopg2 import OperationalError
 
@@ -13,6 +14,7 @@ from tests._utils.setup_utils import TenantFromTokenMock
 
 DB_NAME = "test_db"
 DOCKER_COMPOSE_FILE_PATH = "tests/_utils/docker-compose.yaml"
+# this is only for testing purposes, the password must differ in production
 PASSWORD = "1234"
 
 

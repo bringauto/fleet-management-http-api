@@ -1,15 +1,15 @@
 import logging as _logging
 import connexion as _connexion  # type: ignore
 
-from .api_responses import (
+from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
     error as _error,
     Response as _Response,
 )
-from ..logs import LOGGER_NAME
+from fleet_management_api.logs import LOGGER_NAME as _LOGGER_NAME
 
 
-logger = _logging.getLogger(LOGGER_NAME)
+logger = _logging.getLogger(_LOGGER_NAME)
 
 
 def log_info(message: str) -> None:

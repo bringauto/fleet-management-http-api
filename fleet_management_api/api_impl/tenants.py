@@ -7,7 +7,16 @@ from connexion.lifecycle import ConnexionResponse as _Response, ConnexionRequest
 from connexion.exceptions import Unauthorized  # type: ignore
 from fleet_management_api.api_impl.load_request import Request as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
-from fleet_management_api.logs import LOGGER_NAME
+from fleet_management_api.api_impl.constants import (
+    AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
+    PAYLOAD_FIELD_NAME as _PAYLOAD_FIELD_NAME,
+)
+
+
+_ALGORITHM = "RS256"
+
+
+TenantName = str
 
 
 class UsingEmptyTenant(Exception):
@@ -38,11 +47,6 @@ class MissingRSAKey(Exception):
     """Raise when a RSA key (either public or private) is not set."""
 
     pass
-
-
-_ALGORITHM = "RS256"
-
-TenantName = str
 
 
 class AccessibleTenants:
@@ -214,7 +218,7 @@ def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> l
     # api key is not provided - read tenants from JWT
     if "Authorization" not in request.headers:
         raise NoHeaderWithJWTToken
-    bearer = str(request.headers["Authorization"]).split(" ")[-1]
+    bearer = str(request.headers[_AUTHORIZATION_HEADER_NAME]).split(" ")[-1]
     if not bearer.strip():
         raise Unauthorized("No valid JWT token or API key provided.")
     if not key.strip():
@@ -222,7 +226,7 @@ def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> l
     decoded_key = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
 
     try:
-        payload = dict(json.loads(decoded_key["Payload"]))
+        payload = dict(json.loads(decoded_key[_PAYLOAD_FIELD_NAME]))
     except KeyError:
         raise NoAccessibleTenants(
             "No tenants could be extracted from the token. Token is missing the payload."
