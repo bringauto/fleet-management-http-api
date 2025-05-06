@@ -1,7 +1,6 @@
 from __future__ import annotations
 import logging.handlers
 import os
-import logging.config
 
 from .script_args.configs import APIConfig as _APIConfig, Logging as _Logging
 

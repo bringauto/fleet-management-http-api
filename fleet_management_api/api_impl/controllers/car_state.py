@@ -9,24 +9,19 @@ from fleet_management_api.api_impl.api_logging import (
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.models import CarState as _CarState
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.load_request import (
-    RequestJSON as _RequestJSON,
-    RequestEmpty as _RequestEmpty,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants as _view_with_tenants,
-    view_with_tenants_and_data as _view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants as _controller_with_tenants,
+    controller_with_tenants_and_data as _controller_with_tenants_and_data,
 )
 
 
-@_view_with_tenants_and_data
+@_controller_with_tenants_and_data
 def create_car_states(tenants: _AccessibleTenants, states_data: list[dict], **kwargs) -> _Response:
     """Post new car states.
 
@@ -83,7 +78,7 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_all_car_states(
     tenants: _AccessibleTenants, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
 ) -> _Response:
@@ -113,7 +108,7 @@ def get_all_car_states(
     return _json_response(car_states)
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_car_states(
     tenants: _AccessibleTenants,
     car_id: int,

@@ -18,8 +18,8 @@ from fleet_management_api.api_impl.api_logging import (
 P = ParamSpec("P")
 
 
-def view_with_tenants(
-    view: Callable[Concatenate[_AccessibleTenants, P], _Response],
+def controller_with_tenants(
+    controller: Callable[Concatenate[_AccessibleTenants, P], _Response],
 ) -> Callable[Concatenate[P], _Response]:
 
     def wrapper(*args, **kwargs):
@@ -31,14 +31,14 @@ def view_with_tenants(
             return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
         tenants = tresponse.body
         assert isinstance(tenants, _AccessibleTenants)
-        response = view(tenants, *args, **kwargs)
+        response = controller(tenants, *args, **kwargs)
         return response
 
     return wrapper
 
 
-def view_with_tenants_and_data(
-    view: Callable[Concatenate[_AccessibleTenants, dict | list[dict], P], _Response],
+def controller_with_tenants_and_data(
+    controller: Callable[Concatenate[_AccessibleTenants, dict | list[dict], P], _Response],
 ) -> Callable[Concatenate[P], _Response]:
 
     def wrapper(*args, **kwargs):
@@ -50,7 +50,7 @@ def view_with_tenants_and_data(
             return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
         tenants = tresponse.body
         assert isinstance(tenants, _AccessibleTenants)
-        response = view(tenants, request.data, *args, **kwargs)
+        response = controller(tenants, request.data, *args, **kwargs)
         return response
 
     return wrapper

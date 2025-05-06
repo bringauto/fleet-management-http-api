@@ -12,13 +12,13 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants,
-    view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants,
+    controller_with_tenants_and_data,
 )
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def create_hws(tenants: _AccessibleTenants, hw_data: list[dict], **kwargs) -> _Response:
     """Create new platform HWs.
 
@@ -46,7 +46,7 @@ def create_hws(tenants: _AccessibleTenants, hw_data: list[dict], **kwargs) -> _R
         )
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_hws(tenants: _AccessibleTenants, **kwargs) -> _Response:
     """Get all existing platform HWs."""
     hw_id_models = _db_access.get(tenants, _db_models.PlatformHWDB)
@@ -57,7 +57,7 @@ def get_hws(tenants: _AccessibleTenants, **kwargs) -> _Response:
     return _json_response(platform_hw_ids)
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_hw(tenants: _AccessibleTenants, platform_hw_id: int, **kwargs) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
     hw_models = _db_access.get(
@@ -75,7 +75,7 @@ def get_hw(tenants: _AccessibleTenants, platform_hw_id: int, **kwargs) -> _Respo
         return _json_response(hws[0])
 
 
-@view_with_tenants
+@controller_with_tenants
 def delete_hw(tenants: _AccessibleTenants, platform_hw_id: int, **kwargs) -> _Response:
     """Delete an existing platform HW identified by 'platformhw_id'.
 

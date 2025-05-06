@@ -17,7 +17,9 @@ from fleet_management_api.api_impl.api_logging import (
     log_error as _log_error,
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import view_with_tenants as _view_with_tenants
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants as _controller_with_tenants,
+)
 
 
 CarId = int
@@ -29,7 +31,7 @@ STATE_TRANSITIONS: dict[str, set[str]] = {
 }
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_car_action_states(
     tenants: _AccessibleTenants,
     car_id: int,
@@ -65,7 +67,7 @@ def get_car_action_states(
     return _json_response(states)
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def pause_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
     """Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
 
@@ -80,7 +82,7 @@ def pause_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
     return create_car_action_states_from_argument_and_save_to_db(tenants, [state])
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def unpause_car(tenants: _AccessibleTenants, car_id: int, **kwargs):  # noqa: E501
     """Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
 

@@ -17,13 +17,13 @@ from fleet_management_api.api_impl.api_logging import (
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants,
-    view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants,
+    controller_with_tenants_and_data,
 )
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_route_visualization(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
@@ -41,7 +41,7 @@ def get_route_visualization(tenants: _AccessibleTenants, route_id: int, **kwargs
         return _json_response(rp)
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def redefine_route_visualizations(
     tenants: _AccessibleTenants, visualisations_data: list[dict], **kwargs
 ) -> _Response:

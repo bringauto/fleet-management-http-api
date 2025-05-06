@@ -21,16 +21,16 @@ from fleet_management_api.response_consts import (
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants_and_data,
-    view_with_tenants,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants_and_data,
+    controller_with_tenants,
 )
 
 
 OrderId = int
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def create_order_states(tenants: _AccessibleTenants, data: list[dict], **kwargs) -> _Response:
     """Post new states of existing orders.
 
@@ -149,7 +149,7 @@ def create_order_states_from_argument_and_post(
         )
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_all_order_states(
     tenants: _AccessibleTenants,
     wait: bool = False,
@@ -177,7 +177,7 @@ def get_all_order_states(
         return _get_order_states(tenants, {}, wait, since, last_n=last_n)
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_order_states(
     tenants: _AccessibleTenants,
     order_id: int,

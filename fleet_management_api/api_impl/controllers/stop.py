@@ -18,13 +18,13 @@ from fleet_management_api.response_consts import (
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants as _view_with_tenants,
-    view_with_tenants_and_data as _view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants as _controller_with_tenants,
+    controller_with_tenants_and_data as _controller_with_tenants_and_data,
 )
 
 
-@_view_with_tenants_and_data
+@_controller_with_tenants_and_data
 def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
     """Create new stops.
 
@@ -50,7 +50,7 @@ def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) 
         )
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def delete_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
@@ -75,7 +75,7 @@ def delete_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Respons
         )
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
@@ -89,7 +89,7 @@ def get_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
         return _Response(body=stops[0], status_code=200, content_type="application/json")
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_stops(tenants: _AccessibleTenants, **kwargs) -> _Response:
     """Get all existing stops."""
     stop_db_models = _db_access.get(tenants, _db_models.StopDB)
@@ -100,7 +100,7 @@ def get_stops(tenants: _AccessibleTenants, **kwargs) -> _Response:
     return _json_response(stops)
 
 
-@_view_with_tenants_and_data
+@_controller_with_tenants_and_data
 def update_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
     """Update an existing stop.
 

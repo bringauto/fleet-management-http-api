@@ -26,13 +26,13 @@ from fleet_management_api.api_impl.api_logging import (
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants,
-    view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants,
+    controller_with_tenants_and_data,
 )
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def create_cars(
     tenants: _AccessibleTenants, car_data: list[dict], **kwargs
 ) -> _Response:  # noqa: E501
@@ -89,7 +89,7 @@ def create_cars(
         )
 
 
-@view_with_tenants
+@controller_with_tenants
 def delete_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
     """Deletes an existing car identified by 'car_id'.
 
@@ -104,7 +104,7 @@ def delete_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
         return _log_error_and_respond(msg, response.status_code, response.body["title"])
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
     """Get a car identified by 'car_id'."""
     db_cars = _db_access.get(
@@ -123,7 +123,7 @@ def get_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
         return _json_response(car)
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_cars(tenants: _AccessibleTenants, **kwargs) -> _Response:  # noqa: E501
     """List all cars."""
     db_cars = _db_access.get(
@@ -140,7 +140,7 @@ def get_cars(tenants: _AccessibleTenants, **kwargs) -> _Response:  # noqa: E501
     return _json_response(cars)
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def update_cars(tenants: _AccessibleTenants, cars_data: list[dict], **kwargs) -> _Response:
     """Update existing cars.
 

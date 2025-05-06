@@ -20,9 +20,9 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.api_impl.controllers.order_state as _order_state
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants,
-    view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants,
+    controller_with_tenants_and_data,
 )
 
 CarId = int
@@ -159,7 +159,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-@view_with_tenants_and_data
+@controller_with_tenants_and_data
 def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs) -> _Response:
     """Post new orders.
 
@@ -240,7 +240,7 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
         )
 
 
-@view_with_tenants
+@controller_with_tenants
 def delete_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs) -> _Response:
     """Delete an existing order."""
     response = _db_access.delete(tenants, _db_models.OrderDB, order_id)
@@ -261,7 +261,7 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
     delete_order(car_id, oldest_inactive_order_id)
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
@@ -280,7 +280,7 @@ def get_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs)
         return _json_response(order)  # type: ignore
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_car_orders(tenants: _AccessibleTenants, car_id: int, since: int = 0, **kwargs) -> _Response:
     """Get all orders for a given car."""
     if not _car_exist(tenants, car_id):
@@ -302,7 +302,7 @@ def get_car_orders(tenants: _AccessibleTenants, car_id: int, since: int = 0, **k
     return _json_response(orders)
 
 
-@view_with_tenants
+@controller_with_tenants
 def get_orders(tenants: _AccessibleTenants, since: int = 0, **kwargs) -> _Response:
     """Get all existing orders."""
     _log_info("Listing all existing orders.")

@@ -1,8 +1,6 @@
 from functools import partial
 
-from fleet_management_api.models import (
-    Route as _Route,
-)
+from fleet_management_api.models import Route as _Route
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.database.db_models import (
     OrderDB as _OrderDB,
@@ -27,13 +25,13 @@ from fleet_management_api.response_consts import (
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.view_decorators import (
-    view_with_tenants as _view_with_tenants,
-    view_with_tenants_and_data as _view_with_tenants_and_data,
+from fleet_management_api.api_impl.controller_decorators import (
+    controller_with_tenants as _controller_with_tenants,
+    controller_with_tenants_and_data as _controller_with_tenants_and_data,
 )
 
 
-@_view_with_tenants_and_data
+@_controller_with_tenants_and_data
 def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs) -> _Response:
     """Post a new route.
 
@@ -70,7 +68,7 @@ def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
         )
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def delete_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(tenants, route_id)
@@ -93,7 +91,7 @@ def delete_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Respo
         return _log_info_and_respond(route_deletion_msg)
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Route:
     """Get an existing route identified by 'route_id'."""
     route_db_models = _db_access.get(tenants, _RouteDB, criteria={"id": lambda x: x == route_id})
@@ -107,7 +105,7 @@ def get_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Route:
         return _json_response(routes[0])
 
 
-@_view_with_tenants
+@_controller_with_tenants
 def get_routes(tenants: _AccessibleTenants, **kwargs) -> list[_Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(tenants, _RouteDB)
@@ -118,7 +116,7 @@ def get_routes(tenants: _AccessibleTenants, **kwargs) -> list[_Route]:
     return _json_response(route)
 
 
-@_view_with_tenants_and_data
+@_controller_with_tenants_and_data
 def update_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs) -> _Response:
     """Update an existing route identified by 'route_ids' array.
 
