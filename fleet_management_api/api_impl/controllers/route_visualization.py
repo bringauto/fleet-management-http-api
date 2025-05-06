@@ -14,22 +14,18 @@ from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import (
-    RequestEmpty as _RequestEmpty,
-    RequestJSON as _RequestJSON,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.view_decorators import (
+    view_with_tenants,
+    view_with_tenants_and_data,
+)
 
 
-def get_route_visualization(route_id: int) -> _Response:
+@view_with_tenants
+def get_route_visualization(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     rp_db_models = _db_access.get(
         tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
@@ -45,7 +41,10 @@ def get_route_visualization(route_id: int) -> _Response:
         return _json_response(rp)
 
 
-def redefine_route_visualizations() -> _Response:
+@view_with_tenants_and_data
+def redefine_route_visualizations(
+    tenants: _AccessibleTenants, visualisations_data: list[dict], **kwargs
+) -> _Response:
     """Redefine route visualizations for existing routes.
 
     If a route visualization for a route already exists, it will be replaced.
@@ -55,11 +54,7 @@ def redefine_route_visualizations() -> _Response:
     The visualization can be redefined only if:
     - the route exists.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-    vis = [_RouteVisualization.from_dict(s) for s in request.data]
+    vis = [_RouteVisualization.from_dict(s) for s in visualisations_data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):
             return _error(

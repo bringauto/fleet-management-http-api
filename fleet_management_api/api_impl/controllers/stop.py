@@ -12,20 +12,20 @@ from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import (
-    RequestJSON as _RequestJSON,
-    RequestEmpty as _RequestEmpty,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.view_decorators import (
+    view_with_tenants as _view_with_tenants,
+    view_with_tenants_and_data as _view_with_tenants_and_data,
+)
 
 
-def create_stops() -> _Response:
+@_view_with_tenants_and_data
+def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
     """Create new stops.
 
     If some of the stops' creation fails, no stops are added to the server.
@@ -33,11 +33,7 @@ def create_stops() -> _Response:
     The stop creation can succeed only if:
     - there is no stop with the same name.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-    stops = [_Stop.from_dict(s) for s in request.data]
+    stops = [_Stop.from_dict(s) for s in stops_data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.add(tenants, *stop_db_models)
     if response.status_code == 200:
@@ -54,15 +50,12 @@ def create_stops() -> _Response:
         )
 
 
-def delete_stop(stop_id: int) -> _Response:
+@_view_with_tenants
+def delete_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     routes_response = _get_routes_referencing_stop(tenants, stop_id)
     if routes_response.status_code != 200:
         return _log_info_and_respond(
@@ -82,12 +75,9 @@ def delete_stop(stop_id: int) -> _Response:
         )
 
 
-def get_stop(stop_id: int) -> _Response:
+@_view_with_tenants
+def get_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
         tenants, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
@@ -99,12 +89,9 @@ def get_stop(stop_id: int) -> _Response:
         return _Response(body=stops[0], status_code=200, content_type="application/json")
 
 
-def get_stops() -> _Response:
+@_view_with_tenants
+def get_stops(tenants: _AccessibleTenants, **kwargs) -> _Response:
     """Get all existing stops."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     stop_db_models = _db_access.get(tenants, _db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
@@ -113,7 +100,8 @@ def get_stops() -> _Response:
     return _json_response(stops)
 
 
-def update_stops() -> _Response:
+@_view_with_tenants_and_data
+def update_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
     """Update an existing stop.
 
     If some of the stops' update fails, no stops are updated.
@@ -122,11 +110,7 @@ def update_stops() -> _Response:
     - all stops exist,
     - there is no stop with the same name.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-    stops = [_Stop.from_dict(s) for s in request.data]
+    stops = [_Stop.from_dict(s) for s in stops_data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
     response = _db_access.update(tenants, *stop_db_models)
     if response.status_code == 200:

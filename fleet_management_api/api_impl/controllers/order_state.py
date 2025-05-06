@@ -10,7 +10,6 @@ from fleet_management_api.api_impl.api_logging import (
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
@@ -21,17 +20,18 @@ from fleet_management_api.response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import (
-    RequestEmpty as _RequestEmpty,
-    RequestJSON as _RequestJSON,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.view_decorators import (
+    view_with_tenants_and_data,
+    view_with_tenants,
+)
 
 
 OrderId = int
 
 
-def create_order_states() -> _Response:
+@view_with_tenants_and_data
+def create_order_states(tenants: _AccessibleTenants, data: list[dict], **kwargs) -> _Response:
     """Post new states of existing orders.
 
     If some of the order states's creation fails, no states are added to the server.
@@ -40,12 +40,8 @@ def create_order_states() -> _Response:
     - the order exists,
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     try:
-        order_states = [_models.OrderState.from_dict(item) for item in request.data]
+        order_states = [_models.OrderState.from_dict(item) for item in data]
     except (ValueError, TypeError) as e:
         return _log_info_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
@@ -57,6 +53,7 @@ def create_order_states_from_argument_and_post(
     tenants: _AccessibleTenants,
     order_states: list[_models.OrderState],
     check_final_state: bool = True,
+    **kwargs,
 ) -> _Response:
     """Create new states of existing orders. The Order State models are passed as an argument.
 
@@ -152,11 +149,14 @@ def create_order_states_from_argument_and_post(
         )
 
 
+@view_with_tenants
 def get_all_order_states(
+    tenants: _AccessibleTenants,
     wait: bool = False,
     since: int = 0,
     last_n: int = 0,
     car_id: Optional[int] = None,
+    **kwargs: Any,
 ) -> _Response:
     """Get all order states for all the existing orders.
 
@@ -170,10 +170,6 @@ def get_all_order_states(
     If None, return states of all orders. If the car with the specified 'car_id' does not exist,
     return empty list.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     _log_info("Getting all order states for all orders.")
     if car_id is not None:
         return _get_order_states(tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n)
@@ -181,8 +177,14 @@ def get_all_order_states(
         return _get_order_states(tenants, {}, wait, since, last_n=last_n)
 
 
+@view_with_tenants
 def get_order_states(
-    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0
+    tenants: _AccessibleTenants,
+    order_id: int,
+    wait: bool = False,
+    since: int = 0,
+    last_n: int = 0,
+    **kwargs: Any,
 ) -> _Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
@@ -195,10 +197,6 @@ def get_order_states(
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     if _existing_orders(tenants, order_id)[order_id] is None:
         _log_info(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)

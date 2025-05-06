@@ -20,9 +20,14 @@ from fleet_management_api.api_impl.load_request import (
     RequestEmpty as _RequestEmpty,
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.view_decorators import (
+    view_with_tenants as _view_with_tenants,
+    view_with_tenants_and_data as _view_with_tenants_and_data,
+)
 
 
-def create_car_states() -> _Response:
+@_view_with_tenants_and_data
+def create_car_states(tenants: _AccessibleTenants, states_data: list[dict], **kwargs) -> _Response:
     """Post new car states.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -30,11 +35,7 @@ def create_car_states() -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-    car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
+    car_states = [_CarState.from_dict(s) for s in states_data]  # noqa: E501
     return create_car_states_from_argument_and_post(tenants, car_states)
 
 
@@ -82,8 +83,9 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
+@_view_with_tenants
 def get_all_car_states(
-    since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+    tenants: _AccessibleTenants, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
 ) -> _Response:
     """Get all car states for all the cars.
 
@@ -94,13 +96,9 @@ def get_all_car_states(
     :param wait: If True, wait for new states if there are no states yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
-        _AccessibleTenants(request),
+        tenants,
         _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -115,8 +113,14 @@ def get_all_car_states(
     return _json_response(car_states)
 
 
+@_view_with_tenants
 def get_car_states(
-    car_id: int, since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+    tenants: _AccessibleTenants,
+    car_id: int,
+    since: int = 0,
+    wait: bool = False,
+    last_n: int = 0,
+    **kwargs,
 ) -> _Response:
     """Get car states for a car idenfified by 'car_id' of an existing car.
 
@@ -130,11 +134,8 @@ def get_car_states(
     try:
         if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
-        request = _RequestEmpty.load()
-        if not request:
-            return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
-            _AccessibleTenants(request),
+            tenants,
             base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,
