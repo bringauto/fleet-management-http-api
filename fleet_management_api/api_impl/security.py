@@ -17,7 +17,7 @@ class SecurityObj:
         self._keycloak_url = keycloak_url
         self._scope = scope
         self._realm_name = realm
-        self._callback = appended_uri(base_uri, "token_get")
+        self._callback = get_appended_uri(base_uri, "token_get")
         self._state = "state"
 
         self._oid = KeycloakOpenID(
@@ -45,7 +45,7 @@ class SecurityObj:
         if state != self._state:
             raise Exception("Invalid state")
 
-        if _url.urlparse(iss).geturl() != appended_uri(
+        if _url.urlparse(iss).geturl() != get_appended_uri(
             self._keycloak_url, "realms", self._realm_name
         ):
             raise Exception("Invalid issuer")
@@ -61,7 +61,7 @@ class SecurityObj:
         return token
 
 
-def appended_uri(uri: str, *appended: str) -> str:
+def get_appended_uri(uri: str, *appended: str) -> str:
     """Join URI parts.
 
     This function return valid URI composed of multiple parts.
