@@ -29,13 +29,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
+    LoadedRequest as _LoadedRequest,
 )
 
 
 @controller_with_tenants_and_data
-def create_cars(
-    tenants: _AccessibleTenants, car_data: list[dict], **kwargs
-) -> _Response:  # noqa: E501
+def create_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
     """Create new cars.
 
     If some of the cars' creation fails, no cars are added to the server.
@@ -47,7 +46,7 @@ def create_cars(
     - the platform HW is not referenced by any existing car.
     """
     cars: list[_models.Car] = []
-    for car_dict in car_data:
+    for car_dict in request.data:
         car_dict["lastState"] = None
         car = _models.Car.from_dict(car_dict)
         cars.append(car)
@@ -64,7 +63,7 @@ def create_cars(
             )
         )
 
-    response = _db_access.add(tenants, *car_db_models, checked=checked)
+    response = _db_access.add(request.tenants, *car_db_models, checked=checked)
     if response.status_code == 200:
         posted_db_models: list[_db_models.CarDB] = response.body
         ids: list[int] = []
@@ -73,8 +72,8 @@ def create_cars(
             ids.append(model.id)
             _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
-        car_states = _post_default_car_state(tenants, ids).body
-        _post_default_car_action_state(tenants, ids).body
+        car_states = _post_default_car_state(request.tenants, ids).body
+        _post_default_car_action_state(request.tenants, ids).body
 
         posted_cars: list[_Car] = []
         for model, state in zip(posted_db_models, car_states):
@@ -90,12 +89,12 @@ def create_cars(
 
 
 @controller_with_tenants
-def delete_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
+def delete_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
     """Deletes an existing car identified by 'car_id'.
 
     :param car_id: ID of the car to be deleted.
     """
-    response = _db_access.delete(tenants, _db_models.CarDB, car_id)
+    response = _db_access.delete(request.tenants, _db_models.CarDB, car_id)
     if response.status_code == 200:
         msg = f"Car (ID={car_id}) has been deleted."
         return _log_info_and_respond(msg)
@@ -105,10 +104,10 @@ def delete_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def get_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
+def get_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
     """Get a car identified by 'car_id'."""
     db_cars = _db_access.get(
-        tenants,
+        request.tenants,
         _db_models.CarDB,
         criteria={"id": lambda x: x == car_id},
         omitted_relationships=[_db_models.CarDB.orders],
@@ -118,30 +117,30 @@ def get_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
             f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
     else:
-        car = _get_car_with_last_state(tenants, db_cars[0])
+        car = _get_car_with_last_state(request.tenants, db_cars[0])
         _log_info(f"Car with ID={car_id} was found.")
         return _json_response(car)
 
 
 @controller_with_tenants
-def get_cars(tenants: _AccessibleTenants, **kwargs) -> _Response:  # noqa: E501
+def get_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
     """List all cars."""
     db_cars = _db_access.get(
-        tenants, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
+        request.tenants, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
     )
     cars: list[_models.Car] = list()
     if len(db_cars) == 0:
         _log_info("Listing all cars: no cars found.")
     else:
         for db_car in db_cars:
-            car = _get_car_with_last_state(tenants, db_car)
+            car = _get_car_with_last_state(request.tenants, db_car)
             cars.append(car)
         _log_info(f"Listing all cars: {len(cars)} cars found.")
     return _json_response(cars)
 
 
 @controller_with_tenants_and_data
-def update_cars(tenants: _AccessibleTenants, cars_data: list[dict], **kwargs) -> _Response:
+def update_cars(request: _LoadedRequest, **kwargs) -> _Response:
     """Update existing cars.
 
     If any of the cars' update fails, no cars are updated on the server.
@@ -153,9 +152,9 @@ def update_cars(tenants: _AccessibleTenants, cars_data: list[dict], **kwargs) ->
     - the car name is unique.
     - the platform HW is not referenced by any other existing car.
     """
-    cars = [_models.Car.from_dict(item) for item in cars_data]  # noqa: E501
+    cars = [_models.Car.from_dict(item) for item in request.data]  # noqa: E501
     car_db_model = [_obj_to_db.car_to_db_model(c) for c in cars]
-    response = _db_access.update(tenants, *car_db_model)
+    response = _db_access.update(request.tenants, *car_db_model)
     car_ids = [c.id for c in cars]
     if response.status_code == 200:
         return _log_info_and_respond(f"Cars with IDs {car_ids} has been succesfully updated.")

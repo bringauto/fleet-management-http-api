@@ -19,6 +19,7 @@ from fleet_management_api.api_impl.api_logging import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
+    LoadedRequest as _LoadedRequest,
 )
 
 
@@ -33,7 +34,7 @@ STATE_TRANSITIONS: dict[str, set[str]] = {
 
 @_controller_with_tenants
 def get_car_action_states(
-    tenants: _AccessibleTenants,
+    request: _LoadedRequest,
     car_id: int,
     since: int = 0,
     wait: bool = False,
@@ -52,7 +53,7 @@ def get_car_action_states(
             title="Referenced object not found",
         )
     db_models = _db_access.get(
-        tenants,
+        request.tenants,
         _db_models.CarActionStateDB,
         criteria={"timestamp": lambda x: x >= since, "car_id": lambda x: x == car_id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -68,7 +69,7 @@ def get_car_action_states(
 
 
 @_controller_with_tenants
-def pause_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
+def pause_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
     """Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
 
      # noqa: E501
@@ -79,11 +80,11 @@ def pause_car(tenants: _AccessibleTenants, car_id: int, **kwargs) -> _Response:
     :rtype: ConnexionResponse
     """
     state = CarActionState(car_id=car_id, action_status="paused")
-    return create_car_action_states_from_argument_and_save_to_db(tenants, [state])
+    return create_car_action_states_from_argument_and_save_to_db(request.tenants, [state])
 
 
 @_controller_with_tenants
-def unpause_car(tenants: _AccessibleTenants, car_id: int, **kwargs):  # noqa: E501
+def unpause_car(request: _LoadedRequest, car_id: int, **kwargs):  # noqa: E501
     """Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
 
      # noqa: E501
@@ -94,7 +95,7 @@ def unpause_car(tenants: _AccessibleTenants, car_id: int, **kwargs):  # noqa: E5
     :rtype: ConnexionResponse
     """
     state = CarActionState(car_id=car_id, action_status="normal")
-    return create_car_action_states_from_argument_and_save_to_db(tenants, [state])
+    return create_car_action_states_from_argument_and_save_to_db(request.tenants, [state])
 
 
 def create_car_action_states_from_argument_and_save_to_db(

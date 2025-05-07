@@ -24,6 +24,7 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants_and_data,
     controller_with_tenants,
+    LoadedRequest as _LoadedRequest,
 )
 
 
@@ -31,7 +32,7 @@ OrderId = int
 
 
 @controller_with_tenants_and_data
-def create_order_states(tenants: _AccessibleTenants, data: list[dict], **kwargs) -> _Response:
+def create_order_states(request: _LoadedRequest, **kwargs) -> _Response:
     """Post new states of existing orders.
 
     If some of the order states's creation fails, no states are added to the server.
@@ -41,12 +42,12 @@ def create_order_states(tenants: _AccessibleTenants, data: list[dict], **kwargs)
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
     try:
-        order_states = [_models.OrderState.from_dict(item) for item in data]
+        order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
         return _log_info_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
         )
-    return create_order_states_from_argument_and_post(tenants, order_states)
+    return create_order_states_from_argument_and_post(request.tenants, order_states)
 
 
 def create_order_states_from_argument_and_post(
@@ -151,7 +152,7 @@ def create_order_states_from_argument_and_post(
 
 @controller_with_tenants
 def get_all_order_states(
-    tenants: _AccessibleTenants,
+    request: _LoadedRequest,
     wait: bool = False,
     since: int = 0,
     last_n: int = 0,
@@ -172,14 +173,16 @@ def get_all_order_states(
     """
     _log_info("Getting all order states for all orders.")
     if car_id is not None:
-        return _get_order_states(tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n)
+        return _get_order_states(
+            request.tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n
+        )
     else:
-        return _get_order_states(tenants, {}, wait, since, last_n=last_n)
+        return _get_order_states(request.tenants, {}, wait, since, last_n=last_n)
 
 
 @controller_with_tenants
 def get_order_states(
-    tenants: _AccessibleTenants,
+    request: _LoadedRequest,
     order_id: int,
     wait: bool = False,
     since: int = 0,
@@ -197,12 +200,12 @@ def get_order_states(
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    if _existing_orders(tenants, order_id)[order_id] is None:
+    if _existing_orders(request.tenants, order_id)[order_id] is None:
         _log_info(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
-        return _get_order_states(tenants, criteria, wait, since, last_n)
+        return _get_order_states(request.tenants, criteria, wait, since, last_n)
 
 
 def _existing_orders(

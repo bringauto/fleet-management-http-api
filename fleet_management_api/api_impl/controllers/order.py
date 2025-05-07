@@ -23,6 +23,7 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
+    LoadedRequest as _LoadedRequest,
 )
 
 CarId = int
@@ -160,7 +161,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 @controller_with_tenants_and_data
-def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs) -> _Response:
+def create_orders(request: _LoadedRequest, **kwargs) -> _Response:
     """Post new orders.
 
     If some of the orders' creation fails, no orders are added to the server.
@@ -173,9 +174,9 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
     """
     order_db_models: list[_db_models.OrderDB] = []
     checked: list[_db_access.CheckBeforeAdd] = []
-    if not isinstance(orders_data, list):
+    if not isinstance(request.data, list):
         return _error(400, "Invalid input: expected a list of orders.", "Bad Request")
-    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in orders_data]
+    orders: list[_models.Order] = [_models.Order.from_dict(o) for o in request.data]
     orders_per_car = _group_new_orders_by_car(orders)
     if _max_n_of_active_orders is not None:
         for car_id in orders_per_car:
@@ -189,7 +190,7 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
     for order in orders:
         order.last_state = None  # type: ignore
         car_id = order.car_id
-        if not _car_exist(tenants, car_id):
+        if not _car_exist(request.tenants, car_id):
             return _log_info_and_respond(
                 f"Car with ID={car_id} does not exist.", 404, _OBJ_NOT_FOUND
             )
@@ -211,7 +212,7 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
         )
         order_db_models.append(_obj_to_db.order_to_db_model(order))
 
-    response = _db_access.add(tenants, *order_db_models, checked=checked)
+    response = _db_access.add(request.tenants, *order_db_models, checked=checked)
 
     if response.status_code == 200:
         # orders are created in the database, now log them
@@ -222,7 +223,7 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
             ids.append(model.id)
             _log_info(f"Order (ID={model.id}) has been created.")
 
-        db_states = _post_default_order_states(tenants, ids).body
+        db_states = _post_default_order_states(request.tenants, ids).body
         states = [_obj_to_db.order_state_from_db_model(db_state) for db_state in db_states]
 
         posted_orders: list[_models.Order] = []
@@ -241,9 +242,9 @@ def create_orders(tenants: _AccessibleTenants, orders_data: list[dict], **kwargs
 
 
 @controller_with_tenants
-def delete_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs) -> _Response:
+def delete_order(request: _LoadedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Delete an existing order."""
-    response = _db_access.delete(tenants, _db_models.OrderDB, order_id)
+    response = _db_access.delete(request.tenants, _db_models.OrderDB, order_id)
     if response.status_code == 200:
         msg = f"Order (ID={order_id}) has been deleted."
         _log_info(msg)
@@ -262,10 +263,10 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
 
 
 @controller_with_tenants
-def get_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs) -> _Response:
+def get_order(request: _LoadedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
-        tenants,
+        request.tenants,
         base=_db_models.OrderDB,
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
@@ -275,15 +276,15 @@ def get_order(tenants: _AccessibleTenants, car_id: int, order_id: int, **kwargs)
         return _error(404, msg, _OBJ_NOT_FOUND)
     else:
         db_order = order_db_models[0]
-        order = _get_order_with_last_state(tenants, db_order)
+        order = _get_order_with_last_state(request.tenants, db_order)
         _log_info(f"Found order with ID={order_id} of car with ID={car_id}.")
         return _json_response(order)  # type: ignore
 
 
 @controller_with_tenants
-def get_car_orders(tenants: _AccessibleTenants, car_id: int, since: int = 0, **kwargs) -> _Response:
+def get_car_orders(request: _LoadedRequest, car_id: int, since: int = 0, **kwargs) -> _Response:
     """Get all orders for a given car."""
-    if not _car_exist(tenants, car_id):
+    if not _car_exist(request.tenants, car_id):
         return _log_info_and_respond(
             f"Car with ID={car_id} does not exist.", 404, title=_OBJ_NOT_FOUND
         )
@@ -295,7 +296,7 @@ def get_car_orders(tenants: _AccessibleTenants, car_id: int, since: int = 0, **k
     )
     orders: list[_models.Order] = list()
     for db_order in db_orders:
-        order = _get_order_with_last_state(tenants, db_order)
+        order = _get_order_with_last_state(request.tenants, db_order)
         if order is not None:
             orders.append(order)
     _log_info(f"Returning {len(orders)} orders for car with ID={car_id}.")
@@ -303,15 +304,15 @@ def get_car_orders(tenants: _AccessibleTenants, car_id: int, since: int = 0, **k
 
 
 @controller_with_tenants
-def get_orders(tenants: _AccessibleTenants, since: int = 0, **kwargs) -> _Response:
+def get_orders(request: _LoadedRequest, since: int = 0, **kwargs) -> _Response:
     """Get all existing orders."""
     _log_info("Listing all existing orders.")
     db_orders = _db_access.get(
-        tenants, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
+        request.tenants, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
     )
     orders: list[_models.Order] = list()
     for db_order in db_orders:
-        order = _get_order_with_last_state(tenants, db_order)
+        order = _get_order_with_last_state(request.tenants, db_order)
         if order is not None:
             orders.append(order)
     return _json_response(orders)

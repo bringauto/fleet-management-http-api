@@ -16,18 +16,18 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
+    LoadedRequest as _LoadedRequest,
 )
 
 
 @controller_with_tenants
-def get_route_visualization(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Response:
+def get_route_visualization(request: _LoadedRequest, route_id: int, **kwargs) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
-        tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
+        request.tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
         return _error(
@@ -42,9 +42,7 @@ def get_route_visualization(tenants: _AccessibleTenants, route_id: int, **kwargs
 
 
 @controller_with_tenants_and_data
-def redefine_route_visualizations(
-    tenants: _AccessibleTenants, visualisations_data: list[dict], **kwargs
-) -> _Response:
+def redefine_route_visualizations(request: _LoadedRequest, **kwargs) -> _Response:
     """Redefine route visualizations for existing routes.
 
     If a route visualization for a route already exists, it will be replaced.
@@ -54,7 +52,7 @@ def redefine_route_visualizations(
     The visualization can be redefined only if:
     - the route exists.
     """
-    vis = [_RouteVisualization.from_dict(s) for s in visualisations_data]
+    vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):
             return _error(
@@ -63,7 +61,7 @@ def redefine_route_visualizations(
                 title=_OBJ_NOT_FOUND,
             )
 
-    existing_vis: list[_RouteVisDB] = _db_access.get(tenants, _RouteVisDB)
+    existing_vis: list[_RouteVisDB] = _db_access.get(request.tenants, _RouteVisDB)
     existing_vis_dict: dict[int, _RouteVisDB] = {v.route_id: v for v in existing_vis}
     for v in vis:
         if v.route_id in existing_vis_dict:
@@ -77,7 +75,7 @@ def redefine_route_visualizations(
             )
 
     vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
-    response = _db_access.update(tenants, *vis_db_models)
+    response = _db_access.update(request.tenants, *vis_db_models)
     if response.status_code == 200:
         inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
         for v in inserted_vis:

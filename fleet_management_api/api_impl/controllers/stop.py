@@ -21,11 +21,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
     controller_with_tenants_and_data as _controller_with_tenants_and_data,
+    LoadedRequest as _LoadedRequest,
 )
 
 
 @_controller_with_tenants_and_data
-def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
+def create_stops(request: _LoadedRequest, **kwargs) -> _Response:
     """Create new stops.
 
     If some of the stops' creation fails, no stops are added to the server.
@@ -33,9 +34,9 @@ def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) 
     The stop creation can succeed only if:
     - there is no stop with the same name.
     """
-    stops = [_Stop.from_dict(s) for s in stops_data]
+    stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.add(tenants, *stop_db_models)
+    response = _db_access.add(request.tenants, *stop_db_models)
     if response.status_code == 200:
         posted_db_models: list[_db_models.StopDB] = response.body
         for stop in posted_db_models:
@@ -51,19 +52,19 @@ def create_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) 
 
 
 @_controller_with_tenants
-def delete_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
+def delete_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
     The stop cannot be deleted if it is referenced by any route.
     """
-    routes_response = _get_routes_referencing_stop(tenants, stop_id)
+    routes_response = _get_routes_referencing_stop(request.tenants, stop_id)
     if routes_response.status_code != 200:
         return _log_info_and_respond(
             routes_response.body["title"],
             routes_response.status_code,
             routes_response.body["title"],
         )
-    response = _db_access.delete(tenants, _db_models.StopDB, stop_id)
+    response = _db_access.delete(request.tenants, _db_models.StopDB, stop_id)
     if response.status_code == 200:
         return _log_info_and_respond(f"Stop with ID={stop_id} has been deleted.")
     else:
@@ -76,10 +77,10 @@ def delete_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Respons
 
 
 @_controller_with_tenants
-def get_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
+def get_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
-        tenants, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
+        request.tenants, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
     )
     stops = [_obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models]
     if len(stops) == 0:
@@ -90,9 +91,9 @@ def get_stop(tenants: _AccessibleTenants, stop_id: int, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def get_stops(tenants: _AccessibleTenants, **kwargs) -> _Response:
+def get_stops(request: _LoadedRequest, **kwargs) -> _Response:
     """Get all existing stops."""
-    stop_db_models = _db_access.get(tenants, _db_models.StopDB)
+    stop_db_models = _db_access.get(request.tenants, _db_models.StopDB)
     stops: list[_Stop] = [
         _obj_to_db.stop_from_db_model(stop_db_model) for stop_db_model in stop_db_models
     ]
@@ -101,7 +102,7 @@ def get_stops(tenants: _AccessibleTenants, **kwargs) -> _Response:
 
 
 @_controller_with_tenants_and_data
-def update_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) -> _Response:
+def update_stops(request: _LoadedRequest, **kwargs) -> _Response:
     """Update an existing stop.
 
     If some of the stops' update fails, no stops are updated.
@@ -110,9 +111,9 @@ def update_stops(tenants: _AccessibleTenants, stops_data: list[dict], **kwargs) 
     - all stops exist,
     - there is no stop with the same name.
     """
-    stops = [_Stop.from_dict(s) for s in stops_data]
+    stops = [_Stop.from_dict(s) for s in request.data]
     stop_db_models = [_obj_to_db.stop_to_db_model(s) for s in stops]
-    response = _db_access.update(tenants, *stop_db_models)
+    response = _db_access.update(request.tenants, *stop_db_models)
     if response.status_code == 200:
         updated_stops: list[_db_models.StopDB] = response.body
         for s in updated_stops:

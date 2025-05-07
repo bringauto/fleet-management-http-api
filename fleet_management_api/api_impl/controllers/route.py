@@ -28,11 +28,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
     controller_with_tenants_and_data as _controller_with_tenants_and_data,
+    LoadedRequest as _LoadedRequest,
 )
 
 
 @_controller_with_tenants_and_data
-def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs) -> _Response:
+def create_routes(request: _LoadedRequest, **kwargs) -> _Response:
     """Post a new route.
 
     If some of the routes' creation fails, no routes are added to the server.
@@ -41,9 +42,9 @@ def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
     - all stops exist,
     - there is not a route with the same name.
     """
-    routes = [_Route.from_dict(r) for r in routes_data]
+    routes = [_Route.from_dict(r) for r in request.data]
     for r in routes:
-        check_response = _check_route_model(tenants, r)
+        check_response = _check_route_model(request.tenants, r)
         if check_response.status_code != 200:
             return _log_info_and_respond(
                 check_response.body["detail"],
@@ -52,12 +53,12 @@ def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
             )
 
     route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
-    response = _db_access.add(tenants, *route_db_models)
+    response = _db_access.add(request.tenants, *route_db_models)
     if response.status_code == 200:
         inserted_db_models: list[_RouteDB] = response.body
         for route in inserted_db_models:
             assert route.id is not None
-            _create_empty_route_visualization(tenants, route.id)
+            _create_empty_route_visualization(request.tenants, route.id)
             _log_info(f"Route (name='{route.name}) has been created.")
         return _json_response([_obj_to_db.route_from_db_model(m) for m in inserted_db_models])
     else:
@@ -69,16 +70,16 @@ def create_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
 
 
 @_controller_with_tenants
-def delete_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Response:
+def delete_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Response:
     """Delete an existing route identified by 'route_id'."""
-    related_orders_response = _find_related_orders(tenants, route_id)
+    related_orders_response = _find_related_orders(request.tenants, route_id)
     if related_orders_response.status_code != 200:
         return _log_info_and_respond(
             related_orders_response.status_code,
             related_orders_response.status_code,
             related_orders_response.body,
         )
-    response = _db_access.delete(tenants, _RouteDB, route_id)
+    response = _db_access.delete(request.tenants, _RouteDB, route_id)
     if response.status_code != 200:
         note = " (not found)" if response.status_code == 404 else ""
         return _log_error_and_respond(
@@ -92,9 +93,11 @@ def delete_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Respo
 
 
 @_controller_with_tenants
-def get_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Route:
+def get_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Route:
     """Get an existing route identified by 'route_id'."""
-    route_db_models = _db_access.get(tenants, _RouteDB, criteria={"id": lambda x: x == route_id})
+    route_db_models = _db_access.get(
+        request.tenants, _RouteDB, criteria={"id": lambda x: x == route_id}
+    )
     routes = [_obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
     if len(routes) == 0:
         return _log_info_and_respond(
@@ -106,9 +109,9 @@ def get_route(tenants: _AccessibleTenants, route_id: int, **kwargs) -> _Route:
 
 
 @_controller_with_tenants
-def get_routes(tenants: _AccessibleTenants, **kwargs) -> list[_Route]:
+def get_routes(request: _LoadedRequest, **kwargs) -> list[_Route]:
     """Get all existing routes."""
-    route_db_models = _db_access.get(tenants, _RouteDB)
+    route_db_models = _db_access.get(request.tenants, _RouteDB)
     route: list[_Route] = [
         _obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models
     ]
@@ -117,7 +120,7 @@ def get_routes(tenants: _AccessibleTenants, **kwargs) -> list[_Route]:
 
 
 @_controller_with_tenants_and_data
-def update_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs) -> _Response:
+def update_routes(request: _LoadedRequest, **kwargs) -> _Response:
     """Update an existing route identified by 'route_ids' array.
 
     If some of the routes' update fails, no routes are updated on the server.
@@ -126,8 +129,8 @@ def update_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
     - all stops exist,
     - all route IDs exist.
     """
-    routes = [_Route.from_dict(item) for item in routes_data]
-    check_stops_response = _find_nonexistent_stops(tenants, *routes)
+    routes = [_Route.from_dict(item) for item in request.data]
+    check_stops_response = _find_nonexistent_stops(request.tenants, *routes)
     if check_stops_response.status_code != 200:
         return _log_info_and_respond(
             check_stops_response.body,
@@ -135,7 +138,7 @@ def update_routes(tenants: _AccessibleTenants, routes_data: list[dict], **kwargs
             _OBJ_NOT_FOUND,
         )
     route_db_models = [_obj_to_db.route_to_db_model(r) for r in routes]
-    response = _db_access.update(tenants, *route_db_models)
+    response = _db_access.update(request.tenants, *route_db_models)
     if response.status_code == 200:
         inserted_routes: list[_RouteDB] = response.body
         for r in inserted_routes:
