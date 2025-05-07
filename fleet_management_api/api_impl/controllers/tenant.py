@@ -23,7 +23,11 @@ def set_tenant_cookie(request: _ProcessedRequest, tenant_id: int, **kwargs) -> _
 
     If the tenant with the ID does not exist, return a Unauthorized response."""
     tenants_in_db = _db_access.get_tenants(request.tenants)
-    assert isinstance(tenant_id, int), "Tenant ID must be an integer"
+    # Validate at runtime even when assertions are disabled
+    if not isinstance(tenant_id, int):
+        return _log_error_and_respond(
+            "Tenant ID must be an integer", 400, title="invalid tenant ID type"
+        )
     for t in tenants_in_db:
         if t.id == tenant_id:
             response = _text_response(

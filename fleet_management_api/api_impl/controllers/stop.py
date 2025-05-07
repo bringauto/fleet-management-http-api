@@ -12,6 +12,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
+    log_nok_and_respond as _log_nok_and_respond,
 )
 from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
@@ -58,10 +59,10 @@ def delete_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response
     """
     routes_response = _get_routes_referencing_stop(request.tenants, stop_id)
     if routes_response.status_code != 200:
-        return _log_info_and_respond(
-            routes_response.body["title"],
+        return _log_nok_and_respond(
+            routes_response.body,
             routes_response.status_code,
-            routes_response.body["title"],
+            title="Cannot delete referenced stop",
         )
     response = _db_access.delete(request.tenants, _db_models.StopDB, stop_id)
     if response.status_code == 200:

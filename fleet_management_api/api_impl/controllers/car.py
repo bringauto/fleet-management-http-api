@@ -20,6 +20,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
+    log_nok_and_respond as _log_nok_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_error_and_respond as _log_error_and_respond,
 )
@@ -71,8 +72,21 @@ def create_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E50
             ids.append(model.id)
             _log_info(f"Car (ID={model.id}, name='{model.name}') has been created.")
 
-        car_states = _post_default_car_state(request.tenants, ids).body
-        _post_default_car_action_state(request.tenants, ids).body
+        car_states_resp = _post_default_car_state(request.tenants, ids)
+        if car_states_resp.status_code != 200:
+            return _log_nok_and_respond(
+                code=car_states_resp.status_code,
+                msg=car_states_resp.body,
+                title="Car state creation failed",
+            )
+        car_states: list[_CarState] = car_states_resp.body
+        car_action_states_resp = _post_default_car_action_state(request.tenants, ids)
+        if car_action_states_resp.status_code != 200:
+            return _log_nok_and_respond(
+                code=car_action_states_resp.status_code,
+                msg=car_action_states_resp.body,
+                title="Car action state creation failed",
+            )
 
         posted_cars: list[_Car] = []
         for model, state in zip(posted_db_models, car_states):

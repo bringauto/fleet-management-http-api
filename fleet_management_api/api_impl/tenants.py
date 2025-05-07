@@ -1,10 +1,10 @@
 from __future__ import annotations
 import json
+import dataclasses
 
 import jwt
-
-from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 from connexion.exceptions import Unauthorized  # type: ignore
+
 from fleet_management_api.api_impl.load_request import LoadedRequest as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
 from fleet_management_api.api_impl.constants import (
@@ -150,31 +150,38 @@ class _EmptyTenant(AccessibleTenants):
 NO_TENANTS = _EmptyTenant()
 
 
+@dataclasses.dataclass(frozen=True)
+class LoadedAccessibleTenants:
+    msg: str
+    status_code: int = 200
+    tenants: AccessibleTenants = NO_TENANTS
+
+
 def get_accessible_tenants(
     request: _Request,
     key: str = "",
     audience: str = "account",
     ignore_cookie: bool = False,
-) -> _Response:
+) -> LoadedAccessibleTenants:
     try:
         tenants = AccessibleTenants(request, key, audience, ignore_cookie)
-        return _Response(
+        return LoadedAccessibleTenants(
+            msg="Accessible tenants extracted successfully.",
             status_code=200,
-            mimetype="application/json",
-            content_type="application/json",
-            body=tenants,
+            tenants=tenants,
         )
     except NoAccessibleTenants:
         # If the JWT token does not contain any tenants, return an empty tenant object
-        return _Response(
+        return LoadedAccessibleTenants(
+            msg="JWT token does not contain any accessible tenants.",
             status_code=401,
-            mimetype="text/plain",
-            content_type="text/plain",
-            body="JWT token does not contain any accessible tenants.",
+            tenants=NO_TENANTS,
         )
     except Exception as e:
-        return _Response(
-            status_code=500, mimetype="text/plain", content_type="text/plain", body=str(e)
+        return LoadedAccessibleTenants(
+            msg=f"Failed to extract accessible tenants: {str(e)}",
+            status_code=500,
+            tenants=NO_TENANTS,
         )
 
 
