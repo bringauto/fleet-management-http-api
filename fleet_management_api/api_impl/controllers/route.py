@@ -27,12 +27,11 @@ from fleet_management_api.response_consts import (
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
-    controller_with_tenants_and_data as _controller_with_tenants_and_data,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-@_controller_with_tenants_and_data
+@_controller_with_tenants(require_data=True)
 def create_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post a new route.
 
@@ -119,7 +118,7 @@ def get_routes(request: _ProcessedRequest, **kwargs) -> list[_Route]:
     return _json_response(route)
 
 
-@_controller_with_tenants_and_data
+@_controller_with_tenants(require_data=True)
 def update_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update an existing route identified by 'route_ids' array.
 

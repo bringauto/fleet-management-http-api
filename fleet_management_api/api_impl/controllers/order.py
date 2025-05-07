@@ -22,7 +22,6 @@ from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
-    controller_with_tenants_and_data,
     ProcessedRequest as _ProcessedRequest,
 )
 
@@ -160,7 +159,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-@controller_with_tenants_and_data
+@controller_with_tenants(require_data=True)
 def create_orders(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new orders.
 

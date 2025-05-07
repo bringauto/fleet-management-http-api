@@ -4,7 +4,7 @@ This module provides decorators for the controller imlpementation in the Fleet M
 The decorators pre-load and validate the request data and also the tenant information from the connexion.request object.
 """
 
-from typing import Callable, Concatenate, ParamSpec
+from typing import Callable, Concatenate, ParamSpec, Optional
 import dataclasses
 
 from fleet_management_api.api_impl.api_responses import Response as _Response
@@ -33,55 +33,48 @@ class ProcessedRequest:
     data: list[dict[str, str | None]] = dataclasses.field(default_factory=list)
 
 
-# The raw controllers are functions defined in the api_impl/controllers module
-RawController = Callable[Concatenate[ProcessedRequest, P], _Response]
-Controller = Callable[Concatenate[P], _Response]
+def controller_with_tenants(
+    controller: Optional[Callable[Concatenate[ProcessedRequest, P], _Response]] = None,
+    /,
+    *,
+    require_data: bool = False,
+) -> (
+    Callable[Concatenate[P], _Response]
+    | Callable[
+        [Callable[Concatenate[ProcessedRequest, P], _Response]], Callable[Concatenate[P], _Response]
+    ]
+):
+    """This decorator provides the controller function with the information about tenants, for which data can be created, read or modified.
 
-
-def controller_with_tenants(controller: RawController) -> Controller:
-    """This decorator provides the controller function with the information about tenants, for which data can be read or modified.
-
-    The controller also prevents calling the controller if
-    1) the request body is in invalid format or
+    The decorator also prevents calling the controller if
+    1) the request body is invalid (i.e., it is not a valid JSON if the data is required) or
     2) tenants are not set up correctly, either the tenant cookie is not set for modifying the data or there are no accessible tenants
+
+    Instead of calling the controller, the decorator returns a response with appropriate status code, error message and also logs the event.
     """
 
-    def wrapper(*args, **kwargs):
-        request = _load_request(require_data=False)
-        if not request:
-            return _log_invalid_request_body_format()
-        tresponse = _get_accessible_tenants(request)
-        if tresponse.status_code != 200:
-            return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-        tenants = tresponse.body
-        assert isinstance(tenants, _AccessibleTenants)
-        loaded_request = ProcessedRequest(tenants)
-        response = controller(loaded_request, *args, **kwargs)
-        return response
+    def _controller_with_tenants(
+        controller: Callable[Concatenate[ProcessedRequest, P], _Response],
+    ) -> Callable[Concatenate[P], _Response]:
 
-    return wrapper
+        def wrapper(*args, **kwargs) -> _Response:
+            request = _load_request(require_data=require_data)
+            if not request:
+                return _log_invalid_request_body_format()
+            tresponse = _get_accessible_tenants(request)
+            if tresponse.status_code != 200:
+                return _log_error_and_respond(
+                    tresponse.body, tresponse.status_code, title="No tenants"
+                )
+            tenants = tresponse.body
+            assert isinstance(tenants, _AccessibleTenants)
+            loaded_request = ProcessedRequest(tenants, data=request.data)
+            response = controller(loaded_request, *args, **kwargs)
+            return response
 
+        return wrapper
 
-def controller_with_tenants_and_data(controller: RawController) -> Controller:
-    """This decorator provides the controller function with the information about tenants, for which data can be created or modified
-    and the data itself (in JSON format).
-
-    The controller also prevents calling the controller if
-    1) the request body is not a valid JSON or
-    2) tenants are not set up correctly, either the tenant cookie is not set for modifying the data or there are no accessible tenants
-    """
-
-    def wrapper(*args, **kwargs):
-        request = _load_request(require_data=True)
-        if not request:
-            return _log_invalid_request_body_format()
-        tresponse = _get_accessible_tenants(request)
-        if tresponse.status_code != 200:
-            return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
-        tenants = tresponse.body
-        assert isinstance(tenants, _AccessibleTenants)
-        loaded_request = ProcessedRequest(tenants, data=request.data)
-        response = controller(loaded_request, *args, **kwargs)
-        return response
-
-    return wrapper
+    if controller is None:
+        return _controller_with_tenants
+    else:
+        return _controller_with_tenants(controller)

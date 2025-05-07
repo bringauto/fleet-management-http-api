@@ -22,7 +22,6 @@ from fleet_management_api.response_consts import (
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants_and_data,
     controller_with_tenants,
     ProcessedRequest as _ProcessedRequest,
 )
@@ -31,7 +30,7 @@ from fleet_management_api.api_impl.controller_decorators import (
 OrderId = int
 
 
-@controller_with_tenants_and_data
+@controller_with_tenants(require_data=True)
 def create_order_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new states of existing orders.
 

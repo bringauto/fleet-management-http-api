@@ -13,12 +13,11 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
-    controller_with_tenants_and_data,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-@controller_with_tenants_and_data
+@controller_with_tenants(require_data=True)
 def create_hws(request: _ProcessedRequest, **kwargs) -> _Response:
     """Create new platform HWs.
 

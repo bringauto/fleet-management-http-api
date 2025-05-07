@@ -78,14 +78,14 @@ class _LoadedRequestJSON(LoadedRequest):
 class _LoadedRequestEmpty(LoadedRequest):
     """A request loaded from the connexion request object, while expecting no data. The loaded request is always valid."""
 
-    data: Any = None
+    data: Any = dataclasses.field(default_factory=list)
     headers: dict[str, Any] = dataclasses.field(default_factory=dict)
     cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
     query: dict[str, Any] = dataclasses.field(default_factory=dict)
 
     @classmethod
     def get_data(cls, *args, **kwargs) -> Any:
-        return None
+        return []
 
     @classmethod
     def is_valid(cls, *args, **kwargs) -> bool:

@@ -18,7 +18,6 @@ from fleet_management_api.api_impl.api_logging import (
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
-    controller_with_tenants_and_data,
     ProcessedRequest as _ProcessedRequest,
 )
 
@@ -41,7 +40,7 @@ def get_route_visualization(request: _ProcessedRequest, route_id: int, **kwargs)
         return _json_response(rp)
 
 
-@controller_with_tenants_and_data
+@controller_with_tenants(require_data=True)
 def redefine_route_visualizations(request: _ProcessedRequest, **kwargs) -> _Response:
     """Redefine route visualizations for existing routes.
 
