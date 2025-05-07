@@ -18,7 +18,7 @@ from fleet_management_api.api_impl.tenants import (
     NO_TENANTS as _NO_TENANTS,
 )
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants as _controller_with_tenants,
+    with_processed_request as _controller_with_tenants,
     ProcessedRequest as _ProcessedRequest,
 )
 

@@ -16,7 +16,7 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants as _controller_with_tenants,
+    with_processed_request as _controller_with_tenants,
     ProcessedRequest as _ProcessedRequest,
 )
 

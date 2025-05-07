@@ -26,7 +26,7 @@ from fleet_management_api.response_consts import (
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants as _controller_with_tenants,
+    with_processed_request as _controller_with_tenants,
     ProcessedRequest as _ProcessedRequest,
 )
 

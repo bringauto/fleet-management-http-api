@@ -22,7 +22,7 @@ from fleet_management_api.response_consts import (
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants,
+    with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
@@ -30,7 +30,7 @@ from fleet_management_api.api_impl.controller_decorators import (
 OrderId = int
 
 
-@controller_with_tenants(require_data=True)
+@with_processed_request(require_data=True)
 def create_order_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new states of existing orders.
 
@@ -149,7 +149,7 @@ def create_order_states_from_argument_and_post(
         )
 
 
-@controller_with_tenants
+@with_processed_request
 def get_all_order_states(
     request: _ProcessedRequest,
     wait: bool = False,
@@ -179,7 +179,7 @@ def get_all_order_states(
         return _get_order_states(request.tenants, {}, wait, since, last_n=last_n)
 
 
-@controller_with_tenants
+@with_processed_request
 def get_order_states(
     request: _ProcessedRequest,
     order_id: int,

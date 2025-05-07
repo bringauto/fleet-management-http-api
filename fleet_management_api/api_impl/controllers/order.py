@@ -21,7 +21,7 @@ import fleet_management_api.api_impl.controllers.order_state as _order_state
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    controller_with_tenants,
+    with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
@@ -159,7 +159,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
         _inactive_orders[car_id].append(order_id)
 
 
-@controller_with_tenants(require_data=True)
+@with_processed_request(require_data=True)
 def create_orders(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new orders.
 
@@ -240,7 +240,7 @@ def create_orders(request: _ProcessedRequest, **kwargs) -> _Response:
         )
 
 
-@controller_with_tenants
+@with_processed_request
 def delete_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Delete an existing order."""
     response = _db_access.delete(request.tenants, _db_models.OrderDB, order_id)
@@ -261,7 +261,7 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
     delete_order(car_id, oldest_inactive_order_id)
 
 
-@controller_with_tenants
+@with_processed_request
 def get_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
@@ -280,7 +280,7 @@ def get_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) 
         return _json_response(order)  # type: ignore
 
 
-@controller_with_tenants
+@with_processed_request
 def get_car_orders(request: _ProcessedRequest, car_id: int, since: int = 0, **kwargs) -> _Response:
     """Get all orders for a given car."""
     if not _car_exist(request.tenants, car_id):
@@ -302,7 +302,7 @@ def get_car_orders(request: _ProcessedRequest, car_id: int, since: int = 0, **kw
     return _json_response(orders)
 
 
-@controller_with_tenants
+@with_processed_request
 def get_orders(request: _ProcessedRequest, since: int = 0, **kwargs) -> _Response:
     """Get all existing orders."""
     _log_info("Listing all existing orders.")

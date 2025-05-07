@@ -33,7 +33,7 @@ class ProcessedRequest:
     data: list[dict[str, str | None]] = dataclasses.field(default_factory=list)
 
 
-def controller_with_tenants(
+def with_processed_request(
     controller: Optional[Callable[Concatenate[ProcessedRequest, P], _Response]] = None,
     /,
     *,
