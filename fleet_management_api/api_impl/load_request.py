@@ -59,6 +59,9 @@ class Request(abc.ABC):
 
 
 class RequestJSON(Request):
+    """A request loaded from the connexion request object, while expecting a JSON data. The loaded request is valid only if the
+    connexion request contained a valid JSON data."""
+
     @classmethod
     def get_data(cls, request: _Request) -> Any:
         try:
@@ -71,19 +74,10 @@ class RequestJSON(Request):
         return request.is_json
 
 
-class RequestNoData(Request):
-
-    @classmethod
-    def get_data(cls, request: _Request) -> Any:
-        return None
-
-    @classmethod
-    def is_valid(cls, request: _Request) -> bool:
-        return True
-
-
 @dataclasses.dataclass
 class RequestEmpty(Request):
+    """A request loaded from the connexion request object, while expecting no data. The loaded request is always valid."""
+
     data: Any = None
     headers: dict[str, Any] = dataclasses.field(default_factory=dict)
     cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
