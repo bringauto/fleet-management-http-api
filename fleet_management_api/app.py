@@ -111,23 +111,23 @@ class _TestClient(_FlaskClient):
 
     def get(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().get(url, *args, **kwargs, headers=headers or self._get_headers())
+        return super().get(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def head(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().head(url, *args, **kwargs, headers=headers or self._get_headers())
+        return super().head(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def post(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().post(url, *args, **kwargs, headers=headers or self._get_headers())
+        return super().post(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def put(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().put(url, *args, **kwargs, headers=headers or self._get_headers())
+        return super().put(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def delete(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().delete(url, *args, **kwargs, headers=headers or self._get_headers())
+        return super().delete(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def _insert_key(self, uri: str) -> str:
         if "?" in uri:
