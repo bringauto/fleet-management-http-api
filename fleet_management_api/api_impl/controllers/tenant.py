@@ -12,8 +12,10 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
 )
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
-from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
-from fleet_management_api.api_impl.tenants import NO_TENANTS
+from fleet_management_api.api_impl.tenants import (
+    AccessibleTenants as _AccessibleTenants,
+    NO_TENANTS as _NO_TENANTS,
+)
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
 )
@@ -40,7 +42,9 @@ def set_tenant_cookie(tenant_id: int) -> _Response:
 
 
 def get_tenants() -> _Response:
-    """Get all existing tenants."""
+    """Return all tenants, that are accessible to the client based on the authentication
+    (e.g., all the tenants contained in the JWT token)
+    """
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
@@ -58,7 +62,7 @@ def delete_tenant(tenants: _AccessibleTenants, tenant_id: int) -> _Response:
 
     The tenant cannot be deleted if assigned to a Car.
     """
-    if _db_access.exists(NO_TENANTS, _db_models.CarDB, criteria={"tenant_id": lambda x: x == tenant_id}):  # type: ignore
+    if _db_access.exists(_NO_TENANTS, _db_models.CarDB, criteria={"tenant_id": lambda x: x == tenant_id}):  # type: ignore
         return _log_error_and_respond(
             f"Tenant with ID={tenant_id} cannot be deleted because it is assigned to a car.",
             400,
