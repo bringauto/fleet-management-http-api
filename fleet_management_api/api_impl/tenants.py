@@ -190,7 +190,7 @@ def _extract_current_and_accessible_tenants_from_request(
         accessible_tenants = []
     else:
         # api key is not provided - read tenants from JWT
-        tenants = _accessible_tenants(request, key, audience)
+        tenants = _get_accessible_tenants_from_auth_headers(request, key, audience)
         _check_current_tenant_is_accessible(current_tenant, tenants)
         accessible_tenants = tenants
     return current_tenant, accessible_tenants
@@ -210,8 +210,10 @@ def _get_current_tenant(request: ConnexionRequest) -> TenantName:
     return ""
 
 
-def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> list[str]:
-    """Return the list of accessible tenants extracted from a JWT token.
+def _get_accessible_tenants_from_auth_headers(
+    request: ConnexionRequest, key: str, audience: str
+) -> list[str]:
+    """The accessible tenants extracted from a JWT token.
 
     If the token is missing or does not contain any tenants, raise an exception.
     """
