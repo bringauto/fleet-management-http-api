@@ -13,6 +13,8 @@ from fleet_management_api.api_impl.constants import (
 
 @dataclasses.dataclass
 class Request(abc.ABC):
+    """A superclass for requests loaded from the Connexion framework."""
+
     data: Any
     headers: dict[str, Any]
     cookies: dict[str, Any] = dataclasses.field(default_factory=dict)
