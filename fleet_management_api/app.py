@@ -158,6 +158,7 @@ def get_test_app(
     predef_api_key: str = "",
     accessible_tenants: Optional[list[str]] = None,
     use_previous: bool = False,
+    add_test_tenant: bool = True,
 ) -> TestApp:
     """Creates a test app that can be used for testing purposes.
 
@@ -175,6 +176,8 @@ def get_test_app(
                 key=predef_api_key, name=TEST_API_KEY_NAME, creation_timestamp=_timestamp_ms()
             ),
         )
+        if add_test_tenant:
+            _db_access.add_tenants(TEST_TENANT_NAME)
     except _db_access.DuplicateError:
         print(f"API key under name {TEST_API_KEY_NAME} already exists.")
     except Exception as e:

@@ -8,7 +8,8 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.models import CarState as _CarState
 import fleet_management_api.database.db_models as _db_models
@@ -150,7 +151,7 @@ def get_car_states(
             title="Referenced object not found",
         )
     except Exception as e:  # pragma: no cover
-        return _log_error_and_respond(str(e), 500, title="Unexpected internal error")
+        return _log_warning_or_error_and_respond(str(e), 500, title="Unexpected internal error")
 
 
 def _remove_old_states(tenants: _AccessibleTenants, car_id: int) -> _Response:

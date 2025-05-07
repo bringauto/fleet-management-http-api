@@ -9,10 +9,9 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_nok_and_respond as _log_nok_and_respond,
 )
 from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,
@@ -59,7 +58,7 @@ def delete_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response
     """
     routes_response = _get_routes_referencing_stop(request.tenants, stop_id)
     if routes_response.status_code != 200:
-        return _log_nok_and_respond(
+        return _log_warning_or_error_and_respond(
             routes_response.body,
             routes_response.status_code,
             title="Cannot delete referenced stop",
@@ -121,7 +120,7 @@ def update_stops(request: _ProcessedRequest, **kwargs) -> _Response:
         return _text_response(f"{len(updated_stops)} stop(s) were successfully updated.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Some stops could not be updated {note}. {response.body['detail']}",
             response.status_code,
             response.body["title"],

@@ -16,7 +16,7 @@ from fleet_management_api.api_impl.api_responses import (
     text_response as _text_response,
 )
 from fleet_management_api.api_impl.api_logging import (
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
 )
@@ -61,7 +61,7 @@ def create_routes(request: _ProcessedRequest, **kwargs) -> _Response:
             _log_info(f"Route (name='{route.name}) has been created.")
         return _json_response([_obj_to_db.route_from_db_model(m) for m in inserted_db_models])
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Routes could not be created. {response.body['detail']}",
             response.status_code,
             response.body["title"],
@@ -81,7 +81,7 @@ def delete_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Respon
     response = _db_access.delete(request.tenants, _RouteDB, route_id)
     if response.status_code != 200:
         note = " (not found)" if response.status_code == 404 else ""
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Could not delete route with ID={route_id}{note}. {response.body['detail']}",
             response.status_code,
             response.body["title"],
@@ -145,7 +145,7 @@ def update_routes(request: _ProcessedRequest, **kwargs) -> _Response:
         return _text_response("Routes were succesfully updated.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Routes {[r.name for r in routes]} could not be updated {note}. {response.body['detail']}",
             404,
             response.body["title"],

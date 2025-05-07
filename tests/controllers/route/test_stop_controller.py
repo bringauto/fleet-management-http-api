@@ -5,7 +5,7 @@ import fleet_management_api.database.connection as _connection
 import fleet_management_api.models as _models
 import fleet_management_api.app as _app
 import fleet_management_api.database.db_models as _db_models
-from fleet_management_api.models import Stop, GNSSPosition
+from fleet_management_api.models import Stop, GNSSPosition, Tenant
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.auth_controller import (
     generate_test_keys,
@@ -86,6 +86,11 @@ class Test_Identical_Stop_Names(api_test.TestCase):
         self.app = _app.get_test_app(
             "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
         )
+        with self.app.app.test_client() as client:
+            client.post(
+                "v2/management/tenant?api_key=testAPIKey",
+                json=[Tenant(name="tenant_1"), Tenant(name="tenant_2")],
+            )
 
     def test_creating_two_stops_ith_identical_names_under_the_same_tenant_returns_error(
         self,

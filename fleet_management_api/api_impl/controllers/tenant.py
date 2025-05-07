@@ -1,8 +1,9 @@
 from fleet_management_api.database import db_models as _db_models, db_access as _db_access
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
+from fleet_management_api.models import Tenant as _Tenant
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
 )
 from fleet_management_api.api_impl.api_responses import (
@@ -25,7 +26,7 @@ def set_tenant_cookie(request: _ProcessedRequest, tenant_id: int, **kwargs) -> _
     tenants_in_db = _db_access.get_tenants(request.tenants)
     # Validate at runtime even when assertions are disabled
     if not isinstance(tenant_id, int):
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             "Tenant ID must be an integer", 400, title="invalid tenant ID type"
         )
     for t in tenants_in_db:
@@ -38,6 +39,31 @@ def set_tenant_cookie(request: _ProcessedRequest, tenant_id: int, **kwargs) -> _
     return _log_info_and_respond(
         f"Tenant with ID={tenant_id} is not accessible", 401, title="Unauthorized"
     )
+
+
+@_with_processed_request(ignore_tenant_cookie=True, require_data=True)
+def create_tenants(request: _ProcessedRequest, **kwargs) -> _Response:
+    """Create a new tenant with the given name.
+
+    The tenant name must be unique.
+    """
+
+    tenants = [_Tenant.from_dict(t) for t in request.data]
+    tenant_db_models = [_obj_to_db.tenant_to_db_model(t) for t in tenants]
+    response = _db_access.add_without_tenant(*tenant_db_models)
+
+    if response.status_code == 200:
+        posted_db_models: list[_db_models.TenantDB] = response.body
+        for tenant in posted_db_models:
+            _log_info(f"Stop (name='{tenant.name}) has been created.")
+        models = [_obj_to_db.tenant_from_db_model(m) for m in posted_db_models]
+        return _json_response(models)
+    else:
+        return _log_warning_or_error_and_respond(
+            f"Could not create tenants. {response.body['detail']}",
+            response.status_code,
+            response.body["title"],
+        )
 
 
 @_with_processed_request(ignore_tenant_cookie=True)
@@ -59,7 +85,7 @@ def delete_tenant(request: _ProcessedRequest, tenant_id: int) -> _Response:
     The tenant cannot be deleted if assigned to a Car.
     """
     if _db_access.exists(_NO_TENANTS, _db_models.CarDB, criteria={"tenant_id": lambda x: x == tenant_id}):  # type: ignore
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Tenant with ID={tenant_id} cannot be deleted because it is assigned to a car.",
             400,
             title="Cannot delete object",
@@ -69,7 +95,7 @@ def delete_tenant(request: _ProcessedRequest, tenant_id: int) -> _Response:
         return _log_info_and_respond(f"Tenant with ID={tenant_id} has been deleted.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Could not delete tenant with ID={tenant_id}{note}. {response.body['detail']}",
             response.status_code,
             response.body["title"],

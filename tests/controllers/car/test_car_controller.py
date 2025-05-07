@@ -1,5 +1,5 @@
 import unittest
-from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone
+from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone, Tenant
 import fleet_management_api.app as _app
 from fleet_management_api.api_impl.tenants import decode_jwt_token
 from fleet_management_api.database.db_access import delete
@@ -156,6 +156,12 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
         self.app = _app.get_test_app(
             "testAPIKey", accessible_tenants=["tenant_1", "tenant_2"], use_previous=True
         )
+        with self.app.app.test_client() as c:
+            c.post(
+                "/v2/management/tenant?api_key=testAPIKey",
+                json=[Tenant(name="tenant_1"), Tenant(name="tenant_2")],
+            )
+
         with self.app.app.test_client() as client:
             client.set_cookie("", "tenant", "tenant_1")
             client.post(
@@ -286,6 +292,15 @@ class Test_Logging_Car_Creation(api_test.TestCase):
         self.app = _app.get_test_app(use_previous=True)
         create_platform_hws(self.app, api_key=self.app.predef_api_key)
 
+    def test_creating_car_under_nonexistent_tenant_logs_warning(self):
+        with self.assertLogs(LOGGER_NAME, level="WARNING") as logs:
+            car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
+            with self.app.app.test_client() as c:
+                c.set_cookie("", "tenant", "nonexistent_tenant")
+                c.post("/v2/management/car", json=[car], content_type="application/json")
+                self.assertEqual(len(logs.output), 1)
+                self.assertIn("Tenant 'nonexistent_tenant' does not exist", logs.output[0])
+
     def test_succesfull_creation_of_a_car_is_logged_as_info(self):
         with self.assertLogs(LOGGER_NAME, level="INFO") as logs:
             car = Car(name="test_car", platform_hw_id=1, car_admin_phone=PHONE)
@@ -296,10 +311,10 @@ class Test_Logging_Car_Creation(api_test.TestCase):
                 self.assertEqual(len(logs.output), 3)
                 self.assertIn(str(car.name), logs.output[0])
 
-    def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_s(
+    def test_unsuccesfull_creation_of_a_car_already_present_in_database_is_logged_as_warning(
         self,
     ):
-        with self.assertLogs(LOGGER_NAME, level="ERROR") as logs:
+        with self.assertLogs(LOGGER_NAME, level="WARNING") as logs:
             car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
             app = _app.get_test_app(use_previous=True)
             with app.app.test_client(TEST_TENANT_NAME) as c:

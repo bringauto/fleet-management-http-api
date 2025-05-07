@@ -5,89 +5,101 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '400'
-                message: 'Bad request'
+                code: "400"
+                message: "Bad request"
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '401'
-                message: 'Unauthorized'
+                code: "401"
+                message: "Unauthorized"
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '403'
-                message: 'Request forbidden'
+                code: "403"
+                message: "Request forbidden"
+
     NotFound:
       description: Not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '404'
-                message: 'Resource not found'
+                code: "404"
+                message: "Resource not found"
     MethodNotAllowed:
       description: Method not allowed
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '405'
-                message: 'Method not allowed'
+                code: "405"
+                message: "Method not allowed"
     RequestTimeout:
       description: Request timeout
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '408'
-                message: 'Request timeout'
+                code: "408"
+                message: "Request timeout"
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          examples:
+            error:
+              value:
+                code: "409"
+                message: "Conflict"
     ServiceUnavailable:
       description: Service unavailable
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '503'
-                message: 'Service unavailable'
+                code: "503"
+                message: "Service unavailable"
     UnexpectedError:
       description: Unexpected error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           examples:
             error:
               value:
-                code: '500'
-                message: 'Unexpected error'
+                code: "500"
+                message: "Unexpected error"
   schemas:
     Error:
       type: object
@@ -98,7 +110,7 @@ components:
           example: 404
         message:
           type: string
-          example: 'Not found'
+          example: "Not found"
       required:
         - code
         - message

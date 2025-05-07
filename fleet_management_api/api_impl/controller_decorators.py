@@ -16,7 +16,7 @@ from fleet_management_api.api_impl.tenants import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_invalid_request_body_format as _log_invalid_request_body_format,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
 )
 
 
@@ -62,7 +62,7 @@ def with_processed_request(
                 return _log_invalid_request_body_format()
             tresponse = _get_accessible_tenants(request, ignore_cookie=ignore_tenant_cookie)
             if tresponse.status_code != 200:
-                return _log_error_and_respond(
+                return _log_warning_or_error_and_respond(
                     tresponse.msg, tresponse.status_code, title="No tenants"
                 )
             loaded_request = ProcessedRequest(tresponse.tenants, data=request.data)

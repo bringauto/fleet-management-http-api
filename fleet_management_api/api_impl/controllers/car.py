@@ -20,9 +20,8 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
-    log_nok_and_respond as _log_nok_and_respond,
     log_info_and_respond as _log_info_and_respond,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
 )
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
@@ -74,7 +73,7 @@ def create_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E50
 
         car_states_resp = _post_default_car_state(request.tenants, ids)
         if car_states_resp.status_code != 200:
-            return _log_nok_and_respond(
+            return _log_warning_or_error_and_respond(
                 code=car_states_resp.status_code,
                 msg=car_states_resp.body,
                 title="Car state creation failed",
@@ -82,7 +81,7 @@ def create_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E50
         car_states: list[_CarState] = car_states_resp.body
         car_action_states_resp = _post_default_car_action_state(request.tenants, ids)
         if car_action_states_resp.status_code != 200:
-            return _log_nok_and_respond(
+            return _log_warning_or_error_and_respond(
                 code=car_action_states_resp.status_code,
                 msg=car_action_states_resp.body,
                 title="Car action state creation failed",
@@ -94,7 +93,7 @@ def create_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E50
             posted_cars.append(posted_car)
         return _json_response(posted_cars)
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             code=response.status_code,
             msg=f"Cars could not be created. {response.body['detail']}",
             title=response.body["title"],
@@ -113,7 +112,7 @@ def delete_car(request: _ProcessedRequest, car_id: int, **kwargs) -> _Response:
         return _log_info_and_respond(msg)
     else:
         msg = f"Car (ID={car_id}) could not be deleted. {response.body['detail']}"
-        return _log_error_and_respond(msg, response.status_code, response.body["title"])
+        return _log_warning_or_error_and_respond(msg, response.status_code, response.body["title"])
 
 
 @with_processed_request
@@ -173,7 +172,7 @@ def update_cars(request: _ProcessedRequest, **kwargs) -> _Response:
         return _log_info_and_respond(f"Cars with IDs {car_ids} has been succesfully updated.")
     else:
         msg = f"Cars with IDs {car_ids} could not be updated. {response.body['detail']}"
-        return _log_error_and_respond(msg, response.status_code, response.body["title"])
+        return _log_warning_or_error_and_respond(msg, response.status_code, response.body["title"])
 
 
 def _get_car_with_last_state(

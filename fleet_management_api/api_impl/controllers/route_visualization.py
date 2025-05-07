@@ -11,7 +11,7 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
 )
 from fleet_management_api.api_impl.api_logging import (
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
 )
@@ -82,6 +82,6 @@ def redefine_route_visualizations(request: _ProcessedRequest, **kwargs) -> _Resp
             _log_info(f"Route visualization (ID={v.id}) has been succesfully redefined.")
         return _json_response(inserted_vis)
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             response.body["detail"], response.status_code, response.body["title"]
         )

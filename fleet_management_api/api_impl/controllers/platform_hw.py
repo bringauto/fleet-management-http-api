@@ -3,7 +3,7 @@ from fleet_management_api.database import db_access as _db_access, db_models as 
 from fleet_management_api.api_impl import obj_to_db as _obj_to_db
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
 )
 from fleet_management_api.api_impl.api_responses import (
@@ -38,7 +38,7 @@ def create_hws(request: _ProcessedRequest, **kwargs) -> _Response:
             _log_info(f"Platform HW (name='{p.name}) has been created.")
         return _json_response(inserted_models)
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Platform HW (names='{[p.name for p in hws]}) could not be created. {response.body['detail']}",
             response.status_code,
             response.body["title"],
@@ -91,7 +91,7 @@ def delete_hw(request: _ProcessedRequest, platform_hw_id: int, **kwargs) -> _Res
         return _log_info_and_respond(f"Platform HW with ID={platform_hw_id} has been deleted.")
     else:
         note = " (not found)" if response.status_code == 404 else ""
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Could not delete platform HW with ID={platform_hw_id}{note}. {response.body['detail']}",
             response.status_code,
             response.body["title"],

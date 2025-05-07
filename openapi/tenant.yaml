@@ -25,30 +25,6 @@ paths:
           $ref: "errors.yaml#/components/responses/NotFound"
         default:
           $ref: "errors.yaml#/components/responses/UnexpectedError"
-
-  /tenant:
-    get:
-      operationId: getTenants
-      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
-      tags:
-        - tenant
-      summary: Find and return all existing Tenants.
-      responses:
-        "200":
-          description: All the currently existing Tenants have been returned.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Tenant"
-              example: [{ "id": 1, "name": "bring_auto" }]
-        "401":
-          $ref: "errors.yaml#/components/responses/Unauthorized"
-        "403":
-          $ref: "errors.yaml#/components/responses/Forbidden"
-        default:
-          $ref: "errors.yaml#/components/responses/UnexpectedError"
     delete:
       operationId: deleteTenant
       x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
@@ -73,6 +49,69 @@ paths:
           $ref: "errors.yaml#/components/responses/NotFound"
         "405":
           $ref: "errors.yaml#/components/responses/MethodNotAllowed"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+
+  /tenant:
+    post:
+      operationId: createTenants
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      tags:
+        - tenant
+      summary: Create new Tenants.
+      requestBody:
+        description: Tenants to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Tenant"
+            example: [{ "name": "Tenant 1" }, { "name": "Tenant_2" }]
+
+      responses:
+        "200":
+          description: The Tenants have been created.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tenant"
+              example:
+                [
+                  { "id": 1, "name": "Tenant 1" },
+                  { "id": 2, "name": "Tenant_2" },
+                ]
+        "400":
+          $ref: "errors.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "409":
+          $ref: "errors.yaml#/components/responses/Conflict"
+        default:
+          $ref: "errors.yaml#/components/responses/UnexpectedError"
+    get:
+      operationId: getTenants
+      x-openapi-router-controller: fleet_management_api.api_impl.controllers.tenant
+      tags:
+        - tenant
+      summary: Find and return all existing Tenants.
+      responses:
+        "200":
+          description: All the currently existing Tenants have been returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tenant"
+              example: [{ "id": 1, "name": "bring_auto" }]
+        "401":
+          $ref: "errors.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "errors.yaml#/components/responses/Forbidden"
         default:
           $ref: "errors.yaml#/components/responses/UnexpectedError"
 

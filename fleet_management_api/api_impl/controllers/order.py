@@ -9,7 +9,7 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_error as _log_error,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
 )
@@ -233,7 +233,7 @@ def create_orders(request: _ProcessedRequest, **kwargs) -> _Response:
 
         return _json_response(posted_orders)
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Error when sending order. {response.body['detail']}.",
             response.status_code,
             response.body["title"],

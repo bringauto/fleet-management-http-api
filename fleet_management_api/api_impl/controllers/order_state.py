@@ -9,7 +9,8 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
-    log_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
+    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
@@ -72,7 +73,7 @@ def create_order_states_from_argument_and_post(
 
     inaccessible_order_ids = all_order_ids - accessible_order_ids
     if inaccessible_order_ids:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Order with IDs={inaccessible_order_ids} are not accessible.",
             401,
             title="Unauthorized",
@@ -142,7 +143,7 @@ def create_order_states_from_argument_and_post(
         except Exception as e:
             _log_error(f"Error while converting Order State DB models to Order State models: {e}.")
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Order state could not be sent. {response.body['detail']}",
             response.status_code,
             title=response.body["title"],
