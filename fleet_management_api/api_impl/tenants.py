@@ -225,7 +225,7 @@ def _get_accessible_tenants_from_auth_headers(
     If the token is missing or does not contain any tenants, raise an exception.
     """
     # api key is not provided - read tenants from JWT
-    if "Authorization" not in request.headers:
+    if _AUTHORIZATION_HEADER_NAME not in request.headers:
         raise NoHeaderWithJWTToken
     bearer = str(request.headers[_AUTHORIZATION_HEADER_NAME]).split(" ")[-1]
     if not bearer.strip():
