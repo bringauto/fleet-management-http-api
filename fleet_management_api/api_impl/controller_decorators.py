@@ -26,7 +26,7 @@ P = ParamSpec("P")
 
 
 @dataclasses.dataclass(frozen=True)
-class LoadedRequest:
+class ProcessedRequest:
     """Instance of this class contains the accessible tenants info and JSON data (a list of objects) loaded from a single request.
 
     If the request does not contain the JSON data, the data field is left as an empty list.
@@ -37,7 +37,7 @@ class LoadedRequest:
 
 
 def controller_with_tenants(
-    controller: Callable[Concatenate[LoadedRequest, P], _Response],
+    controller: Callable[Concatenate[ProcessedRequest, P], _Response],
 ) -> Callable[Concatenate[P], _Response]:
     """This decorator provides the controller function with the information about tenants, for which data can be read or modified.
 
@@ -55,7 +55,7 @@ def controller_with_tenants(
             return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
         tenants = tresponse.body
         assert isinstance(tenants, _AccessibleTenants)
-        loaded_request = LoadedRequest(tenants)
+        loaded_request = ProcessedRequest(tenants)
         response = controller(loaded_request, *args, **kwargs)
         return response
 
@@ -63,7 +63,7 @@ def controller_with_tenants(
 
 
 def controller_with_tenants_and_data(
-    controller: Callable[Concatenate[LoadedRequest, list[dict], P], _Response],
+    controller: Callable[Concatenate[ProcessedRequest, list[dict], P], _Response],
 ) -> Callable[Concatenate[P], _Response]:
     """This decorator provides the controller function with the information about tenants, for which data can be created or modified
     and the data itself (in JSON format).
@@ -82,7 +82,7 @@ def controller_with_tenants_and_data(
             return _log_error_and_respond(tresponse.body, tresponse.status_code, title="No tenants")
         tenants = tresponse.body
         assert isinstance(tenants, _AccessibleTenants)
-        loaded_request = LoadedRequest(tenants, data=request.data)
+        loaded_request = ProcessedRequest(tenants, data=request.data)
         response = controller(loaded_request, *args, **kwargs)
         return response
 

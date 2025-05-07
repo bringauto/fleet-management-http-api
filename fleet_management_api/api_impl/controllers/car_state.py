@@ -18,12 +18,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
     controller_with_tenants_and_data as _controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @_controller_with_tenants_and_data
-def create_car_states(request: _LoadedRequest, **kwargs) -> _Response:
+def create_car_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new car states.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -81,7 +81,7 @@ def create_car_states_from_argument_and_post(
 
 @_controller_with_tenants
 def get_all_car_states(
-    request: _LoadedRequest, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
+    request: _ProcessedRequest, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
 ) -> _Response:
     """Get all car states for all the cars.
 
@@ -111,7 +111,7 @@ def get_all_car_states(
 
 @_controller_with_tenants
 def get_car_states(
-    request: _LoadedRequest,
+    request: _ProcessedRequest,
     car_id: int,
     since: int = 0,
     wait: bool = False,

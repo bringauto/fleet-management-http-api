@@ -23,7 +23,7 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 CarId = int
@@ -161,7 +161,7 @@ def add_inactive_order(car_id: CarId, order_id: OrderId) -> None:
 
 
 @controller_with_tenants_and_data
-def create_orders(request: _LoadedRequest, **kwargs) -> _Response:
+def create_orders(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new orders.
 
     If some of the orders' creation fails, no orders are added to the server.
@@ -242,7 +242,7 @@ def create_orders(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def delete_order(request: _LoadedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
+def delete_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Delete an existing order."""
     response = _db_access.delete(request.tenants, _db_models.OrderDB, order_id)
     if response.status_code == 200:
@@ -263,7 +263,7 @@ def delete_oldest_inactive_order(car_id: int) -> _Response:
 
 
 @controller_with_tenants
-def get_order(request: _LoadedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
+def get_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) -> _Response:
     """Get an existing order."""
     order_db_models = _db_access.get(
         request.tenants,
@@ -282,7 +282,7 @@ def get_order(request: _LoadedRequest, car_id: int, order_id: int, **kwargs) -> 
 
 
 @controller_with_tenants
-def get_car_orders(request: _LoadedRequest, car_id: int, since: int = 0, **kwargs) -> _Response:
+def get_car_orders(request: _ProcessedRequest, car_id: int, since: int = 0, **kwargs) -> _Response:
     """Get all orders for a given car."""
     if not _car_exist(request.tenants, car_id):
         return _log_info_and_respond(
@@ -304,7 +304,7 @@ def get_car_orders(request: _LoadedRequest, car_id: int, since: int = 0, **kwarg
 
 
 @controller_with_tenants
-def get_orders(request: _LoadedRequest, since: int = 0, **kwargs) -> _Response:
+def get_orders(request: _ProcessedRequest, since: int = 0, **kwargs) -> _Response:
     """Get all existing orders."""
     _log_info("Listing all existing orders.")
     db_orders = _db_access.get(

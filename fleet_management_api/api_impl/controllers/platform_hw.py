@@ -14,12 +14,12 @@ from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @controller_with_tenants_and_data
-def create_hws(request: _LoadedRequest, **kwargs) -> _Response:
+def create_hws(request: _ProcessedRequest, **kwargs) -> _Response:
     """Create new platform HWs.
 
     If some of the HWs' creation fails, no objects are added to the server.
@@ -47,7 +47,7 @@ def create_hws(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def get_hws(request: _LoadedRequest, **kwargs) -> _Response:
+def get_hws(request: _ProcessedRequest, **kwargs) -> _Response:
     """Get all existing platform HWs."""
     hw_id_models = _db_access.get(request.tenants, _db_models.PlatformHWDB)
     platform_hw_ids: list[_PlatformHW] = [
@@ -58,7 +58,7 @@ def get_hws(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def get_hw(request: _LoadedRequest, platform_hw_id: int, **kwargs) -> _Response:
+def get_hw(request: _ProcessedRequest, platform_hw_id: int, **kwargs) -> _Response:
     """Get an existing platform HW identified by 'platformhw_id'."""
     hw_models = _db_access.get(
         request.tenants, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
@@ -76,7 +76,7 @@ def get_hw(request: _LoadedRequest, platform_hw_id: int, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def delete_hw(request: _LoadedRequest, platform_hw_id: int, **kwargs) -> _Response:
+def delete_hw(request: _ProcessedRequest, platform_hw_id: int, **kwargs) -> _Response:
     """Delete an existing platform HW identified by 'platformhw_id'.
 
     The platform HW cannot be deleted if assigned to a Car.

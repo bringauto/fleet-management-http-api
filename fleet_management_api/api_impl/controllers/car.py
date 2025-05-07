@@ -29,12 +29,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @controller_with_tenants_and_data
-def create_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
+def create_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E501
     """Create new cars.
 
     If some of the cars' creation fails, no cars are added to the server.
@@ -89,7 +89,7 @@ def create_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
 
 
 @controller_with_tenants
-def delete_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
+def delete_car(request: _ProcessedRequest, car_id: int, **kwargs) -> _Response:
     """Deletes an existing car identified by 'car_id'.
 
     :param car_id: ID of the car to be deleted.
@@ -104,7 +104,7 @@ def delete_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def get_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
+def get_car(request: _ProcessedRequest, car_id: int, **kwargs) -> _Response:
     """Get a car identified by 'car_id'."""
     db_cars = _db_access.get(
         request.tenants,
@@ -123,7 +123,7 @@ def get_car(request: _LoadedRequest, car_id: int, **kwargs) -> _Response:
 
 
 @controller_with_tenants
-def get_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
+def get_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E501
     """List all cars."""
     db_cars = _db_access.get(
         request.tenants, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
@@ -140,7 +140,7 @@ def get_cars(request: _LoadedRequest, **kwargs) -> _Response:  # noqa: E501
 
 
 @controller_with_tenants_and_data
-def update_cars(request: _LoadedRequest, **kwargs) -> _Response:
+def update_cars(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update existing cars.
 
     If any of the cars' update fails, no cars are updated on the server.

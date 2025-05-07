@@ -21,12 +21,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
     controller_with_tenants_and_data as _controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @_controller_with_tenants_and_data
-def create_stops(request: _LoadedRequest, **kwargs) -> _Response:
+def create_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Create new stops.
 
     If some of the stops' creation fails, no stops are added to the server.
@@ -52,7 +52,7 @@ def create_stops(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def delete_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
+def delete_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
     The stop cannot be deleted if it is referenced by any route.
@@ -77,7 +77,7 @@ def delete_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def get_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
+def get_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
         request.tenants, _db_models.StopDB, criteria={"id": lambda x: x == stop_id}
@@ -91,7 +91,7 @@ def get_stop(request: _LoadedRequest, stop_id: int, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def get_stops(request: _LoadedRequest, **kwargs) -> _Response:
+def get_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Get all existing stops."""
     stop_db_models = _db_access.get(request.tenants, _db_models.StopDB)
     stops: list[_Stop] = [
@@ -102,7 +102,7 @@ def get_stops(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @_controller_with_tenants_and_data
-def update_stops(request: _LoadedRequest, **kwargs) -> _Response:
+def update_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update an existing stop.
 
     If some of the stops' update fails, no stops are updated.

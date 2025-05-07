@@ -19,12 +19,12 @@ from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants,
     controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @controller_with_tenants
-def get_route_visualization(request: _LoadedRequest, route_id: int, **kwargs) -> _Response:
+def get_route_visualization(request: _ProcessedRequest, route_id: int, **kwargs) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
     rp_db_models = _db_access.get(
         request.tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
@@ -42,7 +42,7 @@ def get_route_visualization(request: _LoadedRequest, route_id: int, **kwargs) ->
 
 
 @controller_with_tenants_and_data
-def redefine_route_visualizations(request: _LoadedRequest, **kwargs) -> _Response:
+def redefine_route_visualizations(request: _ProcessedRequest, **kwargs) -> _Response:
     """Redefine route visualizations for existing routes.
 
     If a route visualization for a route already exists, it will be replaced.

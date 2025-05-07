@@ -24,7 +24,7 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants_and_data,
     controller_with_tenants,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
@@ -32,7 +32,7 @@ OrderId = int
 
 
 @controller_with_tenants_and_data
-def create_order_states(request: _LoadedRequest, **kwargs) -> _Response:
+def create_order_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new states of existing orders.
 
     If some of the order states's creation fails, no states are added to the server.
@@ -152,7 +152,7 @@ def create_order_states_from_argument_and_post(
 
 @controller_with_tenants
 def get_all_order_states(
-    request: _LoadedRequest,
+    request: _ProcessedRequest,
     wait: bool = False,
     since: int = 0,
     last_n: int = 0,
@@ -182,7 +182,7 @@ def get_all_order_states(
 
 @controller_with_tenants
 def get_order_states(
-    request: _LoadedRequest,
+    request: _ProcessedRequest,
     order_id: int,
     wait: bool = False,
     since: int = 0,

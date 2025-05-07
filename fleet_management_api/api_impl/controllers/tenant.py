@@ -19,7 +19,7 @@ from fleet_management_api.api_impl.tenants import (
 )
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
@@ -64,7 +64,7 @@ def get_tenants() -> _Response:
 
 
 @_controller_with_tenants
-def delete_tenant(request: _LoadedRequest, tenant_id: int) -> _Response:
+def delete_tenant(request: _ProcessedRequest, tenant_id: int) -> _Response:
     """Delete an existing tenant identified by 'tenant_id'.
 
     The tenant cannot be deleted if assigned to a Car.

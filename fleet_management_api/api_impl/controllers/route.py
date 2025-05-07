@@ -28,12 +28,12 @@ from fleet_management_api.api_impl.tenants import AccessibleTenants as _Accessib
 from fleet_management_api.api_impl.controller_decorators import (
     controller_with_tenants as _controller_with_tenants,
     controller_with_tenants_and_data as _controller_with_tenants_and_data,
-    LoadedRequest as _LoadedRequest,
+    ProcessedRequest as _ProcessedRequest,
 )
 
 
 @_controller_with_tenants_and_data
-def create_routes(request: _LoadedRequest, **kwargs) -> _Response:
+def create_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post a new route.
 
     If some of the routes' creation fails, no routes are added to the server.
@@ -70,7 +70,7 @@ def create_routes(request: _LoadedRequest, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def delete_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Response:
+def delete_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(request.tenants, route_id)
     if related_orders_response.status_code != 200:
@@ -93,7 +93,7 @@ def delete_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Response:
 
 
 @_controller_with_tenants
-def get_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Route:
+def get_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Route:
     """Get an existing route identified by 'route_id'."""
     route_db_models = _db_access.get(
         request.tenants, _RouteDB, criteria={"id": lambda x: x == route_id}
@@ -109,7 +109,7 @@ def get_route(request: _LoadedRequest, route_id: int, **kwargs) -> _Route:
 
 
 @_controller_with_tenants
-def get_routes(request: _LoadedRequest, **kwargs) -> list[_Route]:
+def get_routes(request: _ProcessedRequest, **kwargs) -> list[_Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(request.tenants, _RouteDB)
     route: list[_Route] = [
@@ -120,7 +120,7 @@ def get_routes(request: _LoadedRequest, **kwargs) -> list[_Route]:
 
 
 @_controller_with_tenants_and_data
-def update_routes(request: _LoadedRequest, **kwargs) -> _Response:
+def update_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update an existing route identified by 'route_ids' array.
 
     If some of the routes' update fails, no routes are updated on the server.
