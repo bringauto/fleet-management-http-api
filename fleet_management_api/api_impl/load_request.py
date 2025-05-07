@@ -8,6 +8,7 @@ from flask.wrappers import Request as _Request
 
 from fleet_management_api.api_impl.constants import (
     AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
+    AUTHORIZATION_ENVIRONMENT_NAME as _AUTHORIZATION_ENVIRONMENT_NAME,
 )
 
 
@@ -29,7 +30,9 @@ class LoadedRequest(abc.ABC):
             return None
         try:
             headers = {
-                _AUTHORIZATION_HEADER_NAME: request.headers.environ.get("HTTP_AUTHORIZATION", "")
+                _AUTHORIZATION_HEADER_NAME: request.headers.environ.get(
+                    _AUTHORIZATION_ENVIRONMENT_NAME, ""
+                )
             }
         except RuntimeError:
             headers = {_AUTHORIZATION_HEADER_NAME: ""}
