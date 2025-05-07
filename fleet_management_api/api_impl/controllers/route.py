@@ -26,12 +26,12 @@ from fleet_management_api.response_consts import (
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    with_processed_request as _controller_with_tenants,
+    with_processed_request as _with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-@_controller_with_tenants(require_data=True)
+@_with_processed_request(require_data=True)
 def create_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post a new route.
 
@@ -68,7 +68,7 @@ def create_routes(request: _ProcessedRequest, **kwargs) -> _Response:
         )
 
 
-@_controller_with_tenants
+@_with_processed_request
 def delete_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Response:
     """Delete an existing route identified by 'route_id'."""
     related_orders_response = _find_related_orders(request.tenants, route_id)
@@ -91,7 +91,7 @@ def delete_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Respon
         return _log_info_and_respond(route_deletion_msg)
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Route:
     """Get an existing route identified by 'route_id'."""
     route_db_models = _db_access.get(
@@ -107,7 +107,7 @@ def get_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Route:
         return _json_response(routes[0])
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_routes(request: _ProcessedRequest, **kwargs) -> list[_Route]:
     """Get all existing routes."""
     route_db_models = _db_access.get(request.tenants, _RouteDB)
@@ -118,7 +118,7 @@ def get_routes(request: _ProcessedRequest, **kwargs) -> list[_Route]:
     return _json_response(route)
 
 
-@_controller_with_tenants(require_data=True)
+@_with_processed_request(require_data=True)
 def update_routes(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update an existing route identified by 'route_ids' array.
 

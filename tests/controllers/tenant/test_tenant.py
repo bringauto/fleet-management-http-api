@@ -1,9 +1,7 @@
 import unittest
 
 import fleet_management_api.app as _app
-from fleet_management_api.database.connection import (
-    set_connection_source_test,
-)
+from fleet_management_api.database.connection import set_connection_source_test
 from fleet_management_api.logs import configure_logging, LOGGER_NAME
 from fleet_management_api.script_args.configs import LoggingConfig as _Logging
 from fleet_management_api.database.db_access import add_tenants, add

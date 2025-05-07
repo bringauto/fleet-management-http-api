@@ -38,6 +38,7 @@ def with_processed_request(
     /,
     *,
     require_data: bool = False,
+    ignore_tenant_cookie: bool = False,
 ) -> Callable[Concatenate[P], _Response]:
     """This decorator provides the controller function with the information about tenants, for which data can be created, read or modified.
 
@@ -46,9 +47,11 @@ def with_processed_request(
     2) tenants are not set up correctly, either the tenant cookie is not set for modifying the data or there are no accessible tenants
 
     Instead of calling the controller, the decorator returns a response with appropriate status code, error message and also logs the event.
+
+    All controller functions must contain the **kwargs argument in the end to prevent Keyword argument errors.
     """
 
-    def _controller_with_tenants(
+    def _with_processed_request(
         controller: Callable[Concatenate[ProcessedRequest, P], _Response],
     ) -> Callable[Concatenate[P], _Response]:
 
@@ -56,7 +59,7 @@ def with_processed_request(
             request = _load_request(require_data=require_data)
             if not request:
                 return _log_invalid_request_body_format()
-            tresponse = _get_accessible_tenants(request)
+            tresponse = _get_accessible_tenants(request, ignore_cookie=ignore_tenant_cookie)
             if tresponse.status_code != 200:
                 return _log_error_and_respond(
                     tresponse.body, tresponse.status_code, title="No tenants"
@@ -70,6 +73,6 @@ def with_processed_request(
         return wrapper
 
     if controller is None:
-        return _controller_with_tenants
+        return _with_processed_request
     else:
-        return _controller_with_tenants(controller)
+        return _with_processed_request(controller)

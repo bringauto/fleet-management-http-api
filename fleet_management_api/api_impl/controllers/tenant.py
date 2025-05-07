@@ -4,37 +4,25 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.api_impl.api_responses import (
     Response as _Response,
     json_response as _json_response,
     text_response as _text_response,
 )
-from fleet_management_api.api_impl.load_request import _LoadedRequestEmpty as _RequestEmpty
-from fleet_management_api.api_impl.tenants import (
-    AccessibleTenants as _AccessibleTenants,
-    get_accessible_tenants as _get_accessible_tenants,
-    NO_TENANTS as _NO_TENANTS,
-)
+from fleet_management_api.api_impl.tenants import NO_TENANTS as _NO_TENANTS
 from fleet_management_api.api_impl.controller_decorators import (
-    with_processed_request as _controller_with_tenants,
+    with_processed_request as _with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-def set_tenant_cookie(tenant_id: int) -> _Response:
+@_with_processed_request(ignore_tenant_cookie=True)
+def set_tenant_cookie(request: _ProcessedRequest, tenant_id: int, **kwargs) -> _Response:
     """Set the tenant cookie to the tenant with the given ID.
 
     If the tenant with the ID does not exist, return a Unauthorized response."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tresponse = _get_accessible_tenants(request, ignore_cookie=True)
-    if tresponse.status_code != 200:
-        return tresponse
-    tenants = tresponse.body
-    tenants_in_db = _db_access.get_tenants(tenants)
+    tenants_in_db = _db_access.get_tenants(request.tenants)
     assert isinstance(tenant_id, int), "Tenant ID must be an integer"
     for t in tenants_in_db:
         if t.id == tenant_id:
@@ -48,22 +36,19 @@ def set_tenant_cookie(tenant_id: int) -> _Response:
     )
 
 
-def get_tenants() -> _Response:
+@_with_processed_request(ignore_tenant_cookie=True)
+def get_tenants(request: _ProcessedRequest, **kwargs) -> _Response:
     """Return all tenants, that are accessible to the client based on the authentication
     (e.g., all the tenants contained in the JWT token)
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
-    tenants = [
-        _obj_to_db.tenant_from_db_model(t) for t in _db_access.get_tenants(accessible_tenants)
+    db_tenants = [
+        _obj_to_db.tenant_from_db_model(t) for t in _db_access.get_tenants(request.tenants)
     ]
-    _log_info(f"Found {len(tenants)} tenants.")
-    return _json_response(tenants)
+    _log_info(f"Found {len(db_tenants)} tenants.")
+    return _json_response(db_tenants)
 
 
-@_controller_with_tenants
+@_with_processed_request
 def delete_tenant(request: _ProcessedRequest, tenant_id: int) -> _Response:
     """Delete an existing tenant identified by 'tenant_id'.
 

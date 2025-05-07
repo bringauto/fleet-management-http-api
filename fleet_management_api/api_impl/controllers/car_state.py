@@ -16,12 +16,12 @@ import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    with_processed_request as _controller_with_tenants,
+    with_processed_request as _with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-@_controller_with_tenants(require_data=True)
+@_with_processed_request(require_data=True)
 def create_car_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new car states.
 
@@ -78,7 +78,7 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_all_car_states(
     request: _ProcessedRequest, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
 ) -> _Response:
@@ -108,7 +108,7 @@ def get_all_car_states(
     return _json_response(car_states)
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_car_states(
     request: _ProcessedRequest,
     car_id: int,

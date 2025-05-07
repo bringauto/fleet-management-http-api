@@ -19,12 +19,12 @@ from fleet_management_api.response_consts import (
 )
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 from fleet_management_api.api_impl.controller_decorators import (
-    with_processed_request as _controller_with_tenants,
+    with_processed_request as _with_processed_request,
     ProcessedRequest as _ProcessedRequest,
 )
 
 
-@_controller_with_tenants(require_data=True)
+@_with_processed_request(require_data=True)
 def create_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Create new stops.
 
@@ -50,7 +50,7 @@ def create_stops(request: _ProcessedRequest, **kwargs) -> _Response:
         )
 
 
-@_controller_with_tenants
+@_with_processed_request
 def delete_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response:
     """Delete an existing stop identified by 'stop_id'.
 
@@ -75,7 +75,7 @@ def delete_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response
         )
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response:
     """Get an existing stop identified by 'stop_id'."""
     stop_db_models: list[_db_models.StopDB] = _db_access.get(
@@ -89,7 +89,7 @@ def get_stop(request: _ProcessedRequest, stop_id: int, **kwargs) -> _Response:
         return _Response(body=stops[0], status_code=200, content_type="application/json")
 
 
-@_controller_with_tenants
+@_with_processed_request
 def get_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Get all existing stops."""
     stop_db_models = _db_access.get(request.tenants, _db_models.StopDB)
@@ -100,7 +100,7 @@ def get_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     return _json_response(stops)
 
 
-@_controller_with_tenants(require_data=True)
+@_with_processed_request(require_data=True)
 def update_stops(request: _ProcessedRequest, **kwargs) -> _Response:
     """Update an existing stop.
 
