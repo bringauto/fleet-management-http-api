@@ -12,7 +12,6 @@ from fleet_management_api.api_impl.api_logging import (
     log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
 )
 from fleet_management_api.response_consts import (
     CANNOT_DELETE_REFERENCED as _CANNOT_DELETE_REFERENCED,

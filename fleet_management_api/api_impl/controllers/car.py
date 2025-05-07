@@ -20,7 +20,6 @@ from fleet_management_api.api_impl.api_responses import (
 )
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
-    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
 )

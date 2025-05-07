@@ -188,7 +188,6 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
                     Tenant(name=TEST_TENANT_3),
                 ],
             )
-        _db_access.add_without_tenant(TenantDB(name=TEST_TENANT_3))
         with self.app.app.test_client() as client:
             self.hw_1 = PlatformHW(name="test_hw_1")
             client.set_cookie("", "tenant", TEST_TENANT_1)
