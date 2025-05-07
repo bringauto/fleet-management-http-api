@@ -22,13 +22,15 @@ from fleet_management_api.api_impl.controller_decorators import (
 
 
 def set_tenant_cookie(tenant_id: int) -> _Response:
-    """Set a cookie with the tenant ID."""
-    assert isinstance(tenant_id, int), "Tenant ID must be an integer"
+    """Set the tenant cookie to the tenant with the given ID.
+
+    If the tenant with the ID does not exist, return a Unauthorized response."""
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
     accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
     accessible_tenants_in_db = _db_access.get_tenants(accessible_tenants)
+    assert isinstance(tenant_id, int), "Tenant ID must be an integer"
     for t in accessible_tenants_in_db:
         if t.id == tenant_id:
             response = _text_response(
