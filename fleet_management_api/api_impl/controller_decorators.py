@@ -38,12 +38,7 @@ def with_processed_request(
     /,
     *,
     require_data: bool = False,
-) -> (
-    Callable[Concatenate[P], _Response]
-    | Callable[
-        [Callable[Concatenate[ProcessedRequest, P], _Response]], Callable[Concatenate[P], _Response]
-    ]
-):
+) -> Callable[Concatenate[P], _Response]:
     """This decorator provides the controller function with the information about tenants, for which data can be created, read or modified.
 
     The decorator also prevents calling the controller if
