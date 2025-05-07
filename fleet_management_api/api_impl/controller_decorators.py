@@ -8,10 +8,7 @@ from typing import Callable, Concatenate, ParamSpec
 import dataclasses
 
 from fleet_management_api.api_impl.api_responses import Response as _Response
-from fleet_management_api.api_impl.load_request import (
-    RequestJSON as _RequestJSON,
-    RequestEmpty as _RequestEmpty,
-)
+from fleet_management_api.api_impl.load_request import load_request as _load_request
 from fleet_management_api.api_impl.tenants import (
     AccessibleTenants as _AccessibleTenants,
     get_accessible_tenants as _get_accessible_tenants,
@@ -36,9 +33,12 @@ class ProcessedRequest:
     data: list[dict[str, str | None]] = dataclasses.field(default_factory=list)
 
 
-def controller_with_tenants(
-    controller: Callable[Concatenate[ProcessedRequest, P], _Response],
-) -> Callable[Concatenate[P], _Response]:
+# The raw controllers are functions defined in the api_impl/controllers module
+RawController = Callable[Concatenate[ProcessedRequest, P], _Response]
+Controller = Callable[Concatenate[P], _Response]
+
+
+def controller_with_tenants(controller: RawController) -> Controller:
     """This decorator provides the controller function with the information about tenants, for which data can be read or modified.
 
     The controller also prevents calling the controller if
@@ -47,7 +47,7 @@ def controller_with_tenants(
     """
 
     def wrapper(*args, **kwargs):
-        request = _RequestEmpty.load()
+        request = _load_request(require_data=False)
         if not request:
             return _log_invalid_request_body_format()
         tresponse = _get_accessible_tenants(request)
@@ -62,9 +62,7 @@ def controller_with_tenants(
     return wrapper
 
 
-def controller_with_tenants_and_data(
-    controller: Callable[Concatenate[ProcessedRequest, list[dict], P], _Response],
-) -> Callable[Concatenate[P], _Response]:
+def controller_with_tenants_and_data(controller: RawController) -> Controller:
     """This decorator provides the controller function with the information about tenants, for which data can be created or modified
     and the data itself (in JSON format).
 
@@ -74,7 +72,7 @@ def controller_with_tenants_and_data(
     """
 
     def wrapper(*args, **kwargs):
-        request = _RequestJSON.load()
+        request = _load_request(require_data=True)
         if not request:
             return _log_invalid_request_body_format()
         tresponse = _get_accessible_tenants(request)

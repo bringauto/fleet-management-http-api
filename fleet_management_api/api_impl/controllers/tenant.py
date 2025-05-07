@@ -11,7 +11,7 @@ from fleet_management_api.api_impl.api_responses import (
     json_response as _json_response,
     text_response as _text_response,
 )
-from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
+from fleet_management_api.api_impl.load_request import _LoadedRequestEmpty as _RequestEmpty
 from fleet_management_api.api_impl.tenants import (
     AccessibleTenants as _AccessibleTenants,
     get_accessible_tenants as _get_accessible_tenants,

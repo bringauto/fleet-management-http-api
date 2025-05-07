@@ -12,7 +12,7 @@ from fleet_management_api.api_impl.constants import (
 
 
 @dataclasses.dataclass
-class Request(abc.ABC):
+class LoadedRequest(abc.ABC):
     """A superclass for requests loaded from the Connexion framework."""
 
     data: Any
@@ -23,7 +23,7 @@ class Request(abc.ABC):
     method: str = ""
 
     @classmethod
-    def load(cls) -> Request | None:
+    def load(cls) -> LoadedRequest | None:
         request = connexion.request
         if not cls.is_valid(request):
             return None
@@ -58,7 +58,7 @@ class Request(abc.ABC):
         pass
 
 
-class RequestJSON(Request):
+class _LoadedRequestJSON(LoadedRequest):
     """A request loaded from the connexion request object, while expecting a JSON data. The loaded request is valid only if the
     connexion request contained a valid JSON data."""
 
@@ -75,7 +75,7 @@ class RequestJSON(Request):
 
 
 @dataclasses.dataclass
-class RequestEmpty(Request):
+class _LoadedRequestEmpty(LoadedRequest):
     """A request loaded from the connexion request object, while expecting no data. The loaded request is always valid."""
 
     data: Any = None
@@ -90,3 +90,11 @@ class RequestEmpty(Request):
     @classmethod
     def is_valid(cls, *args, **kwargs) -> bool:
         return True
+
+
+def load_request(require_data: bool = False) -> LoadedRequest | None:
+    """Load the request from the connexion request object.
+
+    If the data is required, the request is loaded only if the request contains valid JSON data, otherwise None is returned.
+    """
+    return _LoadedRequestJSON.load() if require_data else _LoadedRequestEmpty.load()

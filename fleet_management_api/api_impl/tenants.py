@@ -5,7 +5,7 @@ import jwt
 
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 from connexion.exceptions import Unauthorized  # type: ignore
-from fleet_management_api.api_impl.load_request import Request as _Request
+from fleet_management_api.api_impl.load_request import LoadedRequest as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
 from fleet_management_api.api_impl.constants import (
     AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
