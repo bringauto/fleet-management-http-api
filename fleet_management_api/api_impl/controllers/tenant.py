@@ -14,6 +14,7 @@ from fleet_management_api.api_impl.api_responses import (
 from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 from fleet_management_api.api_impl.tenants import (
     AccessibleTenants as _AccessibleTenants,
+    get_accessible_tenants as _get_accessible_tenants,
     NO_TENANTS as _NO_TENANTS,
 )
 from fleet_management_api.api_impl.controller_decorators import (
@@ -28,17 +29,20 @@ def set_tenant_cookie(tenant_id: int) -> _Response:
     request = _RequestEmpty.load()
     if not request:
         return _log_invalid_request_body_format()
-    accessible_tenants = _AccessibleTenants(request, ignore_cookie=True)
-    accessible_tenants_in_db = _db_access.get_tenants(accessible_tenants)
+    tresponse = _get_accessible_tenants(request, ignore_cookie=True)
+    if tresponse.status_code != 200:
+        return tresponse
+    tenants = tresponse.body
+    tenants_in_db = _db_access.get_tenants(tenants)
     assert isinstance(tenant_id, int), "Tenant ID must be an integer"
-    for t in accessible_tenants_in_db:
+    for t in tenants_in_db:
         if t.id == tenant_id:
             response = _text_response(
                 f"Tenant '{t.name}' does exist and is included in Set-Cookie."
             )
             response.headers["Set-Cookie"] = f"tenant={t.name}; Path=/"
             return response
-    return _log_error_and_respond(
+    return _log_info_and_respond(
         f"Tenant with ID={tenant_id} is not accessible", 401, title="Unauthorized"
     )
 

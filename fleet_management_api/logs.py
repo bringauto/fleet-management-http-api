@@ -2,14 +2,14 @@ from __future__ import annotations
 import logging.handlers
 import os
 
-from .script_args.configs import APIConfig as _APIConfig, Logging as _Logging
+from .script_args.configs import LoggingConfig as _Logging
 
 
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 LOGGER_NAME = "werkzeug"
 
 
-def configure_logging(component_name: str, config: _APIConfig) -> None:
+def configure_logging(component_name: str, config: _Logging) -> None:
     """Configure the logging for the application.
 
     The component name is written in the log messages to identify the source of the log message.
@@ -17,12 +17,10 @@ def configure_logging(component_name: str, config: _APIConfig) -> None:
     The logging configuration is read from a JSON file. If the file is not found, a default configuration is used.
     """
     try:
-        log_config = config.logging
-
-        if log_config.console.use:
-            _configure_logging_to_console(log_config.console, component_name)
-        if log_config.file.use:
-            _configure_logging_to_file(log_config.file, component_name)
+        if config.console.use:
+            _configure_logging_to_console(config.console, component_name)
+        if config.file.use:
+            _configure_logging_to_file(config.file, component_name)
         logging.getLogger(LOGGER_NAME).setLevel(
             logging.DEBUG
         )  # This ensures the logging level will be fully determined by the handlers
