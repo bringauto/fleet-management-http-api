@@ -1,3 +1,9 @@
+"""
+This module provides decorators for the controller imlpementation in the Fleet Management API.
+
+The decorators pre-load and validate the request data and also the tenant information from the connexion.request object.
+"""
+
 from typing import Callable, Concatenate, ParamSpec
 
 from fleet_management_api.api_impl.api_responses import Response as _Response
