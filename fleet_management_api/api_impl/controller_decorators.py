@@ -6,6 +6,7 @@ The decorators pre-load and validate the request data and also the tenant inform
 
 from typing import Callable, Concatenate, ParamSpec, Optional
 import dataclasses
+import functools
 
 from fleet_management_api.api_impl.api_responses import Response as _Response
 from fleet_management_api.api_impl.load_request import load_request as _load_request
@@ -62,15 +63,13 @@ def with_processed_request(
             tresponse = _get_accessible_tenants(request, ignore_cookie=ignore_tenant_cookie)
             if tresponse.status_code != 200:
                 return _log_error_and_respond(
-                    tresponse.body, tresponse.status_code, title="No tenants"
+                    tresponse.msg, tresponse.status_code, title="No tenants"
                 )
-            tenants = tresponse.body
-            assert isinstance(tenants, _AccessibleTenants)
-            loaded_request = ProcessedRequest(tenants, data=request.data)
+            loaded_request = ProcessedRequest(tresponse.tenants, data=request.data)
             response = controller(loaded_request, *args, **kwargs)
             return response
 
-        return wrapper
+        return functools.wraps(controller)(wrapper)
 
     if controller is None:
         return _with_processed_request
