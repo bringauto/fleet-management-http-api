@@ -1,9 +1,9 @@
 import unittest
 
 import fleet_management_api.app as _app
-from fleet_management_api.database.connection import (
-    set_connection_source_test,
-)
+from fleet_management_api.database.connection import set_connection_source_test
+from fleet_management_api.logs import configure_logging, LOGGER_NAME
+from fleet_management_api.script_args.configs import LoggingConfig as _Logging
 from fleet_management_api.database.db_access import add_tenants, add
 from fleet_management_api.database.db_models import PlatformHWDB
 from fleet_management_api.models import Tenant
@@ -70,33 +70,50 @@ class Test_Setting_Tenant_Cookie(unittest.TestCase):
 
     def setUp(self) -> None:
         set_connection_source_test()
+        configure_logging(
+            "test",
+            config=_Logging(
+                file=_Logging.HandlerConfig(level="DEBUG", use=False),
+                console=_Logging.HandlerConfig(level="DEBUG", use=True),
+            ),
+        )
         self.app = _app.get_test_app(
             use_previous=True, predef_api_key="test_key", add_test_tenant=False
         )
         add_tenants("tenant_1", "tenant_2", "tenant_3")
+        with self.app.app.test_client() as c:
+            self.tenants = c.get("/v2/management/tenant?api_key=test_key").json
+        assert self.tenants is not None
+        self.assertEqual(self.tenants[0]["name"], "tenant_1")
+        self.assertEqual(self.tenants[1]["name"], "tenant_2")
+        self.assertEqual(self.tenants[2]["name"], "tenant_3")
         accessible_tenants_1 = TenantFromTokenMock("tenant_1", [])
         add(accessible_tenants_1, PlatformHWDB(name="platform_x"))
         accessible_tenants_2 = TenantFromTokenMock("tenant_2", [])
         add(accessible_tenants_2, PlatformHWDB(name="platform_y"))
 
-    def test_using_id_of_nonexistent_tenant_yields_401_error(self) -> None:
+    def test_using_id_of_nonexistent_tenant_yields_401_error_but_logs_only_info(self) -> None:
         with self.app.app.test_client() as c:
-            tenant_id = 1543543453
-            response = c.head(f"/v2/management/tenant/{tenant_id}?api_key=test_key")
-            self.assertEqual(response.status_code, 401)
-            self.assertNotIn("Set-Cookie", response.headers)
+            with self.assertLogs(LOGGER_NAME, level="INFO") as logs:
+                tenant_id = 1543543453
+                response = c.head(f"/v2/management/tenant/{tenant_id}?api_key=test_key")
+                self.assertEqual(response.status_code, 401)
+                self.assertNotIn("Set-Cookie", response.headers)
+                self.assertTrue(all(("ERROR" not in log) for log in logs.output))
+                self.assertTrue(any("not accessible" in log for log in logs.output))
 
     def test_using_id_of_existing_tenant_yields_200_code_and_sets_cookie(self) -> None:
         with self.app.app.test_client() as c:
+            assert self.tenants is not None
             # setting cookie to tenant_1
-            tenant_id = 1
+            tenant_id = self.tenants[0]["id"]
             response = c.head(f"/v2/management/tenant/{tenant_id}?api_key=test_key")
             self.assertEqual(response.status_code, 200)
             self.assertIn("Set-Cookie", response.headers)
             self.assertIn("tenant_1", response.headers["Set-Cookie"])
 
             # setting cookie to tenant_2
-            tenant_id = 2
+            tenant_id = self.tenants[1]["id"]
             response = c.head(f"/v2/management/tenant/{tenant_id}?api_key=test_key")
             self.assertEqual(response.status_code, 200)
             self.assertIn("tenant_2", response.headers["Set-Cookie"])
@@ -107,7 +124,9 @@ class Test_Setting_Tenant_Cookie(unittest.TestCase):
         generate_test_keys()
         set_auth_params(public_key=get_test_public_key(strip=True), client_id="test_client")
         with self.app.app.test_client() as c:
-            tenant_id = 1  # id of tenant_1, that is not included in the JWT token
+            tenant_id = self.tenants[0][
+                "id"
+            ]  # id of tenant_1, that is not included in the JWT token
             response = c.head(
                 f"/v2/management/tenant/{tenant_id}",
                 headers={"Authorization": f"Bearer {get_token('tenant_2', 'tenant_3')}"},

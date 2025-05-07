@@ -9,7 +9,7 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
-    log_warning_or_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 import fleet_management_api.models as _models
@@ -21,17 +21,18 @@ from fleet_management_api.response_consts import (
     CANNOT_CREATE_OBJECT as _CANNOT_CREATE_OBJECT,
     OBJ_NOT_FOUND as _OBJ_NOT_FOUND,
 )
-from fleet_management_api.api_impl.load_request import (
-    RequestEmpty as _RequestEmpty,
-    RequestJSON as _RequestJSON,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.controller_decorators import (
+    with_processed_request,
+    ProcessedRequest as _ProcessedRequest,
+)
 
 
 OrderId = int
 
 
-def create_order_states() -> _Response:
+@with_processed_request(require_data=True)
+def create_order_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new states of existing orders.
 
     If some of the order states's creation fails, no states are added to the server.
@@ -40,23 +41,20 @@ def create_order_states() -> _Response:
     - the order exists,
     - there is no Order State with final status (DONE or CANCELED) for the order.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     try:
         order_states = [_models.OrderState.from_dict(item) for item in request.data]
     except (ValueError, TypeError) as e:
         return _log_info_and_respond(
             f"Invalid request data: {e}", 400, title="Invalid Request Data"
         )
-    return create_order_states_from_argument_and_post(tenants, order_states)
+    return create_order_states_from_argument_and_post(request.tenants, order_states)
 
 
 def create_order_states_from_argument_and_post(
     tenants: _AccessibleTenants,
     order_states: list[_models.OrderState],
     check_final_state: bool = True,
+    **kwargs,
 ) -> _Response:
     """Create new states of existing orders. The Order State models are passed as an argument.
 
@@ -75,7 +73,7 @@ def create_order_states_from_argument_and_post(
 
     inaccessible_order_ids = all_order_ids - accessible_order_ids
     if inaccessible_order_ids:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Order with IDs={inaccessible_order_ids} are not accessible.",
             401,
             title="Unauthorized",
@@ -145,18 +143,21 @@ def create_order_states_from_argument_and_post(
         except Exception as e:
             _log_error(f"Error while converting Order State DB models to Order State models: {e}.")
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             f"Order state could not be sent. {response.body['detail']}",
             response.status_code,
             title=response.body["title"],
         )
 
 
+@with_processed_request
 def get_all_order_states(
+    request: _ProcessedRequest,
     wait: bool = False,
     since: int = 0,
     last_n: int = 0,
     car_id: Optional[int] = None,
+    **kwargs: Any,
 ) -> _Response:
     """Get all order states for all the existing orders.
 
@@ -170,19 +171,23 @@ def get_all_order_states(
     If None, return states of all orders. If the car with the specified 'car_id' does not exist,
     return empty list.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     _log_info("Getting all order states for all orders.")
     if car_id is not None:
-        return _get_order_states(tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n)
+        return _get_order_states(
+            request.tenants, {"car_id": lambda x: x == car_id}, wait, since, last_n
+        )
     else:
-        return _get_order_states(tenants, {}, wait, since, last_n=last_n)
+        return _get_order_states(request.tenants, {}, wait, since, last_n=last_n)
 
 
+@with_processed_request
 def get_order_states(
-    order_id: int, wait: bool = False, since: int = 0, last_n: int = 0
+    request: _ProcessedRequest,
+    order_id: int,
+    wait: bool = False,
+    since: int = 0,
+    last_n: int = 0,
+    **kwargs: Any,
 ) -> _Response:
     """Get all order states for an order identified by 'order_id' of an existing order.
 
@@ -195,16 +200,12 @@ def get_order_states(
     :param wait: If True, wait for new states if there are no states for the order yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
-    if _existing_orders(tenants, order_id)[order_id] is None:
+    if _existing_orders(request.tenants, order_id)[order_id] is None:
         _log_info(f"Order with id='{order_id}' was not found. Cannot get its states.")
         return _json_response([], code=404)
     else:
         criteria: dict[str, Callable[[Any], bool]] = {"order_id": lambda x: x == order_id}
-        return _get_order_states(tenants, criteria, wait, since, last_n)
+        return _get_order_states(request.tenants, criteria, wait, since, last_n)
 
 
 def _existing_orders(

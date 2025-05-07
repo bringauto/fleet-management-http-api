@@ -1,6 +1,7 @@
 import unittest
 from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone, Tenant
 import fleet_management_api.app as _app
+from fleet_management_api.api_impl.tenants import decode_jwt_token
 from fleet_management_api.database.db_access import delete
 from fleet_management_api.database.db_models import CarStateDB
 from fleet_management_api.logs import LOGGER_NAME
@@ -10,6 +11,7 @@ from fleet_management_api.api_impl.auth_controller import (
     clear_auth_params,
     clear_test_keys,
     get_test_public_key,
+    get_public_key,
 )
 
 from tests._utils.constants import TEST_TENANT_NAME
@@ -246,6 +248,22 @@ class Test_Retrieving_Single_Car(api_test.TestCase):
             c.post("/v2/management/car", json=[car], content_type="application/json")
             response = c.get(f"/v2/management/car/{nonexistent_car_id}")
             self.assertEqual(response.status_code, 404)
+
+
+class Test_Retrieving_Cars_Without_Valid_JWT_Token(api_test.TestCase):
+
+    def setUp(self, *args) -> None:
+        super().setUp()
+        generate_test_keys()
+        set_auth_params(get_test_public_key(strip=True), "test_client")
+        self.app = _app.get_test_app("testAPIKey", accessible_tenants=[], use_previous=True)
+
+    def test_token_without_any_tenants_yields_401_response(self):
+        with self.app.app.test_client() as client:
+            response = client.get(
+                "/v2/management/platformhw", headers={"Authorization": f"Bearer {_app.get_token()}"}
+            )
+            self.assertEqual(response.status_code, 401)
 
 
 class Test_Creating_Car_Using_Example_From_Specification(api_test.TestCase):

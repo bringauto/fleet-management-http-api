@@ -1,16 +1,22 @@
 from __future__ import annotations
 import json
-import logging
+import dataclasses
 
 import jwt
-from connexion.lifecycle import ConnexionRequest  # type: ignore
 from connexion.exceptions import Unauthorized  # type: ignore
-from fleet_management_api.api_impl.load_request import Request as _Request
+
+from fleet_management_api.api_impl.load_request import LoadedRequest as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
-from fleet_management_api.logs import LOGGER_NAME
+from fleet_management_api.api_impl.constants import (
+    AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
+    PAYLOAD_FIELD_NAME as _PAYLOAD_FIELD_NAME,
+)
 
 
-_logger = logging.getLogger(LOGGER_NAME)
+_ALGORITHM = "RS256"
+
+
+TenantName = str
 
 
 class UsingEmptyTenant(Exception):
@@ -43,37 +49,11 @@ class MissingRSAKey(Exception):
     pass
 
 
-_ALGORITHM = "RS256"
-
-TenantName = str
-
-
 class AccessibleTenants:
     """
     This class extracts from a request the following information:
     - the name of the current tenant, that is used for reading and writing data to the database.
     - the list of all tenants that can be accessed for reading data from the database.
-
-    Optional arguments include:
-    - `key` - a public key used for decoding a JWT token. If left empty, the public key is read using
-    the `get_public_key` function from the `auth_controller` module.
-    - `audience` - the audience of the JWT token.
-
-    Both current tenant and accessible tenants are extracted based on the authorization method used.
-    If an API key is provided, all accessible tenants are set to empty list, meaning there is NO restriction
-    on reading data from the database.
-
-    If API key is not provided and request contains a JWT token, the accessible tenants are extracted from the token.
-    If the token does not contain any tenants or the token is not provided, an exception is raised.
-
-    The current tenant is read from a cookie. If the tenant is not set in a cookie, the current tenant is set to empty string.
-    If the list of accessible tenants is not empty and the current tenant is set, the current tenant must be among accessible tenants,
-    otherwise an exception is raised.
-
-    If the current tenant is empty, all data owned by all accessible tenants can be read from the database,
-    but no data can be written to the database.
-
-    If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
     """
 
     def __init__(
@@ -83,6 +63,28 @@ class AccessibleTenants:
         audience: str = "account",
         ignore_cookie: bool = False,
     ) -> None:
+        """
+        Optional arguments include:
+        - `key` - a public key used for decoding a JWT token. If left empty, the public key is read using
+        the `get_public_key` function from the `auth_controller` module.
+        - `audience` - the audience of the JWT token.
+
+        Both current tenant and accessible tenants are extracted based on the authorization method used.
+        If an API key is provided, all accessible tenants are set to empty list, meaning there is NO restriction
+        on reading data from the database.
+
+        If API key is not provided and request contains a JWT token, the accessible tenants are extracted from the token.
+        If the token does not contain any tenants or the token is not provided, an exception is raised.
+
+        The current tenant is read from a cookie. If the tenant is not set in a cookie, the current tenant is set to empty string.
+        If the list of accessible tenants is not empty and the current tenant is set, the current tenant must be among accessible tenants,
+        otherwise an exception is raised.
+
+        If the current tenant is empty, all data owned by all accessible tenants can be read from the database,
+        but no data can be written to the database.
+
+        If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
+        """
 
         if "api_key" not in request.query and not key.strip():
             key = get_public_key()
@@ -148,8 +150,43 @@ class _EmptyTenant(AccessibleTenants):
 NO_TENANTS = _EmptyTenant()
 
 
+@dataclasses.dataclass(frozen=True)
+class LoadedAccessibleTenants:
+    msg: str
+    status_code: int = 200
+    tenants: AccessibleTenants = NO_TENANTS
+
+
+def get_accessible_tenants(
+    request: _Request,
+    key: str = "",
+    audience: str = "account",
+    ignore_cookie: bool = False,
+) -> LoadedAccessibleTenants:
+    try:
+        tenants = AccessibleTenants(request, key, audience, ignore_cookie)
+        return LoadedAccessibleTenants(
+            msg="Accessible tenants extracted successfully.",
+            status_code=200,
+            tenants=tenants,
+        )
+    except NoAccessibleTenants:
+        # If the JWT token does not contain any tenants, return an empty tenant object
+        return LoadedAccessibleTenants(
+            msg="JWT token does not contain any accessible tenants.",
+            status_code=401,
+            tenants=NO_TENANTS,
+        )
+    except Exception as e:
+        return LoadedAccessibleTenants(
+            msg=f"Failed to extract accessible tenants: {str(e)}",
+            status_code=500,
+            tenants=NO_TENANTS,
+        )
+
+
 def _extract_current_and_accessible_tenants_from_request(
-    request: ConnexionRequest, key: str, audience: str, ignore_cookie: bool = False
+    request: _Request, key: str, audience: str, ignore_cookie: bool = False
 ) -> tuple[str, list[str]]:
 
     if ignore_cookie:
@@ -160,7 +197,7 @@ def _extract_current_and_accessible_tenants_from_request(
         accessible_tenants = []
     else:
         # api key is not provided - read tenants from JWT
-        tenants = _accessible_tenants(request, key, audience)
+        tenants = _get_accessible_tenants_from_auth_headers(request, key, audience)
         _check_current_tenant_is_accessible(current_tenant, tenants)
         accessible_tenants = tenants
     return current_tenant, accessible_tenants
@@ -173,22 +210,24 @@ def _check_current_tenant_is_accessible(current: TenantName, accessible: list[Te
         )
 
 
-def _get_current_tenant(request: ConnexionRequest) -> TenantName:
+def _get_current_tenant(request: _Request) -> TenantName:
     """Return the tenant name from a cookie. If the cookie is not set, return an empty string."""
     if hasattr(request, "cookies") and "tenant" in request.cookies:
         return str(request.cookies.get("tenant", "")).strip()
     return ""
 
 
-def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> list[str]:
-    """Return the list of accessible tenants extracted from a JWT token.
+def _get_accessible_tenants_from_auth_headers(
+    request: _Request, key: str, audience: str
+) -> list[str]:
+    """The accessible tenants extracted from a JWT token.
 
     If the token is missing or does not contain any tenants, raise an exception.
     """
     # api key is not provided - read tenants from JWT
-    if "Authorization" not in request.headers:
+    if _AUTHORIZATION_HEADER_NAME not in request.headers:
         raise NoHeaderWithJWTToken
-    bearer = str(request.headers["Authorization"]).split(" ")[-1]
+    bearer = str(request.headers[_AUTHORIZATION_HEADER_NAME]).split(" ")[-1]
     if not bearer.strip():
         raise Unauthorized("No valid JWT token or API key provided.")
     if not key.strip():
@@ -196,7 +235,7 @@ def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> l
     decoded_key = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
 
     try:
-        payload = dict(json.loads(decoded_key["Payload"]))
+        payload = dict(json.loads(decoded_key[_PAYLOAD_FIELD_NAME]))
     except KeyError:
         raise NoAccessibleTenants(
             "No tenants could be extracted from the token. Token is missing the payload."
@@ -210,3 +249,21 @@ def _accessible_tenants(request: ConnexionRequest, key: str, audience: str) -> l
     if not tenants:
         raise NoAccessibleTenants("No item group in token. Token does not contain tenants.")
     return tenants
+
+
+def encode_jwt_token(payload: dict, key: str) -> str:
+    """Encode a JWT token using the provided key."""
+    try:
+        return jwt.encode(payload, key, algorithm=_ALGORITHM)
+    except Exception as e:
+        raise Unauthorized("Failed to encode JWT token.") from e
+
+
+def decode_jwt_token(token: str, key: str) -> dict:
+    """Decode a JWT token using the provided key."""
+    try:
+        return jwt.decode(token, key, algorithms=[_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise Unauthorized("JWT token has expired.")
+    except jwt.InvalidTokenError:
+        raise Unauthorized("Invalid JWT token.")

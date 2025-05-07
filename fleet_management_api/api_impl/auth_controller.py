@@ -3,9 +3,9 @@ import re
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+from flask import redirect
 
 from fleet_management_api.api_impl.security import SecurityObj
-from flask import redirect
 from fleet_management_api.api_impl.api_logging import log_info, log_error, log_debug
 from fleet_management_api.api_impl.api_responses import Response as _Response, error as _error
 

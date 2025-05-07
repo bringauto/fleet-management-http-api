@@ -11,27 +11,22 @@ from fleet_management_api.api_impl.api_responses import (
     error as _error,
 )
 from fleet_management_api.api_impl.api_logging import (
-    log_warning_or_error_and_respond as _log_error_and_respond,
+    log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
     log_info as _log_info,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.response_consts import OBJ_NOT_FOUND as _OBJ_NOT_FOUND
-from fleet_management_api.api_impl.load_request import (
-    RequestEmpty as _RequestEmpty,
-    RequestJSON as _RequestJSON,
+from fleet_management_api.api_impl.controller_decorators import (
+    with_processed_request,
+    ProcessedRequest as _ProcessedRequest,
 )
-from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
 
 
-def get_route_visualization(route_id: int) -> _Response:
+@with_processed_request
+def get_route_visualization(request: _ProcessedRequest, route_id: int, **kwargs) -> _Response:
     """Get route visualization for an existing route identified by 'route_id'."""
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     rp_db_models = _db_access.get(
-        tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
+        request.tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
     if len(rp_db_models) == 0:
         return _error(
@@ -45,7 +40,8 @@ def get_route_visualization(route_id: int) -> _Response:
         return _json_response(rp)
 
 
-def redefine_route_visualizations() -> _Response:
+@with_processed_request(require_data=True)
+def redefine_route_visualizations(request: _ProcessedRequest, **kwargs) -> _Response:
     """Redefine route visualizations for existing routes.
 
     If a route visualization for a route already exists, it will be replaced.
@@ -55,10 +51,6 @@ def redefine_route_visualizations() -> _Response:
     The visualization can be redefined only if:
     - the route exists.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     vis = [_RouteVisualization.from_dict(s) for s in request.data]
     for v in vis:
         if not _db_access.db_object_check(_RouteDB, v.route_id):
@@ -68,7 +60,7 @@ def redefine_route_visualizations() -> _Response:
                 title=_OBJ_NOT_FOUND,
             )
 
-    existing_vis: list[_RouteVisDB] = _db_access.get(tenants, _RouteVisDB)
+    existing_vis: list[_RouteVisDB] = _db_access.get(request.tenants, _RouteVisDB)
     existing_vis_dict: dict[int, _RouteVisDB] = {v.route_id: v for v in existing_vis}
     for v in vis:
         if v.route_id in existing_vis_dict:
@@ -82,7 +74,7 @@ def redefine_route_visualizations() -> _Response:
             )
 
     vis_db_models = [_obj_to_db.route_visualization_to_db_model(v) for v in vis]
-    response = _db_access.update(tenants, *vis_db_models)
+    response = _db_access.update(request.tenants, *vis_db_models)
     if response.status_code == 200:
         inserted_vis = [_obj_to_db.route_visualization_from_db_model(m) for m in response.body]
         for v in inserted_vis:
@@ -90,6 +82,6 @@ def redefine_route_visualizations() -> _Response:
             _log_info(f"Route visualization (ID={v.id}) has been succesfully redefined.")
         return _json_response(inserted_vis)
     else:
-        return _log_error_and_respond(
+        return _log_warning_or_error_and_respond(
             response.body["detail"], response.status_code, response.body["title"]
         )

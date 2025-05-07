@@ -49,7 +49,7 @@ class Test_Car_Is_Returned_With_Its_Last_State(unittest.TestCase):
             c.post("/v2/management/carstate", json=[state_1, state_2, state_3, state_4])
 
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
-            response = c.get(f"/v2/management/car")
+            response = c.get("/v2/management/car")
             self.assertEqual(200, response.status_code)
             self.assertEqual(len(response.json), 2)
             self.assertEqual(response.json[0]["lastState"]["status"], state_2.status)
