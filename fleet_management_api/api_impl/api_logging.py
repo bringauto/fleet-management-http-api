@@ -32,6 +32,15 @@ def log_error(message: str) -> None:
     logger.error(str(message))
 
 
+def log_nok_and_respond(msg: str, code: int, title: str) -> _Response:
+    """Pass a custom error message to the API logger. Log warning if the code is < 500, otherwise log error."""
+    if code < 500:
+        log_info(msg)
+    else:
+        log_error(msg)
+    return _error(code, str(msg), title)
+
+
 def log_error_and_respond(msg: str, code: int, title: str) -> _Response:
     """Pass a custom error message to the API logger and return a connexion response with the given code, title and detail."""
     log_error(msg)
