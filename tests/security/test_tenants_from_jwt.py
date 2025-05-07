@@ -1,4 +1,5 @@
 import unittest
+
 import jwt
 from connexion.lifecycle import ConnexionRequest  # type: ignore
 
@@ -23,7 +24,6 @@ import tests._utils.api_test as api_test
 
 
 TEST_URL = "https://example.com"
-ALGORITHM = "RS256"
 
 
 def testing_auth_header(*tenants: str) -> str:
