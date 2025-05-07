@@ -4,7 +4,7 @@ from typing import Any, Optional
 import jwt
 
 from flask.testing import FlaskClient as _FlaskClient  # type: ignore
-from connexion.apps.flask_app import FlaskApp as _FlaskApp
+from connexion.apps.flask_app import FlaskApp as _FlaskApp  # type: ignore
 from .encoder import JSONEncoder
 
 from fleet_management_api.database.db_models import ApiKeyDB as _ApiKeyDB
@@ -19,6 +19,10 @@ from fleet_management_api.api_impl.auth_controller import (
 )
 from fleet_management_api.api_impl.api_logging import log_error as _log_error
 from fleet_management_api.api_impl.tenants import MissingRSAKey as _MissingRSAKey
+from fleet_management_api.api_impl.constants import (
+    AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
+    PAYLOAD_FIELD_NAME as _PAYLOAD_FIELD_NAME,
+)
 
 
 TEST_TENANT_NAME = "test-tenant"
@@ -31,7 +35,7 @@ _test_app: _FlaskApp | None = None
 def get_token(*tenants: str) -> str:
     tenant_list = ",".join(f'"/customers/{name}"' for name in tenants)
     payload = {
-        "Payload": '{{"group": [{tenant_list}]}}'.format(tenant_list=tenant_list),
+        _PAYLOAD_FIELD_NAME: '{{"group": [{tenant_list}]}}'.format(tenant_list=tenant_list),
         "aud": "account",
         "allowed-origins": ["test_client"],
     }
@@ -105,25 +109,25 @@ class _TestClient(_FlaskClient):
         self._app = application
         self._key = api_key
 
-    def get(self, url: str, *args, **kwargs) -> Any:
+    def get(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().get(url, *args, **kwargs, headers=self._get_headers())
+        return super().get(url, *args, headers=headers or self._get_headers(), **kwargs)
 
-    def head(self, url: str, *args, **kwargs) -> Any:
+    def head(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().head(url, *args, **kwargs, headers=self._get_headers())
+        return super().head(url, *args, headers=headers or self._get_headers(), **kwargs)
 
-    def post(self, url: str, *args, **kwargs) -> Any:
+    def post(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().post(url, *args, **kwargs, headers=self._get_headers())
+        return super().post(url, *args, headers=headers or self._get_headers(), **kwargs)
 
-    def put(self, url: str, *args, **kwargs) -> Any:
+    def put(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().put(url, *args, **kwargs, headers=self._get_headers())
+        return super().put(url, *args, headers=headers or self._get_headers(), **kwargs)
 
-    def delete(self, url: str, *args, **kwargs) -> Any:
+    def delete(self, url: str, *args, headers: Optional[dict] = None, **kwargs) -> Any:
         url = self._insert_key(url)
-        return super().delete(url, *args, **kwargs, headers=self._get_headers())
+        return super().delete(url, *args, headers=headers or self._get_headers(), **kwargs)
 
     def _insert_key(self, uri: str) -> str:
         if "?" in uri:
@@ -135,7 +139,7 @@ class _TestClient(_FlaskClient):
     def _get_headers(self) -> dict[str, str]:
         accessible_tenants = self._app._accessible_tenants
         if self._app.api_key is not None:
-            return {"Authorization": ""}
+            return {_AUTHORIZATION_HEADER_NAME: ""}
         try:
             token = get_token(*accessible_tenants)
         except _MissingRSAKey as e:
@@ -144,7 +148,7 @@ class _TestClient(_FlaskClient):
         except Exception as e:
             _log_error(f"Unexpected error generating token: {str(e)}")
             raise
-        return {"Authorization": f"Bearer {token}"}
+        return {_AUTHORIZATION_HEADER_NAME: f"Bearer {token}"}
 
 
 TEST_API_KEY_NAME = "test_key"
@@ -161,6 +165,9 @@ def get_test_app(
 
     If the api_key is left empty, no authentication is required.
     The api_key can be set to any value, that can be used as a value for 'api_key' query parameter in the API calls.
+
+    `use previous` parameter is used to determine if an instance of TestApp from previously run test should be user.
+    This can significantly speed up the setUp phase of the tests.
     """
     try:
         _db_access.add_without_tenant(

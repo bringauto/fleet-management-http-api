@@ -1,4 +1,5 @@
 from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
+
 from fleet_management_api.models.car_action_state import (
     CarActionState,
     CarActionStatus,
@@ -15,10 +16,12 @@ from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
-from fleet_management_api.api_impl.load_request import RequestEmpty as _RequestEmpty
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.controller_decorators import (
+    with_processed_request as _with_processed_request,
+    ProcessedRequest as _ProcessedRequest,
+)
 
 
 CarId = int
@@ -30,8 +33,14 @@ STATE_TRANSITIONS: dict[str, set[str]] = {
 }
 
 
+@_with_processed_request
 def get_car_action_states(
-    car_id: int, since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+    request: _ProcessedRequest,
+    car_id: int,
+    since: int = 0,
+    wait: bool = False,
+    last_n: int = 0,
+    **kwargs,
 ) -> _Response:
     """Finds car action states for a Car with given carId.
 
@@ -44,11 +53,8 @@ def get_car_action_states(
             404,
             title="Referenced object not found",
         )
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
     db_models = _db_access.get(
-        _AccessibleTenants(request),
+        request.tenants,
         _db_models.CarActionStateDB,
         criteria={"timestamp": lambda x: x >= since, "car_id": lambda x: x == car_id},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -63,7 +69,8 @@ def get_car_action_states(
     return _json_response(states)
 
 
-def pause_car(car_id: int) -> _Response:
+@_with_processed_request
+def pause_car(request: _ProcessedRequest, car_id: int, **kwargs) -> _Response:
     """Finds and pauses a Car with given carId, if not already paused. Sets car action status to PAUSED if it is not in PAUSED action status already.
 
      # noqa: E501
@@ -73,15 +80,12 @@ def pause_car(car_id: int) -> _Response:
 
     :rtype: ConnexionResponse
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     state = CarActionState(car_id=car_id, action_status="paused")
-    return create_car_action_states_from_argument_and_save_to_db(tenants, [state])
+    return create_car_action_states_from_argument_and_save_to_db(request.tenants, [state])
 
 
-def unpause_car(car_id):  # noqa: E501
+@_with_processed_request
+def unpause_car(request: _ProcessedRequest, car_id: int, **kwargs):  # noqa: E501
     """Finds and unpauses a Car with given carId, if paused. Sets car action status to NORMAL only if it is in PAUSED action status.
 
      # noqa: E501
@@ -91,12 +95,8 @@ def unpause_car(car_id):  # noqa: E501
 
     :rtype: ConnexionResponse
     """
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     state = CarActionState(car_id=car_id, action_status="normal")
-    return create_car_action_states_from_argument_and_save_to_db(tenants, [state])
+    return create_car_action_states_from_argument_and_save_to_db(request.tenants, [state])
 
 
 def create_car_action_states_from_argument_and_save_to_db(

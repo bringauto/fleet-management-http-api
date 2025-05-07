@@ -9,20 +9,20 @@ from fleet_management_api.api_impl.api_logging import (
     log_info_and_respond as _log_info_and_respond,
     log_error as _log_error,
     log_error_and_respond as _log_error_and_respond,
-    log_invalid_request_body_format as _log_invalid_request_body_format,
 )
 from fleet_management_api.models import CarState as _CarState
 import fleet_management_api.database.db_models as _db_models
 import fleet_management_api.api_impl.obj_to_db as _obj_to_db
 import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.api_impl.load_request import (
-    RequestJSON as _RequestJSON,
-    RequestEmpty as _RequestEmpty,
-)
 from fleet_management_api.api_impl.tenants import AccessibleTenants as _AccessibleTenants
+from fleet_management_api.api_impl.controller_decorators import (
+    with_processed_request as _with_processed_request,
+    ProcessedRequest as _ProcessedRequest,
+)
 
 
-def create_car_states() -> _Response:
+@_with_processed_request(require_data=True)
+def create_car_states(request: _ProcessedRequest, **kwargs) -> _Response:
     """Post new car states.
 
     If some of the car states' creation fails, no car states are added to the server.
@@ -30,12 +30,8 @@ def create_car_states() -> _Response:
     The car state creation can succeed only if:
     - the car exists.
     """
-    request = _RequestJSON.load()
-    if not request:
-        return _log_invalid_request_body_format()
-    tenants = _AccessibleTenants(request)
     car_states = [_CarState.from_dict(s) for s in request.data]  # noqa: E501
-    return create_car_states_from_argument_and_post(tenants, car_states)
+    return create_car_states_from_argument_and_post(request.tenants, car_states)
 
 
 def create_car_states_from_argument_and_post(
@@ -82,8 +78,9 @@ def create_car_states_from_argument_and_post(
     return _error(code=code, msg=msg, title=title)
 
 
+@_with_processed_request
 def get_all_car_states(
-    since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+    request: _ProcessedRequest, since: int = 0, wait: bool = False, last_n: int = 0, **kwargs
 ) -> _Response:
     """Get all car states for all the cars.
 
@@ -94,13 +91,9 @@ def get_all_car_states(
     :param wait: If True, wait for new states if there are no states yet.
     :param last_n: If greater than 0, return only up to 'last_n' states with highest timestamp.
     """
-
-    request = _RequestEmpty.load()
-    if not request:
-        return _log_invalid_request_body_format()
     # first, return car_states with highest timestamp sorted by timestamp and id in descending order
     car_state_db_models = _db_access.get(
-        _AccessibleTenants(request),
+        request.tenants,
         _db_models.CarStateDB,
         criteria={"timestamp": lambda x: x >= since},
         sort_result_by={"timestamp": "desc", "id": "desc"},
@@ -115,8 +108,14 @@ def get_all_car_states(
     return _json_response(car_states)
 
 
+@_with_processed_request
 def get_car_states(
-    car_id: int, since: int = 0, wait: bool = False, last_n: int = 0, tenant: str = ""
+    request: _ProcessedRequest,
+    car_id: int,
+    since: int = 0,
+    wait: bool = False,
+    last_n: int = 0,
+    **kwargs,
 ) -> _Response:
     """Get car states for a car idenfified by 'car_id' of an existing car.
 
@@ -130,11 +129,8 @@ def get_car_states(
     try:
         if not _db_access.get_by_id(_db_models.CarDB, car_id):
             raise _db_access.ParentNotFound
-        request = _RequestEmpty.load()
-        if not request:
-            return _log_invalid_request_body_format()
         car_state_db_models = _db_access.get(
-            _AccessibleTenants(request),
+            request.tenants,
             base=_db_models.CarStateDB,
             criteria={
                 "car_id": lambda i: i == car_id,

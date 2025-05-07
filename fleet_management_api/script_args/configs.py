@@ -8,7 +8,7 @@ LoggingLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 class APIConfig(pydantic.BaseModel):
-    logging: Logging
+    logging: LoggingConfig
     http_server: HTTPServer
     database: Database
     security: Security
@@ -16,7 +16,7 @@ class APIConfig(pydantic.BaseModel):
     data: Data
 
 
-class Logging(pydantic.BaseModel):
+class LoggingConfig(pydantic.BaseModel):
     console: HandlerConfig
     file: HandlerConfig
 
