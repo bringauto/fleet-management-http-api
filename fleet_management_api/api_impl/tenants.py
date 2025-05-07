@@ -3,7 +3,7 @@ import json
 
 import jwt
 
-from connexion.lifecycle import ConnexionResponse as _Response, ConnexionRequest  # type: ignore
+from connexion.lifecycle import ConnexionResponse as _Response  # type: ignore
 from connexion.exceptions import Unauthorized  # type: ignore
 from fleet_management_api.api_impl.load_request import Request as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
@@ -179,7 +179,7 @@ def get_accessible_tenants(
 
 
 def _extract_current_and_accessible_tenants_from_request(
-    request: ConnexionRequest, key: str, audience: str, ignore_cookie: bool = False
+    request: _Request, key: str, audience: str, ignore_cookie: bool = False
 ) -> tuple[str, list[str]]:
 
     if ignore_cookie:
@@ -203,7 +203,7 @@ def _check_current_tenant_is_accessible(current: TenantName, accessible: list[Te
         )
 
 
-def _get_current_tenant(request: ConnexionRequest) -> TenantName:
+def _get_current_tenant(request: _Request) -> TenantName:
     """Return the tenant name from a cookie. If the cookie is not set, return an empty string."""
     if hasattr(request, "cookies") and "tenant" in request.cookies:
         return str(request.cookies.get("tenant", "")).strip()
@@ -211,7 +211,7 @@ def _get_current_tenant(request: ConnexionRequest) -> TenantName:
 
 
 def _get_accessible_tenants_from_auth_headers(
-    request: ConnexionRequest, key: str, audience: str
+    request: _Request, key: str, audience: str
 ) -> list[str]:
     """The accessible tenants extracted from a JWT token.
 
