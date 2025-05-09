@@ -17,8 +17,6 @@ from fleet_management_api.api_impl.tenants import (
 )
 from fleet_management_api.app import get_token, get_test_app
 from fleet_management_api.models import Tenant
-import fleet_management_api.database.db_access as _db_access
-from fleet_management_api.database.db_models import TenantDB
 from fleet_management_api.models import PlatformHW
 from fleet_management_api.api_impl.load_request import _LoadedRequestEmpty as _RequestEmpty
 import tests._utils.api_test as api_test
