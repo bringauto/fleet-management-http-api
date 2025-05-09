@@ -21,7 +21,6 @@ from fleet_management_api.api_impl.api_logging import log_error as _log_error
 from fleet_management_api.api_impl.tenants import MissingRSAKey as _MissingRSAKey
 from fleet_management_api.api_impl.constants import (
     AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
-    PAYLOAD_FIELD_NAME as _PAYLOAD_FIELD_NAME,
 )
 
 
@@ -33,9 +32,10 @@ _test_app: _FlaskApp | None = None
 
 
 def get_token(*tenants: str) -> str:
-    tenant_list = ",".join(f'"/customers/{name}"' for name in tenants)
+    tenant_list = [f"/customers/{name}" for name in tenants]
     payload = {
-        _PAYLOAD_FIELD_NAME: '{{"group": [{tenant_list}]}}'.format(tenant_list=tenant_list),
+        "group": tenant_list,
+        "iss": "test",
         "aud": "account",
         "allowed-origins": ["test_client"],
     }
@@ -45,7 +45,7 @@ def get_token(*tenants: str) -> str:
     try:
         encoded = jwt.encode(payload, private, algorithm="RS256")
     except jwt.PyJWTError as e:
-        _log_error(f"Failed to encode JWT token: {str(e)}")
+        _log_error(f"Failed to encode JWsT token: {str(e)}")
         return ""
     return encoded
 

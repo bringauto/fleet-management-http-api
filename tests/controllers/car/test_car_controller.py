@@ -1,7 +1,7 @@
 import unittest
+
 from fleet_management_api.models import Car, PlatformHW, Order, MobilePhone, Tenant
 import fleet_management_api.app as _app
-from fleet_management_api.api_impl.tenants import decode_jwt_token
 from fleet_management_api.database.db_access import delete
 from fleet_management_api.database.db_models import CarStateDB
 from fleet_management_api.logs import LOGGER_NAME
@@ -11,14 +11,15 @@ from fleet_management_api.api_impl.auth_controller import (
     clear_auth_params,
     clear_test_keys,
     get_test_public_key,
-    get_public_key,
 )
-
 from tests._utils.constants import TEST_TENANT_NAME
-from tests._utils.setup_utils import create_stops, create_platform_hws, create_route
-
+from tests._utils.setup_utils import (
+    create_stops,
+    create_platform_hws,
+    create_route,
+    TenantFromTokenMock,
+)
 import tests._utils.api_test as api_test
-from tests._utils.setup_utils import TenantFromTokenMock
 
 
 PHONE = MobilePhone(phone="123456789")

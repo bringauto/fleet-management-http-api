@@ -1,5 +1,4 @@
 from __future__ import annotations
-import json
 import dataclasses
 
 import jwt
@@ -9,7 +8,6 @@ from fleet_management_api.api_impl.load_request import LoadedRequest as _Request
 from fleet_management_api.api_impl.auth_controller import get_public_key
 from fleet_management_api.api_impl.constants import (
     AUTHORIZATION_HEADER_NAME as _AUTHORIZATION_HEADER_NAME,
-    PAYLOAD_FIELD_NAME as _PAYLOAD_FIELD_NAME,
 )
 
 
@@ -170,10 +168,10 @@ def get_accessible_tenants(
             status_code=200,
             tenants=tenants,
         )
-    except NoAccessibleTenants:
+    except NoAccessibleTenants as e:
         # If the JWT token does not contain any tenants, return an empty tenant object
         return LoadedAccessibleTenants(
-            msg="JWT token does not contain any accessible tenants.",
+            msg=f"JWT token does not contain any accessible tenants. Error: {str(e)}",
             status_code=401,
             tenants=NO_TENANTS,
         )
@@ -232,38 +230,12 @@ def _get_accessible_tenants_from_auth_headers(
         raise Unauthorized("No valid JWT token or API key provided.")
     if not key.strip():
         raise MissingRSAKey("RSA public key is not set.")
-    decoded_key = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
-
-    try:
-        payload = dict(json.loads(decoded_key[_PAYLOAD_FIELD_NAME]))
-    except KeyError:
-        raise NoAccessibleTenants(
-            "No tenants could be extracted from the token. Token is missing the payload."
-        )
-    except Exception as e:
-        raise Unauthorized("Invalid JWT token.") from e
-
-    group: list[str] = payload.get("group", [])
+    decoded_payload = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
+    if "group" not in decoded_payload:
+        raise NoAccessibleTenants("No item 'group' in token. Token does not contain tenants.")
+    group: list[str] = decoded_payload.get("group", [])
     tenants = [item.split("/")[-1] for item in group if item.startswith("/customers/")]
     tenants = [tenant for tenant in tenants if tenant]
     if not tenants:
-        raise NoAccessibleTenants("No item group in token. Token does not contain tenants.")
+        raise NoAccessibleTenants("No accessible tenants found in the token.")
     return tenants
-
-
-def encode_jwt_token(payload: dict, key: str) -> str:
-    """Encode a JWT token using the provided key."""
-    try:
-        return jwt.encode(payload, key, algorithm=_ALGORITHM)
-    except Exception as e:
-        raise Unauthorized("Failed to encode JWT token.") from e
-
-
-def decode_jwt_token(token: str, key: str) -> dict:
-    """Decode a JWT token using the provided key."""
-    try:
-        return jwt.decode(token, key, algorithms=[_ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        raise Unauthorized("JWT token has expired.")
-    except jwt.InvalidTokenError:
-        raise Unauthorized("Invalid JWT token.")
