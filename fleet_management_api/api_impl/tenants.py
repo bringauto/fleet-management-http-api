@@ -249,23 +249,3 @@ def _get_accessible_tenants_from_auth_headers(
     if not tenants:
         raise NoAccessibleTenants("No item group in token. Token does not contain tenants.")
     return tenants
-
-
-def encode_jwt_token(payload: dict, key: str) -> str:
-    """Encode a JWT token using the provided key."""
-    try:
-        return jwt.encode(payload, key, algorithm=_ALGORITHM)
-    except Exception as e:
-        raise Unauthorized("Failed to encode JWT token.") from e
-
-
-def decode_jwt_token(token: str, key: str) -> dict:
-    """Decode a JWT token using the provided key."""
-    try:
-        return jwt.decode(token, key, algorithms=[_ALGORITHM])
-    except jwt.ExpiredSignatureError:
-        raise Unauthorized("JWT token has expired.")
-    except jwt.InvalidTokenError:
-        raise Unauthorized("Invalid JWT token.")
-
-
