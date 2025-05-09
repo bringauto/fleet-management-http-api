@@ -555,7 +555,7 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
             c.set_cookie("", "tenant", "")
             # post to car owned by tenant_A, that is accessible (present in the token)
             response = c.post(
-                "/v2/management/carstate?api_key=test_key",
+                "/v2/management/carstate",
                 headers={"Authorization": f"Bearer {_app.get_token('tenant_A', 'tenant_B')}"},
                 json=[state],
             )

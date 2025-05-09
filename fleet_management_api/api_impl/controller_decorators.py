@@ -63,7 +63,7 @@ def with_processed_request(
             tresponse = _get_accessible_tenants(request, ignore_cookie=ignore_tenant_cookie)
             if tresponse.status_code != 200:
                 return _log_warning_or_error_and_respond(
-                    tresponse.msg, tresponse.status_code, title="No tenants"
+                    tresponse.msg, tresponse.status_code, title="Cannot extract tenants"
                 )
             loaded_request = ProcessedRequest(tresponse.tenants, data=request.data)
             response = controller(loaded_request, *args, **kwargs)
