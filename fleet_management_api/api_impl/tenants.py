@@ -267,3 +267,5 @@ def decode_jwt_token(token: str, key: str) -> dict:
         raise Unauthorized("JWT token has expired.")
     except jwt.InvalidTokenError:
         raise Unauthorized("Invalid JWT token.")
+
+
