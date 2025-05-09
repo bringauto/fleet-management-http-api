@@ -1,4 +1,5 @@
 import jwt
+import connexion as _connexion
 
 from fleet_management_api.api_impl.api_keys import (
     verify_key_and_return_key_info as _verify_key_and_return_key_info,
@@ -20,6 +21,7 @@ def info_from_oAuth2AuthCode(token):
     :rtype: dict | None
     """
 
+    _raise_for_simultaneous_jwt_and_api_key()
     try:
         decoded_token = jwt.decode(
             token, get_public_key(), algorithms=["RS256"], audience="account"
@@ -61,9 +63,23 @@ def info_from_APIKeyAuth(api_key, *args) -> None | dict:
     :return: Information attached to provided api_key or None if api_key is invalid or does not allow access to called API
     :rtype: dict | None
     """
-
+    _raise_for_simultaneous_jwt_and_api_key()
     code, info = _verify_key_and_return_key_info(api_key)
     if code == 200:
         return {"name": info.name}  # type: ignore
     else:
         return None
+
+
+def _raise_for_simultaneous_jwt_and_api_key() -> None:
+    request = _connexion.request
+    api_key_used = "api_key" in request.query_string.decode()
+    jwt_used = "Authorization" in request.headers and request.headers["Authorization"].startswith(
+        "Bearer "
+    )
+    if api_key_used and jwt_used:
+        raise _connexion.exceptions.AuthenticationProblem(
+            status=401,
+            detail="Cannot use both API key and JWT token for authentication.",
+            title="Authentication error",
+        )

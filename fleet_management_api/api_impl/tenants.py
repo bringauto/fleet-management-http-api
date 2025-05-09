@@ -29,12 +29,6 @@ class TenantNotAccessible(Exception):
     pass
 
 
-class MultipleSchemasAtOnce(Exception):
-    """Raise when multiple security schemas are used at the same time."""
-
-    pass
-
-
 class NoAccessibleTenants(Exception):
     """Raise when no accessible tenants are found in a JWT token."""
 
@@ -89,7 +83,6 @@ class AccessibleTenants:
 
         If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
         """
-        self._raise_for_jwt_and_api_key_at_the_same_time(request)
         if "api_key" not in request.query and not key.strip():
             key = get_public_key()
         self._current, self._all_accessible = _extract_current_and_accessible_tenants_from_request(
@@ -126,20 +119,6 @@ class AccessibleTenants:
     def copy(self) -> AccessibleTenants:
         """Return a copy of the current object."""
         return AccessibleTenants.from_dict({"current": self._current, "all": self._all_accessible})
-
-    def _raise_for_jwt_and_api_key_at_the_same_time(self, request: _Request) -> None:
-        """Raise a MultipleSchemasAtOnce exception if both JWT token and API key are provided in the request."""
-        api_key_used = "api_key" in request.query
-        jwt_token_used = _AUTHORIZATION_HEADER_NAME in request.headers and str(
-            request.headers[_AUTHORIZATION_HEADER_NAME]
-        ).startswith("Bearer ")
-
-        if api_key_used and jwt_token_used:
-            # If both API key and JWT token are provided, raise an exception
-            raise MultipleSchemasAtOnce(
-                "Both JWT token and API key are provided in the request. "
-                "Please use either one of them."
-            )
 
 
 class AccessibleTenantsFromDict(AccessibleTenants):
@@ -187,13 +166,6 @@ def get_accessible_tenants(
             msg="Accessible tenants extracted successfully.",
             status_code=200,
             tenants=tenants,
-        )
-    except MultipleSchemasAtOnce as e:
-        # If both JWT token and API key are provided, return an error message
-        return LoadedAccessibleTenants(
-            msg=f"Both JWT token and API key are provided in the request. Error: {str(e)}",
-            status_code=401,
-            tenants=NO_TENANTS,
         )
     except NoAccessibleTenants as e:
         # If the JWT token does not contain any tenants, return an empty tenant object
