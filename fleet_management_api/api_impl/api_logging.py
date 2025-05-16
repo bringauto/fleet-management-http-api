@@ -32,7 +32,6 @@ def log_error(message: str) -> None:
     logger.error(str(message))
 
 
-
 def log_warning_or_error_and_respond(msg: str, code: int, title: str) -> _Response:
     """Pass a custom error message to the API logger and return a connexion response with the given code, title and detail."""
     if code < 500:
@@ -45,6 +44,12 @@ def log_warning_or_error_and_respond(msg: str, code: int, title: str) -> _Respon
 def log_warning_and_respond(msg: str, code: int, title: str) -> _Response:
     """Pass a custom warning message to the API logger and return a connexion response with the given code, title and detail."""
     log_warning(msg)
+    return _error(code, str(msg), title)
+
+
+def log_error_and_respond(msg: str, code: int, title: str) -> _Response:
+    """Pass a custom error message to the API logger and return a connexion response with the given code, title and detail."""
+    log_error(msg)
     return _error(code, str(msg), title)
 
 

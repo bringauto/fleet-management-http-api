@@ -4,6 +4,7 @@ from fleet_management_api.models import Tenant as _Tenant
 from fleet_management_api.api_impl.api_logging import (
     log_info as _log_info,
     log_warning_or_error_and_respond as _log_warning_or_error_and_respond,
+    log_error_and_respond as _log_error_and_respond,
     log_info_and_respond as _log_info_and_respond,
 )
 from fleet_management_api.api_impl.api_responses import (
@@ -58,6 +59,12 @@ def create_tenants(request: _ProcessedRequest, **kwargs) -> _Response:
             _log_info(f"Stop (name='{tenant.name}) has been created.")
         models = [_obj_to_db.tenant_from_db_model(m) for m in posted_db_models]
         return _json_response(models)
+    elif response.status_code == 400 and "null value in column" in response.body["detail"]:
+        return _log_error_and_respond(
+            f"Could not create tenants. {response.body['detail']}",
+            400,
+            title="Not-null constraint violation",
+        )
     else:
         return _log_warning_or_error_and_respond(
             f"Could not create tenants. {response.body['detail']}",
