@@ -148,6 +148,27 @@ class Test_Adding_Multiple_Tenants(unittest.TestCase):
             self.assertEqual(response.json[0]["name"], "test_tenant_2")
             self.assertEqual(response.json[0]["id"], 2)
 
+    def test_multiple_requests_with_repeating_tenant_names_always_add_each_tenant_only_once(self):
+        names = ["tenant1", "tenant2", "tenant3"]
+        repeated_names = [
+            names[0],
+            names[1],
+            names[0],
+            names[0],
+            names[2],
+            names[2],
+            names[1],
+            names[1],
+        ]
+        for name in repeated_names:
+            with self.app.app.test_client() as c:
+                response = c.post("/v2/management/tenant?api_key=abcde123", json=[{"name": name}])
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/tenant?api_key=abcde123")
+            assert response.json is not None
+            self.assertEqual(len(response.json), len(names))
+            self.assertEqual([tenant["name"] for tenant in response.json], names)
+
     def tearDown(self) -> None:
         self.p.terminate()
         try:
