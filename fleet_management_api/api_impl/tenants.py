@@ -134,7 +134,8 @@ class _EmptyTenant(AccessibleTenants):
 
     def __init__(self, *args, **kwargs):
         """The empty tenant object does not have any accessible tenants or a current tenant."""
-        pass
+        self._current = ""
+        self._all_accessible = []
 
     @property
     def current(self) -> str:
