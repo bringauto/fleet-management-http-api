@@ -170,8 +170,6 @@ def add_tenants(*names: str) -> _Response:
             last_id += 1
             tenant.id = last_id
         response = add_without_tenant(*tenants, auto_id=False)
-    if response.status_code != 200:
-        raise RuntimeError(f"Error when adding tenants: {response.body}")
     return response
 
 

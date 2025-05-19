@@ -50,8 +50,7 @@ def create_tenants(request: _ProcessedRequest, **kwargs) -> _Response:
     """
 
     tenants = [_Tenant.from_dict(t) for t in request.data]
-    tenant_db_models = [_obj_to_db.tenant_to_db_model(t) for t in tenants]
-    response = _db_access.add_without_tenant(*tenant_db_models)
+    response = _db_access.add_tenants(*[t.name for t in tenants])
 
     if response.status_code == 200:
         posted_db_models: list[_db_models.TenantDB] = response.body

@@ -51,7 +51,7 @@ class SessionWithTenants(Session):
 
 
 class Tenants(Protocol):
-    """Protocol for a class that provides the current tenant and all accessible tenants."""
+    """Protocol for a class that provides the current tenant and all accessible tmptyenants."""
 
     @property
     def current(self) -> str: ...
