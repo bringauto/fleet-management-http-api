@@ -158,8 +158,18 @@ def add_tenants(*names: str) -> _Response:
     """Add tenants to the database."""
     tenants = [_TenantDB(name=name) for name in names]
     response = add_without_tenant(*tenants)
-    if response.status_code != 200:
-        raise RuntimeError(f"Error when adding tenants: {response.body}")
+    if response.status_code == 400 and 'null value in column "id"' in response.body["detail"]:
+        logger.warning(
+            "Server attempted to add tenants without automatically generated IDs."
+            "Attempting to read existing IDs from the database, set tenant IDs before "
+            "adding to database and insert the tenants again."
+        )
+        db_tenants = get_tenants(_NO_TENANTS)
+        last_id = max([(t.id or 0) for t in db_tenants]) if db_tenants else 0
+        for tenant in tenants:
+            last_id += 1
+            tenant.id = last_id
+        response = add_without_tenant(*tenants, auto_id=False)
     return response
 
 

@@ -1,5 +1,6 @@
 import multiprocessing
 import time
+import unittest
 
 import fleet_management_api.app as _app
 from fleet_management_api.api_impl.auth_controller import (
@@ -50,7 +51,7 @@ def wait_for_process(app: TestApp, process: multiprocessing.Process, timeout: fl
         raise RuntimeError("Failed to start test server")
 
 
-class Test_(api_test.TestCase):
+class Test_Authorization(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
@@ -110,3 +111,7 @@ class Test_(api_test.TestCase):
         self.p.join()
         clear_auth_params()
         clear_test_keys()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    unittest.main()  # pragma: no cover

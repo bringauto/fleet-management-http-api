@@ -16,6 +16,62 @@ from fleet_management_api.app import get_token
 from tests._utils.setup_utils import TenantFromTokenMock
 
 
+class Test_Creating_Tenant(unittest.TestCase):
+
+    def setUp(self) -> None:
+        set_connection_source_test()
+        self.app = _app.get_test_app(
+            use_previous=True, predef_api_key="test_key", add_test_tenant=False
+        )
+
+    def test_creating_tenant_with_nonexitent_name_yields_200_response(self) -> None:
+        with self.app.app.test_client() as c:
+            response = c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="test_tenant")],
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["name"], "test_tenant")
+            self.assertEqual(response.json[0]["id"], 1)
+
+    def test_creating_multiple_tenants_with_noncolliding_names_in_separate_requests_yields_200_responses(
+        self,
+    ) -> None:
+        with self.app.app.test_client() as c:
+            response = c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="test_tenant")],
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["name"], "test_tenant")
+            self.assertEqual(response.json[0]["id"], 1)
+
+            response = c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="test_tenant_2")],
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["name"], "test_tenant_2")
+            self.assertEqual(response.json[0]["id"], 2)
+
+    def test_creating_tenant_with_already_existing_name_yields_400_response(self) -> None:
+        with self.app.app.test_client() as c:
+            c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="test_tenant")],
+            )
+            response = c.post(
+                "/v2/management/tenant?api_key=test_key",
+                json=[Tenant(name="test_tenant")],
+            )
+            self.assertEqual(response.status_code, 400)
+            assert response.json is not None
+            self.assertIn("UNIQUE constraint failed", response.json["detail"])
+
+
 class Test_Get_Tenants(unittest.TestCase):
 
     def setUp(self) -> None:

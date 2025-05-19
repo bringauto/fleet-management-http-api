@@ -1,6 +1,7 @@
 import unittest
 import subprocess
 import time
+import multiprocessing
 
 import psycopg2  # type: ignore
 from psycopg2 import OperationalError
@@ -8,6 +9,8 @@ from psycopg2 import OperationalError
 import fleet_management_api.database.connection as _connection
 import fleet_management_api.database.db_access as _db_access
 import fleet_management_api.database.db_models as _db_models
+from fleet_management_api.app import get_app
+
 from tests._utils.constants import TEST_TENANT_NAME
 from tests._utils.setup_utils import TenantFromTokenMock
 
@@ -106,6 +109,68 @@ class Test_Database_Cleanup(unittest.TestCase):
         self.assertFalse(response)
 
     def tearDown(self) -> None:
+        try:
+            subprocess.run(
+                ["docker", "compose", "-f", DOCKER_COMPOSE_FILE_PATH, "down"],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Error stopping database: {e}")
+
+
+class Test_Adding_Multiple_Tenants(unittest.TestCase):
+    def setUp(self):
+        restart_database()
+        _connection.set_connection_source("localhost", 5432, "test_db", "postgres", PASSWORD)
+        api_key = _db_models.ApiKeyDB(creation_timestamp=0, name="test_key", key="abcde123")
+        _db_access.add_without_tenant(api_key)
+        self.app = get_app()
+        self.p = multiprocessing.Process(
+            target=self.app.run, kwargs={"port": 8080, "debug": False, "use_reloader": False}
+        )
+        self.p.start()
+
+    def test_adding_multiple_tenants_with_non_colliding_names_yield_200_responses(self):
+        with self.app.app.test_client() as c:
+            response = c.post(
+                "/v2/management/tenant?api_key=abcde123", json=[{"name": "test_tenant"}]
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["name"], "test_tenant")
+            self.assertEqual(response.json[0]["id"], 1)
+
+            response = c.post(
+                "/v2/management/tenant?api_key=abcde123", json=[{"name": "test_tenant_2"}]
+            )
+            self.assertEqual(response.status_code, 200)
+            assert response.json is not None
+            self.assertEqual(response.json[0]["name"], "test_tenant_2")
+            self.assertEqual(response.json[0]["id"], 2)
+
+    def test_multiple_requests_with_repeating_tenant_names_always_add_each_tenant_only_once(self):
+        names = ["tenant1", "tenant2", "tenant3"]
+        repeated_names = [
+            names[0],
+            names[1],
+            names[0],
+            names[0],
+            names[2],
+            names[2],
+            names[1],
+            names[1],
+        ]
+        for name in repeated_names:
+            with self.app.app.test_client() as c:
+                response = c.post("/v2/management/tenant?api_key=abcde123", json=[{"name": name}])
+        with self.app.app.test_client() as c:
+            response = c.get("/v2/management/tenant?api_key=abcde123")
+            assert response.json is not None
+            self.assertEqual(len(response.json), len(names))
+            self.assertEqual([tenant["name"] for tenant in response.json], names)
+
+    def tearDown(self) -> None:
+        self.p.terminate()
         try:
             subprocess.run(
                 ["docker", "compose", "-f", DOCKER_COMPOSE_FILE_PATH, "down"],

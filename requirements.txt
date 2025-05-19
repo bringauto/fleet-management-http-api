@@ -1,17 +1,17 @@
-connexion[swagger-ui] >= 2.6.0, <3
-swagger-ui-bundle >= 0.0.2
-python_dateutil >= 2.6.0
-setuptools >= 21.0.0
+connexion[swagger-ui] == 2.14.2
+swagger-ui-bundle == 0.0.9
+python_dateutil == 2.9.0.post0
+setuptools == 59.6.0
 Flask == 2.1.1
 httpx == 0.27.2
-python-dotenv >= 1.0.0
-psycopg2-binary >= 2.9.9
+python-dotenv == 1.0.1
+psycopg2-binary == 2.9.10
 python-keycloak == 4.7.0
 keycloak-client == 0.15.4
 pyjwt == 2.3.0
 cryptography == 3.4.8
-psycopg >= 3.1.0
-psycopg-binary
-psycopg[binary]
-pydantic >= 2.5.3
-SQLAlchemy >= 2.0.25
+psycopg == 3.2.3
+psycopg-binary == 3.2.3
+psycopg[binary] == 3.2.3
+pydantic == 2.9.2
+SQLAlchemy == 2.0.41
