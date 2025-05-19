@@ -83,7 +83,6 @@ class AccessibleTenants:
 
         If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
         """
-
         if "api_key" not in request.query and not key.strip():
             key = get_public_key()
         self._current, self._all_accessible = _extract_current_and_accessible_tenants_from_request(
@@ -226,6 +225,7 @@ def _get_accessible_tenants_from_auth_headers(
     # api key is not provided - read tenants from JWT
     if _AUTHORIZATION_HEADER_NAME not in request.headers:
         raise NoHeaderWithJWTToken
+
     bearer = str(request.headers[_AUTHORIZATION_HEADER_NAME]).split(" ")[-1]
     if not bearer.strip():
         raise Unauthorized("No valid JWT token or API key provided.")
