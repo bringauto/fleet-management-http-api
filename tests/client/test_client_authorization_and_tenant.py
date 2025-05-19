@@ -51,7 +51,7 @@ def wait_for_process(app: TestApp, process: multiprocessing.Process, timeout: fl
         raise RuntimeError("Failed to start test server")
 
 
-class Test_(api_test.TestCase):
+class Test_Authorization(api_test.TestCase):
 
     def setUp(self, *args) -> None:
         super().setUp()
