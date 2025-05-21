@@ -450,20 +450,25 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             self.assertEqual(response.status_code, 200)
 
             response = c.get("/v2/management/orderstate/1")
-            self.assertEqual([state["status"] for state in response.json], [OrderStatus.TO_ACCEPT, OrderStatus.DONE])
+            self.assertEqual(
+                [state["status"] for state in response.json],
+                [OrderStatus.TO_ACCEPT, OrderStatus.DONE],
+            )
 
         # push more states
         some_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             for _ in range(max_n):
                 response = c.post("/v2/management/orderstate", json=[some_state])
-                self.assertEqual(response.status_code, 403) # should be rejected
+                self.assertEqual(response.status_code, 403)  # should be rejected
 
         # check the states did not change
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate/1")
-            self.assertEqual([state["status"] for state in response.json], [OrderStatus.TO_ACCEPT, OrderStatus.DONE])
-
+            self.assertEqual(
+                [state["status"] for state in response.json],
+                [OrderStatus.TO_ACCEPT, OrderStatus.DONE],
+            )
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):

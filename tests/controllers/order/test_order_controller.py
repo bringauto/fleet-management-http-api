@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 import os
+import threading
 
 import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
@@ -326,6 +327,43 @@ class Test_Deleting_Order(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.delete(f"/v2/management/order/1/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
+
+    def test_accessing_order_during_deletion_of_some_always_only_returns_orders_with_defined_last_state(
+        self,
+    ):
+        N_TO_TRY = 50
+        self.n_failed = 0
+        self.n_tried = 0
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+
+            def check_states():
+                self.n_tried += 1
+                response = c.get("/v2/management/order")
+                self.assertEqual(response.status_code, 200)
+
+                for order in response.json:
+                    assert isinstance(order, dict)
+                    if "lastState" not in order.keys():
+                        self.n_failed += 1
+
+            for _ in range(N_TO_TRY):
+                response = c.post("/v2/management/order", json=[self.order])
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(len(response.json), 1)
+                order_id = response.json[0]["id"]
+                t1 = threading.Thread(target=c.delete, args=(f"/v2/management/order/1/{order_id}",))
+                t2 = threading.Thread(target=check_states)
+
+                t1.start()
+                t2.start()
+                t1.join()
+                t2.join()
+
+            if self.n_failed:
+                self.fail(
+                    "Some orders being deleted were accessible by GET method without having last status. "
+                    f"Number of such orders: {self.n_failed} out of {self.n_tried}."
+                )
 
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
