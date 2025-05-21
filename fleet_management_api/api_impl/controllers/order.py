@@ -251,8 +251,7 @@ def delete_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwarg
         return _text_response(f"Order (ID={order_id})has been succesfully deleted.")
     else:
         msg = f"Order (ID={order_id}) could not be deleted. {response.body['detail']}"
-        _log_error(msg)
-        return _error(response.status_code, msg, response.body["title"])
+        return _log_warning_or_error_and_respond(msg, response.status_code, response.body["title"])
 
 
 def delete_oldest_inactive_order(car_id: int) -> _Response:
