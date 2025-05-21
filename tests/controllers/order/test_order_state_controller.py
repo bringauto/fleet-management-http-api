@@ -436,6 +436,35 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             response = c.post("/v2/management/orderstate", json=[some_state])
             self.assertEqual(response.status_code, 403)
 
+    def test_receiving_states_after_final_state_does_not_trigger_autodeletion_of_oldest_states(
+        self,
+    ):
+        # set up the database
+        max_n = 3
+        _db_models.OrderStateDB.set_max_n_of_stored_states(max_n)
+
+        # push the done state, check there is the default and final state only
+        done_state = OrderState(status=OrderStatus.DONE, order_id=1)
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            response = c.post("/v2/management/orderstate", json=[done_state])
+            self.assertEqual(response.status_code, 200)
+
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual([state["status"] for state in response.json], [OrderStatus.TO_ACCEPT, OrderStatus.DONE])
+
+        # push more states
+        some_state = OrderState(status=OrderStatus.IN_PROGRESS, order_id=1)
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            for _ in range(max_n):
+                response = c.post("/v2/management/orderstate", json=[some_state])
+                self.assertEqual(response.status_code, 403) # should be rejected
+
+        # check the states did not change
+        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            response = c.get("/v2/management/orderstate/1")
+            self.assertEqual([state["status"] for state in response.json], [OrderStatus.TO_ACCEPT, OrderStatus.DONE])
+
+
     def tearDown(self) -> None:  # pragma: no cover
         if os.path.isfile("test.db"):
             os.remove("test.db")
