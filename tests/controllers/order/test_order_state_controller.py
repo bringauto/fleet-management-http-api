@@ -393,7 +393,7 @@ class Test_Accepting_Order_States_After_Receiving_State_With_Final_Status(unitte
             response = c.get("/v2/management/orderstate/1")
             self.assertEqual(response.json[-1].get("status"), OrderStatus.DONE)
 
-    def test_sending_single_order_state_after_CANCELED_status_has_been_received_yield_403_code(
+    def test_sending_single_order_state_after_CANCELED_status_has_been_received_yields_403_code(
         self,
     ):
         canceled_state = OrderState(status=OrderStatus.CANCELED, order_id=1)
