@@ -98,7 +98,7 @@ def get_route(request: _ProcessedRequest, route_id: int, **kwargs) -> _Route:
         request.tenants, _RouteDB, criteria={"id": lambda x: x == route_id}
     )
     routes = [_obj_to_db.route_from_db_model(route_db_model) for route_db_model in route_db_models]
-    if len(routes) == 0:
+    if not routes:
         return _log_info_and_respond(
             f"Route with ID={route_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )

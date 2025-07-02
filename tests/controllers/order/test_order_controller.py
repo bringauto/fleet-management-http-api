@@ -328,11 +328,10 @@ class Test_Deleting_Order(unittest.TestCase):
             response = c.delete(f"/v2/management/order/1/{nonexistent_order_id}")
             self.assertEqual(response.status_code, 404)
 
-    
     def test_accessing_order_during_deletion_of_some_always_only_returns_orders_with_defined_last_state(
         self,
     ):
-        N_TO_TRY = 50
+        N_TO_TRY = 100
         self.n_failed = 0
         self.n_tried = 0
         with self.app.app.test_client(TEST_TENANT_NAME) as c:

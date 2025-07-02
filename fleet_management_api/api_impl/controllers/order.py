@@ -63,7 +63,7 @@ def n_of_active_orders(car_id: int) -> int:
     if car_id not in _active_orders:
         response = get_car_orders(car_id)
         if response.status_code != 200:
-            _active_orders[car_id] = list()
+            _active_orders[car_id] = []
         else:
             orders: list[_models.Order] = response.body
             _active_orders[car_id] = [
@@ -80,7 +80,7 @@ def n_of_inactive_orders(car_id: int) -> int:
     if car_id not in _inactive_orders:
         response = get_car_orders(car_id)
         if response.status_code != 200:
-            _inactive_orders[car_id] = list()
+            _inactive_orders[car_id] = []
         else:
             orders: list[_models.Order] = response.body
             _inactive_orders[car_id] = [
@@ -268,7 +268,7 @@ def get_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) 
         base=_db_models.OrderDB,
         criteria={"id": lambda x: x == order_id, "car_id": lambda x: x == car_id},
     )
-    if len(order_db_models) == 0:
+    if not order_db_models:
         msg = f"Order with ID={order_id} assigned to car with ID={car_id} was not found."
         _log_info(msg)
         return _error(404, msg, _OBJ_NOT_FOUND)
@@ -296,7 +296,7 @@ def get_car_orders(request: _ProcessedRequest, car_id: int, since: int = 0, **kw
         children_col_name="orders",
         criteria={"timestamp": lambda z: z >= since},
     )
-    orders: list[_models.Order] = list()
+    orders: list[_models.Order] = []
     for db_order in db_orders:
         order = _get_order_with_last_state(request.tenants, db_order)
         if order is not None:
@@ -312,7 +312,7 @@ def get_orders(request: _ProcessedRequest, since: int = 0, **kwargs) -> _Respons
     db_orders = _db_access.get(
         request.tenants, _db_models.OrderDB, criteria={"timestamp": lambda x: x >= since}
     )
-    orders: list[_models.Order] = list()
+    orders: list[_models.Order] = []
     for db_order in db_orders:
         order = _get_order_with_last_state(request.tenants, db_order)
         if order is not None:

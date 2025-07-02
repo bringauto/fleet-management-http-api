@@ -28,7 +28,7 @@ def get_route_visualization(request: _ProcessedRequest, route_id: int, **kwargs)
     rp_db_models = _db_access.get(
         request.tenants, _RouteVisDB, criteria={"route_id": lambda x: x == route_id}
     )
-    if len(rp_db_models) == 0:
+    if not rp_db_models:
         return _error(
             404,
             f"Route visualization (route ID={route_id}) was not found.",

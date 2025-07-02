@@ -15,7 +15,7 @@ class TenantFromTokenMock:
         return not self.current and not self.all
 
     def is_accessible(self, tenant_name: str) -> bool:
-        return len(self.all) == 0 or tenant_name in self.all
+        return not self.all or tenant_name in self.all
 
 
 def create_platform_hws(

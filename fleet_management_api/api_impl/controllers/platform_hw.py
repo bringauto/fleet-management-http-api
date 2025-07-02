@@ -63,7 +63,7 @@ def get_hw(request: _ProcessedRequest, platform_hw_id: int, **kwargs) -> _Respon
         request.tenants, _db_models.PlatformHWDB, criteria={"id": lambda x: x == platform_hw_id}
     )
     hws = [_obj_to_db.hw_from_db_model(hw_id_model) for hw_id_model in hw_models]
-    if len(hws) == 0:
+    if not hws:
         return _log_info_and_respond(
             f"Platform HW with ID={platform_hw_id} was not found.",
             404,

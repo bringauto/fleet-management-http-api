@@ -124,7 +124,7 @@ def get_car(request: _ProcessedRequest, car_id: int, **kwargs) -> _Response:
         criteria={"id": lambda x: x == car_id},
         omitted_relationships=[_db_models.CarDB.orders],
     )
-    if len(db_cars) == 0:
+    if not db_cars:
         return _log_info_and_respond(
             f"Car with ID={car_id} was not found.", 404, title=_OBJ_NOT_FOUND
         )
@@ -140,8 +140,8 @@ def get_cars(request: _ProcessedRequest, **kwargs) -> _Response:  # noqa: E501
     db_cars = _db_access.get(
         request.tenants, _db_models.CarDB, omitted_relationships=[_db_models.CarDB.orders]
     )
-    cars: list[_models.Car] = list()
-    if len(db_cars) == 0:
+    cars: list[_models.Car] = []
+    if not db_cars:
         _log_info("Listing all cars: no cars found.")
     else:
         for db_car in db_cars:
