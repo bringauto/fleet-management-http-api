@@ -183,7 +183,7 @@ def _find_nonexistent_stops(tenants: _AccessibleTenants, *routes: _Route) -> _Re
                 return x == id_
 
             _db_access.exists(tenants, _StopDB, criteria={"id": partial(check_id, id_=id_)})
-        existing_ids = set([stop_id.id for stop_id in _db_access.get(tenants, _StopDB)])
+        existing_ids = {stop_id.id for stop_id in _db_access.get(tenants, _StopDB)}
         nonexistent_stop_ids = checked_id_set.difference(existing_ids)
         if nonexistent_stop_ids:
             return _error(
