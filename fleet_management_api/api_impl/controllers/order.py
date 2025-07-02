@@ -325,6 +325,9 @@ def _get_order_with_last_state(
     order_db_model: _db_models.OrderDB,
 ) -> _models.Order | None:
     last_state = _get_last_order_state(tenants, order_db_model)
+    if not last_state:
+        _log_info(f"Order with ID={order_db_model.id} has no last state. Skipping.s")
+        return None
     order = _obj_to_db.order_from_db_model(order_db_model=order_db_model, last_state=last_state)
     return order
 
