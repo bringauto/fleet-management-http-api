@@ -275,6 +275,10 @@ def get_order(request: _ProcessedRequest, car_id: int, order_id: int, **kwargs) 
     else:
         db_order = order_db_models[0]
         order = _get_order_with_last_state(request.tenants, db_order)
+        if not order:
+            msg = f"No valid order found for ID={order_id} for car with ID={car_id}."
+            _log_info(msg)
+            return _error(404, msg, _OBJ_NOT_FOUND)
         _log_info(f"Found order with ID={order_id} of car with ID={car_id}.")
         return _json_response(order)  # type: ignore
 
