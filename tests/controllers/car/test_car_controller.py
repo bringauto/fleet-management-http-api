@@ -297,7 +297,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
         with self.assertLogs(LOGGER_NAME, level="WARNING") as logs:
             car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
             with self.app.app.test_client() as c:
-                c.set_cookie("", "tenant", "nonexistent_tenant")
+                c.set_cookie("localhost", "tenant", "nonexistent_tenant")
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
                 self.assertIn("Tenant 'nonexistent_tenant' does not exist", logs.output[0])
