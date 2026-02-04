@@ -7,6 +7,7 @@ import fleet_management_api.database.connection as _connection
 from fleet_management_api.models import Order, Car, MobilePhone, OrderState, OrderStatus
 import fleet_management_api.app as _app
 from tests._utils.setup_utils import create_platform_hws, create_stops, create_route
+from tests._utils.api_test import threadpool_test_client
 from fleet_management_api.api_impl.controllers.order import set_max_n_of_inactive_orders
 from fleet_management_api.database.timestamp import timestamp_ms
 from tests._utils.constants import TEST_TENANT_NAME
@@ -96,7 +97,7 @@ class Test_Retrieving_Awaited_Orders_In_The_Middle_Of_Their_Deletion(unittest.Te
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             c.post("/v2/management/order", json=self.orders)
 
-        with self.app.app.test_client(TEST_TENANT_NAME) as c, ThreadPoolExecutor() as executor:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c, ThreadPoolExecutor() as executor:
             # requesting order updates
             future = executor.submit(get_order_updates, since=timestamp_ms() + 50)
             # posting done states immediatelly after

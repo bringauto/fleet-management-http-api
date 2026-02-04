@@ -1,10 +1,11 @@
 import os
+import sys
 import unittest
 import subprocess
 
 
 RUN_CONTENT = [
-    "python",
+    sys.executable,
     "scripts/add_api_key.py",
     "Alice",
     "tests/script_args/test_config.json",

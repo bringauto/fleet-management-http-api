@@ -28,6 +28,7 @@ from fleet_management_api.api_impl.auth_controller import (
 
 from tests._utils.setup_utils import create_platform_hws
 import tests._utils.api_test as api_test
+from tests._utils.api_test import threadpool_test_client
 from tests._utils.constants import TEST_TENANT_NAME
 from tests._utils.setup_utils import TenantFromTokenMock
 
@@ -293,7 +294,7 @@ class Test_Query_Parameters(api_test.TestCase):
         create_platform_hws(self.app)
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         with _futures.ThreadPoolExecutor() as ex:
-            with self.app.app.test_client(TEST_TENANT_NAME) as c:
+            with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
                 c.post("/v2/management/car", json=[car]).json
                 time.sleep(1)
                 timestamp = timestamp_ms()
