@@ -100,7 +100,7 @@ class Test_Retrieving_Awaited_Orders_In_The_Middle_Of_Their_Deletion(unittest.Te
         with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c, ThreadPoolExecutor() as executor:
             # requesting order updates
             future = executor.submit(get_order_updates, since=timestamp_ms() + 50)
-            # posting done states immediatelly after
+            # posting done states immediately after
             executor.submit(post_done_states)
             response = future.result()
             self.assertEqual(response.status_code, 200)
