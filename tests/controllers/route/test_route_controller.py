@@ -67,7 +67,7 @@ class Test_Identical_Route_Names(api_test.TestCase):
             )
         with self.app.app.test_client() as client:
             position = GNSSPosition(latitude=1, longitude=1, altitude=1)
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("localhost", "tenant", "tenant_1")
             response_a = client.post(
                 "/v2/management/stop?api_key=testAPIKey",
                 json=[Stop(name="stop_a", position=position)],
@@ -78,7 +78,7 @@ class Test_Identical_Route_Names(api_test.TestCase):
                 json=[Stop(name="stop_b", position=position)],
             )
             self.assertEqual(response_b.status_code, 200)
-            client.set_cookie("", "tenant", "tenant_2")
+            client.set_cookie("localhost", "tenant", "tenant_2")
             response_c = client.post(
                 "/v2/management/stop?api_key=testAPIKey",
                 json=[Stop(name="stop_c", position=position)],
@@ -92,7 +92,7 @@ class Test_Identical_Route_Names(api_test.TestCase):
         with self.app.app.test_client() as client:
             route_1 = Route(name="Route", stop_ids=[1])
             route_2 = Route(name="Route", stop_ids=[2])
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("localhost", "tenant", "tenant_1")
             client.post("/v2/management/route?api_key=testAPIKey", json=[route_1])
             response = client.post("/v2/management/route?api_key=testAPIKey", json=[route_2])
             self.assertEqual(response.status_code, 400)
@@ -103,9 +103,9 @@ class Test_Identical_Route_Names(api_test.TestCase):
         with self.app.app.test_client() as client:
             route_1 = Route(name="Route", stop_ids=[1])
             route_2 = Route(name="Route", stop_ids=[3])
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("localhost", "tenant", "tenant_1")
             client.post("/v2/management/route?api_key=testAPIKey", json=[route_1])
-            client.set_cookie("", "tenant", "tenant_2")
+            client.set_cookie("localhost", "tenant", "tenant_2")
             response = client.post("/v2/management/route?api_key=testAPIKey", json=[route_2])
             self.assertEqual(response.status_code, 200)
 

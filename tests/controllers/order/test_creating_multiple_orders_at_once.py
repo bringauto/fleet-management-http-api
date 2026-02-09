@@ -37,7 +37,7 @@ class Test_Creating_Multiple_Orders_At_Once(unittest.TestCase):
                 c.get("/v2/management/orderstate?carId=1&wait=true")
                 return c.get("/v2/management/order/1")
 
-        with self.app.app.test_client(TEST_TENANT_NAME) as c, ThreadPoolExecutor() as executor:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c, ThreadPoolExecutor() as executor:
             future = executor.submit(get_order_updates)
             time.sleep(0.15)
             c.post("/v2/management/order", json=self.orders)

@@ -66,7 +66,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_1 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
@@ -115,7 +115,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
 
     def test_waiting_for_order_state_for_given_order(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/orderstate/1?wait=true&since=0")

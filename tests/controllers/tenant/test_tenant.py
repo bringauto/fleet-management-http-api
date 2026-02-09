@@ -108,7 +108,7 @@ class Test_Get_Tenants(unittest.TestCase):
         self,
     ) -> None:
         with self.app.app.test_client() as c:
-            c.set_cookie("", "tenant", "tenant_1")
+            c.set_cookie("localhost", "tenant", "tenant_1")
 
             response = c.get("/v2/management/tenant?api_key=test_key")
             assert response.json is not None

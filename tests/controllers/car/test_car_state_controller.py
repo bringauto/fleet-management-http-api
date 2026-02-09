@@ -518,15 +518,15 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         car_6 = Car(platform_hw_id=6, name="car6", car_admin_phone=PHONE)
 
         with self.app.app.test_client("tenant_A") as c:
-            c.set_cookie("", "tenant", "tenant_A")
+            c.set_cookie("localhost", "tenant", "tenant_A")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_1, car_2])
             assert response.status_code == 200, response.json
         with self.app.app.test_client("tenant_B") as c:
-            c.set_cookie("", "tenant", "tenant_B")
+            c.set_cookie("localhost", "tenant", "tenant_B")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_3, car_4])
             assert response.status_code == 200, response.json
         with self.app.app.test_client("tenant_C") as c:
-            c.set_cookie("", "tenant", "tenant_C")
+            c.set_cookie("localhost", "tenant", "tenant_C")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_5, car_6])
             assert response.status_code == 200, response.json
         generate_test_keys()
@@ -552,7 +552,7 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         # car with id 1 is owned by tenant_A
         state = CarState(status="idle", car_id=1)
         with self.app.app.test_client() as c:
-            c.set_cookie("", "tenant", "")
+            c.set_cookie("localhost", "tenant", "")
             # post to car owned by tenant_A, that is accessible (present in the token)
             response = c.post(
                 "/v2/management/carstate?api_key=test_key",
@@ -568,7 +568,7 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         # car with id 5 is owned by tenant_C
         state = CarState(status="idle", car_id=5)
         with self.app.app.test_client() as c:
-            c.set_cookie("", "tenant", "")
+            c.set_cookie("localhost", "tenant", "")
             # post to car owned by tenant_C, that is inaccessible (missing from the token)
             response = c.post(
                 "/v2/management/carstate",

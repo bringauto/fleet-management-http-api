@@ -105,7 +105,7 @@ class _TestClient(_FlaskClient):
     ) -> None:
         super().__init__(application._app, *args, **kwargs)
         if tenant:
-            self.set_cookie("localhost", TENANT_COOKIE_NAME, tenant)
+            self.set_cookie("", TENANT_COOKIE_NAME, tenant)
         self._app = application
         self._key = api_key
 
