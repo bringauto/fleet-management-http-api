@@ -10,6 +10,7 @@ from fleet_management_api.models import Car, CarState, MobilePhone
 from fleet_management_api.database.db_access import set_content_timeout_ms
 from tests._utils.setup_utils import create_platform_hws
 from tests._utils.constants import TEST_TENANT_NAME
+from tests._utils.api_test import threadpool_test_client
 
 
 class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
@@ -34,7 +35,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_waiting_for_car_state_when_no_state_was_sent_yet(self):
         car_state = CarState(car_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 time.sleep(0.01)
@@ -45,7 +46,7 @@ class Test_Waiting_For_Car_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         car_state = CarState(car_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_1 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
@@ -81,7 +82,7 @@ class Test_Wait_For_Car_State_For_Given_Car(unittest.TestCase):
 
     def test_waiting_for_car_state_for_given_car(self):
         car_state = CarState(car_id=1, status="idle")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future = executor.submit(c.get, "/v2/management/carstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/carstate/1?wait=true&since=0")
@@ -119,7 +120,7 @@ class Test_Timeouts(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/carstate?&since=0")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(

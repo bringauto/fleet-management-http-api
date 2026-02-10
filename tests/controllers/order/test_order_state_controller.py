@@ -676,19 +676,19 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         order_3 = Order(car_id=3, target_stop_id=3, stop_route_id=3, notification_phone=PHONE)
 
         with self.app.app.test_client("tenant_A") as c:
-            c.set_cookie("", "tenant", "tenant_A")
+            c.set_cookie("localhost", "tenant", "tenant_A")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_1])
             assert response.status_code == 200, response.json
             response = c.post("/v2/management/order?api_key=test_key", json=[order_1])
             assert response.status_code == 200, response.json
         with self.app.app.test_client("tenant_B") as c:
-            c.set_cookie("", "tenant", "tenant_B")
+            c.set_cookie("localhost", "tenant", "tenant_B")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_2])
             assert response.status_code == 200, response.json
             response = c.post("/v2/management/order?api_key=test_key", json=[order_2])
             assert response.status_code == 200, response.json
         with self.app.app.test_client("tenant_C") as c:
-            c.set_cookie("", "tenant", "tenant_C")
+            c.set_cookie("localhost", "tenant", "tenant_C")
             response = c.post("/v2/management/car?api_key=test_key", json=[car_3])
             assert response.status_code == 200, response.json
             response = c.post("/v2/management/order?api_key=test_key", json=[order_3])
@@ -718,7 +718,7 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         # order with id 1 is owned by tenant_A
         state = OrderState(status="accepted", order_id=1)
         with self.app.app.test_client() as c:
-            c.set_cookie("", "tenant", "")
+            c.set_cookie("localhost", "tenant", "")
             # post to car owned by tenant_A, that is accessible (present in the token)
             response = c.post(
                 "/v2/management/orderstate",
@@ -735,7 +735,7 @@ class Test_Car_States_Without_Tenant_In_Cookies(unittest.TestCase):
         state = OrderState(status="accepted", order_id=3)
         with self.app.app.test_client() as c:
             print(c.get("/v2/management/order?test_").json)
-            c.set_cookie("", "tenant", "")
+            c.set_cookie("localhost", "tenant", "")
             # post to order owned by tenant_C, that is inaccessible (missing from the token)
             response = c.post(
                 "/v2/management/orderstate",

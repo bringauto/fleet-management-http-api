@@ -11,6 +11,7 @@ from fleet_management_api.database.db_access import set_content_timeout_ms, dele
 from fleet_management_api.database.db_models import OrderStateDB
 
 import tests._utils.api_test as api_test
+from tests._utils.api_test import threadpool_test_client
 from tests._utils.setup_utils import (
     create_platform_hws,
     create_stops,
@@ -54,7 +55,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_waiting_for_order_state_when_no_state_was_sent_yet(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 time.sleep(0.01)
@@ -65,7 +66,7 @@ class Test_Waiting_For_Order_States_To_Be_Sent_Do_API(unittest.TestCase):
 
     def test_all_clients_waiting_get_responses_when_state_relevant_for_them_is_sent(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 future_1 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_2 = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
@@ -114,7 +115,7 @@ class Test_Wait_For_Order_State_For_Given_Order(unittest.TestCase):
 
     def test_waiting_for_order_state_for_given_order(self):
         order_state = OrderState(order_id=1, status="in_progress")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=5) as executor:
                 future = executor.submit(c.get, "/v2/management/orderstate?wait=true&since=0")
                 future_1 = executor.submit(c.get, "/v2/management/orderstate/1?wait=true&since=0")
@@ -163,7 +164,7 @@ class Test_Timeouts(unittest.TestCase):
         with self.app.app.test_client(TEST_TENANT_NAME) as c:
             response = c.get("/v2/management/orderstate?&since=0")
             default_state_timestamp = response.json[0]["timestamp"]
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # this waiting thread exceeds timeout before posting the state
                 future_1 = executor.submit(
@@ -344,7 +345,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
     def test_waiting_for_order_states_for_given_car(self):
         order_state_1 = OrderState(order_id=1, status="in_progress")
         order_state_2 = OrderState(order_id=2, status="accepted")
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor() as executor:
                 future_1 = executor.submit(
                     c.get, f"/v2/management/orderstate?carId=2&wait=true&since={self.since}"
@@ -359,7 +360,7 @@ class Test_Filtering_Order_States_By_Car_ID(unittest.TestCase):
                 self.assertEqual(response.json[0]["status"], "accepted")
 
     def test_waiting_for_order_states_for_car_created_after_sending_request_for_states(self):
-        with self.app.app.test_client(TEST_TENANT_NAME) as c:
+        with threadpool_test_client(self.app.app, TEST_TENANT_NAME) as c:
             with ThreadPoolExecutor() as executor:
                 future_1 = executor.submit(
                     c.get, f"/v2/management/orderstate?carId=3&wait=true&since={self.since}"

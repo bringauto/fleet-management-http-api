@@ -1,8 +1,23 @@
 import unittest
 import os
+from contextlib import contextmanager
 
 import fleet_management_api.database.connection as _connection
 import tests.database.models as models
+
+
+@contextmanager
+def threadpool_test_client(app, tenant=None):
+    """Context manager for test_client that avoids Flask 2.2+ context cleanup issues with threading.
+
+    Use this instead of `with app.test_client() as c:` when using ThreadPoolExecutor inside the block.
+
+    Flask's test_client context manager tries to clean up request contexts on exit, which fails
+    when those contexts were used by multiple threads. This helper simply yields the client
+    without the problematic cleanup - the tests don't rely on session preservation anyway.
+    """
+    client = app.test_client(tenant) if tenant else app.test_client()
+    yield client
 
 
 class TestCase(unittest.TestCase):
