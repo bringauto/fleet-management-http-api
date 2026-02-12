@@ -57,7 +57,7 @@ def get_app(use_previous: bool = False) -> _FlaskApp:
     else:
         app = _FlaskApp(__name__, specification_dir="./openapi/")
         app.app.json_provider_class = CustomJSONProvider
-        app.app.json = CustomJSONProvider(app.app)
+        app.app.json = app.app.json_provider_class(app.app)
         app.add_api("openapi.yaml", pythonic_params=True)
         _test_app = app
         return app
@@ -94,7 +94,7 @@ class _TestFlaskApp:
         if self._api_key == "":
             return _TestClient(self, self._api_key, tenant=tenant)
         else:
-            return self._app.test_client(TEST_TENANT_NAME)
+            return self._app.test_client()
 
     def def_accessible_tenants(self, *tenants: str) -> None:
         self._accessible_tenants = list(tenants)
