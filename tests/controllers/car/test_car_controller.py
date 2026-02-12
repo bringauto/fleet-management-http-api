@@ -164,14 +164,14 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
             )
 
         with self.app.app.test_client() as client:
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("tenant", "tenant_1")
             client.post(
                 "/v2/management/platformhw?api_key=testAPIKey", json=[PlatformHW(name="test_hw_1")]
             )
             client.post(
                 "/v2/management/platformhw?api_key=testAPIKey", json=[PlatformHW(name="test_hw_2")]
             )
-            client.set_cookie("", "tenant", "tenant_2")
+            client.set_cookie("tenant", "tenant_2")
             client.post(
                 "/v2/management/platformhw?api_key=testAPIKey", json=[PlatformHW(name="test_hw")]
             )
@@ -183,7 +183,7 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
         with self.app.app.test_client() as client:
             car_a = Car(name="Car", platform_hw_id=1, car_admin_phone=PHONE)
             car_b = Car(name="Car", platform_hw_id=2, car_admin_phone=PHONE)
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("tenant", "tenant_1")
             client.post("/v2/management/car?api_key=testAPIKey", json=[car_a])
             response = client.post("/v2/management/car?api_key=testAPIKey", json=[car_b])
             self.assertEqual(response.status_code, 400)
@@ -195,9 +195,9 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
         with self.app.app.test_client() as client:
             car_a = Car(name="Car", platform_hw_id=1, car_admin_phone=PHONE)
             car_b = Car(name="Car", platform_hw_id=2, car_admin_phone=PHONE)
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("tenant", "tenant_1")
             response_1 = client.post("/v2/management/car?api_key=testAPIKey", json=[car_a])
-            client.set_cookie("", "tenant", "tenant_2")
+            client.set_cookie("tenant", "tenant_2")
             response_2 = client.post("/v2/management/car?api_key=testAPIKey", json=[car_b])
             self.assertEqual(response_2.status_code, 200)
             assert response_1.json is not None
@@ -209,13 +209,13 @@ class Test_Cars_With_Identical_Names(api_test.TestCase):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
         with self.app.app.test_client() as client:
             # Create car in tenant_1
-            client.set_cookie("", "tenant", "tenant_1")
+            client.set_cookie("tenant", "tenant_1")
             response = client.post("/v2/management/car?api_key=testAPIKey", json=[car])
             self.assertEqual(response.status_code, 200)
             car_id = response.json[0]["id"]
 
             # Attempt to access from tenant_2
-            client.set_cookie("", "tenant", "tenant_2")
+            client.set_cookie("tenant", "tenant_2")
             response = client.get(f"/v2/management/car/{car_id}?api_key=testAPIKey")
             self.assertEqual(response.status_code, 404)
 
@@ -297,7 +297,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
         with self.assertLogs(LOGGER_NAME, level="WARNING") as logs:
             car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=PHONE)
             with self.app.app.test_client() as c:
-                c.set_cookie("localhost", "tenant", "nonexistent_tenant")
+                c.set_cookie("tenant", "nonexistent_tenant")
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 self.assertEqual(len(logs.output), 1)
                 self.assertIn("Tenant 'nonexistent_tenant' does not exist", logs.output[0])
@@ -306,7 +306,7 @@ class Test_Logging_Car_Creation(api_test.TestCase):
         with self.assertLogs(LOGGER_NAME, level="INFO") as logs:
             car = Car(name="test_car", platform_hw_id=1, car_admin_phone=PHONE)
             with self.app.app.test_client(TEST_TENANT_NAME) as c:
-                c.set_cookie("localhost", "tenant", TEST_TENANT_NAME)
+                c.set_cookie("tenant", TEST_TENANT_NAME)
                 c.post("/v2/management/car", json=[car], content_type="application/json")
                 # there should be three logs - one for a car, another for the car state and the last one for the car action state
                 self.assertEqual(len(logs.output), 3)

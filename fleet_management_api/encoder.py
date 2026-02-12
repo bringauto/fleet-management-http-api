@@ -1,19 +1,17 @@
-from connexion.apps.flask_app import FlaskJSONEncoder
+from flask.json.provider import DefaultJSONProvider
 
 from fleet_management_api.models.base_model import Model
 
 
-class JSONEncoder(FlaskJSONEncoder):
-    include_nulls = False
-
+class CustomJSONProvider(DefaultJSONProvider):
     def default(self, o):
         if isinstance(o, Model):
             dikt = {}
             for attr in o.openapi_types:
                 value = getattr(o, attr)
-                if value is None and not self.include_nulls:
+                if value is None:
                     continue
                 attr = o.attribute_map[attr]
                 dikt[attr] = value
             return dikt
-        return FlaskJSONEncoder.default(self, o)
+        return super().default(o)

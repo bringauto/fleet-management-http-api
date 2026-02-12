@@ -188,13 +188,13 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
             )
         with self.app.app.test_client() as client:
             self.hw_1 = PlatformHW(name="test_hw_1")
-            client.set_cookie("localhost", "tenant", TEST_TENANT_1)
+            client.set_cookie("tenant", TEST_TENANT_1)
             client.post("/v2/management/platformhw?api_key=testAPIKey", json=[self.hw_1])
             self.hw_2 = PlatformHW(name="test_hw_2")
-            client.set_cookie("localhost", "tenant", TEST_TENANT_2)
+            client.set_cookie("tenant", TEST_TENANT_2)
             client.post("/v2/management/platformhw?api_key=testAPIKey", json=[self.hw_2])
             self.hw_3 = PlatformHW(name="test_hw_3")
-            client.set_cookie("localhost", "tenant", TEST_TENANT_3)
+            client.set_cookie("tenant", TEST_TENANT_3)
             client.post("/v2/management/platformhw?api_key=testAPIKey", json=[self.hw_3])
 
     def test_no_api_key_yields_access_only_to_accessible_tenants(self) -> None:
@@ -220,14 +220,14 @@ class Test_Setting_Tenant_Cookie(api_test.TestCase):
 
     def test_setting_tenant_cookie_yields_data_for_that_tenant_only(self) -> None:
         with self.app.app.test_client() as client:
-            client.set_cookie("localhost", "tenant", TEST_TENANT_1)
+            client.set_cookie("tenant", TEST_TENANT_1)
             response = client.get("/v2/management/platformhw?api_key=testAPIKey")
             self.assertEqual(response.status_code, 200)
             assert isinstance(response.json, list)
             self.assertEqual(len(response.json), 1)
             self.assertEqual(response.json[0]["name"], self.hw_1.name)
 
-            client.set_cookie("localhost", "tenant", TEST_TENANT_2)
+            client.set_cookie("tenant", TEST_TENANT_2)
             response = client.get("/v2/management/platformhw?api_key=testAPIKey")
             self.assertEqual(response.status_code, 200)
             assert isinstance(response.json, list)
@@ -244,7 +244,7 @@ class Test_Creating_A_Tenant(api_test.TestCase):
     def test_tenant_is_not_automatically_created_when_posting_new_item(self):
         hw = PlatformHW(name="test_hw_1")
         with self.app.app.test_client() as c:
-            c.set_cookie("localhost", "tenant", "other_tenant")
+            c.set_cookie("tenant", "other_tenant")
             response = c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
             self.assertEqual(response.status_code, 401)
             # Check that the tenant is not created automatically
@@ -265,7 +265,7 @@ class Test_Creating_A_Tenant(api_test.TestCase):
         tenant = Tenant(name=name)
         with self.app.app.test_client() as c:
             c.post("/v2/management/tenant?api_key=testAPIKey", json=[tenant])
-            c.set_cookie("localhost", "tenant", name)
+            c.set_cookie("tenant", name)
             c.post("/v2/management/platformhw?api_key=testAPIKey", json=[hw])
             response = c.get("/v2/management/platformhw?api_key=testAPIKey")
             self.assertEqual(response.status_code, 200)
