@@ -57,7 +57,7 @@ class AccessibleTenants:
     def __init__(
         self,
         request: _Request,
-        key: str = "",
+        key: str | None = None,
         audience: str = "account",
         ignore_cookie: bool = False,
     ) -> None:
@@ -84,7 +84,7 @@ class AccessibleTenants:
         If the current tenant is not empty, only data owned by the current tenant can be read and written to the database.
         """
 
-        if "api_key" not in request.query and not key.strip():
+        if "api_key" not in request.query and (key is None or not key.strip()):
             key = get_public_key()
         self._current, self._all_accessible = _extract_current_and_accessible_tenants_from_request(
             request,
@@ -158,7 +158,7 @@ class LoadedAccessibleTenants:
 
 def get_accessible_tenants(
     request: _Request,
-    key: str = "",
+    key: str | None = None,
     audience: str = "account",
     ignore_cookie: bool = False,
 ) -> LoadedAccessibleTenants:
@@ -185,7 +185,7 @@ def get_accessible_tenants(
 
 
 def _extract_current_and_accessible_tenants_from_request(
-    request: _Request, key: str, audience: str, ignore_cookie: bool = False
+    request: _Request, key: str | None, audience: str, ignore_cookie: bool = False
 ) -> tuple[str, list[str]]:
 
     if ignore_cookie:
@@ -217,7 +217,7 @@ def _get_current_tenant(request: _Request) -> TenantName:
 
 
 def _get_accessible_tenants_from_auth_headers(
-    request: _Request, key: str, audience: str
+    request: _Request, key: str | None, audience: str
 ) -> list[str]:
     """The accessible tenants extracted from a JWT token.
 
@@ -229,7 +229,7 @@ def _get_accessible_tenants_from_auth_headers(
     bearer = str(request.headers[_AUTHORIZATION_HEADER_NAME]).split(" ")[-1]
     if not bearer.strip():
         raise Unauthorized("No valid JWT token or API key provided.")
-    if not key.strip():
+    if not key or not key.strip():
         raise MissingRSAKey("RSA public key is not set.")
     decoded_payload = jwt.decode(bearer, key, [_ALGORITHM], audience=audience)
     if "group" not in decoded_payload:

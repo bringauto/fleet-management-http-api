@@ -5,7 +5,7 @@ import jwt
 
 from flask.testing import FlaskClient as _FlaskClient  # type: ignore
 from connexion.apps.flask_app import FlaskApp as _FlaskApp  # type: ignore
-from .encoder import JSONEncoder
+from .encoder import CustomJSONProvider
 
 from fleet_management_api.database.db_models import ApiKeyDB as _ApiKeyDB
 from fleet_management_api.database.timestamp import timestamp_ms as _timestamp_ms
@@ -56,7 +56,8 @@ def get_app(use_previous: bool = False) -> _FlaskApp:
         return _test_app
     else:
         app = _FlaskApp(__name__, specification_dir="./openapi/")
-        app.app.json_encoder = JSONEncoder
+        app.app.json_provider_class = CustomJSONProvider
+        app.app.json = app.app.json_provider_class(app.app)
         app.add_api("openapi.yaml", pythonic_params=True)
         _test_app = app
         return app
@@ -93,7 +94,7 @@ class _TestFlaskApp:
         if self._api_key == "":
             return _TestClient(self, self._api_key, tenant=tenant)
         else:
-            return self._app.test_client(TEST_TENANT_NAME)
+            return self._app.test_client()
 
     def def_accessible_tenants(self, *tenants: str) -> None:
         self._accessible_tenants = list(tenants)
@@ -105,7 +106,7 @@ class _TestClient(_FlaskClient):
     ) -> None:
         super().__init__(application._app, *args, **kwargs)
         if tenant:
-            self.set_cookie("localhost", TENANT_COOKIE_NAME, tenant)
+            self.set_cookie(TENANT_COOKIE_NAME, tenant)
         self._app = application
         self._key = api_key
 

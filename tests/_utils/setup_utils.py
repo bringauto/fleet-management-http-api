@@ -22,7 +22,7 @@ def create_platform_hws(
     app: TestApp, count: int = 1, tenant: str = TEST_TENANT_NAME, api_key: str | None = ""
 ) -> None:
     with app.app.test_client(tenant) as c:
-        c.set_cookie("localhost", "tenant", tenant)
+        c.set_cookie("tenant", tenant)
         for i in range(count):
             platformhw = _models.PlatformHW(name=f"Test Platform Hw {timestamp_ms()+i}")
             if api_key:
@@ -37,7 +37,7 @@ def create_stops(
 ) -> list[int]:
     ids = []
     with app.app.test_client(tenant) as c:
-        c.set_cookie("localhost", "tenant", tenant)
+        c.set_cookie("tenant", tenant)
         for i in range(count):
             stop = _models.Stop(
                 name=f"Test Stop {timestamp_ms()+i}",
@@ -54,7 +54,7 @@ def create_route(
     app: TestApp, stop_ids: tuple[int, ...], tenant: str = TEST_TENANT_NAME, api_key: str = ""
 ) -> None:
     with app.app.test_client(tenant) as c:
-        c.set_cookie("localhost", "tenant", tenant)
+        c.set_cookie("tenant", tenant)
         route = _models.Route(name=f"test_route_{timestamp_ms()}", stop_ids=stop_ids)
         response = c.post(f"/v2/management/route?api_key={api_key}", json=[route])
         assert (
