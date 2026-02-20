@@ -61,7 +61,7 @@ def verify_key_and_return_key_info(
     except Exception as e:
         logger.error(f"Error while verifying key: {e}")
         return 500, "Internal server error."
-    if len(_key_db_models) == 0:
+    if not _key_db_models:
         return 401, "Invalid API key used."
     else:
         return 200, _key_db_models[0]

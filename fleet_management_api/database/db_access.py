@@ -263,7 +263,11 @@ def add(
 
 @db_access_method
 def delete(tenants: Tenants, base: type[_Base], id_: Any) -> _Response:
-    """Delete a single object with `id_` from the database table correspoding to the mapped class `base`."""
+    """
+    Delete a single object with `id_` from the database table correspoding to the mapped class `base`.
+
+    There is only a single transaction for deleting the entity and its dependent entities.
+    """
     source = _get_current_connection_source()
     if base.owned_by_tenant():
         response = _check_and_set_tenant(tenants, base(id=id_))

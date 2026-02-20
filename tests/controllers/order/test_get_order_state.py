@@ -400,7 +400,7 @@ class Test_Retrieving_Order_With_States_Deleted(api_test.TestCase):
         create_stops(app, 1)
         create_route(app, stop_ids=(1,))
 
-    def test_last_order_state_is_none_if_all_order_states_have_been_deleted(self):
+    def test_order_is_not_deleted_if_all_order_states_have_been_deleted(self):
         car = Car(name="Test Car", platform_hw_id=1, car_admin_phone=MobilePhone(phone="123456789"))
         app = _app.get_test_app(use_previous=True)
         with app.app.test_client() as c:
@@ -414,8 +414,7 @@ class Test_Retrieving_Order_With_States_Deleted(api_test.TestCase):
             # there are now no order states for order with ID=1
             self.assertEqual(response.json, [])
             response = c.get("/v2/management/order/1/1")
-            self.assertEqual(response.status_code, 200)
-            self.assertIsNone(Order.from_dict(response.json).last_state)
+            self.assertEqual(response.status_code, 404)
 
 
 if __name__ == "__main__":

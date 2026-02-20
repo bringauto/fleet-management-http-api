@@ -212,7 +212,7 @@ def _existing_orders(
     tenants: _AccessibleTenants, *order_ids: int
 ) -> dict[int, _db_models.OrderDB | None]:
     order_ids = tuple(dict.fromkeys(order_ids).keys())
-    orders: dict[int, _db_models.OrderDB | None] = dict()
+    orders: dict[int, _db_models.OrderDB | None] = {}
 
     for id_ in order_ids:
         orders_with_id = _db_access.get(
@@ -267,7 +267,7 @@ def _remove_old_states(tenants: _AccessibleTenants, order_id: int) -> _Response:
 def _trim_states_after_done_or_canceled(
     states: list[_models.OrderState],
 ) -> list[_models.OrderState]:
-    done_or_canceled_states: dict[OrderId, _models.OrderState] = dict()
+    done_or_canceled_states: dict[OrderId, _models.OrderState] = {}
     filtered_states: list[_models.OrderState] = []
     received_states = states.copy()
     for state in received_states:

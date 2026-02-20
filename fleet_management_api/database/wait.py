@@ -19,7 +19,7 @@ class WaitObjManager:
         """
         WaitObjManager._check_nonnegative_timeout(timeout_ms)
         self._timeout_ms = timeout_ms
-        self._wait_dict: dict[str, list[WaitObject]] = dict()
+        self._wait_dict: dict[str, list[WaitObject]] = {}
 
     @property
     def timeout_ms(self) -> int:
@@ -66,7 +66,7 @@ class WaitObjManager:
         if timeout_ms is None or timeout_ms < 0:
             timeout_ms = self._timeout_ms
         if key not in self._wait_dict:
-            self._wait_dict[key] = list()
+            self._wait_dict[key] = []
         wait_obj = WaitObject(timeout_ms, validation)
         self._wait_dict[key].append(wait_obj)
         return wait_obj
@@ -104,7 +104,7 @@ class WaitObject:
         - If `validation` is set, the WaitObject will only accept the data that passes the validation.
         - If `timeout_ms` is set to 0, the WaitObject will respond immediatelly.
         """
-        self._response_content: list[Any] = list()
+        self._response_content: list[Any] = []
         self._wait_condition = _threading.Condition()
         self._is_valid = validation
         self._timeout_ms = max(timeout_ms, 0)

@@ -169,8 +169,8 @@ def check_for_invalid_car_action_state_transitions(
     states: list[CarActionState],
 ) -> dict[CarId, list[tuple[CarActionStatus, CarActionStatus]]]:
     """Return a dictionary of car ids with invalid state transitions."""
-    last_statuses: dict[CarId, CarActionStatus] = dict()
-    invalid_state_transitions: dict[CarId, list[tuple[CarActionStatus, CarActionStatus]]] = dict()
+    last_statuses: dict[CarId, CarActionStatus] = {}
+    invalid_state_transitions: dict[CarId, list[tuple[CarActionStatus, CarActionStatus]]] = {}
     for state in states:
         car_id = state.car_id
         if car_id not in last_statuses:

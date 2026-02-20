@@ -117,7 +117,7 @@ class Test_Merging_Action_States(api_test.TestCase):
             CarActionState(car_id=4, action_status=CarActionStatus.PAUSED),
         ]
         invalid_transitions = check_for_invalid_car_action_state_transitions(states)
-        self.assertDictEqual(invalid_transitions, dict())
+        self.assertDictEqual(invalid_transitions, {})
 
     def test_consecutive_states_with_identical_status_are_merged(self):
         states = [
